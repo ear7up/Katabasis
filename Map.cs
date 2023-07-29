@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 public class Map
 {
-    private readonly Point _mapTileSize = new(6, 15);
-    private readonly Sprite[,] _tiles;
+    private readonly Point _mapTileSize = new(16, 16);
+    private readonly Tile[,] _tiles;
     private readonly List<Building> _buildings;
     private Building _editBuilding;
 
@@ -17,44 +17,63 @@ public class Map
 
     public Map()
     {
-        _tiles = new Sprite[_mapTileSize.X, _mapTileSize.Y];
+        _tiles = new Tile[_mapTileSize.X, _mapTileSize.Y];
         _buildings = new List<Building>();
         _editBuilding = null;
 
         // Load all of the tile textures
-        List<Texture2D> textures = new();
-        textures.Add(Globals.Content.Load<Texture2D>("desert"));
-        textures.Add(Globals.Content.Load<Texture2D>("desert_hill"));
-        textures.Add(Globals.Content.Load<Texture2D>("desert_hill2"));
+        const int DESERT_TILECOUNT = 5;
+        List<Texture2D> desertTextures = new();
+        for (int i = 1; i <= DESERT_TILECOUNT; i++)
+        {
+            desertTextures.Add(Globals.Content.Load<Texture2D>($"desert/{i:000}"));
+        }
 
         // 512x512
-        TileSize = new(textures[0].Width, textures[0].Height);
+        TileSize = new(desertTextures[0].Width, desertTextures[0].Height);
         MapSize = new(TileSize.X * _mapTileSize.X, TileSize.Y * _mapTileSize.Y);
         Origin = new(MapSize.X / 2, MapSize.Y / 2);
 
         Random random = new();
+
+        int row = 1;
+        int tiles_per_row = 1;
+        int tile_in_row = 0;
 
         for (int y = 0; y < _mapTileSize.Y; y++)
         {
             for (int x = 0; x < _mapTileSize.X; x++)
             {
                 // Assign random tile textures
-                int r = random.Next(0, textures.Count);
+                int r = random.Next(0, desertTextures.Count);
+                float xpos = 0f;
 
-                // Line hexagons horizontally, leaving a gap of 1/2 width
-                float xpos = x * TileSize.X * 1.5f;
+                // Rows get bigger until halfway, then they get smaller
+                if (row > _mapTileSize.Y)    
+                    xpos = -Origin.X + ((TileSize.X / 2) * row) + (tile_in_row * TileSize.X);
+                else
+                    xpos = Origin.X - ((TileSize.X / 2) * row) + (tile_in_row * TileSize.X);
 
-                // Hexagons don't fill up a bounding box, but they have a fixed ratio between width and height
-                float ypos = y * TileSize.Y * HEXAGON_HEIGHT_RATIO * 0.5f;
+                // Each row is half a tile size down, shave off a bit because each tile has a thick base
+                float ypos = (TileSize.Y / 2) * row - (30 * row);
 
-                // Every other row should be shifted over 75% of its width so that the uppper-left corner of its
-                // bounding box lines up with the bottom-right corner of the hexagon above (the bounding boxes will overlap)
-                if (y % 2 == 1)
+                tile_in_row++;
+
+                // Start a new row
+                if (tile_in_row >= tiles_per_row)
                 {
-                    xpos += TileSize.X * 0.75f;
+                    tile_in_row = 0;
+                    row++;
+
+                    // Halfway through, each row will have fewer
+                    if (row > _mapTileSize.Y)
+                        tiles_per_row--;
+                    else
+                        tiles_per_row++;
                 }
 
-                _tiles[x, y] = new(textures[r], new(xpos, ypos));
+                Texture2D feature = null;
+                _tiles[x, y] = new(new(xpos, ypos), desertTextures[r], feature);
             }
         }
     }
