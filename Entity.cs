@@ -5,13 +5,15 @@ abstract class Entity
 {
     protected Texture2D image;
     
+    
     // The tint of the image. This will also allow us to change the transparency.
     protected Color color = Color.White;	
 
     public Vector2 Position, Velocity;
     public float Orientation;
     public float Radius = 20;	// used for circular collision detection
-    //public bool IsExpired;		// true if the entity was destroyed and should be deleted.
+    protected float Scale;
+    public bool IsExpired;		// true if the entity was destroyed and should be deleted.
 
     public Vector2 Size
     {
@@ -23,8 +25,8 @@ abstract class Entity
 
     public abstract void Update();
 
-    public virtual void Draw(SpriteBatch spriteBatch)
+    public virtual void Draw()
     {
-        spriteBatch.Draw(image, Position, null, color, Orientation, Size / 2f, 1f, 0, 0);
+        Globals.SpriteBatch.Draw(image, Position, null, color, Orientation, Size / 2f, 1f, 0, 0);
     }
 }

@@ -34,14 +34,10 @@ public class KatabasisGame : Game
 
     protected override void Initialize()
     {
-        // TODO: Add your initialization logic here
-        //ballPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
-        //ballSpeed = 200f;
-
         Content.RootDirectory = "Content";
         Globals.Content = Content;
 
-        _gameManager = new();
+        //_gameManager = new();
 
         base.Initialize();
     }
@@ -51,6 +47,8 @@ public class KatabasisGame : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         Globals.SpriteBatch = _spriteBatch;
         Sprites.Load(Content);
+
+        _gameManager = new();
     }
 
     protected override void Update(GameTime gameTime)
@@ -71,26 +69,6 @@ public class KatabasisGame : Game
     {
         GraphicsDevice.Clear(Color.Black);
         _gameManager.Draw();
-
-        /*
-        _spriteBatch.Begin();
-        
-        _spriteBatch.Draw(
-            ballTexture,
-            ballPosition,
-            null,
-            Color.White,
-            0f,
-            new Vector2(ballTexture.Width / 2, ballTexture.Height / 2),
-            Vector2.One,
-            SpriteEffects.None,
-            0f
-        );
-        _spriteBatch.End();
-        */
-
-        // TODO: Add your drawing code here
-
         base.Draw(gameTime);
     }
 }

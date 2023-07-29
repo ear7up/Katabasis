@@ -23,7 +23,8 @@ public class Map
 
         // Load all of the tile textures
         List<Texture2D> desertTextures = Sprites.LoadTextures("desert", 6);
-        List<Texture2D> desertVegetationTextures = Sprites.LoadTextures("desert/vegetation", 7);
+        List<Texture2D> desertVegetationTextures = Sprites.LoadTextures("desert/vegetation", 6);
+        List<Texture2D> desertBedouinTextures = Sprites.LoadTextures("desert/bedouin_camps", 5);
 
         // 500x345
         TileSize = new(desertTextures[0].Width, desertTextures[0].Height);
@@ -54,10 +55,15 @@ public class Map
                     // 20% desert with hills
                     texture = desertTextures[random.Next(0, desertTextures.Count)];
                 }
+                else if (r < 0.98)
+                {
+                    // 28% desert with vegetation
+                    texture = desertVegetationTextures[random.Next(0, desertVegetationTextures.Count)];
+                }
                 else
                 {
-                    // 30% desert with vegetation
-                    texture = desertVegetationTextures[random.Next(0, desertVegetationTextures.Count)];
+                    // 2% bedouin camps
+                    texture = desertBedouinTextures[random.Next(0, desertBedouinTextures.Count)];
                 }
 
                 // Rows get bigger until halfway, then they get smaller
