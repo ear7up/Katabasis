@@ -8,6 +8,7 @@ public static class InputManager
 
     public const int CAMERA_MODE = 1;
     public const int BUILD_MODE = 2;
+    public const int TILE_MODE = 3;
     public static int Mode = CAMERA_MODE;
 
     public static float ScrollValue;
@@ -32,19 +33,31 @@ public static class InputManager
         {
             if (Mode == BUILD_MODE)
             {
-                SwitchToCameraMode();
+                SwitchToMode(CAMERA_MODE);
             }
             else
             {
-                Mode = BUILD_MODE;
+                SwitchToMode(BUILD_MODE);
+            }
+        }
+
+        if (keyboardState.IsKeyUp(Keys.T) && lastKeyboardState.IsKeyDown(Keys.T))
+        {
+            if (Mode == TILE_MODE)
+            {
+                SwitchToMode(CAMERA_MODE);
+            }
+            else
+            {
+                SwitchToMode(TILE_MODE);
             }
         }
     }
 
     // Switch to camera mode and re-initialize variables
-    private static void SwitchToCameraMode()
+    private static void SwitchToMode(int mode)
     {
-        Mode = CAMERA_MODE;
+        Mode = mode;
         _dragStart = Vector2.Zero;
         MouseDrag = Vector2.Zero;
         ConfirmBuilding = false;
@@ -79,7 +92,7 @@ public static class InputManager
         // Disable build mode on right click
         if (lastMouseState.RightButton == ButtonState.Released && mouseState.RightButton == ButtonState.Pressed)
         {
-            SwitchToCameraMode();
+            SwitchToMode(CAMERA_MODE);
         }
         // Confirm the building if left click is pressed
         else if (lastMouseState.LeftButton == ButtonState.Released && mouseState.LeftButton == ButtonState.Pressed)
@@ -88,7 +101,7 @@ public static class InputManager
         }
         else if (ConfirmBuilding)
         {
-            SwitchToCameraMode();
+            SwitchToMode(CAMERA_MODE);
         }
         else
         {
@@ -113,6 +126,7 @@ public static class InputManager
 
         DetermineMode();
 
+        // Default to camera mode controls unless the mode blocks camera movement
         switch (Mode)
         {
             case BUILD_MODE : ProcessBuildingInputs(); break;

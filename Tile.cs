@@ -44,4 +44,18 @@ public class Tile
             TileFeatureSprite.Draw();
         }
     }
+
+    public void Highlight()
+    {
+        Vector2 pos = BaseSprite.Position;
+        pos.Y -= 150;
+        BaseSprite.Position = pos;
+    }
+
+    public void Unhighlight()
+    {
+        Vector2 pos = BaseSprite.Position;
+        pos.Y += 150;
+        BaseSprite.Position = pos;
+    }
 }

@@ -13,7 +13,7 @@ abstract class Entity
     public float Orientation;
     public float Radius = 20;	// used for circular collision detection
     protected float Scale;
-    public bool IsExpired;		// true if the entity was destroyed and should be deleted.
+    //public bool IsExpired;		// true if the entity was destroyed and should be deleted.
 
     public Vector2 Size
     {

@@ -7,6 +7,7 @@ public class Map
     private readonly Tile[,] _tiles;
     private readonly List<Building> _buildings;
     private Building _editBuilding;
+    private Tile _highlightedTile;
 
     public Point TileSize { get; private set; }
     public Point MapSize { get; private set; }
@@ -99,6 +100,32 @@ public class Map
 
     public void Update()
     {
+        if (InputManager.Mode == InputManager.TILE_MODE)
+        {
+            // TODO: this should probably use a quad tree or something, searching >16,000 tiles is slow and unnecessary
+            foreach (Tile t in _tiles)
+            {
+                // Vaguely inside the bounding box for the tile (close enough tbh)
+                float dist = Vector2.Distance(InputManager.MousePos, t.BaseSprite.Position);
+                if (dist < TileSize.X / 2)
+                {
+                    // Clear the highlighted tile
+                    if (_highlightedTile != null)
+                    {
+                        _highlightedTile.Unhighlight();
+                    }
+
+                    _highlightedTile = t;
+                    _highlightedTile.Highlight();
+                }
+            }
+        }
+        else if (_highlightedTile != null)
+        {
+            _highlightedTile.Unhighlight();
+            _highlightedTile = null;
+        }
+
         if (_editBuilding != null)
         {
             // Make the currently editing buliding follow the mouse pointer
