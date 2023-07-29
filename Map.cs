@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class Map
 {
-    private readonly Point _mapTileSize = new(16, 16);
+    private readonly Point _mapTileSize = new(128, 128);
     private readonly Tile[,] _tiles;
     private readonly List<Building> _buildings;
     private Building _editBuilding;
@@ -22,14 +22,10 @@ public class Map
         _editBuilding = null;
 
         // Load all of the tile textures
-        const int DESERT_TILECOUNT = 5;
-        List<Texture2D> desertTextures = new();
-        for (int i = 1; i <= DESERT_TILECOUNT; i++)
-        {
-            desertTextures.Add(Globals.Content.Load<Texture2D>($"desert/{i:000}"));
-        }
+        List<Texture2D> desertTextures = Sprites.LoadTextures("desert", 6);
+        List<Texture2D> desertVegetationTextures = Sprites.LoadTextures("desert/vegetation", 7);
 
-        // 512x512
+        // 500x345
         TileSize = new(desertTextures[0].Width, desertTextures[0].Height);
         MapSize = new(TileSize.X * _mapTileSize.X, TileSize.Y * _mapTileSize.Y);
         Origin = new(MapSize.X / 2, MapSize.Y / 2);
@@ -44,11 +40,28 @@ public class Map
         {
             for (int x = 0; x < _mapTileSize.X; x++)
             {
+                Texture2D texture = null;
+                double r = random.NextDouble();
+
                 // Assign random tile textures
-                int r = random.Next(0, desertTextures.Count);
-                float xpos = 0f;
+                if (r < 0.6)
+                {
+                    // 50% plain desert
+                    texture = desertTextures[5];
+                }
+                else if (r < 0.7)
+                {
+                    // 20% desert with hills
+                    texture = desertTextures[random.Next(0, desertTextures.Count)];
+                }
+                else
+                {
+                    // 30% desert with vegetation
+                    texture = desertVegetationTextures[random.Next(0, desertVegetationTextures.Count)];
+                }
 
                 // Rows get bigger until halfway, then they get smaller
+                float xpos = 0f;
                 if (row > _mapTileSize.Y)    
                     xpos = -Origin.X + ((TileSize.X / 2) * row) + (tile_in_row * TileSize.X);
                 else
@@ -73,7 +86,7 @@ public class Map
                 }
 
                 Texture2D feature = null;
-                _tiles[x, y] = new(new(xpos, ypos), desertTextures[r], feature);
+                _tiles[x, y] = new(new(xpos, ypos), texture, feature);
             }
         }
     }

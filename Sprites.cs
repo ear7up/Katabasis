@@ -30,4 +30,15 @@ static class Sprites
 		int i = r.Next(0, buildings.Count);
 		return buildings[i];
 	}
+
+	// Load path/001 through path/count and return the list of textures
+	public static List<Texture2D> LoadTextures(string path, int count)
+	{
+		List<Texture2D> textures = new();
+        for (int i = 1; i <= count; i++)
+        {
+            textures.Add(Globals.Content.Load<Texture2D>($"{path}/{i:000}"));
+        }
+		return textures;
+	}
 }
