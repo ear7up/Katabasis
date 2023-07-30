@@ -56,8 +56,8 @@ public class Person : Entity
         Gender = (GenderType)rand.Next(2);
         switch (Gender)
         {
-            case GenderType.MALE: image = Sprites.PersonMale; break;
-            case GenderType.FEMALE: image = Sprites.PersonFemale; break; 
+            case GenderType.MALE: image = Sprites.ManC; break;
+            case GenderType.FEMALE: image = Sprites.WomanC; break; 
         }
 
         Radius = image.Width / 2f;
@@ -84,7 +84,7 @@ public class Person : Entity
     {
         var person = new Person(position);
         person.AddBehaviour(person.MoveRandomly());
-        person.color = new Color(rand.Next(255), rand.Next(255), rand.Next(255));
+        person.Scale = 0.05f;
         return person;
     }
 
@@ -129,10 +129,7 @@ public class Person : Entity
 
     public override void Draw()
     {
-        
-        //Globals.SpriteBatch.Draw(image, Position, null, Color.White, Orientation, Size, 1f, 0, 0);
         Globals.SpriteBatch.Draw(image, Position, null, color, 0f, Size, Scale, 0, 0);
-        //base.Draw(spriteBatch);
     }
 
     private void AddBehaviour(IEnumerable<int> behaviour)

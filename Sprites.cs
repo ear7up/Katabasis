@@ -6,8 +6,12 @@ using Microsoft.Xna.Framework.Graphics;
 
 static class Sprites
 {
-	public static Texture2D PersonMale { get; private set; }
-	public static Texture2D PersonFemale { get; private set; }
+	public static Texture2D ManC { get; private set; }
+	public static Texture2D ManS { get; private set; }
+	public static Texture2D ManG { get; private set; }
+	public static Texture2D WomanC { get; private set; }
+	public static Texture2D WomanS { get; private set; }
+	public static Texture2D WomanG { get; private set; }
 	public static SpriteFont Font { get; private set; }
 	private static Random r = new Random();
 	private static List<Texture2D> buildings;
@@ -15,8 +19,13 @@ static class Sprites
 	public static void Load(ContentManager content)
 	{
 		// folder/file
-		PersonMale = content.Load<Texture2D>("ball");
-		PersonFemale = content.Load<Texture2D>("ball");
+		ManC = content.Load<Texture2D>("person/man_copper");
+		ManS = content.Load<Texture2D>("person/man_silver");
+		ManG = content.Load<Texture2D>("person/man_gold");
+		WomanC = content.Load<Texture2D>("person/woman_copper");
+		WomanS = content.Load<Texture2D>("person/woman_silver");
+		WomanG = content.Load<Texture2D>("person/woman_gold");
+		
 		Font = content.Load<SpriteFont>("Font");
 
 		const int NUM_BUILDINGS = 48;

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public class Task
 {
     // Move: go to a location
@@ -10,9 +12,9 @@ public class Task
     // Work:
     //      Move to Work location
     //      If neeeded Goods are present
-    //          consume goods, produce new goods
+    //          consume goods, produce goods
 
-    public List<SkillValue> skillsNeeded
+    public List<SkillLevel> skillsNeeded;
 
     public Task()
     {
