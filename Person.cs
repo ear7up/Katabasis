@@ -1,32 +1,119 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
-class Person : Entity
+public enum Skill
+{
+    FARMING = 0,
+    BUILDING,
+    HUNTING,
+    FISHING,
+    COOKING,
+    SEWING,
+    SMITHING,
+    FIGHTING,
+    NUM_SKILLS // last entry for easy enum size lookup
+}
+
+public class SkillLevel
+{
+    public Skill skill;
+    public int value;
+    public SkillLevel(Skill skill, int value)
+    {
+        this.skill = skill;
+        this.value = value;
+    }
+}
+
+public class Person : Entity
 {
     public static Random rand = new Random();
 
     private List<IEnumerator<int>> behaviours = new List<IEnumerator<int>>();
+    private float[,] Demand;
+    private GenderType Gender;
+    public Hashtable PersonalStockpile;
+    private Tile Home;
+    public int Money { get; set; }
+    private SkillLevel[] Skills; // inherited by children Lamarck-style?
 
-    public Person(Texture2D image, Vector2 position)
+    public enum GenderType
     {
-        this.image = image;
+        MALE,
+        FEMALE
+    }
+
+    public Person(Vector2 position)
+    {
         Position = position;
-        Radius = image.Width / 2f;
         Velocity = new Vector2(20f, 20f);
-        //color = Color.Transparent;
         Orientation = rand.NextFloat(0.0f, MathHelper.TwoPi);
         Scale = 0.2f;
+        
+        Gender = (GenderType)rand.Next(2);
+        switch (Gender)
+        {
+            case GenderType.MALE: image = Sprites.PersonMale; break;
+            case GenderType.FEMALE: image = Sprites.PersonFemale; break; 
+        }
+
+        Radius = image.Width / 2f;
+
+        Demand = new float[Goods.NUM_GOODS_TYPES, Goods.GOODS_PER_TYPE];
+        PersonalStockpile = new();
+
+        // New person starts with each skill assigned randomly between 1-20 (they go up to 100 with experience)
+        Skills = new SkillLevel[(int)Skill.NUM_SKILLS];
+        
+        for (int i = 0; i < (int)Skill.NUM_SKILLS; i++)
+        {
+            Skills[i] = new SkillLevel((Skill)i, rand.Next(1, 20));
+        }
+    }
+
+    public override string ToString()
+    {
+        string gender = Gender == GenderType.MALE ? "Male" : "Female";
+        return $"Person(gender={gender}, money={Money})";
     }
 
     public static Person CreatePerson(Vector2 position)
     {
-        var person = new Person(Sprites.Person, position);
+        var person = new Person(position);
         person.AddBehaviour(person.MoveRandomly());
         person.color = new Color(rand.Next(255), rand.Next(255), rand.Next(255));
         return person;
     }
+
+    public void ChooseNextTask()
+    {
+        // Check skills needed for tasks and weight the probability of choosing based on relative skill level
+    }
+
+    // Add to the Demand matrix based on what goods the person wants
+    // Call once per day?
+    public void UpdateGoodsDemand()
+    {
+        float[,] change = new float[Goods.NUM_GOODS_TYPES, Goods.GOODS_PER_TYPE];
+
+        // Units: kg/day
+        for (int i = 0; i < Goods.GOODS_PER_TYPE; i++)
+        {
+            change[(int)Goods.GoodsType.FOOD_ANIMAL,i] += 0.1f;
+            change[(int)Goods.GoodsType.FOOD_PLANT,i] += 1f;
+            change[(int)Goods.GoodsType.FOOD_PROCESSED,i] += 0.5f;
+        }
+    }
+
+    public void DailyUpdate()
+    {
+        UpdateGoodsDemand();
+    }
+
+    // A person is willing to travel 1 tile in any direction to do work at a building
 
     public override void Update()
     {
@@ -38,12 +125,6 @@ class Person : Entity
         }
         Velocity = Extensions.FromPolar(Orientation, 20f);
         Position += Velocity * Globals.Time;
-        //Console.WriteLine("Moving at angle " + angle.ToString() + " vector " + Velocity.ToString());
-
-        //ApplyBehaviours();
-        //Position += Velocity;
-        //Position = Vector2.Clamp(Position, Size / 2, Katabasis.KatabasisGame.ScreenSize - Size / 2);
-        //Velocity *= 0.8f;
     }
 
     public override void Draw()

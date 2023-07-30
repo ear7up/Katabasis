@@ -163,7 +163,7 @@ public class Map
         }
     }
 
-    public void Draw()
+    public void DrawTiles()
     {
         // Draw map tiles
         for (int y = 0; y < _mapTileSize.Y; y++)
@@ -173,13 +173,19 @@ public class Map
                 _tiles[x, y].Draw();
             }
         }
+    }
 
+    public void DrawUI()
+    {
         // If the user is placing a building, draw that temporary sprite
         if (_editBuilding != null)
         {
             _editBuilding.Draw();
         }
+    }
 
+    public void DrawBuildings()
+    {
         // Draw each permanent building
         foreach (Building b in _buildings)
         {

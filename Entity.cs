@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
-abstract class Entity
+public abstract class Entity
 {
     protected Texture2D image;
     
