@@ -157,8 +157,59 @@ public class Map
             }
         }
 
+        GenerateRivers();
+
         // Fix the map origin to account for overlap and perspective
         Origin = new(MapSize.X / 2 - HORIZONTAL_OVERLAP, MapSize.Y / 2 - VERTICAL_OVERLAP * _mapTileSize.Y);
+    }
+
+    public void GenerateRivers()
+    {
+        List<Texture2D> desertRiverTextures = Sprites.LoadTextures("desert/river", 16);
+        Random random = new();
+        GenerateTopRiver(desertRiverTextures, random);
+        GenerateTopRiver(desertRiverTextures, random);
+        GenerateTopRiver(desertRiverTextures, random);
+        GenerateBottomRiver(desertRiverTextures, random);
+        GenerateBottomRiver(desertRiverTextures, random);
+    }
+
+    public void GenerateTopRiver(List<Texture2D> desertRiverTextures, Random random)
+    {
+        // Head southeast a random number of times from the top tile
+        int steps1 = random.Next(2, _mapTileSize.X);
+        Tile top = _tiles[0];
+        for (int i = 0; i < steps1; i++)
+        {
+            top = top.neighbors[(int)Tile.Cardinal.SE];
+        }
+
+        int length1 = random.Next(_mapTileSize.Y / 3, 3 * _mapTileSize.Y / 4);
+        for (int i = 0; i < length1; i++)
+        {
+            // Overwrite the tile with a river and head south-west
+            top.BaseSprite.Texture = desertRiverTextures[random.Next(0, desertRiverTextures.Count)];
+            top = top.neighbors[(int)Tile.Cardinal.SW];
+        }
+    }
+
+    public void GenerateBottomRiver(List<Texture2D> desertRiverTextures, Random random)
+    {
+        // Head northwest a random number of times from the bottom tile        
+        int steps2 = random.Next(2, _mapTileSize.X);
+        Tile bottom = _tiles[_tiles.Length - 1];
+        for (int i = 0; i < steps2; i++)
+        {
+            bottom = bottom.neighbors[(int)Tile.Cardinal.NW];
+        }
+        
+        int length2 = random.Next(_mapTileSize.Y / 3, 3 * _mapTileSize.Y / 4);
+        for (int i = 0; i < length2; i++)
+        {
+            // Overwrite the tile with a river and head north-east
+            bottom.BaseSprite.Texture = desertRiverTextures[random.Next(0, desertRiverTextures.Count)];
+            bottom = bottom.neighbors[(int)Tile.Cardinal.NE];
+        }
     }
 
     public void Update()

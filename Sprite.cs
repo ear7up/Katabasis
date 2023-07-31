@@ -2,7 +2,7 @@
 
 public class Sprite
 {
-    private readonly Texture2D _texture;
+    public Texture2D Texture;
     public Vector2 Position { get; set; }
     public Vector2 Origin { get; protected set; }
     public float Scale { get; set; }
@@ -10,9 +10,9 @@ public class Sprite
 
     public Sprite(Texture2D texture, Vector2 position)
     {
-        _texture = texture;
+        Texture = texture;
         Position = position;
-        Origin = new(_texture.Width / 2, _texture.Height / 2);
+        Origin = new(Texture.Width / 2, Texture.Height / 2);
         Scale = 1f;
         SpriteColor = Color.White;
     }
@@ -29,6 +29,6 @@ public class Sprite
 
     public void Draw()
     {
-        Globals.SpriteBatch.Draw(_texture, Position, null, SpriteColor, 0f, Origin, Scale, SpriteEffects.None, 0f);
+        Globals.SpriteBatch.Draw(Texture, Position, null, SpriteColor, 0f, Origin, Scale, SpriteEffects.None, 0f);
     }
 }
