@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class Map
 {
     private readonly Point _mapTileSize = new(128, 128);
-    private readonly Tile[,] _tiles;
+    private readonly Tile[] _tiles;
     private readonly List<Building> _buildings;
     private Building _editBuilding;
     private Tile _highlightedTile;
@@ -18,18 +18,22 @@ public class Map
 
     public Map()
     {
-        _tiles = new Tile[_mapTileSize.X, _mapTileSize.Y];
+        _tiles = new Tile[_mapTileSize.X *_mapTileSize.Y];
         _buildings = new List<Building>();
         _editBuilding = null;
 
         // Load all of the tile textures
-        List<Texture2D> desertTextures = Sprites.LoadTextures("desert", 6);
+        List<Texture2D> desertTextures = Sprites.LoadTextures("desert/flat", 30);
+        List<Texture2D> desertHillTextures = Sprites.LoadTextures("desert/flat", 5);
         List<Texture2D> desertVegetationTextures = Sprites.LoadTextures("desert/vegetation", 6);
         List<Texture2D> desertBedouinTextures = Sprites.LoadTextures("desert/bedouin_camps", 5);
 
         // 500x345
         TileSize = new(desertTextures[0].Width, desertTextures[0].Height);
         MapSize = new(TileSize.X * _mapTileSize.X, TileSize.Y * _mapTileSize.Y);
+        
+        int VERTICAL_OVERLAP = 30;
+        int HORIZONTAL_OVERLAP = TileSize.X / 2;
         Origin = new(MapSize.X / 2, MapSize.Y / 2);
 
         Random random = new();
@@ -38,64 +42,123 @@ public class Map
         int tiles_per_row = 1;
         int tile_in_row = 0;
 
-        for (int y = 0; y < _mapTileSize.Y; y++)
+        for (int n = 0; n < _mapTileSize.Y * _mapTileSize.X; n++)
         {
-            for (int x = 0; x < _mapTileSize.X; x++)
+            Texture2D texture = null;
+            double r = random.NextDouble();
+
+            // Assign random tile textures
+            if (r < 0.65)
             {
-                Texture2D texture = null;
-                double r = random.NextDouble();
+                // 65% plain desert
+                texture = desertTextures[random.Next(0, desertTextures.Count)];
+            }
+            else if (r < 0.8)
+            {
+                // 15% desert with hills
+                texture = desertTextures[random.Next(0, desertHillTextures.Count)];
+            }
+            else if (r < 0.98)
+            {
+                // 18% desert with vegetation
+                texture = desertVegetationTextures[random.Next(0, desertVegetationTextures.Count)];
+            }
+            else
+            {
+                // 2% bedouin camps
+                texture = desertBedouinTextures[random.Next(0, desertBedouinTextures.Count)];
+            }
 
-                // Assign random tile textures
-                if (r < 0.6)
-                {
-                    // 50% plain desert
-                    texture = desertTextures[5];
-                }
-                else if (r < 0.7)
-                {
-                    // 20% desert with hills
-                    texture = desertTextures[random.Next(0, desertTextures.Count)];
-                }
-                else if (r < 0.98)
-                {
-                    // 28% desert with vegetation
-                    texture = desertVegetationTextures[random.Next(0, desertVegetationTextures.Count)];
-                }
+            // Rows get bigger until halfway, then they get smaller
+            float xpos = 0f;
+            if (row > _mapTileSize.Y)    
+                xpos = -Origin.X + ((TileSize.X / 2) * row) + (tile_in_row * TileSize.X);
+            else
+                xpos = Origin.X - ((TileSize.X / 2) * row) + (tile_in_row * TileSize.X);
+
+            // Each row is half a tile size down, shave off a bit because each tile has a thick base
+            float ypos = (TileSize.Y / 2) * row - (VERTICAL_OVERLAP * row);
+
+            Texture2D feature = null;
+            Tile tile = new(new(xpos, ypos), texture, feature);
+            _tiles[n] = tile;
+
+            tile_in_row++;
+
+            // Start a new row
+            if (tile_in_row >= tiles_per_row)
+            {
+                tile_in_row = 0;
+                row++;
+
+                // Halfway through, each row will have fewer
+                if (row > _mapTileSize.Y)
+                    tiles_per_row--;
                 else
-                {
-                    // 2% bedouin camps
-                    texture = desertBedouinTextures[random.Next(0, desertBedouinTextures.Count)];
-                }
-
-                // Rows get bigger until halfway, then they get smaller
-                float xpos = 0f;
-                if (row > _mapTileSize.Y)    
-                    xpos = -Origin.X + ((TileSize.X / 2) * row) + (tile_in_row * TileSize.X);
-                else
-                    xpos = Origin.X - ((TileSize.X / 2) * row) + (tile_in_row * TileSize.X);
-
-                // Each row is half a tile size down, shave off a bit because each tile has a thick base
-                float ypos = (TileSize.Y / 2) * row - (30 * row);
-
-                tile_in_row++;
-
-                // Start a new row
-                if (tile_in_row >= tiles_per_row)
-                {
-                    tile_in_row = 0;
-                    row++;
-
-                    // Halfway through, each row will have fewer
-                    if (row > _mapTileSize.Y)
-                        tiles_per_row--;
-                    else
-                        tiles_per_row++;
-                }
-
-                Texture2D feature = null;
-                _tiles[x, y] = new(new(xpos, ypos), texture, feature);
+                    tiles_per_row++;
             }
         }
+
+        // Second iteration to assign neighbors
+        row = 1;
+        tiles_per_row = 1;
+        tile_in_row = 0;
+
+        for (int i = 0; i < _mapTileSize.X * _mapTileSize.Y; i++)
+        {
+            Tile t = _tiles[i];
+            Tile ne = null;
+            Tile se = null;
+            Tile nw = null;
+            Tile sw = null;
+
+            bool halfway = row > _mapTileSize.Y;
+
+            // Top-half, last node has no NE neighbor
+            // Bottom-half, all nodes have NE neighbor
+            if (tile_in_row < tiles_per_row - 1 || halfway)
+            {
+                // the row right after the midpoint is wrong
+                ne = _tiles[i - tiles_per_row + ((row <= _mapTileSize.Y) ? 1 : 0)];
+            }
+            // Top-half, all nodes have SE neighbor (except the last node in the middle row)
+            // Bottom-half, last node has no SE neighbor
+            if (tile_in_row < tiles_per_row - 1 || (!halfway && row != _mapTileSize.Y))
+            {
+                se = _tiles[i + tiles_per_row + ((row < _mapTileSize.Y) ? 1 : 0)];
+            }
+            // Top-half, last node in row has no NW neighbor
+            // Bottom-half, all nodes have NW neighbor
+            if (tile_in_row > 0 || halfway)
+            {
+                nw = _tiles[i - tiles_per_row  - (halfway ? 1 : 0)];
+            }
+            // Top-half, all nodes have SW neighbor (except the first node in the middle row)
+            // Bottom-half, first node has no SW Neighbor
+            if (tile_in_row > 0 || !halfway)
+            {
+                sw = _tiles[i + tiles_per_row - ((row >= _mapTileSize.Y) ? 1 : 0)];
+            }
+            t.neighbors = new Tile[]{ ne, se, nw, sw };
+
+            tile_in_row++;
+
+            // Start a new row
+            if (tile_in_row >= tiles_per_row)
+            {
+                tile_in_row = 0;
+                row++;
+
+                // Halfway through, each row will have fewer
+                if (row > _mapTileSize.Y)
+                    tiles_per_row--;
+                else
+                    tiles_per_row++;
+            }
+        }
+
+        // Fix the map origin to account for overlap and perspective
+        Origin = new(MapSize.X / 2 - HORIZONTAL_OVERLAP, MapSize.Y / 2 - VERTICAL_OVERLAP * _mapTileSize.Y);
     }
 
     public void Update()
@@ -166,12 +229,9 @@ public class Map
     public void DrawTiles()
     {
         // Draw map tiles
-        for (int y = 0; y < _mapTileSize.Y; y++)
+        for (int n = 0; n < _mapTileSize.X * _mapTileSize.Y; n++)
         {
-            for (int x = 0; x < _mapTileSize.X; x++) 
-            {
-                _tiles[x, y].Draw();
-            }
+            _tiles[n].Draw();
         }
     }
 

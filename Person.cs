@@ -36,7 +36,7 @@ public class Person : Entity
     private float[,] Demand;
     private GenderType Gender;
     public Hashtable PersonalStockpile;
-    private Tile Home;
+    //private Tile Home;
     public int Money { get; set; }
     private SkillLevel[] Skills; // inherited by children Lamarck-style?
 

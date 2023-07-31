@@ -10,25 +10,22 @@ public class Tile
 
     public enum Cardinal
     {
-        NORTH = 0,
-        EAST = 1,
-        SOUTH = 2,
-        WEST = 3
+        NE, SE, NW, SW
     }
 
     public static Cardinal GetOppositeDirection(Cardinal direction)
     {
         switch (direction)
         {
-            case Cardinal.NORTH: return Cardinal.SOUTH;
-            case Cardinal.EAST: return Cardinal.WEST;
-            case Cardinal.SOUTH: return Cardinal.NORTH;
-            case Cardinal.WEST: return Cardinal.EAST;
+            case Cardinal.NE: return Cardinal.SW;
+            case Cardinal.SE: return Cardinal.NW;
+            case Cardinal.NW: return Cardinal.SE;
+            case Cardinal.SW: return Cardinal.NE;
         }
-        return Cardinal.NORTH;
+        return Cardinal.NE;
     }
 
-    public Tile[] neighbors { get; protected set; }
+    public Tile[] neighbors { get; set; }
 
     public Tile(Vector2 position, Texture2D baseTexture, Texture2D tileFeatureTexture)
     {
