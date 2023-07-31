@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ public class Tile
     public Sprite BaseSprite { get; protected set; }
     public Sprite TileFeatureSprite { get; protected set; }
     public int Population { get; set; }
+    public List<Building> Buildings { get; set; }
 
     // Every tile has a resource stockpile that can be used for production/consumption
     public Hashtable Stockpile;
@@ -42,6 +44,7 @@ public class Tile
     {
         neighbors = new Tile[4];
         Population = 0;
+        Buildings = new();
 
         BaseSprite = new Sprite(baseTexture, position);
         if (TileFeatureSprite != null)
@@ -89,6 +92,11 @@ public class Tile
             Stockpile.Add(subType, new Goods(type, subType, quantity));
     }
 
+    public void AddBuilding(Building b)
+    {
+        Buildings.Add(b);
+    }
+
     public void Draw()
     {
         BaseSprite.Draw();
@@ -103,6 +111,12 @@ public class Tile
         Vector2 pos = BaseSprite.Position;
         pos.Y -= 150;
         BaseSprite.Position = pos;
+        foreach (Building b in Buildings)
+        {
+            Vector2 bpos = b.sprite.Position;
+            bpos.Y -= 150;
+            b.sprite.Position = bpos;
+        }
     }
 
     public void Unhighlight()
@@ -110,6 +124,13 @@ public class Tile
         Vector2 pos = BaseSprite.Position;
         pos.Y += 150;
         BaseSprite.Position = pos;
+
+        foreach (Building b in Buildings)
+        {
+            Vector2 bpos = b.sprite.Position;
+            bpos.Y += 150;
+            b.sprite.Position = bpos;
+        }
     }
 
     // Breadth-first search for a tile based on critera in TileFilter.Match

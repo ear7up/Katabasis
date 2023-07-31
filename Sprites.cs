@@ -12,7 +12,9 @@ static class Sprites
 	public static Texture2D WomanC { get; private set; }
 	public static Texture2D WomanS { get; private set; }
 	public static Texture2D WomanG { get; private set; }
+	public static Sprite Circle { get; private set; }
 	public static SpriteFont Font { get; private set; }
+	
 	private static Random r = new Random();
 	private static List<Texture2D> buildings;
 
@@ -25,6 +27,8 @@ static class Sprites
 		WomanC = content.Load<Texture2D>("person/woman_copper");
 		WomanS = content.Load<Texture2D>("person/woman_silver");
 		WomanG = content.Load<Texture2D>("person/woman_gold");
+
+		Circle = new Sprite(content.Load<Texture2D>("circle"), Vector2.Zero);
 		
 		Font = content.Load<SpriteFont>("Font");
 

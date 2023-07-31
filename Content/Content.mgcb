@@ -601,6 +601,18 @@
 /processorParam:TextureFormat=Color
 /build:buildings/048.png
 
+#begin circle.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:circle.png
+
 #begin desert/bedouin_camps/001.png
 /importer:TextureImporter
 /processor:TextureProcessor

@@ -6,7 +6,7 @@ public class Map
     private readonly Point _mapTileSize = new(128, 128);
     private readonly Tile[] _tiles;
 
-    private readonly SortedList<int, Building> _buildings;
+    private readonly SortedList<float, Building> _buildings;
     private Building _editBuilding;
 
     private Tile _highlightedTile;
@@ -32,7 +32,7 @@ public class Map
         TileSize = new(desertTextures[0].Width, desertTextures[0].Height);
         MapSize = new(TileSize.X * _mapTileSize.X, TileSize.Y * _mapTileSize.Y);
 
-        _buildings = new();
+        _buildings = new(new DuplicateKeyComparer<float>());
         _editBuilding = null;
         
         int VERTICAL_OVERLAP = 30;
@@ -222,26 +222,36 @@ public class Map
         }
     }
 
+    public Tile TileAtPos(Vector2 pos)
+    {
+        // TODO: this should probably use a quad tree or something, searching >16,000 tiles is slow and unnecessary
+        foreach (Tile t in _tiles)
+        {
+            // Vaguely inside the bounding box for the tile (close enough tbh)
+            float dist = Vector2.Distance(pos, t.BaseSprite.Position);
+            if (dist < TileSize.X / 3.2)
+            {
+                return t;
+            }
+        }
+        return null;
+    }
+
     public void Update()
     {
         if (InputManager.Mode == InputManager.TILE_MODE)
         {
-            // TODO: this should probably use a quad tree or something, searching >16,000 tiles is slow and unnecessary
-            foreach (Tile t in _tiles)
+            Tile t = TileAtPos(InputManager.MousePos);
+            if (t != null)
             {
-                // Vaguely inside the bounding box for the tile (close enough tbh)
-                float dist = Vector2.Distance(InputManager.MousePos, t.BaseSprite.Position);
-                if (dist < TileSize.X / 2)
+                // Clear the highlighted tile
+                if (_highlightedTile != null)
                 {
-                    // Clear the highlighted tile
-                    if (_highlightedTile != null)
-                    {
-                        _highlightedTile.Unhighlight();
-                    }
-
-                    _highlightedTile = t;
-                    _highlightedTile.Highlight();
+                    _highlightedTile.Unhighlight();
                 }
+
+                _highlightedTile = t;
+                _highlightedTile.Highlight();
             }
         }
         else if (_highlightedTile != null)
@@ -293,6 +303,10 @@ public class Map
         for (int n = 0; n < _mapTileSize.X * _mapTileSize.Y; n++)
         {
             _tiles[n].Draw();
+
+            // Debuging - show where the sprite's position is (it's more or less in the center of the isometric shape)
+            //Sprites.Circle.Position = _tiles[n].BaseSprite.Position;
+            //Sprites.Circle.Draw();
         }
     }
 
@@ -308,14 +322,19 @@ public class Map
     // Keep building list sorted by y order
     public void AddBuilding(Building b)
     {
-        int y = (int)b.sprite.Position.Y;
+        float y = b.sprite.Position.Y;
+        Tile t = TileAtPos(b.sprite.Position);
+        if (t != null)
+        {
+            t.AddBuilding(b);
+        }
         _buildings.Add(y, b);
     }
 
     public void DrawBuildings()
     {
         // Draw each permanent building
-        foreach (KeyValuePair<int, Building> b in _buildings)
+        foreach (KeyValuePair<float, Building> b in _buildings)
         {
             b.Value.Draw();
         }
