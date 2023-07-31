@@ -18,4 +18,9 @@ public class Building
     {
         sprite.Draw();
     }
+
+    public float GetMaxY()
+    {
+        return sprite.Position.Y + (sprite.Scale * sprite.Texture.Height);
+    }
 }

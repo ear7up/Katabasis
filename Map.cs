@@ -5,8 +5,12 @@ public class Map
 {
     private readonly Point _mapTileSize = new(128, 128);
     private readonly Tile[] _tiles;
-    private readonly List<Building> _buildings;
+
+    private readonly SortedList<int, Building> _buildings;
     private Building _editBuilding;
+    private float _minBuildingY;
+    private float _maxBuildingY;
+
     private Tile _highlightedTile;
 
     public Point TileSize { get; private set; }
@@ -19,8 +23,6 @@ public class Map
     public Map()
     {
         _tiles = new Tile[_mapTileSize.X *_mapTileSize.Y];
-        _buildings = new List<Building>();
-        _editBuilding = null;
 
         // Load all of the tile textures
         List<Texture2D> desertTextures = Sprites.LoadTextures("desert/flat", 30);
@@ -31,6 +33,11 @@ public class Map
         // 500x345
         TileSize = new(desertTextures[0].Width, desertTextures[0].Height);
         MapSize = new(TileSize.X * _mapTileSize.X, TileSize.Y * _mapTileSize.Y);
+
+        _buildings = new();
+        _editBuilding = null;
+        _minBuildingY = MapSize.X;
+        _maxBuildingY = 0;
         
         int VERTICAL_OVERLAP = 30;
         int HORIZONTAL_OVERLAP = TileSize.X / 2;
@@ -249,7 +256,7 @@ public class Map
             if (InputManager.ConfirmBuilding)
             {
                 _editBuilding.sprite.SpriteColor = Color.White;
-                _buildings.Insert(0, _editBuilding);
+                AddBuilding(_editBuilding);
                 _editBuilding = null;
             }
             else if (InputManager.Mode != InputManager.BUILD_MODE)
@@ -295,12 +302,19 @@ public class Map
         }
     }
 
+    // Keep building list sorted by y order
+    public void AddBuilding(Building b)
+    {
+        int y = (int)b.sprite.Position.Y;
+        _buildings.Add(y, b);
+    }
+
     public void DrawBuildings()
     {
         // Draw each permanent building
-        foreach (Building b in _buildings)
+        foreach (KeyValuePair<int, Building> b in _buildings)
         {
-            b.Draw();
+            b.Value.Draw();
         }
     }
 }
