@@ -50,35 +50,10 @@ public class FindNewHomeTask : Task
 
     }
 
-    // BFS, search neighbors, then neighbors of neighbors, etc.
-    public Tile FindNewHome(Tile search)
-    {
-        Stack<Tile> searchStack = new();
-        searchStack.Push(search);
-
-        while (searchStack.Count > 0)
-        {
-            Tile t = searchStack.Pop();
-
-            // Randomize the search order so that it's not biased in one direction
-            foreach (int i in Enumerable.Range(0, t.neighbors.Length).OrderBy(x => Globals.Rand.Next()))
-            {
-                Tile neighbor = t.neighbors[i];
-                if (neighbor != null && neighbor.Population < Tile.MAX_POP)
-                {
-                    return neighbor;
-                }
-                searchStack.Push(neighbor);
-            }
-        }
-
-        return null;
-    }
-
     public override bool Execute(Person p)
     {   
         Tile oldHome = p.Home;
-        Tile newHome = FindNewHome(oldHome);
+        Tile newHome = Tile.FindTile(oldHome, new TileFilterHome());
 
         if (newHome == null)
         {

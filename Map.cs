@@ -142,7 +142,7 @@ public class Map
             {
                 sw = _tiles[i + tiles_per_row - ((row >= _mapTileSize.Y) ? 1 : 0)];
             }
-            t.neighbors = new Tile[]{ ne, se, nw, sw };
+            t.neighbors = new Tile[]{ ne, se, sw, nw };
 
             tile_in_row++;
 

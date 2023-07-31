@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 public class Tile
 {
@@ -13,7 +15,8 @@ public class Tile
 
     public enum Cardinal
     {
-        NE, SE, NW, SW
+        // Do not reorder
+        NE, SE, SW, NW
     }
 
     public static Cardinal GetOppositeDirection(Cardinal direction)
@@ -26,6 +29,11 @@ public class Tile
             case Cardinal.SW: return Cardinal.NE;
         }
         return Cardinal.NE;
+    }
+
+    public static int GetNextDirection(int direction)
+    {
+        return (direction + 1) % 4;
     }
 
     public Tile[] neighbors { get; set; }
@@ -102,5 +110,37 @@ public class Tile
         Vector2 pos = BaseSprite.Position;
         pos.Y += 150;
         BaseSprite.Position = pos;
+    }
+
+    // Breadth-first search for a tile based on critera in TileFilter.Match
+    // Max depth defaults to 50
+    public static Tile FindTile(Tile start, TileFilter f, int maxDepth = 50)
+    {
+        Stack<Tile> searchStack = new();
+        searchStack.Push(start);
+
+        int n = -1;
+        while (searchStack.Count > 0)
+        {
+            Tile t = searchStack.Pop();
+
+            if (n++ / 4 > maxDepth)
+            {
+                return null;
+            }
+
+            // Randomize the search order so that it's not biased in one direction
+            foreach (int i in Enumerable.Range(0, t.neighbors.Length).OrderBy(x => Globals.Rand.Next()))
+            {
+                Tile neighbor = t.neighbors[i];
+                if (f.Match(neighbor))
+                {
+                    return neighbor;
+                }
+                searchStack.Push(neighbor);
+            }
+        }
+
+        return null;
     }
 }
