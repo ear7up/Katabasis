@@ -24,9 +24,11 @@ public class GameManager
         _people = new();
 
         Goods.CalcGoodsTypecounts();
-        for (int i = 0 ; i < 1000; i++)
+
+        const int NUM_PEOPLE = 1000;
+        for (int i = 0 ; i < NUM_PEOPLE; i++)
         {
-            _people.Add(Person.CreatePerson(_map.Origin));
+            _people.Add(Person.CreatePerson(_map.Origin, _map.GetOriginTile()));
         }
 
         RunTests();

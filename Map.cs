@@ -8,12 +8,10 @@ public class Map
 
     private readonly SortedList<int, Building> _buildings;
     private Building _editBuilding;
-    private float _minBuildingY;
-    private float _maxBuildingY;
 
     private Tile _highlightedTile;
 
-    public Point TileSize { get; private set; }
+    public static Point TileSize { get; private set; }
     public Point MapSize { get; private set; }
     public Vector2 Origin { get; private set; }
 
@@ -36,8 +34,6 @@ public class Map
 
         _buildings = new();
         _editBuilding = null;
-        _minBuildingY = MapSize.X;
-        _maxBuildingY = 0;
         
         int VERTICAL_OVERLAP = 30;
         int HORIZONTAL_OVERLAP = TileSize.X / 2;
@@ -168,6 +164,13 @@ public class Map
 
         // Fix the map origin to account for overlap and perspective
         Origin = new(MapSize.X / 2 - HORIZONTAL_OVERLAP, MapSize.Y / 2 - VERTICAL_OVERLAP * _mapTileSize.Y);
+    }
+
+    public Tile GetOriginTile()
+    {
+        // Midpoint, rounded up wil be the origin for odd-sized maps,
+        // even-sized mapps have no true origin, so this will give the tile SW of the center
+        return _tiles[(int)(_tiles.Length / 2f + 0.5)];
     }
 
     public void GenerateRivers()

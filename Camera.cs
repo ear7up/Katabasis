@@ -8,7 +8,7 @@ public class Camera
     public Matrix InverseViewMatrix { get; protected set; }
     
     private Vector2 StartingPosition;
-    private const float DEFAULT_ZOOM = 0.2f;
+    private const float DEFAULT_ZOOM = 0.4f;
     private const float MIN_ZOOM = 0.15f;
     private const float MAX_ZOOM = 3.0f;
 

@@ -2,8 +2,11 @@ using System.Collections;
 
 public class Tile
 {
+    public const int MAX_POP = 8;
+
     public Sprite BaseSprite { get; protected set; }
     public Sprite TileFeatureSprite { get; protected set; }
+    public int Population { get; set; }
 
     // Every tile has a resource stockpile that can be used for production/consumption
     public Hashtable Stockpile;
@@ -30,6 +33,7 @@ public class Tile
     public Tile(Vector2 position, Texture2D baseTexture, Texture2D tileFeatureTexture)
     {
         neighbors = new Tile[4];
+        Population = 0;
 
         BaseSprite = new Sprite(baseTexture, position);
         if (TileFeatureSprite != null)
@@ -38,6 +42,21 @@ public class Tile
         }
 
         Stockpile = new();
+    }
+
+    public Vector2 GetPosition()
+    {
+        return BaseSprite.Position;
+    }
+
+    public Vector2 GetOrigin()
+    {
+        return BaseSprite.Origin;
+    }
+
+    public void SetPosition(Vector2 newPos)
+    {
+        BaseSprite.Position = newPos;
     }
 
     public override string ToString()

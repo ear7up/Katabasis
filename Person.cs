@@ -31,13 +31,15 @@ public class SkillLevel
 public class Person : Entity
 {
     public static Random rand = new Random();
+    public const float MOVE_SPEED = 60f;
 
     private List<IEnumerator<int>> behaviours = new List<IEnumerator<int>>();
     private float[,] Demand;
     private GenderType Gender;
     public Hashtable PersonalStockpile;
-    //private Tile Home;
+    public Tile Home;
     public int Money { get; set; }
+    public PriorityQueue2<Task, int> Tasks;
     private SkillLevel[] Skills; // inherited by children Lamarck-style?
 
     public enum GenderType
@@ -46,7 +48,7 @@ public class Person : Entity
         FEMALE
     }
 
-    public Person(Vector2 position)
+    private Person(Vector2 position)
     {
         Position = position;
         Velocity = new Vector2(20f, 20f);
@@ -65,6 +67,9 @@ public class Person : Entity
         Demand = new float[Goods.NUM_GOODS_TYPES, Goods.GOODS_PER_TYPE];
         PersonalStockpile = new();
 
+        Home = null;
+        Tasks = new();
+
         // New person starts with each skill assigned randomly between 1-20 (they go up to 100 with experience)
         Skills = new SkillLevel[(int)Skill.NUM_SKILLS];
         
@@ -80,17 +85,32 @@ public class Person : Entity
         return $"Person(gender={gender}, money={Money})";
     }
 
-    public static Person CreatePerson(Vector2 position)
+    public static Person CreatePerson(Vector2 position, Tile home)
     {
-        var person = new Person(position);
-        person.AddBehaviour(person.MoveRandomly());
+        Person person = new Person(position);
         person.Scale = 0.05f;
+        person.Home = home;
+        home.Population += 1;
         return person;
     }
 
     public void ChooseNextTask()
     {
         // Check skills needed for tasks and weight the probability of choosing based on relative skill level
+
+        // If the Person's home is too populated, find a new home
+        if (Home == null || Home.Population > Tile.MAX_POP)
+        {
+            Tasks.Enqueue(new FindNewHomeTask());
+            return;
+        }
+
+        Tasks.Enqueue(new IdleAtHomeTask());
+    }
+
+    public void AssignPriorityTask(Task task, int priority)
+    {
+        Tasks.Enqueue(task, priority);
     }
 
     // Add to the Demand matrix based on what goods the person wants
@@ -116,15 +136,25 @@ public class Person : Entity
     // A person is willing to travel 1 tile in any direction to do work at a building
 
     public override void Update()
-    {
-        // 5% chance to change direction slightly
-        if (rand.NextDouble() < 0.05)
+    {        
+        if (Tasks.Empty())
         {
-            float angle = rand.NextFloat(-MathHelper.Pi / 8f, MathHelper.Pi / 8f);
-            Orientation = MathHelper.WrapAngle(Orientation + angle);
+            ChooseNextTask();
         }
-        Velocity = Extensions.FromPolar(Orientation, 20f);
-        Position += Velocity * Globals.Time;
+
+        if (Home.Population > Tile.MAX_POP)
+        {
+            Tasks.Enqueue(new FindNewHomeTask(), 1);
+        }
+        
+        // Peek will grab highest priority task unless no priority is set, then it will grab the oldest assigned task
+        Task current = Tasks.Peek();
+        bool isCompleted = current.Execute(this);
+
+        if (isCompleted)
+        {
+            Tasks.Dequeue();
+        }
     }
 
     public override void Draw()

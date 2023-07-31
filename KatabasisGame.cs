@@ -36,6 +36,7 @@ public class KatabasisGame : Game
     {
         Content.RootDirectory = "Content";
         Globals.Content = Content;
+        Globals.Rand = new Random();
 
         //_gameManager = new();
 

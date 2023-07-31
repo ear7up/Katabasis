@@ -5,9 +5,9 @@ public class MarketTests
     public static void RunTests()
     {
         // TEMPORARY
-        Person seller1 = new(Vector2.Zero);
-        Person seller2 = new(Vector2.Zero);
-        Person seller3 = new(Vector2.Zero);
+        Person seller1 = Person.CreatePerson(Vector2.Zero, null);
+        Person seller2 = Person.CreatePerson(Vector2.Zero, null);
+        Person seller3 = Person.CreatePerson(Vector2.Zero, null);
         Goods iron1 = new(Goods.GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.IRON, 10);
         Goods iron2 = new(Goods.GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.IRON, 20);
         Goods iron3 = new(Goods.GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.IRON, 40);
@@ -19,7 +19,7 @@ public class MarketTests
         market.PlaceSellOrder(new(seller3, false, iron3, 1.3f));
 
         // Buyer is willing to pay 2.0
-        Person buyer = new(Vector2.Zero);
+        Person buyer = Person.CreatePerson(Vector2.Zero, null);
         buyer.Money = 100; 
         Goods iron0 = new(Goods.GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.IRON, 50);
         market.PlaceBuyOrder(new(buyer, true, iron0, 2.0f));
