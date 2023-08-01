@@ -23,14 +23,14 @@ public class MarketOrder
     }
 }
 
-public class Market
+public class Market : Building
 {
     // BuyOrders: Goods.ID -> List<MarketOrder> (sorted by unitPrice DESC)
     private Hashtable BuyOrders;
     // SellOrders: Goods.ID -> List<MarketOrder> (sorted by unitPrice ASC)
     private Hashtable SellOrders;
 
-    public Market()
+    public Market(Tile tile, Sprite sprite) : base(tile, sprite)
     {
         BuyOrders = new();
         SellOrders = new();
@@ -181,6 +181,30 @@ public class Market
             p.Money += (int)(orders[orderId].goods.Quantity * orders[orderId].unitPrice);
             orders.RemoveAt(orderId);
         }
+    }
+
+    // Check if anyone is selling a particular type of goods
+    public float CheckPrice(Goods g)
+    {
+        List<MarketOrder> sellers = (List<MarketOrder>)SellOrders[g.GetId()];
+        int quantity = g.Quantity;
+        float price = 0f;
+        if (sellers == null || sellers.Count == 0)
+            return 0f;
+        
+        foreach (MarketOrder seller in sellers)
+        {
+            int saleQuantity = Math.Min(quantity, seller.goods.Quantity);
+            price += saleQuantity * seller.unitPrice;
+            quantity -= saleQuantity;
+            if (quantity <= 0)
+                break;
+        }
+        
+        // Only return price if all can be bought
+        if (quantity > 0)
+            return 0f;
+        return price;
     }
 
     public int PlaceSellOrder(MarketOrder o)

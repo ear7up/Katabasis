@@ -24,6 +24,8 @@ public class GameManager
         _people = new();
 
         Goods.CalcGoodsTypecounts();
+        GoodsProduction.Init();
+        //Console.WriteLine(GoodsProduction.Print());
 
         const int NUM_PEOPLE = 1000;
         for (int i = 0 ; i < NUM_PEOPLE; i++)

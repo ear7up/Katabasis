@@ -3,23 +3,43 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+public enum TileType
+{
+    DESERT,
+    RIVER,
+    FOREST,
+    OASIS,
+    HILLS,
+    NONE
+}
+
+public enum Cardinal
+{
+    // Do not reorder
+    NE, SE, SW, NW
+}
+
 public class Tile
 {
+    public TileType Type;
+    
     public const int MAX_POP = 8;
+    public int Population { get; set; }
 
     public Sprite BaseSprite { get; protected set; }
     public Sprite TileFeatureSprite { get; protected set; }
-    public int Population { get; set; }
+    
+    public Tile[] Neighbors { get; set; }
+    
     public List<Building> Buildings { get; set; }
 
+    public const float MIN_SOIL_QUALITY = 0.2f;
+    public const float MAX_SOIL_QUALITY = 0.6f;
+    public const float RIVER_SOIL_QUALITY_BONUS = 0.2f;
+    public float SoilQuality { get; set; }
+    
     // Every tile has a resource stockpile that can be used for production/consumption
     public Hashtable Stockpile;
-
-    public enum Cardinal
-    {
-        // Do not reorder
-        NE, SE, SW, NW
-    }
 
     public static Cardinal GetOppositeDirection(Cardinal direction)
     {
@@ -38,11 +58,10 @@ public class Tile
         return (direction + 1) % 4;
     }
 
-    public Tile[] neighbors { get; set; }
-
     public Tile(Vector2 position, Texture2D baseTexture, Texture2D tileFeatureTexture)
     {
-        neighbors = new Tile[4];
+        Type = TileType.DESERT;
+        Neighbors = new Tile[4];
         Population = 0;
         Buildings = new();
 
@@ -53,6 +72,7 @@ public class Tile
         }
 
         Stockpile = new();
+        SoilQuality = Globals.Rand.NextFloat(MIN_SOIL_QUALITY, MAX_SOIL_QUALITY);
     }
 
     public Vector2 GetPosition()
@@ -75,21 +95,25 @@ public class Tile
         return $"Tile(pos={BaseSprite.Position})";
     }
 
-    // Take quantity of specific good type from stockpile, or whatever is left if there's not enough
-    public int TakeFromStockpile(int subType, int quantity)
+    // Takes goods from the stockpile, sets quantity to the amount taken (may be less than requested)
+    public void TakeFromStockpile(Goods goods)
     {
-        Goods goods = (Goods)Stockpile[subType];
-        return goods != null ? goods.Take(quantity) : 0;
+        Goods available = (Goods)Stockpile[goods.GetId()];
+        if (available != null)
+            goods.Quantity = available.Take(goods.Quantity);
+        else
+            goods.Quantity = 0;
     }
 
     // Add quantity to stockpile if the good already exists, otherwise adds the good in the specified quantity
-    public void AddToStockpile(Goods.GoodsType type, int subType, int quantity)
+    public void AddToStockpile(Goods goods)
     {
-        Goods goods = (Goods)Stockpile[subType];
-        if (goods != null)
-            goods.Quantity += quantity;
+        Goods current = (Goods)Stockpile[goods.GetId()];
+        if (current != null)
+            current.Quantity += goods.Quantity;
         else
-            Stockpile.Add(subType, new Goods(type, subType, quantity));
+            Stockpile.Add(goods.GetId(), new Goods(goods));    
+        goods.Quantity = 0;
     }
 
     public void AddBuilding(Building b)
@@ -113,9 +137,9 @@ public class Tile
         BaseSprite.Position = pos;
         foreach (Building b in Buildings)
         {
-            Vector2 bpos = b.sprite.Position;
+            Vector2 bpos = b.Sprite.Position;
             bpos.Y -= 150;
-            b.sprite.Position = bpos;
+            b.Sprite.Position = bpos;
         }
     }
 
@@ -127,15 +151,15 @@ public class Tile
 
         foreach (Building b in Buildings)
         {
-            Vector2 bpos = b.sprite.Position;
+            Vector2 bpos = b.Sprite.Position;
             bpos.Y += 150;
-            b.sprite.Position = bpos;
+            b.Sprite.Position = bpos;
         }
     }
 
     // Breadth-first search for a tile based on critera in TileFilter.Match
     // Max depth defaults to 50
-    public static Tile FindTile(Tile start, TileFilter f, int maxDepth = 50)
+    public static Object Find(Tile start, TileFilter f, int maxDepth = 50)
     {
         Stack<Tile> searchStack = new();
         searchStack.Push(start);
@@ -151,13 +175,12 @@ public class Tile
             }
 
             // Randomize the search order so that it's not biased in one direction
-            foreach (int i in Enumerable.Range(0, t.neighbors.Length).OrderBy(x => Globals.Rand.Next()))
+            foreach (int i in Enumerable.Range(0, t.Neighbors.Length).OrderBy(x => Globals.Rand.Next()))
             {
-                Tile neighbor = t.neighbors[i];
-                if (f.Match(neighbor))
-                {
-                    return neighbor;
-                }
+                Tile neighbor = t.Neighbors[i];
+                Object match = f.Match(neighbor);
+                if (match != null)
+                    return match;
                 searchStack.Push(neighbor);
             }
         }

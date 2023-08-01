@@ -18,7 +18,7 @@ public class Task
     public const int DEFAULT_PRIORITY = 5;
 
     public List<SkillLevel> skillsNeeded;
-    public List<Task> subTasks;
+    public Queue<Task> subTasks;
     public Vector2 location;
     public int currentSubtask;
     // completion criteria ?
@@ -33,13 +33,19 @@ public class Task
 
     public virtual bool Execute(Person p)
     {
-        // Do whatever the task entails, 
-        // Pathfind objectives relative to p.Home
-        // Base progress on p.Skills and Globals.Time
-        // If the task produces Goods, add them to p.Stockpile
+        Task subTask = subTasks.Peek();
+        if (subTask != null)
+        {
+            bool complete = subTask.Execute(p);
+            if (complete)
+            {
+                subTasks.Dequeue();
+            }
+            return subTasks.Count == 0;
+        }
 
         // Return true when the task is completed
-        return false;
+        return true;
     }
 }
 
@@ -53,7 +59,7 @@ public class FindNewHomeTask : Task
     public override bool Execute(Person p)
     {   
         Tile oldHome = p.Home;
-        Tile newHome = Tile.FindTile(oldHome, new TileFilterHome());
+        Tile newHome = (Tile)Tile.Find(oldHome, new TileFilterHome());
 
         if (newHome == null)
         {
@@ -107,6 +113,54 @@ public class IdleAtHomeTask : Task
         }
 
         // This task never ends?
+        return false;
+    }
+}
+
+public class SourceGoodsTask : Task
+{
+    public Goods Goods;
+    public int QuantityRequired;
+    public int QuantityAcquired;
+    public SourceGoodsTask(Goods goods) : base()
+    {
+        Goods = goods;
+        QuantityRequired = Goods.Quantity;
+        QuantityAcquired = 0;
+    }
+
+    public override bool Execute(Person p)
+    {   
+        // Try to complete subtasks first
+        if (!base.Execute(p))
+            return false;
+
+        // Keep requesting more from the stockpile
+        Goods.Quantity = QuantityRequired - QuantityAcquired;
+        p.Home.TakeFromStockpile(Goods);
+        QuantityAcquired += Goods.Quantity;
+
+        if (QuantityAcquired >= QuantityRequired)
+        {
+            Goods.Quantity = QuantityAcquired;
+            return true;
+        }
+
+        // See if we can buy it
+        Market market = (Market)Tile.Find(p.Home, new TileFilterMarket());
+
+        if (market != null)
+        {
+            float price = market.CheckPrice(Goods);
+            if (price < p.Money)
+            {
+                // TODO: Go to the market and buy goods
+                //subTasks.Enqueue(new BuyFromMarketTask());
+            }
+        }
+
+        // TODO: See if we can produce it
+
         return false;
     }
 }

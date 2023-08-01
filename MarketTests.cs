@@ -8,12 +8,12 @@ public class MarketTests
         Person seller1 = Person.CreatePerson(Vector2.Zero, null);
         Person seller2 = Person.CreatePerson(Vector2.Zero, null);
         Person seller3 = Person.CreatePerson(Vector2.Zero, null);
-        Goods iron1 = new(Goods.GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.IRON, 10);
-        Goods iron2 = new(Goods.GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.IRON, 20);
-        Goods iron3 = new(Goods.GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.IRON, 40);
+        Goods iron1 = new(GoodsType.SMITHED, (int)Goods.Smithed.IRON, 10);
+        Goods iron2 = new(GoodsType.SMITHED, (int)Goods.Smithed.IRON, 20);
+        Goods iron3 = new(GoodsType.SMITHED, (int)Goods.Smithed.IRON, 40);
 
         // Iron is selling for 1.3 - 1.5 each
-        Market market = new();
+        Market market = new(null, null);
         market.PlaceSellOrder(new(seller1, false, iron1, 1.5f));
         market.PlaceSellOrder(new(seller2, false, iron2, 1.4f));
         market.PlaceSellOrder(new(seller3, false, iron3, 1.3f));
@@ -21,7 +21,7 @@ public class MarketTests
         // Buyer is willing to pay 2.0
         Person buyer = Person.CreatePerson(Vector2.Zero, null);
         buyer.Money = 100; 
-        Goods iron0 = new(Goods.GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.IRON, 50);
+        Goods iron0 = new(GoodsType.MATERIAL_NATURAL, (int)Goods.Smithed.IRON, 50);
         market.PlaceBuyOrder(new(buyer, true, iron0, 2.0f));
 
         // Seller3 sells out 40/40 @ 1.3 ea = 52

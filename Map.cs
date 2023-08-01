@@ -142,7 +142,7 @@ public class Map
             {
                 sw = _tiles[i + tiles_per_row - ((row >= _mapTileSize.Y) ? 1 : 0)];
             }
-            t.neighbors = new Tile[]{ ne, se, sw, nw };
+            t.Neighbors = new Tile[]{ ne, se, sw, nw };
 
             tile_in_row++;
 
@@ -176,49 +176,41 @@ public class Map
     public void GenerateRivers()
     {
         List<Texture2D> desertRiverTextures = Sprites.LoadTextures("desert/river", 16);
-        Random random = new();
-        GenerateTopRiver(desertRiverTextures, random);
-        GenerateTopRiver(desertRiverTextures, random);
-        GenerateTopRiver(desertRiverTextures, random);
-        GenerateBottomRiver(desertRiverTextures, random);
-        GenerateBottomRiver(desertRiverTextures, random);
+        GenerateRiver(desertRiverTextures, true);
+        GenerateRiver(desertRiverTextures, true);
+        GenerateRiver(desertRiverTextures, true);
+        GenerateRiver(desertRiverTextures, false);
+        GenerateRiver(desertRiverTextures, false);
     }
 
-    public void GenerateTopRiver(List<Texture2D> desertRiverTextures, Random random)
+    public void GenerateRiver(List<Texture2D> desertRiverTextures, bool startingFromTop)
     {
-        // Head southeast a random number of times from the top tile
-        int steps1 = random.Next(2, _mapTileSize.X);
-        Tile top = _tiles[0];
+        // Head a random number of steps south east from the starting tile
+        int steps1 = Globals.Rand.Next(2, _mapTileSize.X);
+        Tile t = startingFromTop ? _tiles[0] : _tiles[_tiles.Length - 1];
+
         for (int i = 0; i < steps1; i++)
         {
-            top = top.neighbors[(int)Tile.Cardinal.SE];
+            t = t.Neighbors[startingFromTop ? (int)Cardinal.SE : (int)Cardinal.NW];
         }
 
-        int length1 = random.Next(_mapTileSize.Y / 3, 3 * _mapTileSize.Y / 4);
+        // Place a random number of river tiles toward the center
+        int length1 = Globals.Rand.Next(_mapTileSize.Y / 3, 3 * _mapTileSize.Y / 4);
         for (int i = 0; i < length1; i++)
         {
-            // Overwrite the tile with a river and head south-west
-            top.BaseSprite.Texture = desertRiverTextures[random.Next(0, desertRiverTextures.Count)];
-            top = top.neighbors[(int)Tile.Cardinal.SW];
-        }
-    }
+            t.BaseSprite.Texture = desertRiverTextures[Globals.Rand.Next(0, desertRiverTextures.Count)];
+            t.Type = TileType.RIVER;
 
-    public void GenerateBottomRiver(List<Texture2D> desertRiverTextures, Random random)
-    {
-        // Head northwest a random number of times from the bottom tile        
-        int steps2 = random.Next(2, _mapTileSize.X);
-        Tile bottom = _tiles[_tiles.Length - 1];
-        for (int i = 0; i < steps2; i++)
-        {
-            bottom = bottom.neighbors[(int)Tile.Cardinal.NW];
-        }
-        
-        int length2 = random.Next(_mapTileSize.Y / 3, 3 * _mapTileSize.Y / 4);
-        for (int i = 0; i < length2; i++)
-        {
-            // Overwrite the tile with a river and head north-east
-            bottom.BaseSprite.Texture = desertRiverTextures[random.Next(0, desertRiverTextures.Count)];
-            bottom = bottom.neighbors[(int)Tile.Cardinal.NE];
+            // Rivers improve the soil quality of neighboring tiles, overlap is intentional (river itself gets 2x bonus)
+            foreach (Tile neighbor in t.Neighbors)
+            {
+                if (neighbor != null)
+                {
+                    neighbor.SoilQuality += Tile.RIVER_SOIL_QUALITY_BONUS;
+                }
+            }
+
+            t = t.Neighbors[startingFromTop ? (int)Cardinal.SW : (int)Cardinal.NE];
         }
     }
 
@@ -263,12 +255,12 @@ public class Map
         if (_editBuilding != null)
         {
             // Make the currently editing buliding follow the mouse pointer
-            _editBuilding.sprite.Position = InputManager.MousePos;
+            _editBuilding.Sprite.Position = InputManager.MousePos;
 
             // Confirm and add the building (stop editing)
             if (InputManager.ConfirmBuilding)
             {
-                _editBuilding.sprite.SpriteColor = Color.White;
+                _editBuilding.Sprite.SpriteColor = Color.White;
                 AddBuilding(_editBuilding);
                 _editBuilding = null;
             }
@@ -280,20 +272,20 @@ public class Map
             // Resize the buliding before placing it (scroll wheel while in build mode)
             if (InputManager.Mode == InputManager.BUILD_MODE && InputManager.ScrollValue > 0)
             {
-                _editBuilding.sprite.ScaleUp(SCALE_CONSTANT);
+                _editBuilding.Sprite.ScaleUp(SCALE_CONSTANT);
             }
             else if (InputManager.Mode == InputManager.BUILD_MODE && InputManager.ScrollValue < 0)
             {
-                _editBuilding.sprite.ScaleDown(SCALE_CONSTANT);
+                _editBuilding.Sprite.ScaleDown(SCALE_CONSTANT);
             }
         }
         // When build mode is first enabled, create a building at the mouse cursor
         else if (_editBuilding == null && InputManager.Mode == InputManager.BUILD_MODE)
         {
             Building b = Building.Random();
-            b.sprite.Position = InputManager.MousePos;
+            b.Sprite.Position = InputManager.MousePos;
             _editBuilding = b;
-            _editBuilding.sprite.SpriteColor = new Color(Color.LightBlue, 0.3f);
+            _editBuilding.Sprite.SpriteColor = new Color(Color.LightBlue, 0.3f);
         }
     }
 
@@ -322,10 +314,11 @@ public class Map
     // Keep building list sorted by y order
     public void AddBuilding(Building b)
     {
-        float y = b.sprite.Position.Y;
-        Tile t = TileAtPos(b.sprite.Position);
+        float y = b.Sprite.Position.Y;
+        Tile t = TileAtPos(b.Sprite.Position);
         if (t != null)
         {
+            b.Location = t;
             t.AddBuilding(b);
         }
         _buildings.Add(y, b);
@@ -337,6 +330,16 @@ public class Map
         foreach (KeyValuePair<float, Building> b in _buildings)
         {
             b.Value.Draw();
+        }
+
+        // Redraw these on top of all buildings so they stand out as intended
+        if (_highlightedTile != null)
+        {
+            _highlightedTile.Draw();
+            foreach (Building b in _highlightedTile.Buildings)
+            {
+                b.Draw();
+            }
         }
     }
 }

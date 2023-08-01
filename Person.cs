@@ -11,7 +11,7 @@ public enum Skill
     HUNTING,
     FISHING,
     COOKING,
-    SEWING,
+    CRAFTING,
     SMITHING,
     FIGHTING,
     NUM_SKILLS // last entry for easy enum size lookup
@@ -25,6 +25,11 @@ public class SkillLevel
     {
         this.skill = skill;
         this.value = value;
+    }
+
+    public override string ToString()
+    {
+        return $"SkillLevel: {skill} {value}";
     }
 }
 
@@ -122,9 +127,9 @@ public class Person : Entity
         // Units: kg/day
         for (int i = 0; i < Goods.GOODS_PER_TYPE; i++)
         {
-            change[(int)Goods.GoodsType.FOOD_ANIMAL,i] += 0.1f;
-            change[(int)Goods.GoodsType.FOOD_PLANT,i] += 1f;
-            change[(int)Goods.GoodsType.FOOD_PROCESSED,i] += 0.5f;
+            change[(int)GoodsType.FOOD_ANIMAL,i] += 0.1f;
+            change[(int)GoodsType.FOOD_PLANT,i] += 1f;
+            change[(int)GoodsType.FOOD_PROCESSED,i] += 0.5f;
         }
     }
 

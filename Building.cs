@@ -1,26 +1,38 @@
+public enum BuildingType
+{
+    MARKET,
+    HOUSE,
+    LUMBERMILL,
+    FORGE,
+    NONE
+}
+
 public class Building
 {
-    public Sprite sprite;
+    // Physical location of the market
+    public Tile Location;
+    public Sprite Sprite;
 
     public static Building Random()
     {
-        Sprite s = new Sprite(Sprites.RandomBuilding(), Vector2.Zero);
-        s.ScaleDown(0.7f);
-        return new Building(s);
+        Sprite sprite = new Sprite(Sprites.RandomBuilding(), Vector2.Zero);
+        sprite.ScaleDown(0.7f);
+        return new Building(null, sprite);
     }
 
-    public Building(Sprite s)
+    public Building(Tile location, Sprite sprite)
     {
-        sprite = s;
+        Location = location;
+        Sprite = sprite;
     }
 
     public void Draw()
     {
-        sprite.Draw();
+        Sprite.Draw();
     }
 
     public float GetMaxY()
     {
-        return sprite.Position.Y + (sprite.Scale * sprite.Texture.Height);
+        return Sprite.Position.Y + (Sprite.Scale * Sprite.Texture.Height);
     }
 }
