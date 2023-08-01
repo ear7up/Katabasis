@@ -14,6 +14,8 @@ public enum Skill
     CRAFTING,
     SMITHING,
     FIGHTING,
+    MINING,
+    FORESTRY,
     NUM_SKILLS // last entry for easy enum size lookup
 }
 

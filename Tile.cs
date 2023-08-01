@@ -10,6 +10,8 @@ public enum TileType
     FOREST,
     OASIS,
     HILLS,
+    ANIMAL,
+    DORMANT_VOLCANO,
     NONE
 }
 

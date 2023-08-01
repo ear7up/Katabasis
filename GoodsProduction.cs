@@ -1,10 +1,12 @@
+using System;
 using System.Collections;
 using System.Linq;
 
 public class GoodsRequirement
 {
     Hashtable Options;
-    public GoodsRequirement(Goods goods1, Goods goods2 = null, Goods goods3 = null, Goods goods4 = null)
+    bool And;
+    public GoodsRequirement(Goods goods1, Goods goods2 = null, Goods goods3 = null, Goods goods4 = null, bool and = false)
     {
         Options = new();
         Options.Add(goods1.GetId(), goods1);
@@ -14,12 +16,18 @@ public class GoodsRequirement
             Options.Add(goods3.GetId(), goods3);
         if (goods4 != null)
             Options.Add(goods4.GetId(), goods4);
+        And = and;
     }
 
     // TODO: this handles one-of, but what about requiring multiple ingredients?
     public bool IsSatisfiedBy(Goods goods)
     {
         return Options.Contains(goods.GetId());
+    }
+
+    public void Add(Goods goods)
+    {
+        Options.Add(goods.GetId(), goods);
     }
 
     public override string ToString()
@@ -31,11 +39,11 @@ public class GoodsRequirement
 
 public class ProductionRequirements
 {
-    SkillLevel SkillRequirement;
-    Goods.Tool ToolRequirement;
-    TileType TileRequirement;
-    BuildingType BuildingRequirement;
-    GoodsRequirement GoodsRequirement;
+    public SkillLevel SkillRequirement;
+    public Goods.Tool ToolRequirement;
+    public TileType TileRequirement;
+    public BuildingType BuildingRequirement;
+    public GoodsRequirement GoodsRequirement;
 
     public ProductionRequirements(
         SkillLevel levelRequirement = null, 
@@ -162,5 +170,506 @@ public class GoodsProduction
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.WOOL)),
             levelRequirement: new SkillLevel(Skill.CRAFTING, 10)));
+
+        g.Type = GoodsType.FOOD_ANIMAL;
+
+        // raw beef -> beef
+        g.SubType = (int)Goods.FoodAnimal.BEEF;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.BEEF)),
+            levelRequirement: new SkillLevel(Skill.COOKING, 10)));
+
+        // raw duck -> duck
+        g.SubType = (int)Goods.FoodAnimal.DUCK;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.DUCK)),
+            levelRequirement: new SkillLevel(Skill.COOKING, 10)));
+
+        // farm -> eggs
+        g.SubType = (int)Goods.FoodAnimal.EGGS;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            levelRequirement: new SkillLevel(Skill.FARMING, 10)));
+
+        // raw fish -> fish
+        g.SubType = (int)Goods.FoodAnimal.FISH;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.FISH)),
+            levelRequirement: new SkillLevel(Skill.COOKING, 10)));
+
+        // raw game -> game
+        g.SubType = (int)Goods.FoodAnimal.GAME;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.GAME)),
+            levelRequirement: new SkillLevel(Skill.COOKING, 10)));
+
+        // raw goose -> goose
+        g.SubType = (int)Goods.FoodAnimal.GOOSE;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.GOOSE)),
+            levelRequirement: new SkillLevel(Skill.COOKING, 10)));
+
+        // farm + forest -> honey
+        g.SubType = (int)Goods.FoodAnimal.HONEY;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            tileRequirement: TileType.FOREST,
+            levelRequirement: new SkillLevel(Skill.FARMING, 40)));
+
+        // farm + animals -> milk
+        g.SubType = (int)Goods.FoodAnimal.MILK;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            tileRequirement: TileType.ANIMAL,
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // raw mutton -> mutton
+        g.SubType = (int)Goods.FoodAnimal.MUTTON;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.MUTTON)),
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // raw partridge -> partridge
+        g.SubType = (int)Goods.FoodAnimal.PARTRIDGE;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.PARTRIDGE)),
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // raw pigeon -> pigeon
+        g.SubType = (int)Goods.FoodAnimal.PIGEON;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.PIGEON)),
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // raw pork -> pork
+        g.SubType = (int)Goods.FoodAnimal.PORK;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.PORK)),
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // raw quail -> quail
+        g.SubType = (int)Goods.FoodAnimal.QUAIL;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.QUAIL)),
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        g.Type = GoodsType.FOOD_PLANT;
+
+        // FARMING: FARM -> plants
+        foreach (Goods.FoodPlant type in Enum.GetValues(typeof(Goods.FoodPlant)))
+        {
+            g.SubType = (int)type;
+            Requirements.Add(g.GetId(), new ProductionRequirements(
+                buildingRequirement: BuildingType.FARM,
+                levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+        }
+
+        g.Type = GoodsType.FOOD_PROCESSED;
+
+        // barley -> beer
+        g.SubType = (int)Goods.ProcessedFood.BEER;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.BARLEY)),
+            levelRequirement: new SkillLevel(Skill.COOKING, 30)));
+
+        // wheat -> bread
+        g.SubType = (int)Goods.ProcessedFood.BREAD;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.WHEAT)),
+            levelRequirement: new SkillLevel(Skill.COOKING, 10)));
+
+        // grapes -> wine
+        g.SubType = (int)Goods.ProcessedFood.WINE;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.GRAPES)),
+            levelRequirement: new SkillLevel(Skill.COOKING, 30)));
+
+        g.Type = GoodsType.MATERIAL_ANIMAL;
+
+        // farming: farm + animals -> bone
+        g.SubType = (int)Goods.MaterialAnimal.BONE;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            tileRequirement: TileType.ANIMAL,
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // farming: farm + animals -> hide
+        g.SubType = (int)Goods.MaterialAnimal.HIDE;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            tileRequirement: TileType.ANIMAL,
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // hunting: animals -> ivory
+        g.SubType = (int)Goods.MaterialAnimal.IVORY;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            tileRequirement: TileType.ANIMAL,
+            levelRequirement: new SkillLevel(Skill.HUNTING, 40)));
+
+        // farming: farm + animals -> wool
+        g.SubType = (int)Goods.MaterialAnimal.WOOL;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            tileRequirement: TileType.ANIMAL,
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        g.Type = GoodsType.MATERIAL_NATURAL;
+
+        // desert: clay (gatherable by hand from any desert tile)
+        g.SubType = (int)Goods.MaterialNatural.CLAY;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            tileRequirement: TileType.DESERT));
+
+        // river: flint?
+        g.SubType = (int)Goods.MaterialNatural.FLINT;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            tileRequirement: TileType.RIVER));
+
+        // mining: hills + pickaxe + mine -> lapis lazuli
+        g.SubType = (int)Goods.MaterialNatural.LAPIS_LAZULI;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.MINE,
+            tileRequirement: TileType.HILLS,
+            toolRequirement: Goods.Tool.PICKAXE,
+            levelRequirement: new SkillLevel(Skill.MINING, 60)));
+
+        // mining: hills + pickaxe + mine -> malachite
+        g.SubType = (int)Goods.MaterialNatural.MALACHITE;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.MINE,
+            tileRequirement: TileType.HILLS,
+            toolRequirement: Goods.Tool.PICKAXE,
+            levelRequirement: new SkillLevel(Skill.MINING, 50)));
+
+        // mining: volcano + pickaxe -> obsidian (extremely rare in Egypt)
+        g.SubType = (int)Goods.MaterialNatural.OBSIDIAN;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            tileRequirement: TileType.DORMANT_VOLCANO,
+            toolRequirement: Goods.Tool.PICKAXE,
+            levelRequirement: new SkillLevel(Skill.MINING, 10)));
+
+        // mining: hills + pickaxe + mine -> raw copper
+        g.SubType = (int)Goods.MaterialNatural.RAW_COPPER;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.MINE,
+            tileRequirement: TileType.HILLS,
+            toolRequirement: Goods.Tool.PICKAXE,
+            levelRequirement: new SkillLevel(Skill.MINING, 20)));
+
+        // mining: hills + pickaxe + mine -> raw gold
+        g.SubType = (int)Goods.MaterialNatural.RAW_GOLD;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.MINE,
+            tileRequirement: TileType.HILLS,
+            toolRequirement: Goods.Tool.PICKAXE,
+            levelRequirement: new SkillLevel(Skill.MINING, 60)));
+
+        // mining: hills + pickaxe + mine -> raw iron
+        g.SubType = (int)Goods.MaterialNatural.RAW_IRON;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.MINE,
+            tileRequirement: TileType.HILLS,
+            toolRequirement: Goods.Tool.PICKAXE,
+            levelRequirement: new SkillLevel(Skill.MINING, 30)));
+
+        // mining: hills + pickaxe + mine -> raw lead
+        g.SubType = (int)Goods.MaterialNatural.RAW_LEAD;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.MINE,
+            tileRequirement: TileType.HILLS,
+            toolRequirement: Goods.Tool.PICKAXE,
+            levelRequirement: new SkillLevel(Skill.MINING, 20)));
+
+        // mining: hills + pickaxe + mine -> raw silver
+        g.SubType = (int)Goods.MaterialNatural.RAW_SILVER;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.MINE,
+            tileRequirement: TileType.HILLS,
+            toolRequirement: Goods.Tool.PICKAXE,
+            levelRequirement: new SkillLevel(Skill.MINING, 50)));
+
+        // mining: hills + pickaxe + mine -> raw tin
+        g.SubType = (int)Goods.MaterialNatural.RAW_TIN;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.MINE,
+            tileRequirement: TileType.HILLS,
+            toolRequirement: Goods.Tool.PICKAXE,
+            levelRequirement: new SkillLevel(Skill.MINING, 10)));
+
+        // mining: hills + pickaxe + mine -> salt
+        g.SubType = (int)Goods.MaterialNatural.SALT;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.MINE,
+            tileRequirement: TileType.HILLS,
+            toolRequirement: Goods.Tool.PICKAXE,
+            levelRequirement: new SkillLevel(Skill.MINING, 10)));
+
+        // mining: hills + pickaxe + mine -> sandstone
+        g.SubType = (int)Goods.MaterialNatural.SANDSTONE;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.MINE,
+            tileRequirement: TileType.HILLS,
+            toolRequirement: Goods.Tool.PICKAXE,
+            levelRequirement: new SkillLevel(Skill.MINING, 10)));
+
+        // mining: hills + pickaxe + mine -> stone
+        g.SubType = (int)Goods.MaterialNatural.STONE;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.MINE,
+            tileRequirement: TileType.HILLS,
+            toolRequirement: Goods.Tool.PICKAXE,
+            levelRequirement: new SkillLevel(Skill.MINING, 10)));
+
+        g.Type = GoodsType.MATERIAL_PLANT;
+
+        // forestry: forest + axe -> cedar
+        g.SubType = (int)Goods.MaterialPlant.CEDAR;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            tileRequirement: TileType.FOREST,
+            toolRequirement: Goods.Tool.AXE,
+            levelRequirement: new SkillLevel(Skill.FORESTRY, 10)));
+
+        // forestry: forest + axe -> ebony
+        g.SubType = (int)Goods.MaterialPlant.EBONY;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            tileRequirement: TileType.FOREST,
+            toolRequirement: Goods.Tool.AXE,
+            levelRequirement: new SkillLevel(Skill.FORESTRY, 10)));
+
+        // farming: farm -> flax
+        g.SubType = (int)Goods.MaterialPlant.FLAX;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // gathering: river -> papyrus
+        g.SubType = (int)Goods.MaterialPlant.PAPYRUS;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            tileRequirement: TileType.RIVER));
+
+        g.Type = GoodsType.RAW_MEAT;
+
+        // farming: farm + animals -> raw beef
+        g.SubType = (int)Goods.RawMeat.BEEF;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            tileRequirement: TileType.ANIMAL,
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // farming: farm + animals -> raw duck
+        g.SubType = (int)Goods.RawMeat.DUCK;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            tileRequirement: TileType.ANIMAL,
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // fishing: river + net -> raw fish
+        g.SubType = (int)Goods.RawMeat.FISH;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            tileRequirement: TileType.RIVER,
+            toolRequirement: Goods.Tool.FISHING_NET,
+            levelRequirement: new SkillLevel(Skill.FISHING, 10)));
+
+        // hunting: animals + spear -> raw game
+        g.SubType = (int)Goods.RawMeat.GAME;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            tileRequirement: TileType.ANIMAL,
+            toolRequirement: Goods.Tool.SPEAR,
+            levelRequirement: new SkillLevel(Skill.HUNTING, 10)));
+
+        // farming: farm + animals -> raw goose
+        g.SubType = (int)Goods.RawMeat.GOOSE;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            tileRequirement: TileType.ANIMAL,
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // farming: farm + animals -> raw mutton
+        g.SubType = (int)Goods.RawMeat.MUTTON;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            tileRequirement: TileType.ANIMAL,
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // farming: farm + animals -> raw partridge
+        g.SubType = (int)Goods.RawMeat.PARTRIDGE;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            tileRequirement: TileType.ANIMAL,
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // farming: farm + animals -> raw pigeon
+        g.SubType = (int)Goods.RawMeat.PIGEON;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            tileRequirement: TileType.ANIMAL,
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // farming: farm + animals -> raw pork
+        g.SubType = (int)Goods.RawMeat.PORK;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            tileRequirement: TileType.ANIMAL,
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        // farming: farm + animals -> raw qual
+        g.SubType = (int)Goods.RawMeat.QUAIL;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.FARM,
+            tileRequirement: TileType.ANIMAL,
+            levelRequirement: new SkillLevel(Skill.FARMING, 20)));
+
+        g.Type = GoodsType.SMITHED;
+
+        // smithing: raw tin + raw copper -> bronze
+        g.SubType = (int)Goods.Smithed.BRONZE;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.RAW_TIN),
+                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.RAW_COPPER),
+                and: true),
+            buildingRequirement: BuildingType.SMITHY,
+            levelRequirement: new SkillLevel(Skill.SMITHING, 30)));
+
+        // smithing: raw copper -> copper
+        g.SubType = (int)Goods.Smithed.COPPER;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.RAW_COPPER)),
+            buildingRequirement: BuildingType.SMITHY,
+            levelRequirement: new SkillLevel(Skill.SMITHING, 10)));
+
+        // smithing: raw gold -> gold
+        g.SubType = (int)Goods.Smithed.GOLD;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.RAW_GOLD)),
+            buildingRequirement: BuildingType.SMITHY,
+            levelRequirement: new SkillLevel(Skill.SMITHING, 20)));
+
+        // smithing: raw iron -> iron
+        g.SubType = (int)Goods.Smithed.IRON;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.RAW_IRON)),
+            buildingRequirement: BuildingType.SMITHY,
+            levelRequirement: new SkillLevel(Skill.SMITHING, 20)));
+
+        // smithing: raw lead -> lead
+        g.SubType = (int)Goods.Smithed.LEAD;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.RAW_LEAD)),
+            buildingRequirement: BuildingType.SMITHY,
+            levelRequirement: new SkillLevel(Skill.SMITHING, 20)));
+
+        // smithing: raw silver -> silver
+        g.SubType = (int)Goods.Smithed.SILVER;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.RAW_SILVER)),
+            buildingRequirement: BuildingType.SMITHY,
+            levelRequirement: new SkillLevel(Skill.SMITHING, 20)));
+
+        // smithing: raw tin -> tin
+        g.SubType = (int)Goods.Smithed.TIN;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.RAW_TIN)),
+            buildingRequirement: BuildingType.SMITHY,
+            levelRequirement: new SkillLevel(Skill.SMITHING, 20)));
+
+        g.Type = GoodsType.TOOL;
+
+        // smithing: [iron OR bronze OR copper] + smithy + hammer -> tool
+        foreach (Goods.Tool type in Enum.GetValues(typeof(Goods.Tool)))
+        {
+            g.SubType = (int)type;
+            Requirements.Add(g.GetId(), new ProductionRequirements(
+                goodsRequirement: new GoodsRequirement(
+                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.IRON),
+                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.BRONZE),
+                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.COPPER)),
+                buildingRequirement: BuildingType.SMITHY,
+                toolRequirement: Goods.Tool.HAMMER,
+                levelRequirement: new SkillLevel(Skill.SMITHING, 10)));
+        }
+
+        // smithing: clay + smithy + hammer -> kiln
+        g.SubType = (int)Goods.Tool.KILN;
+        ProductionRequirements r = (ProductionRequirements)Requirements[g.GetId()];
+        r.GoodsRequirement = new GoodsRequirement(
+            new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.CLAY));
+
+        // crafting: linen + sewing kit -> fishing net
+        g.SubType = (int)Goods.Tool.FISHING_NET;
+        r = (ProductionRequirements)Requirements[g.GetId()];
+        r.GoodsRequirement = new GoodsRequirement(
+            new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.Crafted.LINEN));
+        r.BuildingRequirement = BuildingType.NONE;
+        r.ToolRequirement = Goods.Tool.SEWING_KIT;
+        r.SkillRequirement = new SkillLevel(Skill.CRAFTING, 30);
+
+        // crafting: bricks -> furnace
+        g.SubType = (int)Goods.Tool.FURNACE;
+        r = (ProductionRequirements)Requirements[g.GetId()];
+        r.GoodsRequirement = new GoodsRequirement(
+            new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.Crafted.BRICKS));
+        r.BuildingRequirement = BuildingType.NONE;
+        r.ToolRequirement = Goods.Tool.NONE;
+        r.SkillRequirement = new SkillLevel(Skill.CRAFTING, 30);
+
+        // crafting: [cedar OR ebony] -> loom
+        g.SubType = (int)Goods.Tool.LOOM;
+        r = (ProductionRequirements)Requirements[g.GetId()];
+        r.GoodsRequirement = new GoodsRequirement(
+            new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialPlant.CEDAR),
+            new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialPlant.EBONY));
+        r.BuildingRequirement = BuildingType.NONE;
+        r.ToolRequirement = Goods.Tool.SAW;
+        r.SkillRequirement = new SkillLevel(Skill.CRAFTING, 30);
+
+        g.Type = GoodsType.WAR_GOODS;
+
+        // smithing: [copper OR bronze OR iron] + smithy + hammer -> war tool
+        foreach (Goods.War type in Enum.GetValues(typeof(Goods.War)))
+        {
+            g.SubType = (int)type;
+            Requirements.Add(g.GetId(), new ProductionRequirements(
+                goodsRequirement: new GoodsRequirement(
+                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.IRON),
+                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.BRONZE),
+                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.COPPER)),
+                buildingRequirement: BuildingType.SMITHY,
+                toolRequirement: Goods.Tool.HAMMER,
+                levelRequirement: new SkillLevel(Skill.SMITHING, 30)));
+        }
+
+        // crafting: leather + knife -> sling
+        g.SubType = (int)Goods.War.SLING;
+        r = (ProductionRequirements)Requirements[g.GetId()];
+        r.GoodsRequirement = new GoodsRequirement(
+            new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.LEATHER));
+        r.BuildingRequirement = BuildingType.NONE;
+        r.ToolRequirement = Goods.Tool.KNIFE;
+
+        // shields may also be wood
+        g.SubType = (int)Goods.War.SHIELD;
+        r = (ProductionRequirements)Requirements[g.GetId()];
+        r.GoodsRequirement.Add(new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.CEDAR));
+        r.GoodsRequirement.Add(new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.EBONY));
     }
 }

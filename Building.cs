@@ -4,6 +4,9 @@ public enum BuildingType
     HOUSE,
     LUMBERMILL,
     FORGE,
+    FARM,
+    MINE,
+    SMITHY,
     NONE
 }
 
