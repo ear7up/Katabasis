@@ -34,6 +34,7 @@ public class Market : Building
     {
         BuyOrders = new();
         SellOrders = new();
+        BuildingType = BuildingType.MARKET;
     }
 
     public override string ToString()
@@ -60,7 +61,7 @@ public class Market : Building
     }
 
     // Returns true if the transaction needs to be placed (could not be completed)
-    private bool AttemptTransact(MarketOrder o)
+    public bool AttemptTransact(MarketOrder o)
     {
         Hashtable orders = SellOrders;
         if (!o.buying)
@@ -107,14 +108,15 @@ public class Market : Building
                 o.goods.Quantity -= sale_quantity;
                 trade.goods.Quantity -= sale_quantity;
 
-                // Remember, the buyer already paid to place the order
                 if (o.buying)
                 {    
+                    o.requestor.Money -= cost;
                     trade.requestor.Money += cost;
                 }
                 else
                 {
                     o.requestor.Money += cost;
+                    trade.requestor.Money -= cost;
                 }
 
                 // All of the goods in this order have been bought/sold, flag that we need to remove some trades
@@ -142,12 +144,15 @@ public class Market : Building
         {
             return -1;
         }
-
-        o.requestor.Money -= (int)(o.goods.Quantity * o.unitPrice);
         
         if (AttemptTransact(o))
         {
             List<MarketOrder> orders = (List<MarketOrder>)BuyOrders[o.goods.GetId()];
+
+            if (o.buying)
+            {
+                o.requestor.Money -= (int)(o.goods.Quantity * o.unitPrice);
+            }
 
             // If there are no orders for the good, add it
             if (orders == null)
@@ -242,7 +247,7 @@ public class Market : Building
         if (orders != null && orderId >= 0 && orderId < orders.Count && orders[orderId].requestor == p)
         {
             // Give the seller back his goods
-            ((Goods)p.PersonalStockpile[g.GetId()]).Quantity += orders[orderId].goods.Quantity;
+            p.PersonalStockpile.Get(g).Quantity += orders[orderId].goods.Quantity;
             orders.RemoveAt(orderId);
         }
     }

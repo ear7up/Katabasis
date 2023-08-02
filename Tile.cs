@@ -41,7 +41,7 @@ public class Tile
     public float SoilQuality { get; set; }
     
     // Every tile has a resource stockpile that can be used for production/consumption
-    public Hashtable Stockpile;
+    public Stockpile Stockpile;
 
     public static Cardinal GetOppositeDirection(Cardinal direction)
     {
@@ -95,27 +95,6 @@ public class Tile
     public override string ToString()
     {
         return $"Tile(pos={BaseSprite.Position})";
-    }
-
-    // Takes goods from the stockpile, sets quantity to the amount taken (may be less than requested)
-    public void TakeFromStockpile(Goods goods)
-    {
-        Goods available = (Goods)Stockpile[goods.GetId()];
-        if (available != null)
-            goods.Quantity = available.Take(goods.Quantity);
-        else
-            goods.Quantity = 0;
-    }
-
-    // Add quantity to stockpile if the good already exists, otherwise adds the good in the specified quantity
-    public void AddToStockpile(Goods goods)
-    {
-        Goods current = (Goods)Stockpile[goods.GetId()];
-        if (current != null)
-            current.Quantity += goods.Quantity;
-        else
-            Stockpile.Add(goods.GetId(), new Goods(goods));    
-        goods.Quantity = 0;
     }
 
     public void AddBuilding(Building b)
@@ -176,13 +155,21 @@ public class Tile
                 return null;
             }
 
+            if (t == null)
+            {
+                continue;
+            }
+
             // Randomize the search order so that it's not biased in one direction
             foreach (int i in Enumerable.Range(0, t.Neighbors.Length).OrderBy(x => Globals.Rand.Next()))
             {
                 Tile neighbor = t.Neighbors[i];
-                Object match = f.Match(neighbor);
-                if (match != null)
-                    return match;
+                if (neighbor != null)
+                {
+                    Object match = f.Match(neighbor);
+                    if (match != null)
+                        return match;
+                }
                 searchStack.Push(neighbor);
             }
         }

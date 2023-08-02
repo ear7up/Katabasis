@@ -1,11 +1,12 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 public class GoodsRequirement
 {
-    Hashtable Options;
-    bool And;
+    public Hashtable Options;
+    public bool And;
     public GoodsRequirement(Goods goods1, Goods goods2 = null, Goods goods3 = null, Goods goods4 = null, bool and = false)
     {
         Options = new();
@@ -28,6 +29,23 @@ public class GoodsRequirement
     public void Add(Goods goods)
     {
         Options.Add(goods.GetId(), goods);
+    }
+
+    // Return all goods if `And`, otherwise a random choice
+    public List<Goods> ToList()
+    {
+        List<Goods> goods = new();
+
+        foreach (Goods g in Options.Values)
+            goods.Add(g);
+
+        if (!this.And)
+        {
+            Goods choice = goods[Globals.Rand.Next(goods.Count)];
+            goods.Clear();
+            goods.Add(choice);
+        }
+        return goods;
     }
 
     public override string ToString()

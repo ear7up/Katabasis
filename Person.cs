@@ -22,16 +22,16 @@ public enum Skill
 public class SkillLevel
 {
     public Skill skill;
-    public int value;
-    public SkillLevel(Skill skill, int value)
+    public int level;
+    public SkillLevel(Skill skill, int level)
     {
         this.skill = skill;
-        this.value = value;
+        this.level = level;
     }
 
     public override string ToString()
     {
-        return $"SkillLevel: {skill} {value}";
+        return $"SkillLevel: {skill} {level}";
     }
 }
 
@@ -43,11 +43,11 @@ public class Person : Entity
     private List<IEnumerator<int>> behaviours = new List<IEnumerator<int>>();
     private float[,] Demand;
     private GenderType Gender;
-    public Hashtable PersonalStockpile;
+    public Stockpile PersonalStockpile;
     public Tile Home;
     public int Money { get; set; }
     public PriorityQueue2<Task, int> Tasks;
-    private SkillLevel[] Skills; // inherited by children Lamarck-style?
+    public WeightedList<SkillLevel> Skills; // inherited by children Lamarck-style?
 
     public enum GenderType
     {
@@ -78,11 +78,12 @@ public class Person : Entity
         Tasks = new();
 
         // New person starts with each skill assigned randomly between 1-20 (they go up to 100 with experience)
-        Skills = new SkillLevel[(int)Skill.NUM_SKILLS];
+        Skills = new(Globals.Rand);// SkillLevel[(int)Skill.NUM_SKILLS];
         
         for (int i = 0; i < (int)Skill.NUM_SKILLS; i++)
         {
-            Skills[i] = new SkillLevel((Skill)i, rand.Next(1, 20));
+            int level = rand.Next(5, 30);
+            Skills.Add(new SkillLevel((Skill)i, level), level);
         }
     }
 
@@ -103,14 +104,16 @@ public class Person : Entity
 
     public void ChooseNextTask()
     {
-        // Check skills needed for tasks and weight the probability of choosing based on relative skill level
-
         // If the Person's home is too populated, find a new home
         if (Home == null || Home.Population > Tile.MAX_POP)
         {
             Tasks.Enqueue(new FindNewHomeTask());
             return;
         }
+
+        // Pick a skill, biased toward high-level skills, then pick a task that uses that skill
+        SkillLevel weightedRandomChoice = Skills.Next();
+        Task task = Task.RandomUsingSkill(weightedRandomChoice);
 
         Tasks.Enqueue(new IdleAtHomeTask());
     }
@@ -149,16 +152,21 @@ public class Person : Entity
             ChooseNextTask();
         }
 
-        if (Home.Population > Tile.MAX_POP)
+        if (Home != null && Home.Population > Tile.MAX_POP)
         {
             Tasks.Enqueue(new FindNewHomeTask(), 1);
         }
         
         // Peek will grab highest priority task unless no priority is set, then it will grab the oldest assigned task
         Task current = Tasks.Peek();
-        bool isCompleted = current.Execute(this);
+        TaskStatus currentStatus = current.Execute(this);
 
-        if (isCompleted)
+        if (Task.DEBUG)
+        {
+            Console.WriteLine($"Doing task {current} status: {currentStatus.Complete} value: {currentStatus.ReturnValue}");
+        }
+
+        if (currentStatus.Complete)
         {
             Tasks.Dequeue();
         }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class Map
 {
     private readonly Point _mapTileSize = new(128, 128);
-    private readonly Tile[] _tiles;
+    public Tile[] tiles;
 
     private readonly SortedList<float, Building> _buildings;
     private Building _editBuilding;
@@ -20,7 +20,7 @@ public class Map
 
     public Map()
     {
-        _tiles = new Tile[_mapTileSize.X *_mapTileSize.Y];
+        tiles = new Tile[_mapTileSize.X *_mapTileSize.Y];
 
         // Load all of the tile textures
         List<Texture2D> desertTextures = Sprites.LoadTextures("desert/flat", 30);
@@ -84,7 +84,7 @@ public class Map
 
             Texture2D feature = null;
             Tile tile = new(new(xpos, ypos), texture, feature);
-            _tiles[n] = tile;
+            tiles[n] = tile;
 
             tile_in_row++;
 
@@ -109,7 +109,7 @@ public class Map
 
         for (int i = 0; i < _mapTileSize.X * _mapTileSize.Y; i++)
         {
-            Tile t = _tiles[i];
+            Tile t = tiles[i];
             Tile ne = null;
             Tile se = null;
             Tile nw = null;
@@ -122,25 +122,25 @@ public class Map
             if (tile_in_row < tiles_per_row - 1 || halfway)
             {
                 // the row right after the midpoint is wrong
-                ne = _tiles[i - tiles_per_row + ((row <= _mapTileSize.Y) ? 1 : 0)];
+                ne = tiles[i - tiles_per_row + ((row <= _mapTileSize.Y) ? 1 : 0)];
             }
             // Top-half, all nodes have SE neighbor (except the last node in the middle row)
             // Bottom-half, last node has no SE neighbor
             if (tile_in_row < tiles_per_row - 1 || (!halfway && row != _mapTileSize.Y))
             {
-                se = _tiles[i + tiles_per_row + ((row < _mapTileSize.Y) ? 1 : 0)];
+                se = tiles[i + tiles_per_row + ((row < _mapTileSize.Y) ? 1 : 0)];
             }
             // Top-half, last node in row has no NW neighbor
             // Bottom-half, all nodes have NW neighbor
             if (tile_in_row > 0 || halfway)
             {
-                nw = _tiles[i - tiles_per_row  - (halfway ? 1 : 0)];
+                nw = tiles[i - tiles_per_row  - (halfway ? 1 : 0)];
             }
             // Top-half, all nodes have SW neighbor (except the first node in the middle row)
             // Bottom-half, first node has no SW Neighbor
             if (tile_in_row > 0 || !halfway)
             {
-                sw = _tiles[i + tiles_per_row - ((row >= _mapTileSize.Y) ? 1 : 0)];
+                sw = tiles[i + tiles_per_row - ((row >= _mapTileSize.Y) ? 1 : 0)];
             }
             t.Neighbors = new Tile[]{ ne, se, sw, nw };
 
@@ -170,7 +170,7 @@ public class Map
     {
         // Midpoint, rounded up wil be the origin for odd-sized maps,
         // even-sized mapps have no true origin, so this will give the tile SW of the center
-        return _tiles[(int)(_tiles.Length / 2f + 0.5)];
+        return tiles[(int)(tiles.Length / 2f + 0.5)];
     }
 
     public void GenerateRivers()
@@ -187,7 +187,7 @@ public class Map
     {
         // Head a random number of steps south east from the starting tile
         int steps1 = Globals.Rand.Next(2, _mapTileSize.X);
-        Tile t = startingFromTop ? _tiles[0] : _tiles[_tiles.Length - 1];
+        Tile t = startingFromTop ? tiles[0] : tiles[tiles.Length - 1];
 
         for (int i = 0; i < steps1; i++)
         {
@@ -217,7 +217,7 @@ public class Map
     public Tile TileAtPos(Vector2 pos)
     {
         // TODO: this should probably use a quad tree or something, searching >16,000 tiles is slow and unnecessary
-        foreach (Tile t in _tiles)
+        foreach (Tile t in tiles)
         {
             // Vaguely inside the bounding box for the tile (close enough tbh)
             float dist = Vector2.Distance(pos, t.BaseSprite.Position);
@@ -294,7 +294,7 @@ public class Map
         // Draw map tiles
         for (int n = 0; n < _mapTileSize.X * _mapTileSize.Y; n++)
         {
-            _tiles[n].Draw();
+            tiles[n].Draw();
 
             // Debuging - show where the sprite's position is (it's more or less in the center of the isometric shape)
             //Sprites.Circle.Position = _tiles[n].BaseSprite.Position;
@@ -315,7 +315,11 @@ public class Map
     public void AddBuilding(Building b)
     {
         float y = b.Sprite.Position.Y;
-        Tile t = TileAtPos(b.Sprite.Position);
+        Tile t = b.Location;
+
+        if (t == null)
+            t = TileAtPos(b.Sprite.Position);
+
         if (t != null)
         {
             b.Location = t;

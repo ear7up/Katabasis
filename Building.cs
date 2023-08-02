@@ -14,6 +14,7 @@ public class Building
 {
     // Physical location of the market
     public Tile Location;
+    public BuildingType BuildingType;
     public Sprite Sprite;
 
     public static Building Random()
@@ -23,10 +24,11 @@ public class Building
         return new Building(null, sprite);
     }
 
-    public Building(Tile location, Sprite sprite)
+    public Building(Tile location, Sprite sprite, BuildingType buildingType = BuildingType.NONE)
     {
         Location = location;
         Sprite = sprite;
+        BuildingType = buildingType;
     }
 
     public void Draw()

@@ -13,6 +13,7 @@ public class GameManager
     public const int TICKS_PER_DAY = 3600;
     private long TickCounter = 0;
     
+    public bool TEST = true;
 
     public GameManager()
     {
@@ -27,18 +28,24 @@ public class GameManager
         GoodsProduction.Init();
         //Console.WriteLine(GoodsProduction.Print());
 
-        const int NUM_PEOPLE = 1000;
-        for (int i = 0 ; i < NUM_PEOPLE; i++)
+        if (TEST)
         {
-            _people.Add(Person.CreatePerson(_map.Origin, _map.GetOriginTile()));
+            RunTests();
         }
-
-        RunTests();
+        else
+        {
+            const int NUM_PEOPLE = 1000;
+            for (int i = 0 ; i < NUM_PEOPLE; i++)
+            {
+                _people.Add(Person.CreatePerson(_map.Origin, _map.GetOriginTile()));
+            }
+        }
     }
 
     public void RunTests()
     {
         //MarketTests.RunTests();
+        TasksTest.RunTests(_map);
     }
 
     public void Update()

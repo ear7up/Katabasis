@@ -145,7 +145,7 @@ public class Goods
         return (int)Type * 1000 + (int)SubType;
     }
 
-    public Goods(GoodsType goodsType, int subType, int quantity = 0)
+    public Goods(GoodsType goodsType, int subType, int quantity = 1)
     {
         Type = goodsType;
         SubType = subType;
@@ -182,7 +182,7 @@ public class Goods
     public int Take(int quantity)
     {
         int before = Quantity;
-        Quantity = MathHelper.Max(Quantity, Quantity - quantity);
+        Quantity -= MathHelper.Min(Quantity, quantity);
         return before - Quantity;
     }
 
