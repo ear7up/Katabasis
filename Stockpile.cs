@@ -44,4 +44,14 @@ public class Stockpile
     {
         return _stock.Values;
     }
+
+    public override string ToString()
+    {
+        string s = "[\n";
+        foreach (Goods g in _stock.Values)
+        {
+            s += "  " + g.ToString() + "\n";
+        }
+        return s + "]";
+    }
 }

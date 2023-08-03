@@ -156,7 +156,7 @@ public class Goods
             case GoodsType.SMITHED: subTypeName = Enum.GetName(typeof(Smithed), SubType); break;
             case GoodsType.RAW_MEAT: subTypeName = Enum.GetName(typeof(RawMeat), SubType); break;
         }
-        return $"Goods(type={typeName}, subType={subTypeName}, quantity={Quantity})";
+        return $"Goods({typeName}.{subTypeName}, qty={Quantity})";
     }
 
     // Subtract and return as much of the requested quantity if possible

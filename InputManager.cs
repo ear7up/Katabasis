@@ -13,6 +13,8 @@ public static class InputManager
 
     public static float ScrollValue;
 
+    public static bool Clicked;
+
     // Camera movement
     private static Vector2 _dragStart;
     public static Vector2 MouseDrag = Vector2.Zero;
@@ -25,6 +27,7 @@ public static class InputManager
 
     // Current mouse position, will be corrected for camera transformations by GameManager
     public static Vector2 MousePos = Vector2.Zero;
+    public static Vector2 ScreenMousePos = Vector2.Zero;
 
     private static void DetermineMode()
     {
@@ -67,6 +70,8 @@ public static class InputManager
     {
         // If 'R' was pressed, set the CameraReset state
         CameraReset = keyboardState.IsKeyUp(Keys.R) && lastKeyboardState.IsKeyDown(Keys.R);
+
+        Clicked = (mouseState.LeftButton == ButtonState.Released && lastMouseState.LeftButton == ButtonState.Pressed);
 
         // Track click-and-drag
         if (mouseState.LeftButton == ButtonState.Pressed && lastMouseState.LeftButton != ButtonState.Pressed)
@@ -117,8 +122,13 @@ public static class InputManager
         keyboardState = Keyboard.GetState();
         mouseState = Mouse.GetState();
 
+        // MousePos will be deprojected by the GameManager using the Camera
         MousePos.X = mouseState.X;
         MousePos.Y = mouseState.Y;
+
+        // ScreenMousePos will always refer to the position of the mouse on the screen (e.g. for static UI)
+        ScreenMousePos.X = mouseState.X;
+        ScreenMousePos.Y = mouseState.Y;
 
         previousMouseWheelValue = currentMouseWheelValue;
         currentMouseWheelValue = mouseState.ScrollWheelValue;

@@ -81,9 +81,11 @@ public class Task
             {
                 if (subStatus.Complete)
                 {
+                    if (!subStatus.Failed)
+                        Debug($"  Subtask complete {subStatus.Task} returning {subStatus.ReturnValue}");
                     subTasks.Dequeue();
                 }
-                Task.Debug($"  Doing subtask {subTask} status: {subStatus.Complete} value: {subStatus.ReturnValue}");
+                
                 subStatus.Complete = (subTasks.Count == 0);
                 
                 // Make the whole task fail when a subtask fails
@@ -131,7 +133,7 @@ public class FindNewHomeTask : Task
 
         if (newHome == null)
         {
-            Task.Debug($"Failed to find a home for {p}");
+            Debug($"Failed to find a home for {p}");
             Status.Failed = true;
             return Status;
         }
@@ -204,7 +206,8 @@ public class FindTileByTypeTask : Task
     public override TaskStatus Execute(Person p)
     {   
         Tile found = (Tile)Tile.Find(p.Home, new TileFilterByType(TileType));
-        Task.Debug($"    Tile found: {found}");
+        if (found == null)
+            Debug($"  {TileType} tile not found near {p.Position}");
         Status.Complete = true;
         Status.Failed = (found == null);
         Status.ReturnValue = found;
@@ -380,7 +383,6 @@ public class TryToProduceTask : Task
             {
                 // Go to the tile
                 Tile = (Tile)subStatus.ReturnValue;
-                Task.Debug($"    Tile found, moving to position {Tile.GetPosition()}");
                 subTasks.Enqueue(new GoToTask(Tile.GetPosition()));
             }
         }
@@ -419,7 +421,7 @@ public class TryToProduceTask : Task
                 p.PersonalStockpile.Add(Goods);
                 Status.ReturnValue = Goods;
                 Status.Complete = true;
-                Console.WriteLine($"Successfully produced {Goods}");
+                Task.Debug($"Successfully produced {Goods}");
             }
         }
 
@@ -489,6 +491,7 @@ public class GoToTask : Task
         {
             direction = destination - p.Position;
             direction.Normalize();
+            Debug($"  Moving to position {destination}");
         }
 
         // Move in the direction of the destination at default movespeed scaled by time elapsed

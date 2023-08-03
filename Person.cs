@@ -44,6 +44,8 @@ public class Person : Entity
 
     private float[,] Demand;
     private GenderType Gender;
+    public string Name;
+    public float Age;
     public Stockpile PersonalStockpile;
     public Tile Home;
     public float Money { get; set; }
@@ -64,6 +66,8 @@ public class Person : Entity
         Orientation = rand.NextFloat(0.0f, MathHelper.TwoPi);
         Scale = 0.2f;
         
+        Texture2D image = null;
+
         Gender = (GenderType)rand.Next(2);
         switch (Gender)
         {
@@ -71,28 +75,29 @@ public class Person : Entity
             case GenderType.FEMALE: image = Sprites.WomanC; break; 
         }
 
-        Radius = image.Width / 2f;
-
-        Demand = new float[Goods.NUM_GOODS_TYPES, Goods.GOODS_PER_TYPE];
-        PersonalStockpile = new();
-
+        SetImage(image);
+        Name = NameGenerator.Random(Gender);
+        Age = Globals.Rand.Next(10, 50);
         Home = null;
+        
         Tasks = new();
+        PersonalStockpile = new();
+        Demand = new float[Goods.NUM_GOODS_TYPES, Goods.GOODS_PER_TYPE];
 
         // New person starts with each skill assigned randomly between 1-20 (they go up to 100 with experience)
         Skills = new(Globals.Rand);
         
         foreach (Skill skill in Enum.GetValues(typeof(Skill)))
         {
-            int level = rand.Next(5, 30);
+            // Random skills, older people have more
+            int level = (int)(rand.Next(5, 25) * ((Age + 90) / 100));
             Skills.Add(new SkillLevel(skill, level), level);
         }
     }
 
     public override string ToString()
     {
-        string gender = Gender == GenderType.MALE ? "Male" : "Female";
-        return $"Person(gender={gender}, money={Money})";
+        return $"Person('{Name}' ({Age}) ${Money}, items={PersonalStockpile})";
     }
 
     public static Person CreatePerson(Vector2 position, Tile home)
@@ -177,11 +182,18 @@ public class Person : Entity
             ChooseNextTask();
         }
 
+        if (InputManager.Mode == InputManager.CAMERA_MODE && InputManager.Clicked)
+        {
+            if (GetBounds().Contains(InputManager.MousePos))
+                Console.WriteLine("Person clicked: " + this.ToString());
+        }
+
         if (Hunger >= STARVING)
         {
             AssignPriorityTask(new EatTask(), Task.HIGH_PRIORITY);
         }
 
+        // FindNewHomeTask pathfinds relative to home tile, so it can't be null
         if (Home != null && Home.Population > Tile.MAX_POP)
         {
             Tasks.Enqueue(new FindNewHomeTask(), 1);
@@ -196,14 +208,16 @@ public class Person : Entity
 
         if (currentStatus.Complete)
         {
-            if (currentStatus.Failed)
-                Console.WriteLine($"Task {currentStatus.Task} failed");
+            // This happens often if the task prerequisites cannot be fulfilled
+            //if (Task.DEBUG && currentStatus.Failed)
+            //    Console.WriteLine($"Task {currentStatus.Task} failed");
             Tasks.Dequeue();
         }
     }
 
     public override void Draw()
     {
-        Globals.SpriteBatch.Draw(image, Position, null, color, 0f, Size, Scale, 0, 0);
+        // Why did I override this and the origin with Size instead of Size/2 and set Orientation to 0?
+        Globals.SpriteBatch.Draw(image, Position, null, color, 0f, Size / 2f, Scale, 0, 0);
     }
 }
