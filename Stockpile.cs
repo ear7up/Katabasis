@@ -25,9 +25,28 @@ public class Stockpile
     {
         Goods available = (Goods)_stock[goods.GetId()];
         if (available != null)
+        {
             goods.Quantity = available.Take(goods.Quantity);
+            if (available.Quantity == 0)
+                _stock.Remove(available.GetId());
+        }
         else
             goods.Quantity = 0;
+    }
+
+    public bool Has(Goods goods)
+    {
+        Goods available = (Goods)_stock[goods.GetId()];
+        if (available == null || available.Quantity < goods.Quantity)
+            return false;
+        return true;
+    }
+
+    public void RemoveIfEmpty(Goods goods)
+    {
+        Goods available = (Goods)_stock[goods.GetId()];
+        if (available == null || available.Quantity <= 0)
+            _stock.Remove(available.GetId());
     }
 
     public Goods Get(Goods g)

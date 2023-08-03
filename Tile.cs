@@ -8,10 +8,12 @@ public enum TileType
     DESERT,
     RIVER,
     FOREST,
+    VEGETATION,
     OASIS,
     HILLS,
     ANIMAL,
     DORMANT_VOLCANO,
+    CAMP,
     NONE
 }
 
@@ -34,6 +36,7 @@ public class Tile
     
     public Tile[] Neighbors { get; set; }
     
+    public const int MAX_BUILDINGS = 6;
     public List<Building> Buildings { get; set; }
 
     public const float MIN_SOIL_QUALITY = 0.2f;
@@ -61,9 +64,9 @@ public class Tile
         return (direction + 1) % 4;
     }
 
-    public Tile(Vector2 position, Texture2D baseTexture, Texture2D tileFeatureTexture)
+    public Tile(TileType type, Vector2 position, Texture2D baseTexture, Texture2D tileFeatureTexture)
     {
-        Type = TileType.DESERT;
+        Type = type;
         Owned = false;
         Neighbors = new Tile[4];
         Population = 0;

@@ -21,6 +21,8 @@ public enum Skill
 
 public class SkillLevel
 {
+    public const float INCREASE_CHANCE = 0.1f;
+
     public Skill skill;
     public int level;
     public SkillLevel(Skill skill, int level)
@@ -31,7 +33,7 @@ public class SkillLevel
 
     public override string ToString()
     {
-        return $"SkillLevel: {skill} {level}";
+        return $"{skill}:{level}";
     }
 }
 
@@ -39,8 +41,8 @@ public class Person : Entity
 {
     public static Random rand = new Random();
     public const float MOVE_SPEED = 60f;
-    public const int DAILY_HUNGER = 10;
-    public const int STARVING = 100;
+    public const int DAILY_HUNGER = 50;
+    public const int STARVING = 250;
 
     private float[,] Demand;
     private GenderType Gender;
@@ -97,7 +99,18 @@ public class Person : Entity
 
     public override string ToString()
     {
-        return $"Person('{Name}' ({Age}) ${Money}, items={PersonalStockpile})";
+        string skills = "[";
+        foreach (SkillLevel s in Skills)
+            skills += s.ToString() + ", ";
+        skills = skills.Substring(0, skills.Length - 1);
+        skills += "]";
+        string task = "Idle";
+        if (Tasks.Peek() != null)
+            task  = Tasks.Peek().ToString();
+        return $"Person('{Name}' ({Age}) hunger={Hunger}\n" +
+               $"Task=[{task}]\n" +
+               $"Skill={skills}\n" +
+               $"Items={PersonalStockpile})";
     }
 
     public static Person CreatePerson(Vector2 position, Tile home)
@@ -188,9 +201,19 @@ public class Person : Entity
                 Console.WriteLine("Person clicked: " + this.ToString());
         }
 
+        float r = Globals.Rand.NextFloat(0f, 1f);
+
         if (Hunger >= STARVING)
         {
-            AssignPriorityTask(new EatTask(), Task.HIGH_PRIORITY);
+            // Hunt if you have a spear, otherwise scavenge for wild plants
+            if (PersonalStockpile.Has(new Goods(GoodsType.TOOL, (int)Goods.Tool.SPEAR)))
+                AssignPriorityTask(new SourceGoodsTask(
+                    new Goods(GoodsType.FOOD_ANIMAL, (int)Goods.FoodAnimal.GAME)), 
+                    Task.HIGH_PRIORITY);
+            else
+                AssignPriorityTask(new SourceGoodsTask(
+                    new Goods(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.WILD_EDIBLE)), 
+                    Task.HIGH_PRIORITY);
         }
 
         // FindNewHomeTask pathfinds relative to home tile, so it can't be null
@@ -202,9 +225,6 @@ public class Person : Entity
         // Peek will grab highest priority task unless no priority is set, then it will grab the oldest assigned task
         Task current = Tasks.Peek();
         TaskStatus currentStatus = current.Execute(this);
-
-        if (Task.DEBUG)
-            Console.WriteLine($"Doing task {current} status: {currentStatus.Complete} value: {currentStatus.ReturnValue}");
 
         if (currentStatus.Complete)
         {

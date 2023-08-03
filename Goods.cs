@@ -45,8 +45,12 @@ public class Goods
         GARLIC, SCALLIONS, ONION, LEEK, LETTUCE, CELERY, 
         CUCUMBER, RADISH, TURNIP, GRAPES, GOURD, MELON, 
         PEAS, LENTILS, CHICKPEAS, NUTS, OLIVE_OIL, BARLEY,
-        WHEAT
+        WHEAT, WILD_EDIBLE
     }
+
+    // Consider making a separate enum for stone tools
+    // And make simple production requirements use them instead
+    // so that some things can be made without a smithy and tools
 
     public enum Tool
     {
@@ -115,7 +119,12 @@ public class Goods
     // Return a unique identifier for each good
     public int GetId()
     {
-        return (int)Type * MAX_GOODS_PER_CATEGORY + (int)SubType;
+        return (int)Type * MAX_GOODS_PER_CATEGORY + SubType;
+    }
+
+    public static int GetId(GoodsType type, int subType)
+    {
+        return (int)type * MAX_GOODS_PER_CATEGORY + subType;
     }
 
     // Reverse of GetId, assumes there are max 1000 goods per type category
@@ -156,7 +165,7 @@ public class Goods
             case GoodsType.SMITHED: subTypeName = Enum.GetName(typeof(Smithed), SubType); break;
             case GoodsType.RAW_MEAT: subTypeName = Enum.GetName(typeof(RawMeat), SubType); break;
         }
-        return $"Goods({typeName}.{subTypeName}, qty={Quantity})";
+        return $"({typeName}.{subTypeName}, qty={Quantity})";
     }
 
     // Subtract and return as much of the requested quantity if possible

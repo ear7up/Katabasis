@@ -40,6 +40,30 @@ public class TileFilterBuliding : TileFilter
     }
 }
 
+// Find a building
+public class TileFilterBulidingOnTile : TileFilter
+{
+    public BuildingType BuildingType;
+    public TileType TileType;
+    public TileFilterBulidingOnTile(BuildingType buildingType, TileType tileType)
+    {
+        BuildingType = buildingType;
+        TileType = tileType;
+    }
+
+    public override Object Match(Tile t)
+    {
+        if (t.Type != TileType)
+            return null;
+
+        foreach (Building b in t.Buildings)
+            if (b.BuildingType == BuildingType)
+                return new BuildingAndTile(b, t);
+
+        return null;
+    }
+}
+
 public class TileFilterByType : TileFilter
 {
     public TileType TileType;

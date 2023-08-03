@@ -48,6 +48,7 @@ public class Map
         for (int n = 0; n < _mapTileSize.Y * _mapTileSize.X; n++)
         {
             Texture2D texture = null;
+            TileType tileType = TileType.DESERT;
             double r = random.NextDouble();
 
             // Assign random tile textures
@@ -60,16 +61,19 @@ public class Map
             {
                 // 15% desert with hills
                 texture = desertTextures[random.Next(0, desertHillTextures.Count)];
+                tileType = TileType.HILLS;
             }
             else if (r < 0.98)
             {
                 // 18% desert with vegetation
                 texture = desertVegetationTextures[random.Next(0, desertVegetationTextures.Count)];
+                tileType = TileType.VEGETATION;
             }
             else
             {
                 // 2% bedouin camps
                 texture = desertBedouinTextures[random.Next(0, desertBedouinTextures.Count)];
+                tileType = TileType.CAMP;
             }
 
             // Rows get bigger until halfway, then they get smaller
@@ -83,7 +87,7 @@ public class Map
             float ypos = (TileSize.Y / 2) * row - (VERTICAL_OVERLAP * row);
 
             Texture2D feature = null;
-            Tile tile = new(new(xpos, ypos), texture, feature);
+            Tile tile = new(tileType, new(xpos, ypos), texture, feature);
             tiles[n] = tile;
 
             tile_in_row++;

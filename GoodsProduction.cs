@@ -55,40 +55,6 @@ public class GoodsRequirement
     }
 }
 
-public class ProductionRequirements
-{
-    public SkillLevel SkillRequirement;
-    public Goods.Tool ToolRequirement;
-    public TileType TileRequirement;
-    public BuildingType BuildingRequirement;
-    public GoodsRequirement GoodsRequirement;
-
-    public ProductionRequirements(
-        SkillLevel levelRequirement = null, 
-        Goods.Tool toolRequirement = Goods.Tool.NONE,
-        TileType tileRequirement = TileType.NONE,
-        BuildingType buildingRequirement = BuildingType.NONE,
-        GoodsRequirement goodsRequirement = null)
-    {
-        SkillRequirement = levelRequirement;
-        ToolRequirement = toolRequirement;
-        TileRequirement = tileRequirement;
-        BuildingRequirement = buildingRequirement;
-        GoodsRequirement = goodsRequirement;
-    }
-
-    public override string ToString()
-    {
-        return $"ProductionRequirements(\n" +
-            $"  {SkillRequirement}\n" + 
-            $"  {ToolRequirement}\n" +
-            $"  {TileRequirement}\n" +
-            $"  {BuildingRequirement}\n" +
-            $"  {GoodsRequirement}\n" +
-            ")";
-    }
-}
-
 public class GoodsProduction
 {
     public static Hashtable Requirements;
@@ -115,6 +81,9 @@ public class GoodsProduction
         Requirements = new();
         GoodsBySkill = new();
 
+        // TODO: Set quantity on goods in GoodsRequirement for non 1:1 conversions
+
+        ProductionRequirements r = null;
         Goods g = new(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.BRICKS);
 
         // Bricks require clay only
@@ -305,6 +274,13 @@ public class GoodsProduction
                 levelRequirement: new SkillLevel(Skill.FARMING, 20)));
         }
 
+        // No skill or building required to forage for wild plants, does need a tile with vegetation, though
+        g.SubType = (int)Goods.FoodPlant.WILD_EDIBLE;
+        r = (ProductionRequirements)Requirements[g.GetId()];
+        r.BuildingRequirement = BuildingType.NONE;
+        r.SkillRequirement = null;
+        r.TileRequirement = TileType.VEGETATION;
+
         g.Type = GoodsType.FOOD_PROCESSED;
 
         // barley -> beer
@@ -456,13 +432,10 @@ public class GoodsProduction
             toolRequirement: Goods.Tool.PICKAXE,
             levelRequirement: new SkillLevel(Skill.MINING, 10)));
 
-        // mining: hills + pickaxe + mine -> stone
+        // (simple gathering) hills -> stone
         g.SubType = (int)Goods.MaterialNatural.STONE;
         Requirements.Add(g.GetId(), new ProductionRequirements(
-            buildingRequirement: BuildingType.MINE,
-            tileRequirement: TileType.HILLS,
-            toolRequirement: Goods.Tool.PICKAXE,
-            levelRequirement: new SkillLevel(Skill.MINING, 10)));
+            tileRequirement: TileType.HILLS));
 
         g.Type = GoodsType.MATERIAL_PLANT;
 
@@ -625,23 +598,25 @@ public class GoodsProduction
 
         g.Type = GoodsType.TOOL;
 
+        // For now, allow tools to be made of stone only with no tools required
         // smithing: [iron OR bronze OR copper] + smithy + hammer -> tool
         foreach (Goods.Tool type in Enum.GetValues(typeof(Goods.Tool)))
         {
             g.SubType = (int)type;
             Requirements.Add(g.GetId(), new ProductionRequirements(
                 goodsRequirement: new GoodsRequirement(
-                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.IRON),
-                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.BRONZE),
-                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.COPPER)),
-                buildingRequirement: BuildingType.SMITHY,
-                toolRequirement: Goods.Tool.HAMMER,
+                    new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.STONE)),
+                    //new Goods(GoodsType.SMITHED, (int)Goods.Smithed.IRON),
+                    //new Goods(GoodsType.SMITHED, (int)Goods.Smithed.BRONZE),
+                    //new Goods(GoodsType.SMITHED, (int)Goods.Smithed.COPPER)),
+                //buildingRequirement: BuildingType.SMITHY,
+                //toolRequirement: Goods.Tool.HAMMER,
                 levelRequirement: new SkillLevel(Skill.SMITHING, 10)));
         }
 
         // smithing: clay + smithy + hammer -> kiln
         g.SubType = (int)Goods.Tool.KILN;
-        ProductionRequirements r = (ProductionRequirements)Requirements[g.GetId()];
+        r = (ProductionRequirements)Requirements[g.GetId()];
         r.GoodsRequirement = new GoodsRequirement(
             new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.CLAY));
 
