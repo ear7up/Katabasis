@@ -92,15 +92,28 @@ public class ProductionRequirements
 public class GoodsProduction
 {
     public static Hashtable Requirements;
+    public static Hashtable GoodsBySkill;
 
     public static string Print()
     {
         return string.Join(",", Requirements.Values.Cast<object>().Select(x  => x.ToString()).ToArray());
     }
+    
+    // If the given skill isn't used to produce anything, return goods with no skill requirements
+    public static List<int> GetGoodsMadeUsingSkill(Skill skill)
+    {
+        List<int> goods = (List<int>)GoodsBySkill[skill];
+        if (goods == null)
+        {
+            goods = (List<int>)GoodsBySkill[Skill.NONE];
+        }
+        return goods;
+    }
 
     public static void Init()
     {
         Requirements = new();
+        GoodsBySkill = new();
 
         Goods g = new(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.BRICKS);
 
@@ -689,5 +702,24 @@ public class GoodsProduction
         r = (ProductionRequirements)Requirements[g.GetId()];
         r.GoodsRequirement.Add(new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.CEDAR));
         r.GoodsRequirement.Add(new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.EBONY));
+
+        // Map skill enum values -> list of goods ids
+        foreach (int goodsId in Requirements.Keys)
+        {
+            ProductionRequirements req = (ProductionRequirements)Requirements[goodsId];
+            Skill skill = Skill.NONE;
+            if (req.SkillRequirement != null)
+                skill = req.SkillRequirement.skill;
+
+            List<int> goodsIds = (List<int>)GoodsBySkill[skill];
+
+            if (goodsIds == null)
+            {
+                goodsIds = new();
+                GoodsBySkill[skill] = goodsIds;
+            }
+
+            goodsIds.Add(goodsId);
+        }
     }
 }

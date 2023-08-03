@@ -10,10 +10,10 @@ public class GameManager
     private readonly Camera _camera;
     private List<Person> _people;
 
-    public const int TICKS_PER_DAY = 3600;
-    private long TickCounter = 0;
+    public const int SECONDS_PER_DAY = 60;
+    private float TimeOfDay = 0;
     
-    public bool TEST = true;
+    public bool TEST = false;
 
     public GameManager()
     {
@@ -26,7 +26,7 @@ public class GameManager
 
         Goods.CalcGoodsTypecounts();
         GoodsProduction.Init();
-        //Console.WriteLine(GoodsProduction.Print());
+        GoodsInfo.Init();
 
         if (TEST)
         {
@@ -34,7 +34,7 @@ public class GameManager
         }
         else
         {
-            const int NUM_PEOPLE = 1000;
+            const int NUM_PEOPLE = 30;
             for (int i = 0 ; i < NUM_PEOPLE; i++)
             {
                 _people.Add(Person.CreatePerson(_map.Origin, _map.GetOriginTile()));
@@ -63,10 +63,10 @@ public class GameManager
 
         _map.Update();
 
-        TickCounter++;
-        if (TickCounter > TICKS_PER_DAY)
+        TimeOfDay += Globals.Time;
+        if (TimeOfDay > SECONDS_PER_DAY)
         {
-            TickCounter = 0;
+            TimeOfDay = 0f;
             foreach (Person p in _people)
             {
                 p.DailyUpdate();

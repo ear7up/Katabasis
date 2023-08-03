@@ -21,9 +21,13 @@ public class Goods
 {
     public const float MEAT_SPOIL_RATE = 0.01f;
 
+    // If for some reason in the future there are more than 1000 goods in a single category,
+    // bump this to 10000 to make each good type have a unique integer identifier
+    public const int MAX_GOODS_PER_CATEGORY = 1000;
+
     public GoodsType Type { get; set; }
     public int SubType { get; set; }
-    public int Quantity { get; set; }
+    public float Quantity { get; set; }
 
     public enum ProcessedFood
     {
@@ -89,45 +93,6 @@ public class Goods
         GOOSE, PARTRIDGE, QUAIL, GAME, FISH
     }
 
-    // Percentage of one unit of the good consumed per day of use (generally % of 1kg)
-    // Each row represents a category, if the category doesn't have enough items it will be filled with 0f
-    public static float[,] USE_RATE = {
-        {/*BREAD*/1f, /*BEER*/1f, /*WINE*/1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f},
-
-        {/*PORK*/0.1f, /*BEEF*/0.1f, /*MUTTON*/0.1f, /*DUCK*/0.2f, /*PIGEON*/0.2f, /*GOOSE*/0.2f, /*PARTRIDGE*/0.2f, 
-         /*QUAIL*/0.2f, /*GAME*/0.1f, /*FISH*/0.3f, /*MILK*/0.1f, /*EGGS*/0.1f, /*HONEY*/0.05f, 0f, 0f, 0f, 0f, 0f, 0f},
-
-        {/*GARLIC*/0.05f, /*SCALLIONS*/0.05f, /*ONION*/0.05f, /*LEEK*/0.1f, /*LETTUCE*/0.1f, /*CELERY*/0.1f,
-         /*CUCUMBER*/0.1f, /*RADISH*/0.15f, /*TURNIP*/0.15f, /*GRAPES*/0.15f, /*GOURD*/0.2f, /*MELON*/0.2f, 
-         /*PEAS*/0.2f, /*LENTILS*/0.2f, /*CHICKPEAS*/0.2f, /*NUTS*/0.15f, /*OLIVE_OIL*/0.05f, /*BARLEY*/0.01f,
-         /*WHEAT*/0.01f},
-
-        {/*PICKAXE*/0.005f, /*SHOVEL*/0f, /*HAMMER*/0.05f, /*KILN*/0f, /*FURNACE*/0f, /*SAW*/0.005f, /*KNIFE*/0.005f,
-         /*SPEAR*/0f, /*FISHING_NET*/0.005f, /*AXE*/0.05f, /*SEWING_KIT*/0.05f, /*LOOM*/0.05f, /*CHISEL*/0.05f, 0f, 0f, 0f, 0f, 0f, 0f},
-
-        // These materials are stable, only consumed when converted into something else
-        {/*IVORY*/0f, /*BONE*/0f, /*HIDE*/0f, /*WOOL*/0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f},
-
-        {/*FLAX*/0f, /*CEDAR*/0f, /*EBONY*/0f, /*PAPYRUS*/0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f},
-
-        {/*SALT*/0.05f, /*FLINT*/0f, /*STONE*/0f, /*CLAY*/0f, /*IRON*/0f, /*COPPER*/0f, /*SILVER*/0f, /*GOLD*/0f,
-         /*LEAD*/0f, /*MALACHITE*/0f, /*LAPIS_LAZULI*/0f, /*OBSIDIAN*/0f, /*TIN*/0f, /*SANDSTONE*/0f, 0f, 0f, 0f, 0f, 0f},
-
-        {/*CLOTHING*/0.005f, /*BRICKS*/0f, /*COMBS*/0.005f, /*JEWELRY*/0f, /*POTTERY*/0f, /*STATUES*/0f, 
-         /*INSTRUMENTS*/0.005f, /*YARN*/0f, /*LEATHER*/0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f},
-
-        {/*CHARIOT*/0.005f, /*SWORD*/0.005f, /*AXE*/0.005f, /*SLING*/0.005f, /*SHIELD*/0.005f, /*SHIELD*/0.005f, /*HELMET*/0.005f,
-         0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f},
-
-        {/*IRON*/0f, /*SILVER*/0f, /*GOLD*/0f, /*COPPER*/0f, /*TIN*/0f, /*BRONZE*/0f, /*LEAD*/0f, 
-         0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f},
-
-        // Raw meat spoils when not in use
-        {MEAT_SPOIL_RATE, MEAT_SPOIL_RATE, MEAT_SPOIL_RATE, MEAT_SPOIL_RATE, MEAT_SPOIL_RATE, 
-         MEAT_SPOIL_RATE, MEAT_SPOIL_RATE, MEAT_SPOIL_RATE, MEAT_SPOIL_RATE, MEAT_SPOIL_RATE, 
-         0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f}
-    };
-
     public static int NUM_GOODS_TYPES = 0;
     public static int GOODS_PER_TYPE = 0;
 
@@ -136,13 +101,27 @@ public class Goods
     public static void CalcGoodsTypecounts()
     {
         NUM_GOODS_TYPES = Enum.GetValues(typeof(GoodsType)).Length;
-        GOODS_PER_TYPE = USE_RATE.Length;
+        GOODS_PER_TYPE = 19;
+    }
+
+    // Decrease the quantity of the object by its use rate
+    // TODO: How do we destroy goods when they reach 0 quantity? Do we need to?
+    public void Use()
+    {
+        float useRate = GoodsInfo.GetUseRate(this);
+        Quantity = Math.Max(Quantity - useRate, 0);
     }
 
     // Return a unique identifier for each good
     public int GetId()
     {
-        return (int)Type * 1000 + (int)SubType;
+        return (int)Type * MAX_GOODS_PER_CATEGORY + (int)SubType;
+    }
+
+    // Reverse of GetId, assumes there are max 1000 goods per type category
+    public static Goods FromId(int id)
+    {
+        return new Goods((GoodsType)(id / MAX_GOODS_PER_CATEGORY), id % MAX_GOODS_PER_CATEGORY);
     }
 
     public Goods(GoodsType goodsType, int subType, int quantity = 1)
@@ -174,16 +153,23 @@ public class Goods
             case GoodsType.MATERIAL_NATURAL: subTypeName = Enum.GetName(typeof(MaterialNatural), SubType); break;
             case GoodsType.CRAFT_GOODS: subTypeName = Enum.GetName(typeof(Crafted), SubType); break;
             case GoodsType.WAR_GOODS: subTypeName = Enum.GetName(typeof(War), SubType); break;
+            case GoodsType.SMITHED: subTypeName = Enum.GetName(typeof(Smithed), SubType); break;
+            case GoodsType.RAW_MEAT: subTypeName = Enum.GetName(typeof(RawMeat), SubType); break;
         }
         return $"Goods(type={typeName}, subType={subTypeName}, quantity={Quantity})";
     }
 
     // Subtract and return as much of the requested quantity if possible
-    public int Take(int quantity)
+    public float Take(float quantity)
     {
-        int before = Quantity;
+        float before = Quantity;
         Quantity -= MathHelper.Min(Quantity, quantity);
         return before - Quantity;
+    }
+    
+    public void Update()
+    {
+        Quantity -= GoodsInfo.GetDecayRate(this) * Globals.Time;
     }
 
     // Convenience functions to compare with subtypes
@@ -192,14 +178,9 @@ public class Goods
         return Type == GoodsType.FOOD_PROCESSED && (ProcessedFood)SubType == t;
     }
 
-    public bool IsMeat(FoodAnimal t)
+    public bool IsEdible()
     {
-        return Type == GoodsType.FOOD_PROCESSED && (FoodAnimal)SubType == t;
-    }
-
-    public bool IsFoodPlant(FoodPlant t)
-    {
-        return Type == GoodsType.FOOD_PLANT && (FoodPlant)SubType == t;
+        return Type == GoodsType.FOOD_ANIMAL || Type == GoodsType.FOOD_PLANT || Type == GoodsType.FOOD_PROCESSED;
     }
 
     public bool IsTool(Tool t)

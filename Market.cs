@@ -98,8 +98,8 @@ public class Market : Building
             else
             {
                 // Can't buy or sell more than each individual trader is offering
-                int sale_quantity = MathHelper.Min(o.goods.Quantity, trade.goods.Quantity);
-                int cost = (int)(sale_quantity * trade.unitPrice);
+                float sale_quantity = MathHelper.Min(o.goods.Quantity, trade.goods.Quantity);
+                float cost = sale_quantity * trade.unitPrice;
 
                 //Console.WriteLine($"Executing trade: {trade}");
                 //Console.WriteLine($"Sale quantity: {sale_quantity}");
@@ -192,14 +192,14 @@ public class Market : Building
     public float CheckPrice(Goods g)
     {
         List<MarketOrder> sellers = (List<MarketOrder>)SellOrders[g.GetId()];
-        int quantity = g.Quantity;
+        float quantity = g.Quantity;
         float price = 0f;
         if (sellers == null || sellers.Count == 0)
             return 0f;
         
         foreach (MarketOrder seller in sellers)
         {
-            int saleQuantity = Math.Min(quantity, seller.goods.Quantity);
+            float saleQuantity = Math.Min(quantity, seller.goods.Quantity);
             price += saleQuantity * seller.unitPrice;
             quantity -= saleQuantity;
             if (quantity <= 0)

@@ -24,6 +24,7 @@ public class TasksTest
         for (int i = 0; i < 10; i++)
         {
             p1.Update();
+            Globals.Time += 5;
         }
 
         Console.WriteLine("\nP1 stockpile:");

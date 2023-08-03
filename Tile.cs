@@ -24,6 +24,7 @@ public enum Cardinal
 public class Tile
 {
     public TileType Type;
+    public bool Owned;
     
     public const int MAX_POP = 8;
     public int Population { get; set; }
@@ -63,6 +64,7 @@ public class Tile
     public Tile(Vector2 position, Texture2D baseTexture, Texture2D tileFeatureTexture)
     {
         Type = TileType.DESERT;
+        Owned = false;
         Neighbors = new Tile[4];
         Population = 0;
         Buildings = new();

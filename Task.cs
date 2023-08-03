@@ -5,6 +5,7 @@ using System.Linq;
 public class TaskStatus
 {
     public bool Complete;
+    public bool Failed;
     public Object ReturnValue;
     public Task Task;
     public TaskStatus(Task task)
@@ -12,11 +13,7 @@ public class TaskStatus
         Complete = false;
         ReturnValue = null;
         Task = task;
-    }
-    
-    public bool Failed()
-    {
-        return Complete == true && ReturnValue == null && Task != null;
+        Failed = false;
     }
 
     public bool NothingToDo()
@@ -38,9 +35,11 @@ public class Task
     //      Move to Work location
     //      If neeeded Goods are present
     //          consume goods, produce goods
-    public const bool DEBUG = true;
-    public const int DEFAULT_PRIORITY = 5;
-    public static Object NOT_NULL = new Object();
+    public const bool DEBUG = false;
+    public const int HIGH_PRIORITY = 1;
+    public const int MEDIUM_PRIORITY = 2;
+    public const int LOW_PRIORITY = 3;
+    public const int DEFAULT_PRIORITY = 3;
 
     public List<SkillLevel> skillsNeeded;
     public Queue<Task> subTasks;
@@ -85,8 +84,14 @@ public class Task
                     subTasks.Dequeue();
                 }
                 Task.Debug($"  Doing subtask {subTask} status: {subStatus.Complete} value: {subStatus.ReturnValue}");
-                Status.Complete = (subTasks.Count == 0);
-                //Status.ReturnValue = subStatus.ReturnValue;
+                subStatus.Complete = (subTasks.Count == 0);
+                
+                // Make the whole task fail when a subtask fails
+                if (subStatus.Failed)
+                {
+                    Status.Failed = true;
+                    Status.Complete = true;
+                }
             }
             return subStatus;
         }
@@ -97,7 +102,15 @@ public class Task
     // Pick a random task a person swith skill level `s` can perform
     public static Task RandomUsingSkill(SkillLevel s)
     {
-        return null;
+        // TODO: Are there non-production tasks that use skills?
+
+        // Production tasks (e.g. use farming at a farm building to make food or animal products)
+        List<int> goodsIds = GoodsProduction.GetGoodsMadeUsingSkill(s.skill);
+        int index = Globals.Rand.Next(goodsIds.Count);
+        int id = goodsIds[index];
+        Goods goods = Goods.FromId(id);
+        goods.Quantity = GoodsInfo.GetDefaultProductionQuantity(goods);
+        return new TryToProduceTask(goods);
     }
 }
 
@@ -119,6 +132,7 @@ public class FindNewHomeTask : Task
         if (newHome == null)
         {
             Task.Debug($"Failed to find a home for {p}");
+            Status.Failed = true;
             return Status;
         }
 
@@ -133,11 +147,13 @@ public class IdleAtHomeTask : Task
 {
     private Vector2 destination;
     private Vector2 direction;
+    private float Duration;
 
     public IdleAtHomeTask() : base()
     {
         destination = Vector2.Zero;
         direction = Vector2.Zero;
+        Duration = 30;
     }
 
     public override TaskStatus Execute(Person p)
@@ -167,7 +183,12 @@ public class IdleAtHomeTask : Task
             direction.Normalize();
         }
 
-        // Task never ends, Status is never set to completed
+        Duration -= Globals.Time;
+        if (Duration <= 0)
+        {
+            Status.Complete = true;
+        }
+
         return Status;
     }
 }
@@ -185,6 +206,7 @@ public class FindTileByTypeTask : Task
         Tile found = (Tile)Tile.Find(p.Home, new TileFilterByType(TileType));
         Task.Debug($"    Tile found: {found}");
         Status.Complete = true;
+        Status.Failed = (found == null);
         Status.ReturnValue = found;
         return Status;
     }
@@ -193,8 +215,8 @@ public class FindTileByTypeTask : Task
 public class SourceGoodsTask : Task
 {
     public Goods Goods;
-    public int QuantityRequired;
-    public int QuantityAcquired;
+    public float QuantityRequired;
+    public float QuantityAcquired;
     public Market Market;
     public bool FindMarket;
     public SourceGoodsTask(Goods goods) : base()
@@ -271,6 +293,7 @@ public class SourceGoodsTask : Task
         {
             Goods.Quantity = QuantityAcquired;
             Status.Complete = true;
+            Status.Failed = (QuantityAcquired < QuantityRequired);
             Status.ReturnValue = Goods;
         }
 
@@ -290,6 +313,7 @@ public class FindBuildingTask : Task
         Building b = (Building)Tile.Find(p.Home, new TileFilterBuliding(BuildingType));
         Status.ReturnValue = b;
         Status.Complete = true;
+        Status.Failed = (b == null);
         return Status;
     }
 }
@@ -303,6 +327,8 @@ public class TryToProduceTask : Task
     public Building Building;
     public Tile Tile;
     public Goods Tool;
+    public float TimeToProduce;
+    public float TimeSpent;
 
     public TryToProduceTask(Goods goods)
     {
@@ -312,6 +338,8 @@ public class TryToProduceTask : Task
         Tile = null;
         Tool = null;
         GoodsRequirements = null;
+        TimeToProduce = GoodsInfo.GetTime(goods) * goods.Quantity;
+        TimeSpent = 0f;
         AcquiredGoods = new();
         if (Requirements.GoodsRequirement != null)
             GoodsRequirements = Requirements.GoodsRequirement.ToList();
@@ -327,9 +355,10 @@ public class TryToProduceTask : Task
             if (!subStatus.Complete)
                 return subStatus;
 
-            if (subStatus.Failed())
+            if (subStatus.Failed)
             {
                 Status.Complete = true;
+                Status.Failed = true;
                 return Status;
             }
 
@@ -374,10 +403,24 @@ public class TryToProduceTask : Task
         }
         else if (subTasks.Count == 0)
         {
-            Status.Complete = true;
-            // TODO: modfiy quantity produced by modifiers such as skill level
-            p.PersonalStockpile.Add(Goods);
-            Status.ReturnValue = Goods;
+            //Status.Complete = true;
+            // TODO: possibly modify quantity produced
+
+            // Update the progress on the goods production
+            TimeSpent += Globals.Time;
+ 
+            if (Tool != null)
+            {
+                Tool.Use();
+            }
+
+            if (TimeSpent >= TimeToProduce)
+            {
+                p.PersonalStockpile.Add(Goods);
+                Status.ReturnValue = Goods;
+                Status.Complete = true;
+                Console.WriteLine($"Successfully produced {Goods}");
+            }
         }
 
         return Status;
@@ -438,13 +481,18 @@ public class GoToTask : Task
     public GoToTask(Vector2 position) : base()
     {
         destination = position;
-        direction = position;
-        direction.Normalize();
+        direction = Vector2.Zero;
     }
     public override TaskStatus Execute(Person p)
     {
+        if (direction == Vector2.Zero)
+        {
+            direction = destination - p.Position;
+            direction.Normalize();
+        }
+
         // Move in the direction of the destination at default movespeed scaled by time elapsed
-        p.Position +=  direction * (Person.MOVE_SPEED * Globals.Time);
+        p.Position += direction * (Person.MOVE_SPEED * Globals.Time);
 
         // If we're within 1/8th of the tile's height from the destination, 
         // choose a new one as the home tile's origin plus or minus half the width/height
@@ -454,6 +502,27 @@ public class GoToTask : Task
         {
             Status.Complete = true;
         }
+        return Status;
+    }
+}
+
+// Eat any food  you're holding until you're no longer hungry
+public class EatTask : Task
+{
+    public override TaskStatus Execute(Person p)
+    {
+        foreach (Goods g in p.PersonalStockpile.Values())
+        {
+            if (p.Hunger <= 0)
+                break;
+
+            if (g.IsEdible())
+            {
+                g.Use();
+                p.Hunger = Math.Max(0, p.Hunger - GoodsInfo.GetSatiation(g));
+            }
+        }
+        Status.Complete = true;
         return Status;
     }
 }

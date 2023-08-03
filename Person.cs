@@ -16,7 +16,7 @@ public enum Skill
     FIGHTING,
     MINING,
     FORESTRY,
-    NUM_SKILLS // last entry for easy enum size lookup
+    NONE
 }
 
 public class SkillLevel
@@ -39,13 +39,15 @@ public class Person : Entity
 {
     public static Random rand = new Random();
     public const float MOVE_SPEED = 60f;
+    public const int DAILY_HUNGER = 10;
+    public const int STARVING = 100;
 
-    private List<IEnumerator<int>> behaviours = new List<IEnumerator<int>>();
     private float[,] Demand;
     private GenderType Gender;
     public Stockpile PersonalStockpile;
     public Tile Home;
-    public int Money { get; set; }
+    public float Money { get; set; }
+    public int Hunger { get; set; }
     public PriorityQueue2<Task, int> Tasks;
     public WeightedList<SkillLevel> Skills; // inherited by children Lamarck-style?
 
@@ -78,12 +80,12 @@ public class Person : Entity
         Tasks = new();
 
         // New person starts with each skill assigned randomly between 1-20 (they go up to 100 with experience)
-        Skills = new(Globals.Rand);// SkillLevel[(int)Skill.NUM_SKILLS];
+        Skills = new(Globals.Rand);
         
-        for (int i = 0; i < (int)Skill.NUM_SKILLS; i++)
+        foreach (Skill skill in Enum.GetValues(typeof(Skill)))
         {
             int level = rand.Next(5, 30);
-            Skills.Add(new SkillLevel((Skill)i, level), level);
+            Skills.Add(new SkillLevel(skill, level), level);
         }
     }
 
@@ -111,11 +113,19 @@ public class Person : Entity
             return;
         }
 
-        // Pick a skill, biased toward high-level skills, then pick a task that uses that skill
-        SkillLevel weightedRandomChoice = Skills.Next();
-        Task task = Task.RandomUsingSkill(weightedRandomChoice);
+        float r = Globals.Rand.NextFloat(0f, 1f);
 
-        Tasks.Enqueue(new IdleAtHomeTask());
+        if (r < 1f)
+        {
+            // Pick a skill, biased toward high-level skills, then pick a task that uses that skill
+            SkillLevel weightedRandomChoice = Skills.Next();
+            Task task = Task.RandomUsingSkill(weightedRandomChoice);
+            Tasks.Enqueue(task);
+        }
+        else
+        {
+            Tasks.Enqueue(new IdleAtHomeTask());
+        }
     }
 
     public void AssignPriorityTask(Task task, int priority)
@@ -127,20 +137,35 @@ public class Person : Entity
     // Call once per day?
     public void UpdateGoodsDemand()
     {
-        float[,] change = new float[Goods.NUM_GOODS_TYPES, Goods.GOODS_PER_TYPE];
+        // Hunger coefficient, food demand increases more if the person is hungry
+        int h = (Hunger / DAILY_HUNGER);
 
         // Units: kg/day
         for (int i = 0; i < Goods.GOODS_PER_TYPE; i++)
         {
-            change[(int)GoodsType.FOOD_ANIMAL,i] += 0.1f;
-            change[(int)GoodsType.FOOD_PLANT,i] += 1f;
-            change[(int)GoodsType.FOOD_PROCESSED,i] += 0.5f;
+            // Food demand tends to increase each day so that people won't starve
+            // Rationale: expected change [0.4, 0.8, 0.3] = satiation([4, 4, 2.4]) = 10.4 > daily hunger 10
+            Demand[(int)GoodsType.FOOD_ANIMAL,i] += Globals.Rand.NextFloat(0f, 0.8f) * h;
+            Demand[(int)GoodsType.FOOD_PLANT,i] += Globals.Rand.NextFloat(0f, 1.6f) * h;
+            Demand[(int)GoodsType.FOOD_PROCESSED,i] += Globals.Rand.NextFloat(0f, 0.6f) * h;
+
+            // Will occasionally want to buy craft goods
+            Demand[(int)GoodsType.CRAFT_GOODS,i] += Globals.Rand.NextFloat(0f, 0.005f);
         }
+    }
+
+    public void GoToMarket()
+    {
+        // TODO: Go to the market, figure out what you want most, check prices, and buy important things
+        // try to buy goods where Demand matrix > 1
     }
 
     public void DailyUpdate()
     {
+        Hunger += DAILY_HUNGER;
+        Tasks.Enqueue(new EatTask());
         UpdateGoodsDemand();
+        GoToMarket();
     }
 
     // A person is willing to travel 1 tile in any direction to do work at a building
@@ -150,6 +175,11 @@ public class Person : Entity
         if (Tasks.Empty())
         {
             ChooseNextTask();
+        }
+
+        if (Hunger >= STARVING)
+        {
+            AssignPriorityTask(new EatTask(), Task.HIGH_PRIORITY);
         }
 
         if (Home != null && Home.Population > Tile.MAX_POP)
@@ -162,12 +192,12 @@ public class Person : Entity
         TaskStatus currentStatus = current.Execute(this);
 
         if (Task.DEBUG)
-        {
             Console.WriteLine($"Doing task {current} status: {currentStatus.Complete} value: {currentStatus.ReturnValue}");
-        }
 
         if (currentStatus.Complete)
         {
+            if (currentStatus.Failed)
+                Console.WriteLine($"Task {currentStatus.Task} failed");
             Tasks.Dequeue();
         }
     }
@@ -176,60 +206,4 @@ public class Person : Entity
     {
         Globals.SpriteBatch.Draw(image, Position, null, color, 0f, Size, Scale, 0, 0);
     }
-
-    private void AddBehaviour(IEnumerable<int> behaviour)
-    {
-        behaviours.Add(behaviour.GetEnumerator());
-    }
-
-    private void ApplyBehaviours()
-    {
-        for (int i = 0; i < behaviours.Count; i++)
-        {
-            if (!behaviours[i].MoveNext())
-                behaviours.RemoveAt(i--);
-        }
-    }
-
-    #region Behaviours
-    IEnumerable<int> Follow(float acceleration)
-    {
-        while (true)
-        {
-            // Velocity += (Target.Position - Position).ScaleTo(acceleration);
-            if (Velocity != Vector2.Zero)
-            {
-                Orientation = 360 - (MathF.Atan2(Velocity.X, Velocity.Y) * (360 / (MathF.PI * 2)) * MathF.Sign(Velocity.X));
-            }
-
-            yield return 0;
-        }
-    }
-
-    IEnumerable<int> MoveRandomly()
-    {
-        float direction = rand.NextFloat(0.0f, MathHelper.TwoPi);
-
-        while (true)
-        {
-            direction += rand.NextFloat(-0.1f, 0.1f);
-            direction = MathHelper.WrapAngle(direction);
-
-            for (int i = 0; i < 6; i++)
-            {
-                Velocity += Extensions.FromPolar(direction, 0.4f);
-                Orientation -= 0.05f;
-
-                var bounds = Katabasis.KatabasisGame.Viewport.Bounds;
-                bounds.Inflate(-image.Width / 2 - 1, -image.Height / 2 - 1);
-
-                // if the person is outside the bounds, make it move away from the edge
-                if (!bounds.Contains(Position.ToPoint()))
-                    direction = (Katabasis.KatabasisGame.ScreenSize / 2 - Position).ToAngle() + rand.NextFloat(-MathHelper.PiOver2, MathHelper.PiOver2);
-
-                yield return 0;
-            }
-        }
-    }
-    #endregion
 }
