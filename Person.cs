@@ -43,8 +43,9 @@ public class Person : Entity, Drawable
     public static int IdCounter = 0;
 
     public const float MOVE_SPEED = 60f;
-    public const int DAILY_HUNGER = 50;
-    public const int STARVING = 250;
+    public const int DAILY_HUNGER = 35;
+    public const int STARVING = 210;
+    public const int STARVED_TO_DEATH = 350;
 
     public int Id;
     private float[,] Demand;
@@ -138,10 +139,14 @@ public class Person : Entity, Drawable
             return;
         }
 
+        // TODO: build a house
+
         float r = Globals.Rand.NextFloat(0f, 1f);
 
         if (r < 1f)
         {
+            // TODO: Perhaps try random using inventory?
+
             // Pick a skill, biased toward high-level skills, then pick a task that uses that skill
             SkillLevel weightedRandomChoice = Skills.Next();
             Task task = Task.RandomUsingSkill(weightedRandomChoice);
@@ -237,7 +242,7 @@ public class Person : Entity, Drawable
             TaskStatus currentStatus = current.Execute(this);
 
             // This happens often if the task prerequisites cannot be fulfilled
-            if (currentStatus.Complete)                
+            if (currentStatus.Complete || currentStatus.Failed)
                 Tasks.Dequeue();
         }
     }

@@ -32,7 +32,9 @@ public class GameManager
 
         Goods.CalcGoodsTypecounts();
         GoodsProduction.Init();
+        BulidingProduction.Init();
         GoodsInfo.Init();
+        BuildingInfo.Init();
 
         if (TEST)
         {

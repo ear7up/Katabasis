@@ -34,6 +34,16 @@ public class Stockpile
             goods.Quantity = 0;
     }
 
+    // Takes goods from the stockpile, sets quantity to the amount taken (may be less than requested)
+    public void Borrow(Goods goods)
+    {
+        Goods available = (Goods)_stock[goods.GetId()];
+        if (available != null)
+            goods.Quantity = available.Borrow(goods.Quantity);
+        else
+            goods.Quantity = 0;
+    }
+
     public bool Has(Goods goods)
     {
         Goods available = (Goods)_stock[goods.GetId()];

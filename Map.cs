@@ -24,7 +24,7 @@ public class Map
 
         // Load all of the tile textures
         List<Texture2D> desertTextures = Sprites.LoadTextures("desert/flat", 30);
-        List<Texture2D> desertHillTextures = Sprites.LoadTextures("desert/flat", 5);
+        List<Texture2D> desertHillTextures = Sprites.LoadTextures("desert/hills", 5);
         List<Texture2D> desertVegetationTextures = Sprites.LoadTextures("desert/vegetation", 6);
         List<Texture2D> desertBedouinTextures = Sprites.LoadTextures("desert/bedouin_camps", 5);
 
@@ -60,7 +60,7 @@ public class Map
             else if (r < 0.8)
             {
                 // 15% desert with hills
-                texture = desertTextures[random.Next(0, desertHillTextures.Count)];
+                texture = desertHillTextures[random.Next(0, desertHillTextures.Count)];
                 tileType = TileType.HILLS;
             }
             else if (r < 0.98)
@@ -334,24 +334,5 @@ public class Map
 
         Globals.Ybuffer.Add(b);
         _buildings.Add(y, b);
-    }
-
-    public void DrawBuildings()
-    {
-        // Draw each permanent building
-        foreach (KeyValuePair<float, Building> b in _buildings)
-        {
-            b.Value.Draw();
-        }
-
-        // Redraw these on top of all buildings so they stand out as intended
-        if (_highlightedTile != null)
-        {
-            _highlightedTile.Draw();
-            foreach (Building b in _highlightedTile.Buildings)
-            {
-                b.Draw();
-            }
-        }
     }
 }

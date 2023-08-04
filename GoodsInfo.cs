@@ -74,7 +74,7 @@ public class GoodsInfo
         }
 
         // If it takes a long time to use the object, only produce a few at a time and grant bonus skill xp
-        if (UseRate < 0.005f)
+        if (UseRate < 0.005f && DecayRate == 0f)
         {
             DefaultProductionQuanity = 4;
             Experience = 5;

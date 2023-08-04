@@ -334,10 +334,40 @@ public class FindBuildingTask : Task
     }
     public override TaskStatus Execute(Person p)
     {
-        Building b = (Building)Tile.Find(p.Home, new TileFilterBuliding(BuildingType));
-        Status.ReturnValue = b;
-        Status.Complete = true;
-        Status.Failed = (b == null);
+        Building b = null;
+
+        // Try to complete subtasks first
+        TaskStatus subStatus = base.Execute(p);
+        if (subStatus != null)
+        {
+            if (!subStatus.Complete)
+            {
+                return Status;
+            }
+            else if (subStatus.Failed)
+            {
+                Status.Complete = true;
+                Status.Failed = true;
+                return Status;
+            }
+            else if (subStatus.ReturnValue != null && subStatus.ReturnValue is Building)
+            {
+                b = (Building)subStatus.ReturnValue;
+            }
+        }
+
+        if (b == null)
+            b = (Building)Tile.Find(p.Home, new TileFilterBuliding(BuildingType));
+
+        if (b == null)
+            subTasks.Enqueue(new TryToBuildTask(BuildingType));
+
+        if (subTasks.Count == 0)
+        {
+            Status.ReturnValue = b;
+            Status.Complete = true;
+            Status.Failed = (b == null);
+        }
         return Status;
     }
 }
@@ -638,29 +668,82 @@ public class EatTask : Task
 
 public class TryToBuildTask : Task
 {
-    BuildingType Type;
-    Tile DestTile;
-    public TryToBuildTask(BuildingType type, Tile tile)
+    public Goods Tool;
+    public Tile DestTile;
+    public float TimeSpent;
+    public bool ToolBorrowed;
+    public BuildingType BuildingType;
+
+    public TryToBuildTask(BuildingType buildingType)
     {
-        Type = type;
-        DestTile = tile;
-        CheckValidity();
+        Tool = null;
+        DestTile = null;
+        TimeSpent = 0f;
+        ToolBorrowed = false;
+        BuildingType = buildingType;
+        ProductionRequirements reqs = (ProductionRequirements)BulidingProduction.Requirements[BuildingType];
+
+        if (reqs.ToolRequirement != Goods.Tool.NONE)
+            subTasks.Enqueue(new SourceGoodsTask(new Goods(GoodsType.TOOL, (int)reqs.ToolRequirement)));
+
+        if (reqs.GoodsRequirement != null)
+            foreach (Goods g in reqs.GoodsRequirement.ToList())
+                subTasks.Enqueue(new SourceGoodsTask(g));
+
+        // TODO: additional constraint Tile.MAX_BUILDINGS
+        if (reqs.TileRequirement != TileType.NONE)
+            subTasks.Enqueue(new FindTileByTypeTask(reqs.TileRequirement));
     }
+
     public override TaskStatus Execute(Person p)
     {
-        // Try to complete subtasks first
+        // Wait for subtasks to complete, use their return value
         TaskStatus subStatus = base.Execute(p);
-        if (subStatus != null && !subStatus.Complete)
-            return Status;
+        if (subStatus == null)
+        {
+            subStatus = null;
+        }
+        else if (subStatus.Failed || !subStatus.Complete)
+        {
+            return subStatus;
+        }
+        else if (subStatus.Task is SourceGoodsTask)
+        {
+            Goods g = (Goods)subStatus.ReturnValue;
+            if (g.Type == GoodsType.TOOL)
+            {
+                Tool = g;
+                //ToolBorrowed = ((SourceGoodsTask)subStatus.Task).FromInventory;
+            }
+        }
+        else if (subStatus.Task is FindTileByTypeTask)
+        {
+            DestTile = (Tile)subStatus.ReturnValue;
+            subTasks.Enqueue(new GoToTask(DestTile.GetPosition()));
+        }
+
+        // All queued tasks complete, add build time
+        if (subTasks.Count == 0)
+        {
+            // When enough time has passed, finish the building,
+            // return the tool if borrowed, and add the building to the tile
+            TimeSpent += Globals.Time;
+            if (TimeSpent >= BuildingInfo.GetBuildTime(BuildingType))
+            {
+                // TODO; Why is this failing to get a tool? Not being produced
+                //Tool.Use();
+                //if (ToolBorrowed)
+                //    p.PersonalStockpile.Add(Tool);
+                
+                // No tile type requirement - place it at home tile
+                if (DestTile == null)
+                    DestTile = p.Home;
+
+                Building.CreateBuilding(DestTile, BuildingType);
+                Status.Complete = true;
+            }
+        }
 
         return Status;
-    }
-    public void CheckValidity()
-    {
-        if (DestTile.Buildings.Count >= Tile.MAX_BUILDINGS)
-        {
-            Status.Complete = true;
-            Status.Failed = true;
-        }
     }
 }

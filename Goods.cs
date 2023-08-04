@@ -55,7 +55,7 @@ public class Goods
     public enum Tool
     {
         PICKAXE, SHOVEL, HAMMER, KILN, FURNACE, SAW, KNIFE, 
-        SPEAR, FISHING_NET, AXE, SEWING_KIT, LOOM, CHISEL, NONE
+        SPEAR, FISHING_NET, AXE, SEWING_KIT, LOOM, CHISEL, HOE, NONE
     }
 
     public enum MaterialAnimal
@@ -110,10 +110,10 @@ public class Goods
 
     // Decrease the quantity of the object by its use rate
     // TODO: How do we destroy goods when they reach 0 quantity? Do we need to?
-    public void Use()
+    public void Use(float numTimes = 1f)
     {
         float useRate = GoodsInfo.GetUseRate(this);
-        Quantity = Math.Max(Quantity - useRate, 0);
+        Quantity = Math.Max(Quantity - useRate * numTimes, 0);
     }
 
     // Return a unique identifier for each good
@@ -174,6 +174,12 @@ public class Goods
         float before = Quantity;
         Quantity -= MathHelper.Min(Quantity, quantity);
         return before - Quantity;
+    }
+
+    // Don't actually take, just return the amount that can be taken
+    public float Borrow(float quantity)
+    {
+        return MathHelper.Min(Quantity, quantity);
     }
     
     public void Update()
