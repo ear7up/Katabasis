@@ -286,11 +286,14 @@ public class Map
         // When build mode is first enabled, create a building at the mouse cursor
         else if (_editBuilding == null && InputManager.Mode == InputManager.BUILD_MODE)
         {
-            Building b = Building.Random();
+            Building b = Building.Random(temporary: true);
             b.Sprite.Position = InputManager.MousePos;
             _editBuilding = b;
             _editBuilding.Sprite.SpriteColor = new Color(Color.LightBlue, 0.3f);
         }
+
+        foreach (Building b in _buildings.Values)
+            b.Update();
     }
 
     public void DrawTiles()
@@ -329,6 +332,8 @@ public class Map
             b.Location = t;
             t.AddBuilding(b);
         }
+
+        Globals.Ybuffer.Add(b);
         _buildings.Add(y, b);
     }
 

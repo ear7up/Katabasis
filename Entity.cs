@@ -6,7 +6,7 @@ public abstract class Entity
     public Texture2D image { get; private set; }
     
     // The tint of the image. This will also allow us to change the transparency.
-    protected Color color = Color.White;	
+    protected Color color = Color.White;
 
     public Vector2 Position, Velocity;
     public float Orientation;

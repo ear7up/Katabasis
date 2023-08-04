@@ -64,6 +64,8 @@ public class Tile
         return (direction + 1) % 4;
     }
 
+    public static Vector2 DY = new Vector2(0, 0.0001f);
+
     public Tile(TileType type, Vector2 position, Texture2D baseTexture, Texture2D tileFeatureTexture)
     {
         Type = type;
@@ -75,7 +77,7 @@ public class Tile
         BaseSprite = new Sprite(baseTexture, position);
         if (TileFeatureSprite != null)
         {
-            TileFeatureSprite = new Sprite(tileFeatureTexture, position);
+            TileFeatureSprite = new Sprite(tileFeatureTexture, position + DY);
         }
 
         Stockpile = new();

@@ -6,6 +6,7 @@ public class Camera
     public Rectangle VisibleArea { get; protected set; }
     public Matrix Transform { get; protected set; }
     public Matrix InverseViewMatrix { get; protected set; }
+    public Person Following { get; protected set; }
     
     private Vector2 StartingPosition;
     private const float DEFAULT_ZOOM = 0.4f;
@@ -60,6 +61,16 @@ public class Camera
     {
         Vector2 newPosition = Position + movePosition;
         Position = newPosition;
+    }
+
+    public void Follow(Person person)
+    {
+        Following = person;
+    }
+
+    public void Unfollow()
+    {
+        Following = null;
     }
 
     public void AdjustZoom(float zoomAmount)
@@ -145,6 +156,9 @@ public class Camera
             }
         }
 
-        MoveCamera(cameraMovement);
+        if (Following != null)
+            Position = Following.Position;
+        else
+            MoveCamera(cameraMovement);
     }
 }

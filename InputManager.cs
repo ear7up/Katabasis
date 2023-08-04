@@ -22,6 +22,8 @@ public static class InputManager
     // Trigger to reset the camera to the default position and zoom
     public static bool CameraReset = false;
 
+    public static bool Paused = false;
+
     // Trigger to place a building and exit build mode
     public static bool ConfirmBuilding = false;
 
@@ -78,7 +80,7 @@ public static class InputManager
         {
             _dragStart = new Vector2(mouseState.X, mouseState.Y);
         }
-        else if (_dragStart != Vector2.Zero && lastMouseState.LeftButton == ButtonState.Pressed)
+        else if (!Clicked && _dragStart != Vector2.Zero && lastMouseState.LeftButton == ButtonState.Pressed)
         {
             // MouseDrag smoothly, move camera in the opposite direction to drag
             Vector2 pos = new Vector2(mouseState.X, mouseState.Y);
@@ -143,6 +145,9 @@ public static class InputManager
             case CAMERA_MODE: ProcessCameraInputs();   break;
             default: ProcessCameraInputs(); break;
         }
+
+        if (keyboardState.IsKeyUp(Keys.P) && lastKeyboardState.IsKeyDown(Keys.P))
+            Paused = !Paused;
     }
 
     // Register a mode along with instructions along with events for enabling and disabling it

@@ -620,7 +620,6 @@ public class EatTask : Task
                 while (p.Hunger > 0 && g.Quantity > 0)
                 {
                     g.Use();
-                    p.PersonalStockpile.RemoveIfEmpty(g);
                     p.Hunger = Math.Max(0, p.Hunger - GoodsInfo.GetSatiation(g));
                 }
             }

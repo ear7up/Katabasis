@@ -58,10 +58,7 @@ public class KatabasisGame : Game
             Exit();
 
         Globals.Update(gameTime);
-        _gameManager.Update();
-
-        // TODO: Add your update logic here
-        // MoveBall(gameTime);
+        _gameManager.Update(gameTime);
 
         base.Update(gameTime);
     }

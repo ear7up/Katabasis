@@ -37,13 +37,16 @@ public class SkillLevel
     }
 }
 
-public class Person : Entity
+public class Person : Entity, Drawable
 {
     public static Random rand = new Random();
+    public static int IdCounter = 0;
+
     public const float MOVE_SPEED = 60f;
     public const int DAILY_HUNGER = 50;
     public const int STARVING = 250;
 
+    public int Id;
     private float[,] Demand;
     private GenderType Gender;
     public string Name;
@@ -63,6 +66,7 @@ public class Person : Entity
 
     private Person(Vector2 position)
     {
+        Id = IdCounter++;
         Position = position;
         Velocity = new Vector2(20f, 20f);
         Orientation = rand.NextFloat(0.0f, MathHelper.TwoPi);
@@ -119,6 +123,7 @@ public class Person : Entity
         person.Scale = 0.05f;
         person.Home = home;
         home.Population += 1;
+        Globals.Ybuffer.Add(person);
         return person;
     }
 
@@ -186,19 +191,23 @@ public class Person : Entity
         GoToMarket();
     }
 
-    // A person is willing to travel 1 tile in any direction to do work at a building
+    public bool CheckIfClicked()
+    {
+        if (InputManager.Mode == InputManager.CAMERA_MODE && InputManager.Clicked &&
+            GetBounds().Contains(InputManager.MousePos))
+        {
+            Console.WriteLine($"Person clicked: (max_y = {this.GetMaxY()})\n" + this.ToString());
+            return true;
+        }
+        return false;
+    }
 
+    // A person is willing to travel 1 tile in any direction to do work at a building
     public override void Update()
     {        
         if (Tasks.Empty())
         {
             ChooseNextTask();
-        }
-
-        if (InputManager.Mode == InputManager.CAMERA_MODE && InputManager.Clicked)
-        {
-            if (GetBounds().Contains(InputManager.MousePos))
-                Console.WriteLine("Person clicked: " + this.ToString());
         }
 
         float r = Globals.Rand.NextFloat(0f, 1f);
@@ -239,5 +248,11 @@ public class Person : Entity
     {
         // Why did I override this and the origin with Size instead of Size/2 and set Orientation to 0?
         Globals.SpriteBatch.Draw(image, Position, null, color, 0f, Size / 2f, Scale, 0, 0);
+    }
+
+    public float GetMaxY()
+    {
+        // Each person has a unique id, use it as a small constant to prevent YBuffer flickering
+        return Position.Y + (Scale * image.Height) + (Id * 0.000001f);
     }
 }
