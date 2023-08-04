@@ -614,6 +614,10 @@ public class GoodsProduction
                 levelRequirement: new SkillLevel(Skill.SMITHING, 10)));
         }
 
+        // Don't let people build the "NONE" tool
+        g.SubType = (int)Goods.Tool.NONE;
+        Requirements.Remove(g.GetId());
+
         // smithing: clay + smithy + hammer -> kiln
         g.SubType = (int)Goods.Tool.KILN;
         r = (ProductionRequirements)Requirements[g.GetId()];

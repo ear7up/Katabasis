@@ -9,8 +9,8 @@ public class Camera
     public Person Following { get; protected set; }
     
     private Vector2 StartingPosition;
-    private const float DEFAULT_ZOOM = 0.4f;
-    private const float MIN_ZOOM = 0.15f;
+    private const float DEFAULT_ZOOM = 0.5f;
+    private const float MIN_ZOOM = 0.14f;
     private const float MAX_ZOOM = 3.0f;
 
     public Camera(Viewport viewport, Vector2 position)
@@ -75,7 +75,7 @@ public class Camera
 
     public void AdjustZoom(float zoomAmount)
     {
-        Zoom = MathHelper.Clamp(Zoom + zoomAmount, MIN_ZOOM, MAX_ZOOM);
+        Zoom = MathHelper.Clamp(Zoom * zoomAmount, MIN_ZOOM, MAX_ZOOM);
     }
 
     public void Reset()
@@ -95,47 +95,18 @@ public class Camera
         UpdateMatrix();
 
         Vector2 cameraMovement = Vector2.Zero;
-        int moveSpeed;
-
-        if (Zoom > .8f)
-        {
-            moveSpeed = 15;
-        }
-        else if (Zoom < .8f && Zoom >= .6f)
-        {
-            moveSpeed = 20;
-        }
-        else if (Zoom < .6f && Zoom > .35f)
-        {
-            moveSpeed = 25;
-        }
-        else if (Zoom <= .35f)
-        {
-            moveSpeed = 30;
-        }
-        else
-        {
-            moveSpeed = 10;
-        }
+        int moveSpeed = 10 + (int)(2 * (Zoom - MIN_ZOOM));
 
         // Allow WASD even while not in CAMERA_MODE
         if (Keyboard.GetState().IsKeyDown(Keys.W))
-        {
             cameraMovement.Y = -moveSpeed;
-        }
         else if (Keyboard.GetState().IsKeyDown(Keys.S))
-        {
             cameraMovement.Y = moveSpeed;
-        }
 
         if (Keyboard.GetState().IsKeyDown(Keys.A))
-        {
             cameraMovement.X = -moveSpeed;
-        }
         else if (Keyboard.GetState().IsKeyDown(Keys.D))
-        {
             cameraMovement.X = moveSpeed;
-        }
 
         if (InputManager.Mode == InputManager.CAMERA_MODE)
         {
@@ -148,11 +119,11 @@ public class Camera
             // Zooming with scroll wheel
             if (InputManager.ScrollValue > 0)
             {
-                AdjustZoom(.05f);
+                AdjustZoom(1.05f);
             }
             else if (InputManager.ScrollValue < 0)
             {
-                AdjustZoom(-.05f);
+                AdjustZoom(0.95f);
             }
         }
 

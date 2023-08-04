@@ -58,7 +58,14 @@ public class Task
         Status = new(this);
     }
 
-    public Task Peek(Queue<Task> tasks)
+    public static Task Peek(PriorityQueue2<Task, int> tasks)
+    {
+        if (tasks.Empty())
+            return null;
+        return tasks.Peek();
+    }
+
+    public static Task Peek(Queue<Task> tasks)
     {
         if (tasks.Count == 0)
             return null;

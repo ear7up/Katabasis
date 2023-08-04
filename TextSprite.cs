@@ -7,12 +7,12 @@ public class TextSprite
     public TextSprite(SpriteFont font)
     {
         Font = font;
+        Text = "";
     }
 
     public void Update()
     {
-        Position = InputManager.MousePos;
-        Text = $"({Position.X:0.00}, {Position.Y:0.00})";
+        
     }
 
     public void Draw()

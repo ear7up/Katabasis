@@ -108,9 +108,11 @@ public class Person : Entity, Drawable
             skills += s.ToString() + ", ";
         skills = skills.Substring(0, skills.Length - 1);
         skills += "]";
+
         string task = "Idle";
-        if (Tasks.Peek() != null)
+        if (Task.Peek(Tasks) != null)
             task  = Tasks.Peek().ToString();
+
         return $"Person('{Name}' ({Age}) hunger={Hunger}\n" +
                $"Task=[{task}]\n" +
                $"Skill={skills}\n" +
@@ -196,7 +198,6 @@ public class Person : Entity, Drawable
         if (InputManager.Mode == InputManager.CAMERA_MODE && InputManager.Clicked &&
             GetBounds().Contains(InputManager.MousePos))
         {
-            Console.WriteLine($"Person clicked: (max_y = {this.GetMaxY()})\n" + this.ToString());
             return true;
         }
         return false;
@@ -227,20 +228,17 @@ public class Person : Entity, Drawable
 
         // FindNewHomeTask pathfinds relative to home tile, so it can't be null
         if (Home != null && Home.Population > Tile.MAX_POP)
-        {
             Tasks.Enqueue(new FindNewHomeTask(), 1);
-        }
         
         // Peek will grab highest priority task unless no priority is set, then it will grab the oldest assigned task
-        Task current = Tasks.Peek();
-        TaskStatus currentStatus = current.Execute(this);
-
-        if (currentStatus.Complete)
+        Task current = Task.Peek(Tasks);
+        if (current != null)
         {
+            TaskStatus currentStatus = current.Execute(this);
+
             // This happens often if the task prerequisites cannot be fulfilled
-            //if (Task.DEBUG && currentStatus.Failed)
-            //    Console.WriteLine($"Task {currentStatus.Task} failed");
-            Tasks.Dequeue();
+            if (currentStatus.Complete)                
+                Tasks.Dequeue();
         }
     }
 

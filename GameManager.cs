@@ -14,6 +14,7 @@ public class GameManager
     private float TimeOfDay = 0;
 
     public TextSprite _coordinateDisplay;
+    public static TextSprite _debugDisplay;
     
     public bool TEST = false;
 
@@ -26,6 +27,8 @@ public class GameManager
         //_camera.SetBounds(_map.MapSize, _map.TileSize);
         _people = new();
         _coordinateDisplay = new(Sprites.Font);
+        _debugDisplay = new(Sprites.Font);
+        _debugDisplay.Position = Vector2.Zero;
 
         Goods.CalcGoodsTypecounts();
         GoodsProduction.Init();
@@ -94,6 +97,7 @@ public class GameManager
 
         _map.Update();
 
+        // Give each person a "daily" update for tasks that don't need to be constantly checked
         TimeOfDay += Globals.Time;
         if (TimeOfDay > SECONDS_PER_DAY)
         {
@@ -102,7 +106,17 @@ public class GameManager
                 p.DailyUpdate();
         }
 
-        _coordinateDisplay.Update();
+        // Write the current world coordinate at the mouse position
+        _coordinateDisplay.Text = $"({_coordinateDisplay.Position.X:0.00}, {_coordinateDisplay.Position.Y:0.00})";  
+        _coordinateDisplay.Position = InputManager.MousePos;
+        
+        // Write information about the currently selected person to the top left
+        if (_camera.Following != null)
+            _debugDisplay.Text = _camera.Following.ToString();
+        else
+            _debugDisplay.Text = "";
+        _debugDisplay.Position.X = _camera.VisibleArea.X + 15;
+        _debugDisplay.Position.Y = _camera.VisibleArea.Y + 15;
     }
 
     public void Draw()
@@ -128,6 +142,7 @@ public class GameManager
 
         // Draw the current coordinates at the cursor location
         _coordinateDisplay.Draw();
+        _debugDisplay.Draw();
 
         Globals.SpriteBatch.End();
 

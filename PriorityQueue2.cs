@@ -25,22 +25,16 @@ public class PriorityQueue2<TElement, TPriority>
     public TElement Peek()
     {
         if (pq.Count > 0)
-        {
             return pq.Peek();
-        }
         return q.Peek();
     }
 
     public void Dequeue()
     {
         if (pq.Count > 0)
-        {
             pq.Dequeue();
-        }
-        else
-        {
+        else if (q.Count > 0)
             q.Dequeue();
-        }
     }
 
     public bool Empty()

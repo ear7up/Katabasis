@@ -268,13 +268,8 @@ public class Map
                 AddBuilding(_editBuilding);
                 _editBuilding = null;
             }
-            else if (InputManager.Mode != InputManager.BUILD_MODE)
-            {
-                _editBuilding = null;
-            }
-
             // Resize the buliding before placing it (scroll wheel while in build mode)
-            if (InputManager.Mode == InputManager.BUILD_MODE && InputManager.ScrollValue > 0)
+            else if (InputManager.Mode == InputManager.BUILD_MODE && InputManager.ScrollValue > 0)
             {
                 _editBuilding.Sprite.ScaleUp(SCALE_CONSTANT);
             }
@@ -282,6 +277,10 @@ public class Map
             {
                 _editBuilding.Sprite.ScaleDown(SCALE_CONSTANT);
             }
+            else if (InputManager.Mode != InputManager.BUILD_MODE)
+            {
+                _editBuilding = null;
+            }            
         }
         // When build mode is first enabled, create a building at the mouse cursor
         else if (_editBuilding == null && InputManager.Mode == InputManager.BUILD_MODE)
