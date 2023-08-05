@@ -14,6 +14,7 @@ static class Sprites
 	public static Texture2D WomanG { get; private set; }
 	public static Sprite Circle { get; private set; }
 	public static SpriteFont Font { get; private set; }
+	public static SpriteFont Font2 { get; private set; }
 	
 	private static Random r = new Random();
 	private static List<Texture2D> buildings;
@@ -31,6 +32,7 @@ static class Sprites
 		Circle = new Sprite(content.Load<Texture2D>("circle"), Vector2.Zero);
 		
 		Font = content.Load<SpriteFont>("Font");
+		Font2 = content.Load<SpriteFont>("Gladius-z8AV3");
 
 		const int NUM_BUILDINGS = 48;
 		buildings = new List<Texture2D>(NUM_BUILDINGS);

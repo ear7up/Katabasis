@@ -15,6 +15,8 @@ public class GameManager
 
     public TextSprite _coordinateDisplay;
     public static TextSprite _debugDisplay;
+    public static TextSprite _logoDisplay;
+    public static TextSprite _logoDisplay2;
     
     public bool TEST = false;
 
@@ -29,6 +31,16 @@ public class GameManager
         _coordinateDisplay = new(Sprites.Font);
         _debugDisplay = new(Sprites.Font);
         _debugDisplay.Position = Vector2.Zero;
+
+        _logoDisplay = new(Sprites.Font2);
+        _logoDisplay.Text = "Katabasis";
+        _logoDisplay.Position.Y = Globals.WindowSize.Y - 100;
+        _logoDisplay.FontColor = Color.White;
+        
+        _logoDisplay2 = new(Sprites.Font2);
+        _logoDisplay2.Text = "Katabasis";
+        _logoDisplay2.Position.Y = Globals.WindowSize.Y - 95;
+        _logoDisplay2.FontColor = Color.Black;
 
         Goods.CalcGoodsTypecounts();
         GoodsProduction.Init();
@@ -119,6 +131,9 @@ public class GameManager
             _debugDisplay.Text = "";
         _debugDisplay.Position.X = _camera.VisibleArea.X + 15;
         _debugDisplay.Position.Y = _camera.VisibleArea.Y + 15;
+
+        _logoDisplay.Position.X = Globals.WindowSize.X - _logoDisplay.Width() / 2f - 30;
+        _logoDisplay2.Position.X = _logoDisplay.Position.X + 5;
     }
 
     public void Draw()
@@ -148,6 +163,11 @@ public class GameManager
 
         Globals.SpriteBatch.End();
 
-        // Draw the UI on top of the map, do not apply transformations to it
+        Globals.SpriteBatch.Begin();
+        _logoDisplay2.Draw();
+        _logoDisplay.Draw();
+        Globals.SpriteBatch.End();
+
+        // Draw the UI on top of the map, do not apply transformations to it 
     }
 }
