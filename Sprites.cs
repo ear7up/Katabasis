@@ -16,6 +16,7 @@ static class Sprites
 	public static SpriteFont Font { get; private set; }
 	public static SpriteFont Font2 { get; private set; }
 	
+	// Buildings
 	private static List<Texture2D> buildings;
 	private static List<Texture2D> barracks;
 	private static List<Texture2D> farms;
@@ -24,6 +25,12 @@ static class Sprites
 	private static List<Texture2D> houses;
 	private static List<Texture2D> mines;
 	private static List<Texture2D> ranches;
+
+	// Animals
+	public static Texture2D Cow;
+	public static Texture2D Cat;
+	public static Texture2D Donkey;
+	public static Texture2D Pig;
 
 	public static void Load(ContentManager content)
 	{
@@ -40,6 +47,7 @@ static class Sprites
 		Font = content.Load<SpriteFont>("Font");
 		Font2 = content.Load<SpriteFont>("Gladius-z8AV3");
 
+		// Buildings
 		buildings = LoadTextures("buildings", 48);
 		barracks = LoadTextures("buildings/barracks", 4);
 		farms = LoadTextures("buildings/farm", 3);
@@ -48,6 +56,12 @@ static class Sprites
 		houses = LoadTextures("buildings/house", 9);
 		mines = LoadTextures("buildings/mine", 4);
 		ranches = LoadTextures("buildings/ranch", 5);
+
+		// Animals
+		Cow = content.Load<Texture2D>("animals/bull_copper");
+		Cat = content.Load<Texture2D>("animals/cat_copper");
+		Donkey = content.Load<Texture2D>("animals/donkey_copper");
+		Pig = content.Load<Texture2D>("animals/pig_copper");
 	}
 
 	public static Texture2D RandomBuilding()

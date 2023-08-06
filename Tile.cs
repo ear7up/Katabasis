@@ -135,7 +135,7 @@ public class Tile
             DrawBase = false;
     }
 
-    public void Update()
+    public virtual void Update()
     {
         foreach (Building b in Buildings)
             b.Update();

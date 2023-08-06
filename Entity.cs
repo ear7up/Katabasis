@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 
 public abstract class Entity
 {
-    public Texture2D image { get; private set; }
+    public Texture2D image { get; protected set; }
     
     // The tint of the image. This will also allow us to change the transparency.
     protected Color color = Color.White;
@@ -11,7 +11,7 @@ public abstract class Entity
     public Vector2 Position, Velocity;
     public float Orientation;
     public float Radius = 20;	// used for circular collision detection
-    protected float Scale;
+    public float Scale;
     //public bool IsExpired;		// true if the entity was destroyed and should be deleted.
 
     private Rectangle Bounds;
@@ -47,6 +47,6 @@ public abstract class Entity
 
     public virtual void Draw()
     {
-        Globals.SpriteBatch.Draw(image, Position, null, color, Orientation, Size / 2f, 1f, 0, 0);
+        Globals.SpriteBatch.Draw(image, Position, null, color, Orientation, Size / 2f, Scale, 0, 0);
     }
 }

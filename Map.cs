@@ -85,7 +85,14 @@ public class Map
             float ypos = (TileSize.Y / 2) * row - (VERTICAL_OVERLAP * row);
 
             Texture2D feature = null;
-            Tile tile = new(tileType, new(xpos, ypos), texture, feature);
+            Tile tile = null;
+
+            // 5% chance to add animals to plain desert tiles
+            if (r < 0.05)
+                tile = new TileAnimal(new(xpos, ypos), texture, feature);
+            else
+                tile = new(tileType, new(xpos, ypos), texture, feature);
+
             tiles[n] = tile;
 
             tile_in_row++;
