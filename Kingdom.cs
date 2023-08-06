@@ -6,6 +6,7 @@ public class Kingdom
     public Tile StartTile;
     public List<Tile> OwnedTiles;
     public List<Person> People;
+    public List<Person> Deceased;
 
     public Kingdom(Player owner, Tile startTile)
     {
@@ -14,6 +15,7 @@ public class Kingdom
         OwnedTiles = new();
         OwnedTiles.Add(startTile);
         People = new();
+        Deceased = new();
     }
 
     // Checks if tile is adjacent to one owned by the player
@@ -37,14 +39,19 @@ public class Kingdom
         People.Add(person);
     }
 
-    // TODO: Is there a better way to do this? Requires iterating through the list
-    public void RemovePerson(Person person)
+    public void PersonDied(Person person)
     {
-        People.Remove(person);
+        Deceased.Add(person);
     }
 
     public void Update()
     {
+        // Remove every person who died
+        foreach (Person p in Deceased)
+            People.Remove(p);
+
+        Deceased.Clear();
+
         foreach (Person p in People)
             p.Update();
     }

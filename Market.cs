@@ -34,7 +34,7 @@ public class Market : Building
     {
         BuyOrders = new();
         SellOrders = new();
-        BuildingType = BuildingType.MARKET;
+        Type = BuildingType.MARKET;
     }
 
     public override string ToString()

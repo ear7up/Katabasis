@@ -6,7 +6,6 @@ public class Map
     private readonly Point _mapTileSize = new(128, 128);
     public Tile[] tiles;
 
-    private readonly SortedList<float, Building> _buildings;
     private Building _editBuilding;
 
     private Tile _highlightedTile;
@@ -32,7 +31,6 @@ public class Map
         TileSize = new(desertTextures[0].Width, desertTextures[0].Height);
         MapSize = new(TileSize.X * _mapTileSize.X, TileSize.Y * _mapTileSize.Y);
 
-        _buildings = new(new DuplicateKeyComparer<float>());
         _editBuilding = null;
         
         int VERTICAL_OVERLAP = 30;
@@ -291,8 +289,9 @@ public class Map
             _editBuilding.Sprite.SpriteColor = new Color(Color.LightBlue, 0.3f);
         }
 
-        foreach (Building b in _buildings.Values)
-            b.Update();
+        // Update tiles
+        foreach (Tile t in tiles)
+            t.Update();
     }
 
     public void DrawTiles()
@@ -320,19 +319,11 @@ public class Map
     // Keep building list sorted by y order
     public void AddBuilding(Building b)
     {
-        float y = b.Sprite.Position.Y;
         Tile t = b.Location;
-
         if (t == null)
             t = TileAtPos(b.Sprite.Position);
 
-        if (t != null)
-        {
-            b.Location = t;
-            t.AddBuilding(b);
-        }
-
-        Globals.Ybuffer.Add(b);
-        _buildings.Add(y, b);
+        if (!Building.ConfirmBuilding(b, t))
+            Console.WriteLine("Failed to add building at tile " + t.ToString());
     }
 }

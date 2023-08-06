@@ -31,8 +31,9 @@ public class Tile
     public const int MAX_POP = 8;
     public int Population { get; set; }
 
+    public bool DrawBase;
     public Sprite BaseSprite { get; protected set; }
-    public Sprite TileFeatureSprite { get; protected set; }
+    public Sprite BulidingSprite;
     
     public Tile[] Neighbors { get; set; }
     
@@ -64,8 +65,6 @@ public class Tile
         return (direction + 1) % 4;
     }
 
-    public static Vector2 DY = new Vector2(0, 0.0001f);
-
     public Tile(TileType type, Vector2 position, Texture2D baseTexture, Texture2D tileFeatureTexture)
     {
         Type = type;
@@ -73,12 +72,11 @@ public class Tile
         Neighbors = new Tile[4];
         Population = 0;
         Buildings = new();
+        DrawBase = true;
 
         BaseSprite = new Sprite(baseTexture, position);
-        if (TileFeatureSprite != null)
-        {
-            TileFeatureSprite = new Sprite(tileFeatureTexture, position + DY);
-        }
+        if (BulidingSprite != null)
+            BulidingSprite = new Sprite(tileFeatureTexture, position);
 
         Stockpile = new();
         SoilQuality = Globals.Rand.NextFloat(MIN_SOIL_QUALITY, MAX_SOIL_QUALITY);
@@ -104,18 +102,13 @@ public class Tile
         return $"Tile(pos={BaseSprite.Position})";
     }
 
-    public void AddBuilding(Building b)
-    {
-        Buildings.Add(b);
-    }
-
     public void Draw()
     {
-        BaseSprite.Draw();
-        if (TileFeatureSprite != null)
-        {
-            TileFeatureSprite.Draw();
-        }
+        if (DrawBase)
+            BaseSprite.Draw();
+
+        if (BulidingSprite != null)
+            BulidingSprite.Draw();
     }
 
     public void Highlight()
@@ -129,6 +122,23 @@ public class Tile
             bpos.Y -= 150;
             b.Sprite.Position = bpos;
         }
+    }
+
+    public void AddBuilding(Building building)
+    {
+        Buildings.Add(building);
+        BulidingSprite = building.Sprite;
+        BulidingSprite.Position = BaseSprite.Position;
+
+        // Replace hills with mines otherwise the overlap looks bad
+        if (building.Type == BuildingType.MINE)
+            DrawBase = false;
+    }
+
+    public void Update()
+    {
+        foreach (Building b in Buildings)
+            b.Update();
     }
 
     public void Unhighlight()
@@ -158,14 +168,10 @@ public class Tile
             Tile t = searchStack.Pop();
 
             if (n++ / 4 > maxDepth)
-            {
                 return null;
-            }
 
             if (t == null)
-            {
                 continue;
-            }
 
             // Randomize the search order so that it's not biased in one direction
             foreach (int i in Enumerable.Range(0, t.Neighbors.Length).OrderBy(x => Globals.Rand.Next()))
@@ -180,7 +186,6 @@ public class Tile
                 searchStack.Push(neighbor);
             }
         }
-
         return null;
     }
 }

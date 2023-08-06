@@ -244,7 +244,9 @@ public class Person : Entity, Drawable
 
     public void Die()
     {
-        Owner.Kingdom.RemovePerson(this);
+        if (Home != null)
+            Home.Population--;
+        Owner.Kingdom.PersonDied(this);
         Globals.Ybuffer.Remove(this);
     }
 }

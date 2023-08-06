@@ -16,8 +16,14 @@ static class Sprites
 	public static SpriteFont Font { get; private set; }
 	public static SpriteFont Font2 { get; private set; }
 	
-	private static Random r = new Random();
 	private static List<Texture2D> buildings;
+	private static List<Texture2D> barracks;
+	private static List<Texture2D> farms;
+	private static List<Texture2D> farmsRiver;
+	private static List<Texture2D> granaries;
+	private static List<Texture2D> houses;
+	private static List<Texture2D> mines;
+	private static List<Texture2D> ranches;
 
 	public static void Load(ContentManager content)
 	{
@@ -34,28 +40,54 @@ static class Sprites
 		Font = content.Load<SpriteFont>("Font");
 		Font2 = content.Load<SpriteFont>("Gladius-z8AV3");
 
-		const int NUM_BUILDINGS = 48;
-		buildings = new List<Texture2D>(NUM_BUILDINGS);
-		for (int i = 1; i <= NUM_BUILDINGS; i++)
-		{
-			buildings.Add(content.Load<Texture2D>($"buildings/{i:000}"));
-		}
+		buildings = LoadTextures("buildings", 48);
+		barracks = LoadTextures("buildings/barracks", 4);
+		farms = LoadTextures("buildings/farm", 3);
+		farmsRiver = LoadTextures("buildings/farm_river", 2);
+		granaries = LoadTextures("buildings/granary", 9);
+		houses = LoadTextures("buildings/house", 9);
+		mines = LoadTextures("buildings/mine", 4);
+		ranches = LoadTextures("buildings/ranch", 5);
 	}
 
 	public static Texture2D RandomBuilding()
 	{
-		int i = r.Next(0, buildings.Count);
+		int i = Globals.Rand.Next(0, buildings.Count);
 		return buildings[i];
+	}
+
+	public static Texture2D GetRiverFarmSprite()
+	{
+		int i = Globals.Rand.Next(0, farmsRiver.Count);
+		return farmsRiver[i];
+	}
+
+	public static Texture2D RandomBuilding(BuildingType buildingType)
+	{
+		List<Texture2D> textures = null;
+		switch (buildingType)
+		{
+			case BuildingType.MINE: textures = mines; break;
+			case BuildingType.WOOD_HOUSE: textures = houses; break;
+			case BuildingType.STONE_HOUSE: textures = houses; break;
+			case BuildingType.RANCH: textures = ranches; break;
+			case BuildingType.FARM: textures = farms; break;
+			case BuildingType.FARM_RIVER: textures = farmsRiver; break;
+			case BuildingType.BARRACKS: textures = barracks; break;
+			case BuildingType.GRANARY: textures = granaries; break;
+			default: textures = buildings; break;
+		}
+
+		int i = Globals.Rand.Next(textures.Count);
+		return textures[i];
 	}
 
 	// Load path/001 through path/count and return the list of textures
 	public static List<Texture2D> LoadTextures(string path, int count)
 	{
-		List<Texture2D> textures = new();
+		List<Texture2D> textures = new(count);
         for (int i = 1; i <= count; i++)
-        {
             textures.Add(Globals.Content.Load<Texture2D>($"{path}/{i:000}"));
-        }
 		return textures;
 	}
 }

@@ -649,18 +649,6 @@
 /processorParam:TextureFormat=Color
 /build:buildings/barracks/004.png
 
-#begin buildings/barracks/005.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:buildings/barracks/005.png
-
 #begin buildings/farm_river/001.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -815,7 +803,19 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:buildings/granary/008.png
+/build:buildings/granary/008.png;buildings/granary/007.png
+
+#begin buildings/granary/009.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:buildings/granary/009.png;buildings/granary/008.png
 
 #begin buildings/granary/009.png
 /importer:TextureImporter
@@ -828,18 +828,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:buildings/granary/009.png
-
-#begin buildings/granary/010.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:buildings/granary/010.png
 
 #begin buildings/house/001.png
 /importer:TextureImporter

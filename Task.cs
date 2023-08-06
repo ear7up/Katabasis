@@ -276,7 +276,10 @@ public class SourceGoodsTask : Task
         // Try to find a market once
         if (FindMarket)
         {
-            Market = (Market)Tile.Find(p.Home, new TileFilterBuliding(BuildingType.MARKET));
+            Building market = (Building)Tile.Find(p.Home, new TileFilterBuliding(BuildingType.MARKET));
+            // TODO: markets don't actually coexist with the building type yet
+            if (market != null)
+                Market = null;
             FindMarket = false;
         }
 
@@ -480,7 +483,7 @@ public class TryToProduceTask : Task
                 else if (goods.Quantity > 0)
                     AcquiredGoods.Add(goods);
             }
-            else if (subStatus.Task is FindTileByTypeTask)
+            else if (Tile == null && subStatus.Task is FindTileByTypeTask)
             {
                 // Go to the tile
                 Tile = (Tile)subStatus.ReturnValue;
