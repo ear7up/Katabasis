@@ -21,13 +21,13 @@ public class NameGenerator
         "Neferneferuaten", "Nefertari", "Neferu", "Setepenre", "Sitamun"
     };
 
-    public static string Random(Person.GenderType gender)
+    public static string Random(GenderType gender)
     {
         switch (gender)
         {
-            case Person.GenderType.MALE: 
+            case GenderType.MALE: 
                 return MaleNames[Globals.Rand.Next(MaleNames.Length)];
-            case Person.GenderType.FEMALE: 
+            case GenderType.FEMALE: 
                 return FemaleNames[Globals.Rand.Next(FemaleNames.Length)];
         }
         return "ERROR";

@@ -8,7 +8,7 @@ public class GameManager
     private readonly Sprite _sky;
     private readonly Map _map;
     private readonly Camera _camera;
-    private List<Person> _people;
+    private Player _player1;
 
     public const int SECONDS_PER_DAY = 60;
     private float TimeOfDay = 0;
@@ -26,21 +26,23 @@ public class GameManager
         _sky.Scale = 2f;
         _map = new();
         _camera = new(KatabasisGame.Viewport, _map.Origin);
-        //_camera.SetBounds(_map.MapSize, _map.TileSize);
-        _people = new();
+
+        _player1 = new(_map.GetOriginTile());
+
         _coordinateDisplay = new(Sprites.Font);
         _debugDisplay = new(Sprites.Font);
-        _debugDisplay.Position = Vector2.Zero;
+        _debugDisplay.Position = new Vector2(30f, 30f);
 
         _logoDisplay = new(Sprites.Font2);
         _logoDisplay.Text = "Katabasis";
-        _logoDisplay.Position.Y = Globals.WindowSize.Y - 100;
         _logoDisplay.FontColor = Color.White;
+        _logoDisplay.Position.Y = Globals.WindowSize.Y - _logoDisplay.Height() - 30;
         
         _logoDisplay2 = new(Sprites.Font2);
         _logoDisplay2.Text = "Katabasis";
         _logoDisplay2.Position.Y = Globals.WindowSize.Y - 95;
         _logoDisplay2.FontColor = Color.Black;
+        _logoDisplay2.Position.Y = _logoDisplay.Position.Y + 5;
 
         Goods.CalcGoodsTypecounts();
         GoodsProduction.Init();
@@ -56,7 +58,10 @@ public class GameManager
         {
             const int NUM_PEOPLE = 100;
             for (int i = 0 ; i < NUM_PEOPLE; i++)
-                _people.Add(Person.CreatePerson(_map.Origin, _map.GetOriginTile()));
+            {
+                Person person = Person.CreatePerson(_map.Origin, _map.GetOriginTile());
+                _player1.Kingdom.AddPerson(person);
+            }
         }
     }
 
@@ -91,8 +96,9 @@ public class GameManager
 
         Globals.Update(gameTime);
 
+        // Check is a person was clicked in this frame
         Person clickedPerson = null;
-        foreach (Person p in _people)
+        foreach (Person p in _player1.Kingdom.People)
         {
             if (p.CheckIfClicked())
             {
@@ -101,14 +107,13 @@ public class GameManager
             }
         }
 
+        // If the player clicked off, return camera control, otherwise follow the player
         if (InputManager.Clicked && clickedPerson == null)
             _camera.Unfollow();
         else if (InputManager.Clicked)
             _camera.Follow(clickedPerson);
 
-        foreach (Person p in _people)
-            p.Update();
-
+        _player1.Update();
         _map.Update();
 
         // Give each person a "daily" update for tasks that don't need to be constantly checked
@@ -116,7 +121,7 @@ public class GameManager
         if (TimeOfDay > SECONDS_PER_DAY)
         {
             TimeOfDay = 0f;
-            foreach (Person p in _people)
+            foreach (Person p in _player1.Kingdom.People)
                 p.DailyUpdate();
         }
 
@@ -129,10 +134,8 @@ public class GameManager
             _debugDisplay.Text = _camera.Following.ToString();
         else
             _debugDisplay.Text = "";
-        _debugDisplay.Position.X = _camera.VisibleArea.X + 15;
-        _debugDisplay.Position.Y = _camera.VisibleArea.Y + 15;
 
-        _logoDisplay.Position.X = Globals.WindowSize.X - _logoDisplay.Width() / 2f - 30;
+        _logoDisplay.Position.X = Globals.WindowSize.X - _logoDisplay.Width() - 30;
         _logoDisplay2.Position.X = _logoDisplay.Position.X + 5;
     }
 
@@ -159,11 +162,11 @@ public class GameManager
 
         // Draw the current coordinates at the cursor location
         _coordinateDisplay.Draw();
-        _debugDisplay.Draw();
 
         Globals.SpriteBatch.End();
 
         Globals.SpriteBatch.Begin();
+        _debugDisplay.Draw();
         _logoDisplay2.Draw();
         _logoDisplay.Draw();
         Globals.SpriteBatch.End();

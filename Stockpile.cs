@@ -34,6 +34,13 @@ public class Stockpile
             goods.Quantity = 0;
     }
 
+    // Apply decay rates
+    public void Update()
+    {
+        foreach (Goods g in _stock.Values)
+            g.Quantity -= GoodsInfo.GetDecayRate(g) * Globals.Time;
+    }
+
     // Takes goods from the stockpile, sets quantity to the amount taken (may be less than requested)
     public void Borrow(Goods goods)
     {

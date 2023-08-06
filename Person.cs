@@ -4,42 +4,21 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public enum Skill
+public enum PersonType
 {
-    FARMING = 0,
-    BUILDING,
-    HUNTING,
-    FISHING,
-    COOKING,
-    CRAFTING,
-    SMITHING,
-    FIGHTING,
-    MINING,
-    FORESTRY,
-    NONE
+    CITIZEN,
+    SLAVE,
+    SOLDIER
 }
 
-public class SkillLevel
+public enum GenderType
 {
-    public const float INCREASE_CHANCE = 0.1f;
-
-    public Skill skill;
-    public int level;
-    public SkillLevel(Skill skill, int level)
-    {
-        this.skill = skill;
-        this.level = level;
-    }
-
-    public override string ToString()
-    {
-        return $"{skill}:{level}";
-    }
+    MALE,
+    FEMALE
 }
 
 public class Person : Entity, Drawable
 {
-    public static Random rand = new Random();
     public static int IdCounter = 0;
 
     public const float MOVE_SPEED = 60f;
@@ -47,35 +26,35 @@ public class Person : Entity, Drawable
     public const int STARVING = 210;
     public const int STARVED_TO_DEATH = 350;
 
-    public int Id;
-    private float[,] Demand;
-    private GenderType Gender;
-    public string Name;
-    public float Age;
-    public Stockpile PersonalStockpile;
     public Tile Home;
-    public float Money { get; set; }
-    public int Hunger { get; set; }
+    public Player Owner;
+    public PersonType Type;
+
+    public readonly int Id;
+    public readonly float Age;
+    public readonly string Name;
+    public readonly GenderType Gender;
+
+    public int Hunger;
+    public float Money;
+    private float[,] Demand;
+
+    public Stockpile PersonalStockpile;
     public PriorityQueue2<Task, int> Tasks;
     public WeightedList<SkillLevel> Skills; // inherited by children Lamarck-style?
-
-    public enum GenderType
-    {
-        MALE,
-        FEMALE
-    }
 
     private Person(Vector2 position)
     {
         Id = IdCounter++;
+        Owner = null;
         Position = position;
         Velocity = new Vector2(20f, 20f);
-        Orientation = rand.NextFloat(0.0f, MathHelper.TwoPi);
+        Orientation = Globals.Rand.NextFloat(0.0f, MathHelper.TwoPi);
         Scale = 0.2f;
         
         Texture2D image = null;
 
-        Gender = (GenderType)rand.Next(2);
+        Gender = (GenderType)Globals.Rand.Next(2);
         switch (Gender)
         {
             case GenderType.MALE: image = Sprites.ManC; break;
@@ -97,7 +76,7 @@ public class Person : Entity, Drawable
         foreach (Skill skill in Enum.GetValues(typeof(Skill)))
         {
             // Random skills, older people have more
-            int level = (int)(rand.Next(5, 25) * ((Age + 90) / 100));
+            int level = (int)(Globals.Rand.Next(5, 25) * ((Age + 90) / 100));
             Skills.Add(new SkillLevel(skill, level), level);
         }
     }
@@ -193,6 +172,12 @@ public class Person : Entity, Drawable
     public void DailyUpdate()
     {
         Hunger += DAILY_HUNGER;
+        if (Hunger >= STARVED_TO_DEATH)
+        {
+            Die();
+            return;
+        }
+
         Tasks.Enqueue(new EatTask());
         UpdateGoodsDemand();
         GoToMarket();
@@ -212,9 +197,7 @@ public class Person : Entity, Drawable
     public override void Update()
     {        
         if (Tasks.Empty())
-        {
             ChooseNextTask();
-        }
 
         float r = Globals.Rand.NextFloat(0f, 1f);
 
@@ -257,5 +240,11 @@ public class Person : Entity, Drawable
     {
         // Each person has a unique id, use it as a small constant to prevent YBuffer flickering
         return Position.Y + (Scale * image.Height) + (Id * 0.000001f);
+    }
+
+    public void Die()
+    {
+        Owner.Kingdom.RemovePerson(this);
+        Globals.Ybuffer.Remove(this);
     }
 }

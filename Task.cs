@@ -359,8 +359,9 @@ public class FindBuildingTask : Task
         if (b == null)
             b = (Building)Tile.Find(p.Home, new TileFilterBuliding(BuildingType));
 
-        if (b == null)
-            subTasks.Enqueue(new TryToBuildTask(BuildingType));
+        // Uncomment to enable villagers to automatically build buildings
+        //if (b == null)
+        //    subTasks.Enqueue(new TryToBuildTask(BuildingType));
 
         if (subTasks.Count == 0)
         {
@@ -558,7 +559,10 @@ public class TryToProduceTask : Task
 
     public override string ToString()
     {
-        return base.ToString() + Goods.ToString();
+        string s = base.ToString() + Goods.ToString();
+        foreach (Task subtask in subTasks)
+            s += "\n" + subtask.ToString();
+        return s;
     }
 }
 
