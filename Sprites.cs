@@ -31,6 +31,14 @@ static class Sprites
 	public static Texture2D Cat;
 	public static Texture2D Donkey;
 	public static Texture2D Pig;
+	public static Texture2D Elephant;
+	public static Texture2D Gazelle;
+	public static Texture2D Duck;
+	public static Texture2D Fowl;
+	public static Texture2D Quail;
+	public static Texture2D Goat;
+	public static Texture2D Sheep;
+	public static Texture2D Goose;
 
 	public static void Load(ContentManager content)
 	{
@@ -62,6 +70,14 @@ static class Sprites
 		Cat = content.Load<Texture2D>("animals/cat_copper");
 		Donkey = content.Load<Texture2D>("animals/donkey_copper");
 		Pig = content.Load<Texture2D>("animals/pig_copper");
+		Elephant = content.Load<Texture2D>("animals/elephant_copper");
+		Gazelle = content.Load<Texture2D>("animals/gazelle_copper");
+		Duck = content.Load<Texture2D>("animals/duck_copper");
+		Fowl = content.Load<Texture2D>("animals/fowl_copper");
+		Quail = content.Load<Texture2D>("animals/quail_copper");
+		Goat = content.Load<Texture2D>("animals/goat_copper");
+		Sheep = content.Load<Texture2D>("animals/sheep_copper");
+		Goose = content.Load<Texture2D>("animals/goose_copper");
 	}
 
 	public static Texture2D RandomBuilding()

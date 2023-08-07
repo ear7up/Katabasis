@@ -1,11 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-public enum AnimalType
-{
-    PIG, COW, SHEEP, DUCK, FOWL, DONKEY, GOAT, GAZELLE, BEE, ELEPHANT
-}
-
 public class Animal : Entity, Drawable
 {
     public static int IdCounter = 0;
@@ -48,29 +43,32 @@ public class Animal : Entity, Drawable
 
 public class TileAnimal : Tile
 {
-    public AnimalType TileAnimalType;
     private List<Entity> Animals;
+    public TileType AnimalType;
 
     public TileAnimal(Vector2 position, Texture2D baseTexture, Texture2D tileFeatureTexture) 
-        : base(TileType.ANIMAL, position, baseTexture, tileFeatureTexture)
+        : base(TileType.WILD_ANIMAL, position, baseTexture, tileFeatureTexture)
     {
+        // TileAnimal will default to WILD_ANIMAL type, allowing hunting RawMeat.GAME
+        // AnimalType will replace tile type once a Ranch is built, allowing specific goods to be farmed
         Animals = new();
-        Array animalTypes = Enum.GetValues(typeof(AnimalType));
-        TileAnimalType = (AnimalType)Globals.Rand.Next(animalTypes.Length);
+        AnimalType = (TileType)Globals.Rand.Next((int)TileType.ANIMAL, (int)TileType.WILD_ANIMAL);
 
         Texture2D animalTexture = null;
-        switch (TileAnimalType)
+        switch (AnimalType)
         {
-            //case AnimalType.BEE: animalTexture = Sprites.Bee; break;
-            case AnimalType.COW: animalTexture = Sprites.Cow; break;
-            case AnimalType.DONKEY: animalTexture = Sprites.Donkey; break;
-            //case AnimalType.DUCK: animalTexture = Sprites.Duck; break;
-            //case AnimalType.ELEPHANT: animalTexture = Sprites.Elephant; break;
-            //case AnimalType.FOWL: animalTexture = Sprites.Fowl; break;
-            //case AnimalType.GAZELLE: animalTexture = Sprites.Gazelle; break;
-            //case AnimalType.GOAT: animalTexture = Sprites.Goat; break;
-            case AnimalType.PIG: animalTexture = Sprites.Pig; break;
-            //case AnimalType.SHEEP: animalTexture = Sprites.Sheep; break;
+            //case TileType.BEE: animalTexture = Sprites.Bee; break;
+            case TileType.COW: animalTexture = Sprites.Cow; break;
+            case TileType.DONKEY: animalTexture = Sprites.Donkey; break;
+            case TileType.DUCK: animalTexture = Sprites.Duck; break;
+            case TileType.ELEPHANT: animalTexture = Sprites.Elephant; break;
+            case TileType.FOWL: animalTexture = Sprites.Fowl; break;
+            case TileType.GAZELLE: animalTexture = Sprites.Gazelle; break;
+            case TileType.GOAT: animalTexture = Sprites.Goat; break;
+            case TileType.PIG: animalTexture = Sprites.Pig; break;
+            case TileType.SHEEP: animalTexture = Sprites.Sheep; break;
+            case TileType.GOOSE: animalTexture = Sprites.Goose; break;
+            case TileType.QUAIL: animalTexture = Sprites.Quail; break;
             default: animalTexture = Sprites.Cow; break;
         }
         

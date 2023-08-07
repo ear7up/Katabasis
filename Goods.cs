@@ -36,7 +36,7 @@ public class Goods
 
     public enum FoodAnimal
     {
-        PORK, BEEF, MUTTON, DUCK, PIGEON, GOOSE, PARTRIDGE, 
+        PORK, BEEF, MUTTON, DUCK, FOWL, GOOSE, 
         QUAIL, GAME, FISH, MILK, EGGS, HONEY
     }
 
@@ -93,8 +93,8 @@ public class Goods
 
     public enum RawMeat
     {
-        PORK, BEEF, MUTTON, DUCK, PIGEON, 
-        GOOSE, PARTRIDGE, QUAIL, GAME, FISH
+        PORK, BEEF, MUTTON, DUCK, FOWL, 
+        GOOSE, QUAIL, GAME, FISH
     }
 
     public static int NUM_GOODS_TYPES = 0;

@@ -11,7 +11,8 @@ public enum TileType
     VEGETATION,
     OASIS,
     HILLS,
-    ANIMAL,
+    // Only add new animals between ANIMAL and WILD_ANIMAL
+    ANIMAL, PIG, COW, SHEEP, DUCK, DONKEY, GOAT, GAZELLE, GIRAFFE, ELEPHANT, FOWL, GOOSE, QUAIL, WILD_ANIMAL,
     DORMANT_VOLCANO,
     CAMP,
     NONE
@@ -133,6 +134,10 @@ public class Tile
         // Replace hills with mines otherwise the overlap looks bad
         if (building.Type == BuildingType.MINE)
             DrawBase = false;
+        
+        // Adding a ranch converts the tile from WILD_ANIMAL to ANIMAL (no hunting)
+        if (building.Type == BuildingType.RANCH && Type == TileType.WILD_ANIMAL)
+            Type = ((TileAnimal)this).AnimalType;
     }
 
     public virtual void Update()

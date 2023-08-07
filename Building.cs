@@ -111,7 +111,7 @@ public class Building : Drawable
             return false;
         else if (building.Type == BuildingType.FARM_RIVER && location.Type != TileType.RIVER)
             return false;
-        else if (building.Type == BuildingType.RANCH && location.Type != TileType.ANIMAL)
+        else if (building.Type == BuildingType.RANCH && location.Type != TileType.WILD_ANIMAL)
             return false;
 
         if (location.Buildings.Count == 0)
