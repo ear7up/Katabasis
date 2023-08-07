@@ -57,11 +57,12 @@ public class TileAnimal : Tile
         Texture2D animalTexture = null;
         switch (AnimalType)
         {
-            //case TileType.BEE: animalTexture = Sprites.Bee; break;
+            // Elephants are a special case, can only be hunted for ivory, not farmed
+            case TileType.ELEPHANT: animalTexture = Sprites.Elephant; Type = TileType.ELEPHANT; break;
+            
             case TileType.COW: animalTexture = Sprites.Cow; break;
             case TileType.DONKEY: animalTexture = Sprites.Donkey; break;
             case TileType.DUCK: animalTexture = Sprites.Duck; break;
-            case TileType.ELEPHANT: animalTexture = Sprites.Elephant; break;
             case TileType.FOWL: animalTexture = Sprites.Fowl; break;
             case TileType.GAZELLE: animalTexture = Sprites.Gazelle; break;
             case TileType.GOAT: animalTexture = Sprites.Goat; break;
