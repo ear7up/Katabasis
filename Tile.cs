@@ -12,7 +12,7 @@ public enum TileType
     OASIS,
     HILLS,
     // Only add new animals between ANIMAL and WILD_ANIMAL
-    ANIMAL, PIG, COW, SHEEP, DUCK, DONKEY, GOAT, GAZELLE, GIRAFFE, ELEPHANT, FOWL, GOOSE, QUAIL, WILD_ANIMAL,
+    ANIMAL, PIG, COW, SHEEP, DUCK, DONKEY, GOAT, GAZELLE, /*GIRAFFE,*/ ELEPHANT, FOWL, GOOSE, QUAIL, WILD_ANIMAL,
     DORMANT_VOLCANO,
     CAMP,
     NONE
@@ -28,6 +28,8 @@ public class Tile
 {
     public TileType Type;
     public Player Owner;
+
+    public const int HIGHLIGHT_HEIGHT = 30;
     
     public const int MAX_POP = 8;
     public int Population { get; set; }
@@ -103,6 +105,11 @@ public class Tile
         return $"Tile(pos={BaseSprite.Position})";
     }
 
+    public bool NeighborHasDifferentOwner(Cardinal direction)
+    {
+        return Neighbors[(int)direction] == null || Neighbors[(int)direction].Owner != Owner;
+    }
+
     public void Draw()
     {
         if (DrawBase)
@@ -115,12 +122,12 @@ public class Tile
     public void Highlight()
     {
         Vector2 pos = BaseSprite.Position;
-        pos.Y -= 150;
+        pos.Y -= HIGHLIGHT_HEIGHT;
         BaseSprite.Position = pos;
         foreach (Building b in Buildings)
         {
             Vector2 bpos = b.Sprite.Position;
-            bpos.Y -= 150;
+            bpos.Y -= HIGHLIGHT_HEIGHT;
             b.Sprite.Position = bpos;
         }
     }
@@ -149,13 +156,13 @@ public class Tile
     public void Unhighlight()
     {
         Vector2 pos = BaseSprite.Position;
-        pos.Y += 150;
+        pos.Y += HIGHLIGHT_HEIGHT;
         BaseSprite.Position = pos;
 
         foreach (Building b in Buildings)
         {
             Vector2 bpos = b.Sprite.Position;
-            bpos.Y += 150;
+            bpos.Y += HIGHLIGHT_HEIGHT;
             b.Sprite.Position = bpos;
         }
     }

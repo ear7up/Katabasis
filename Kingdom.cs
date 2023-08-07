@@ -13,7 +13,7 @@ public class Kingdom
         Owner = owner;
         StartTile = startTile;
         OwnedTiles = new();
-        OwnedTiles.Add(startTile);
+        AcquireTilesAround(startTile);
         People = new();
         Deceased = new();
     }
@@ -22,7 +22,7 @@ public class Kingdom
     public bool TryToAcquireTile(Tile tile)
     {
         foreach (Tile neighbor in tile.Neighbors)
-            if (neighbor.Owner == Owner)
+            if (neighbor != null && neighbor.Owner == Owner)
                 return AcquireTile(tile);
         return false;
     }
@@ -30,6 +30,18 @@ public class Kingdom
     public bool AcquireTile(Tile tile)
     {
         OwnedTiles.Add(tile);
+        tile.Highlight();
+        tile.Owner = Owner;
+        return true;
+    }
+
+    // Be careful not to add the same tile twice to the OwnedTiles list
+    public bool AcquireTilesAround(Tile tile)
+    {
+        AcquireTile(tile);
+        foreach (Tile neighbor in tile.Neighbors)
+            if (neighbor != null)
+                AcquireTile(neighbor);
         return true;
     }
 

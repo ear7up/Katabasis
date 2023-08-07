@@ -52,14 +52,14 @@ public class TileAnimal : Tile
         // TileAnimal will default to WILD_ANIMAL type, allowing hunting RawMeat.GAME
         // AnimalType will replace tile type once a Ranch is built, allowing specific goods to be farmed
         Animals = new();
-        AnimalType = (TileType)Globals.Rand.Next((int)TileType.ANIMAL, (int)TileType.WILD_ANIMAL);
+        AnimalType = (TileType)Globals.Rand.Next((int)TileType.ANIMAL + 1, (int)TileType.WILD_ANIMAL);
 
         Texture2D animalTexture = null;
         switch (AnimalType)
         {
             // Elephants are a special case, can only be hunted for ivory, not farmed
             case TileType.ELEPHANT: animalTexture = Sprites.Elephant; Type = TileType.ELEPHANT; break;
-            
+
             case TileType.COW: animalTexture = Sprites.Cow; break;
             case TileType.DONKEY: animalTexture = Sprites.Donkey; break;
             case TileType.DUCK: animalTexture = Sprites.Duck; break;
@@ -70,6 +70,7 @@ public class TileAnimal : Tile
             case TileType.SHEEP: animalTexture = Sprites.Sheep; break;
             case TileType.GOOSE: animalTexture = Sprites.Goose; break;
             case TileType.QUAIL: animalTexture = Sprites.Quail; break;
+            //case TileType.GIRAFFE: animalTexture = Sprites.Giraffe; break;
             default: animalTexture = Sprites.Cow; break;
         }
         
