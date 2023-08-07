@@ -66,14 +66,19 @@ public class GoodsProduction
     }
     
     // If the given skill isn't used to produce anything, return goods with no skill requirements
-    public static List<int> GetGoodsMadeUsingSkill(Skill skill)
+    public static List<int> GetGoodsMadeUsingSkill(SkillLevel skill)
     {
-        List<int> goods = (List<int>)GoodsBySkill[skill];
+        List<int> produceable = new();
+        List<int> goods = (List<int>)GoodsBySkill[skill.skill];
         if (goods == null)
-        {
             goods = (List<int>)GoodsBySkill[Skill.NONE];
+        foreach (int g in goods)
+        {
+            ProductionRequirements req = (ProductionRequirements)Requirements[g];
+            if (req.SkillRequirement == null || req.SkillRequirement.level <= skill.level)
+                produceable.Add(g);
         }
-        return goods;
+        return produceable;
     }
 
     public static void Init()

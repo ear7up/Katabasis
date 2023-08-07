@@ -114,7 +114,7 @@ public class Task
         // TODO: Are there non-production tasks that use skills?
 
         // Production tasks (e.g. use farming at a farm building to make food or animal products)
-        List<int> goodsIds = GoodsProduction.GetGoodsMadeUsingSkill(s.skill);
+        List<int> goodsIds = GoodsProduction.GetGoodsMadeUsingSkill(s);
         int index = Globals.Rand.Next(goodsIds.Count);
         int id = goodsIds[index];
         Goods goods = Goods.FromId(id);
@@ -537,9 +537,12 @@ public class TryToProduceTask : Task
 
             if (TimeSpent >= TimeToProduce)
             {
-                p.PersonalStockpile.Add(Goods);
                 Status.ReturnValue = Goods;
                 Status.Complete = true;
+
+                // Modify harvest yield by soil quality (better near rivers)
+                if (Goods.Type == GoodsType.FOOD_PLANT && Tile != null)
+                    Goods.Quantity *= Tile.SoilQuality;
 
                 // If the task required a skill, give it a chance to increase the skill by 1
                 if (Requirements.SkillRequirement != null)
@@ -548,11 +551,15 @@ public class TryToProduceTask : Task
                     int skill = (int)Requirements.SkillRequirement.skill;
                     float experience = GoodsInfo.GetExperience(Goods) * Goods.Quantity;
 
+                    // At level 10, produce 5% more, at level 100 prdouce 50% more
+                    Goods.Quantity *= (1 + p.Skills[skill].level / 200f);
+
                     // E.g. if making 20 units of 1xp goods, chance is 10% + 20% = 30% to gain a level
                     if (r < SkillLevel.INCREASE_CHANCE + experience / 100)
                         p.Skills[skill].level++;
                 }
 
+                p.PersonalStockpile.Add(Goods);
                 Task.Debug($"Successfully produced {Goods}");
             }
         }

@@ -26,15 +26,20 @@ public class Person : Entity, Drawable
     public const int STARVING = 210;
     public const int STARVED_TO_DEATH = 350;
 
+    // We will attempt to model real causes of death (hunger, disease, conflict)
+    // that bring down the average age at death, this will be the age at which people
+    // start to die due to age-related afflictions independent of these other causes
+    public const int OLD_AGE = 70;
+
     public Tile Home;
     public Player Owner;
     public PersonType Type;
 
     public readonly int Id;
-    public readonly float Age;
     public readonly string Name;
     public readonly GenderType Gender;
 
+    public float Age;
     public int Hunger;
     public float Money;
     private float[,] Demand;
@@ -76,7 +81,7 @@ public class Person : Entity, Drawable
         foreach (Skill skill in Enum.GetValues(typeof(Skill)))
         {
             // Random skills, older people have more
-            int level = (int)(Globals.Rand.Next(5, 25) * ((Age + 90) / 100));
+            int level = (int)(Globals.Rand.Next(10, 35) * ((Age + 90) / 100));
             Skills.Add(new SkillLevel(skill, level), level);
         }
     }
@@ -126,6 +131,8 @@ public class Person : Entity, Drawable
         {
             // TODO: Perhaps try random using inventory?
 
+            // TODO: cook food at home if there are raw ingredients
+
             // Pick a skill, biased toward high-level skills, then pick a task that uses that skill
             SkillLevel weightedRandomChoice = Skills.Next();
             Task task = Task.RandomUsingSkill(weightedRandomChoice);
@@ -171,6 +178,23 @@ public class Person : Entity, Drawable
 
     public void DailyUpdate()
     {
+        // A year is 10 days, chance to die every 1/10th of a year after hitting old age
+        Age += 0.1f;
+        if (Age >= OLD_AGE && Globals.Rand.NextFloat(0f, 1f) <= 0.01f)
+        {
+            Die();
+            return;
+        }
+
+        int sum = 0;
+        foreach (SkillLevel skill in Skills)
+            sum += skill.level;
+
+        if (sum >= 300)
+            SetImage((Gender == GenderType.MALE) ? Sprites.ManG : Sprites.WomanG);
+        else if (sum >= 200)
+            SetImage((Gender == GenderType.MALE) ? Sprites.ManS : Sprites.WomanS);
+
         Hunger += DAILY_HUNGER;
         if (Hunger >= STARVED_TO_DEATH)
         {
@@ -178,7 +202,10 @@ public class Person : Entity, Drawable
             return;
         }
 
+        // Queue up a task to remind them to eat
         Tasks.Enqueue(new EatTask());
+
+        // Figure out what they want and queue up a task to buy it
         UpdateGoodsDemand();
         GoToMarket();
     }
