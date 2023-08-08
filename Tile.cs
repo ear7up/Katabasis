@@ -69,7 +69,7 @@ public class Tile
         return (direction + 1) % 4;
     }
 
-    public Tile(TileType type, Vector2 position, Texture2D baseTexture, Texture2D tileFeatureTexture)
+    public Tile(TileType type, Vector2 position, Texture2D baseTexture, Texture2D buildingTexture)
     {
         Type = type;
         Owner = null;
@@ -80,7 +80,7 @@ public class Tile
 
         BaseSprite = new Sprite(baseTexture, position);
         if (BulidingSprite != null)
-            BulidingSprite = new Sprite(tileFeatureTexture, position);
+            BulidingSprite = new Sprite(buildingTexture, position);
 
         Stockpile = new();
         
@@ -139,8 +139,18 @@ public class Tile
     public void AddBuilding(Building building)
     {
         Buildings.Add(building);
-        BulidingSprite = building.Sprite;
-        BulidingSprite.Position = BaseSprite.Position;
+
+        // If the buliding replaces the whole tile, set it as a sprite to be drawn on the tile layer
+        // otherwise, added it to the ybuffer so overlaps are avoidable
+        if (building.IsWholeTile())
+        {
+            BulidingSprite = building.Sprite;
+            BulidingSprite.Position = BaseSprite.Position;
+        }
+        else
+        {
+            Globals.Ybuffer.Add(building);
+        }
 
         // Replace hills with mines otherwise the overlap looks bad
         if (building.Type == BuildingType.MINE)

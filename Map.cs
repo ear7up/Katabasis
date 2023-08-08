@@ -266,6 +266,12 @@ public class Map
             // Make the currently editing buliding follow the mouse pointer
             _editBuilding.Sprite.Position = InputManager.MousePos;
 
+            Tile location = TileAtPos(InputManager.MousePos);
+            if (Building.ValidPlacement(_editBuilding, location))
+                _editBuilding.Sprite.SpriteColor = new Color(Color.LightBlue, 0.3f);
+            else
+                _editBuilding.Sprite.SpriteColor = new Color(Color.OrangeRed, 0.3f);
+
             // Confirm and add the building (stop editing)
             if (InputManager.ConfirmBuilding)
             {

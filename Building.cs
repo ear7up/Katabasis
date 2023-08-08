@@ -97,6 +97,28 @@ public class Building : Drawable
         return b;    
     }
 
+    public bool IsWholeTile()
+    {
+        return Type == BuildingType.FARM || 
+               Type == BuildingType.FARM_RIVER || 
+               Type == BuildingType.MINE;
+    }
+
+    public static bool ValidPlacement(Building building, Tile location)
+    {
+        if (location == null)
+            return false;
+        if (building.Type == BuildingType.MINE && location.Type != TileType.HILLS)
+            return false;
+        if (building.Type == BuildingType.FARM_RIVER && location.Type != TileType.RIVER)
+            return false;
+        if (building.Type == BuildingType.RANCH && location.Type != TileType.WILD_ANIMAL)
+            return false;
+        if (location.Buildings.Count > 0)
+            return false;
+        return true;
+    }
+
     public static bool ConfirmBuilding(Building building, Tile location)
     {
         // Force farms to be river type on rivers
@@ -106,17 +128,8 @@ public class Building : Drawable
             building.Sprite.Texture = Sprites.GetRiverFarmSprite();
         }
 
-        // Do not allow incompatible tile/building combinations
-        if (building.Type == BuildingType.MINE && location.Type != TileType.HILLS)
-            return false;
-        else if (building.Type == BuildingType.FARM_RIVER && location.Type != TileType.RIVER)
-            return false;
-        else if (building.Type == BuildingType.RANCH && location.Type != TileType.WILD_ANIMAL)
-            return false;
-
-        if (location.Buildings.Count == 0)
+        if (ValidPlacement(building, location))
         {
-            building.Location = location;
             location.AddBuilding(building);
             return true;
         }
