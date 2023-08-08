@@ -30,6 +30,8 @@ public class GameManager
         _player1 = new(_map.GetOriginTile());
 
         _coordinateDisplay = new(Sprites.Font);
+        _coordinateDisplay.Scale = 0.7f;
+
         _debugDisplay = new(Sprites.Font);
         _debugDisplay.Position = new Vector2(30f, 30f);
 
@@ -49,6 +51,10 @@ public class GameManager
         BulidingProduction.Init();
         GoodsInfo.Init();
         BuildingInfo.Init();
+
+        UI.Init();
+        UI.AddElement(new UIElement(Sprites.BottomLeftPanel, scale: 1.1f), UI.Position.BOTTOM_LEFT);
+        UI.AddElement(new UIElement(Sprites.Clock, scale: 0.5f, onClick: TogglePause), UI.Position.TOP_RIGHT);
 
         if (TEST)
         {
@@ -82,10 +88,16 @@ public class GameManager
         return 0;
     }
 
+    public void TogglePause()
+    {
+        InputManager.Paused = !InputManager.Paused;
+    }
+
     public void Update(GameTime gameTime)
     {
         InputManager.Update();
         _camera.UpdateCamera(KatabasisGame.Viewport);
+        UI.Update();
 
         // Calculate the real mouse position by inverting the camera transformations
         InputManager.MousePos = Vector2.Transform(InputManager.MousePos, Matrix.Invert(_camera.Transform));
@@ -126,8 +138,8 @@ public class GameManager
         }
 
         // Write the current world coordinate at the mouse position
-        _coordinateDisplay.Text = $"({_coordinateDisplay.Position.X:0.00}, {_coordinateDisplay.Position.Y:0.00})";  
-        _coordinateDisplay.Position = InputManager.MousePos;
+        _coordinateDisplay.Text = $"({_coordinateDisplay.Position.X:0.0}, {_coordinateDisplay.Position.Y:0.0})";  
+        _coordinateDisplay.Position = InputManager.ScreenMousePos + new Vector2(15f, 15f);
         
         // Write information about the currently selected person to the top left
         if (_camera.Following != null)
@@ -160,17 +172,24 @@ public class GameManager
         // Draw the UI on top
         _map.DrawUI();
 
+        Globals.SpriteBatch.End();
+
+        // Begin screen region draw batch (not affected by camera transforms)
+        Globals.SpriteBatch.Begin();
+
         // Draw the current coordinates at the cursor location
         _coordinateDisplay.Draw();
 
-        Globals.SpriteBatch.End();
-
-        Globals.SpriteBatch.Begin();
+        // Draw debug text
         _debugDisplay.Draw();
+
+        // Draw logo and shadow
         _logoDisplay2.Draw();
         _logoDisplay.Draw();
-        Globals.SpriteBatch.End();
 
-        // Draw the UI on top of the map, do not apply transformations to it 
+        // Draw the user interface
+        UI.Draw();
+
+        Globals.SpriteBatch.End();
     }
 }

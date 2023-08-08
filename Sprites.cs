@@ -40,6 +40,10 @@ static class Sprites
 	public static Texture2D Sheep;
 	public static Texture2D Goose;
 
+	// UI
+	public static Texture2D Clock;
+	public static Texture2D BottomLeftPanel;
+
 	public static void Load(ContentManager content)
 	{
 		// folder/file
@@ -78,6 +82,10 @@ static class Sprites
 		Goat = content.Load<Texture2D>("animals/goat_copper");
 		Sheep = content.Load<Texture2D>("animals/sheep_copper");
 		Goose = content.Load<Texture2D>("animals/goose_copper");
+
+		// UI
+		Clock = content.Load<Texture2D>("UI_maybe/clock");
+		BottomLeftPanel = content.Load<Texture2D>("UI_maybe/panel1");
 	}
 
 	public static Texture2D RandomBuilding()

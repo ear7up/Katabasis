@@ -3159,7 +3159,7 @@
 /processorParam:TextureFormat=Color
 /build:UI_maybe/choice.png
 
-#begin UI_maybe/circle.png
+#begin UI_maybe/clock.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -3169,9 +3169,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:UI_maybe/circle.png
+/build:UI_maybe/clock.png
 
-#begin UI_maybe/panel.png
+#begin UI_maybe/panel1.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -3181,7 +3181,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:UI_maybe/panel.png
+/build:UI_maybe/panel1.png
 
 #begin UI_maybe/pause_button.png
 /importer:TextureImporter
