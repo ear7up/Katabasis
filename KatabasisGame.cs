@@ -25,11 +25,27 @@ public class KatabasisGame : Game
         Instance = this;
 
         _graphics = new GraphicsDeviceManager(this);
-        Globals.WindowSize = new(1920, 1080);
-        _graphics.PreferredBackBufferWidth = 1920;
-        _graphics.PreferredBackBufferHeight = 1080;
+        Globals.WindowSize = new(1600, 900);
+        _graphics.PreferredBackBufferWidth = Globals.WindowSize.X;
+        _graphics.PreferredBackBufferHeight = Globals.WindowSize.Y;
 
         IsMouseVisible = true;
+    }
+
+    public void ToggleFullscreen()
+    {
+        if (_graphics.IsFullScreen)
+        {
+            Globals.WindowSize = new(1600, 900);
+            _graphics.PreferredBackBufferWidth = 1600;
+            _graphics.PreferredBackBufferHeight = 900;
+        }
+        else
+        {
+            Globals.WindowSize = new(GraphicsDevice.Viewport.Bounds.Width, GraphicsDevice.Viewport.Bounds.Height);
+        }
+        _graphics.ToggleFullScreen();
+        _graphics.ApplyChanges();
     }
 
     protected override void Initialize()
@@ -37,8 +53,6 @@ public class KatabasisGame : Game
         Content.RootDirectory = "Content";
         Globals.Content = Content;
         Globals.Rand = new Random();
-
-        //_gameManager = new();
 
         base.Initialize();
     }

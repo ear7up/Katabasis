@@ -101,7 +101,8 @@ public class Building : Drawable
     {
         return Type == BuildingType.FARM || 
                Type == BuildingType.FARM_RIVER || 
-               Type == BuildingType.MINE;
+               Type == BuildingType.MINE || 
+               Type == BuildingType.RANCH;
     }
 
     public static bool ValidPlacement(Building building, Tile location)

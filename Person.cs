@@ -96,7 +96,7 @@ public class Person : Entity, Drawable
 
         string task = "Idle";
         if (Task.Peek(Tasks) != null)
-            task  = Tasks.Peek().ToString();
+            task  = Tasks.Peek().Describe();
 
         return $"Person('{Name}' ({Age}) hunger={Hunger}\n" +
                $"Task=[{task}]\n" +

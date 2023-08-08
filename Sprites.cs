@@ -43,6 +43,7 @@ static class Sprites
 	// UI
 	public static Texture2D Clock;
 	public static Texture2D BottomLeftPanel;
+	public static List<Texture2D> BottomLeftButtons;
 
 	public static void Load(ContentManager content)
 	{
@@ -86,6 +87,7 @@ static class Sprites
 		// UI
 		Clock = content.Load<Texture2D>("UI_maybe/clock");
 		BottomLeftPanel = content.Load<Texture2D>("UI_maybe/panel1");
+		BottomLeftButtons = LoadTextures("UI_maybe/buttons", 8);
 	}
 
 	public static Texture2D RandomBuilding()

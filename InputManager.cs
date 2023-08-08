@@ -1,4 +1,5 @@
 using System;
+using Katabasis;
 
 public static class InputManager
 {
@@ -148,6 +149,12 @@ public static class InputManager
 
         if (keyboardState.IsKeyUp(Keys.P) && lastKeyboardState.IsKeyDown(Keys.P))
             Paused = !Paused;
+
+        if ((keyboardState.IsKeyDown(Keys.LeftAlt) || keyboardState.IsKeyDown(Keys.RightAlt)) && 
+             keyboardState.IsKeyUp(Keys.Enter) && lastKeyboardState.IsKeyDown(Keys.Enter))
+        {
+            KatabasisGame.Instance.ToggleFullscreen();
+        }
     }
 
     // Register a mode along with instructions along with events for enabling and disabling it

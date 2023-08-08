@@ -30,13 +30,13 @@ public class UIElement
         Content = content;
     }
 
-    public void Update()
+    public virtual void Update()
     {
         if (OnClick != null && InputManager.Clicked && Image.GetBounds().Contains(InputManager.MousePos))
             OnClick();
     }
 
-    public void Draw(Vector2 offset)
+    public virtual void Draw(Vector2 offset)
     {
         // Assume all UIElement images inherit their position from their UI container
         Image.Position = offset;

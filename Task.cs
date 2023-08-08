@@ -104,7 +104,6 @@ public class Task
             }
             return subStatus;
         }
-        
         return null;
     }
 
@@ -120,6 +119,14 @@ public class Task
         Goods goods = Goods.FromId(id);
         goods.Quantity = GoodsInfo.GetDefaultProductionQuantity(goods);
         return new TryToProduceTask(goods);
+    }
+
+    public virtual string Describe(string extra = "")
+    {
+        string s = base.ToString() + " [" + extra + "]";
+        foreach (Task subtask in subTasks)
+            s += "\n" + subtask.Describe();
+        return s;
     }
 }
 
@@ -220,6 +227,12 @@ public class FindTileByTypeTask : Task
         Status.ReturnValue = found;
         return Status;
     }
+
+    public override string Describe(string extra = "")
+    {
+        string s = base.Describe(TileType.ToString());
+        return s;
+    }
 }
 
 // Tries to find goods and add to the person's invenctory
@@ -318,13 +331,13 @@ public class SourceGoodsTask : Task
             Status.Failed = (QuantityAcquired < QuantityRequired);
             Status.ReturnValue = GoodsRequest;
         }
-
         return Status;
     }
 
-    public override string ToString()
+    public override string Describe(string extra = "")
     {
-        return base.ToString() + Goods.ToString();
+        string s = base.Describe(GoodsRequest.ToString());
+        return s;
     }
 }
 
@@ -374,6 +387,12 @@ public class FindBuildingTask : Task
         }
         return Status;
     }
+
+    public override string Describe(string extra = "")
+    {
+        string s = base.Describe(BuildingType.ToString());
+        return s;
+    }
 }
 
 public class BuildingAndTile
@@ -404,6 +423,12 @@ public class FindBuildingOnTileTask : Task
         Status.Failed = (bt == null);
         return Status;
     }
+
+    public override string Describe(string extra = "")
+    {
+        string s = base.Describe(BuildingType.ToString() + " on " + TileType.ToString());
+        return s;
+    }
 }
 
 public class TryToProduceTask : Task
@@ -429,7 +454,9 @@ public class TryToProduceTask : Task
         NumRequiredGoods = 0;
         GoodsRequirements = null;
         TimeToProduce = GoodsInfo.GetTime(goods) * goods.Quantity;
+
         TimeSpent = 0f;
+
         AcquiredGoods = new();
         if (Requirements.GoodsRequirement != null)
         {
@@ -535,7 +562,16 @@ public class TryToProduceTask : Task
                 //p.PersonalStockpile.Add(Tool);
             }
 
-            if (TimeSpent >= TimeToProduce)
+            float productionTime = TimeToProduce;
+
+            // Reduce time to produce by 0.5% per skill level
+            if (Requirements.SkillRequirement != null)
+            {
+                int skill = (int)Requirements.SkillRequirement.skill;
+                productionTime *= (200 - p.Skills[skill].level) / 200f;
+            }
+
+            if (TimeSpent >= productionTime)
             {
                 Status.ReturnValue = Goods;
                 Status.Complete = true;
@@ -551,9 +587,6 @@ public class TryToProduceTask : Task
                     int skill = (int)Requirements.SkillRequirement.skill;
                     float experience = GoodsInfo.GetExperience(Goods) * Goods.Quantity;
 
-                    // At level 10, produce 5% more, at level 100 prdouce 50% more
-                    Goods.Quantity *= (1 + p.Skills[skill].level / 200f);
-
                     // E.g. if making 20 units of 1xp goods, chance is 10% + 20% = 30% to gain a level
                     if (r < SkillLevel.INCREASE_CHANCE + experience / 100)
                         p.Skills[skill].level++;
@@ -563,15 +596,12 @@ public class TryToProduceTask : Task
                 Task.Debug($"Successfully produced {Goods}");
             }
         }
-
         return Status;
     }
 
-    public override string ToString()
+    public override string Describe(string extra = "")
     {
-        string s = base.ToString() + Goods.ToString();
-        foreach (Task subtask in subTasks)
-            s += "\n" + subtask.ToString();
+        string s = base.Describe(Goods.ToString());
         return s;
     }
 }
@@ -653,6 +683,12 @@ public class GoToTask : Task
             Status.Complete = true;
         }
         return Status;
+    }
+
+    public override string Describe(string extra = "")
+    {
+        string s = base.Describe(destination.ToString());
+        return s;
     }
 }
 
@@ -759,5 +795,11 @@ public class TryToBuildTask : Task
         }
 
         return Status;
+    }
+
+    public override string Describe(string extra = "")
+    {
+        string s = base.Describe(BuildingType.ToString());
+        return s;
     }
 }
