@@ -12,10 +12,9 @@ public class KatabasisGame : Game
     public static KatabasisGame Instance { get; private set; }
     public static Viewport Viewport { get { return Instance.GraphicsDevice.Viewport; } }
     public static Vector2 ScreenSize { get { return new Vector2(Viewport.Width, Viewport.Height); } }
-    //public static GameTime GameTime { get; private set; }
+    
+    private Song _defaultBGM;
     private GameManager _gameManager;
-    //public static ParticleManager<ParticleState> ParticleManager { get; private set; }
-    //public static Grid Grid { get; private set; }
 
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
@@ -63,7 +62,18 @@ public class KatabasisGame : Game
         Globals.SpriteBatch = _spriteBatch;
         Sprites.Load(Content);
 
+        _defaultBGM = Globals.Content.Load<Song>("Desert-City");
+        MediaPlayer.Play(_defaultBGM);
+        MediaPlayer.IsRepeating = true;
+        MediaPlayer.Volume = 0.4f;
+        MediaPlayer.MediaStateChanged += SongRestarted;
+
         _gameManager = new();
+    }
+
+    void SongRestarted(object sender, System.EventArgs e)
+    {
+        // MediaPlayer.Play(_defaultBGM);
     }
 
     protected override void Update(GameTime gameTime)

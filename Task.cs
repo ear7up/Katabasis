@@ -504,6 +504,7 @@ public class TryToProduceTask : Task
                 if (goods.Type == GoodsType.TOOL)
                 {
                     // Add the tool quantity back, we're just borrowing it to use
+                    // TODO: this is bugged, if the tool was sourced from the PersonalStockpile, this dupes it
                     Tool = goods;
                     p.PersonalStockpile.Add(Tool);
                 }
@@ -538,14 +539,16 @@ public class TryToProduceTask : Task
                 foreach (Goods g in GoodsRequirements)
                 {
                     Goods req = new Goods(g);
-                    subTasks.Enqueue(new SourceGoodsTask(g));
+                    req.Quantity = Goods.Quantity;
+                    subTasks.Enqueue(new SourceGoodsTask(req));
                 }
             }
             // Otherwise, just pick one good to source
             else
             {
-                subTasks.Enqueue(new SourceGoodsTask(
-                    GoodsRequirements[Globals.Rand.Next(GoodsRequirements.Count)]));
+                Goods req = new Goods(GoodsRequirements[Globals.Rand.Next(GoodsRequirements.Count)]);
+                req.Quantity = Goods.Quantity;
+                subTasks.Enqueue(new SourceGoodsTask(req));
             }
         }
         else if (subTasks.Count == 0)
@@ -592,7 +595,9 @@ public class TryToProduceTask : Task
                         p.Skills[skill].level++;
                 }
 
+                float q = Goods.Quantity;
                 p.PersonalStockpile.Add(Goods);
+                Goods.Quantity = q;
                 Task.Debug($"Successfully produced {Goods}");
             }
         }

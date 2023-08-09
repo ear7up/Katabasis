@@ -1201,6 +1201,12 @@
 /processorParam:TextureFormat=Color
 /build:circle.png
 
+#begin Desert-City.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Desert-City.ogg
+
 #begin desert/bedouin_camps/001.png
 /importer:TextureImporter
 /processor:TextureProcessor

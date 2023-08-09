@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Media;
 
 namespace Katabasis;
 
@@ -13,6 +14,7 @@ public class GameManager
     public const int SECONDS_PER_DAY = 60;
     private float TimeOfDay = 0;
 
+    private Song _defaultBGM;
     private TextSprite _coordinateDisplay;
     private static TextSprite _debugDisplay;
     private static TextSprite _logoDisplay;
