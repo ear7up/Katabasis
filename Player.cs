@@ -11,7 +11,11 @@ public class Player
 
     public void Update()
     {
-        Property.Update();
         Kingdom.Update();
+    }
+
+    public void DailyUpdate()
+    {
+        Property.DailyUpdate();
     }
 }

@@ -34,11 +34,11 @@ public class Stockpile
             goods.Quantity = 0;
     }
 
-    // Apply decay rates
-    public void Update()
+    // Apply decay rates ("daily" rather than continuous)
+    public void DailyUpdate()
     {
         foreach (Goods g in _stock.Values)
-            g.Quantity -= GoodsInfo.GetDecayRate(g) * Globals.Time;
+            g.Quantity *= (1 - GoodsInfo.GetDecayRate(g));
     }
 
     // Takes goods from the stockpile, sets quantity to the amount taken (may be less than requested)

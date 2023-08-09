@@ -14,12 +14,12 @@ public class GameManager
     public const int SECONDS_PER_DAY = 60;
     private float TimeOfDay = 0;
 
-    private Song _defaultBGM;
     private TextSprite _coordinateDisplay;
     private static TextSprite _debugDisplay;
     private static TextSprite _logoDisplay;
     private static TextSprite _logoDisplay2;
     private static GridLayout _bottomLeftPanel;
+    private static GridLayout _bottomPanel;
     
     public bool TEST = false;
 
@@ -64,6 +64,7 @@ public class GameManager
         Action[] buttonActions = { BuildButton, Button2, Button3, Button4, Button5, Button6 };
         _bottomLeftPanel = new(Sprites.BottomLeftPanel);
         _bottomLeftPanel.SetMargin(left: 49, top: 133);
+        _bottomLeftPanel.SetPadding(right: -20);
 
         UIElement buildElement = new(
             Sprites.BottomLeftButtons[0], 
@@ -80,6 +81,25 @@ public class GameManager
 
         UI.AddElement(_bottomLeftPanel, UI.Position.BOTTOM_LEFT);
 
+        _bottomPanel = new(Sprites.BottomPanel);
+        _bottomPanel.SetPadding(bottom: -250);
+        _bottomPanel.SetMargin(left: 30, top: 60);
+        _bottomPanel.SetContent(0, 0, new UIElement(Sprites.farms[0], scale: 0.3f, 
+            onClick: BuildFarm, onHover: UI.SetTooltipText, tooltip: "Farm"));
+        _bottomPanel.SetContent(1, 0, new UIElement(Sprites.mines[0], scale: 0.3f, 
+            onClick: BuildMine, onHover: UI.SetTooltipText, tooltip: "Mine"));
+        _bottomPanel.SetContent(2, 0, new UIElement(Sprites.ranches[0], scale: 0.3f, 
+            onClick: BuildRanch, onHover: UI.SetTooltipText, tooltip: "Ranch"));
+        _bottomPanel.SetContent(0, 1, new UIElement(Sprites.barracks[0], scale: 0.3f, 
+            onClick: BuildBarracks, onHover: UI.SetTooltipText, tooltip: "Barracks"));
+        _bottomPanel.SetContent(1, 1, new UIElement(Sprites.houses[0], scale: 0.3f, 
+            onClick: BuildHouse, onHover: UI.SetTooltipText, tooltip: "House"));
+        _bottomPanel.SetContent(2, 1, new UIElement(Sprites.granaries[0], scale: 0.3f, 
+            onClick: BuildGranary, onHover: UI.SetTooltipText, tooltip: "Granary"));
+        _bottomPanel.Hide();
+
+        UI.AddElement(_bottomPanel, UI.Position.BOTTOM_LEFT);
+
         if (TEST)
         {
             RunTests();
@@ -92,6 +112,40 @@ public class GameManager
                 Person person = Person.CreatePerson(_map.Origin, _map.GetOriginTile());
                 _player1.Kingdom.AddPerson(person);
             }
+        }
+    }
+
+    public void BuildFarm() { Build(BuildingType.FARM); }
+    public void BuildMine() { Build(BuildingType.MINE); }
+    public void BuildRanch() { Build(BuildingType.RANCH); }
+    public void BuildBarracks() { Build(BuildingType.BARRACKS); }
+    public void BuildHouse() { Build(BuildingType.STONE_HOUSE); }
+    public void BuildGranary() { Build(BuildingType.GRANARY); }
+
+    public void Build(BuildingType buildingType)
+    {
+        if (InputManager.Mode == InputManager.BUILD_MODE)
+        {
+            InputManager.SwitchToMode(InputManager.CAMERA_MODE);
+        }
+        else
+        {
+            _map.CreateEditBuilding(buildingType);
+            InputManager.SwitchToMode(InputManager.BUILD_MODE);
+        }
+    }
+
+    public void BuildButton()
+    {
+        if (_bottomPanel.Hidden)
+        {
+            _bottomPanel.Unhide();
+        }
+        else
+        {
+            InputManager.SwitchToMode(InputManager.CAMERA_MODE);
+            _map.ClearEditBuilding();
+            _bottomPanel.Hide();
         }
     }
 
@@ -115,14 +169,6 @@ public class GameManager
     public void TogglePause()
     {
         InputManager.Paused = !InputManager.Paused;
-    }
-
-    public void BuildButton()
-    {
-        if (InputManager.Mode == InputManager.BUILD_MODE)
-            InputManager.SwitchToMode(InputManager.CAMERA_MODE);
-        else
-            InputManager.SwitchToMode(InputManager.BUILD_MODE);
     }
 
     public void Button2()
@@ -174,11 +220,13 @@ public class GameManager
         _player1.Update();
         _map.Update();
 
-        // Give each person a "daily" update for tasks that don't need to be constantly checked
+        // Give a "daily" update for tasks that don't need to be constantly checked
         TimeOfDay += Globals.Time;
         if (TimeOfDay > SECONDS_PER_DAY)
         {
             TimeOfDay = 0f;
+            _map.DailyUpdate();
+            _player1.DailyUpdate();
             foreach (Person p in _player1.Kingdom.People)
                 p.DailyUpdate();
         }

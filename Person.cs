@@ -178,6 +178,8 @@ public class Person : Entity, Drawable
 
     public void DailyUpdate()
     {
+        PersonalStockpile.DailyUpdate();
+
         // A year is 10 days, chance to die every 1/10th of a year after hitting old age
         Age += 0.1f;
         if (Age >= OLD_AGE && Globals.Rand.NextFloat(0f, 1f) <= 0.01f)

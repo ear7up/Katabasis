@@ -22,6 +22,22 @@ public class GridLayout : UIElement
             row.Add(null);
     }
 
+    public override void Hide()
+    {
+        Hidden = true;
+        foreach (List<UIElement> row in GridContent)
+            foreach (UIElement element in row)
+                element.Hide();
+    }
+
+    public override void Unhide()
+    {
+        Hidden = false;
+        foreach (List<UIElement> row in GridContent)
+            foreach (UIElement element in row)
+                element.Unhide();
+    }
+
     public void SetContent(int x, int y, UIElement content)
     {
         Expand(x, y);

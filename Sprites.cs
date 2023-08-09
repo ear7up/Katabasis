@@ -17,14 +17,14 @@ static class Sprites
 	public static SpriteFont Font2 { get; private set; }
 	
 	// Buildings
-	private static List<Texture2D> buildings;
-	private static List<Texture2D> barracks;
-	private static List<Texture2D> farms;
-	private static List<Texture2D> farmsRiver;
-	private static List<Texture2D> granaries;
-	private static List<Texture2D> houses;
-	private static List<Texture2D> mines;
-	private static List<Texture2D> ranches;
+	public static List<Texture2D> buildings;
+	public static List<Texture2D> barracks;
+	public static List<Texture2D> farms;
+	public static List<Texture2D> farmsRiver;
+	public static List<Texture2D> granaries;
+	public static List<Texture2D> houses;
+	public static List<Texture2D> mines;
+	public static List<Texture2D> ranches;
 
 	// Animals
 	public static Texture2D Cow;
@@ -43,6 +43,7 @@ static class Sprites
 	// UI
 	public static Texture2D Clock;
 	public static Texture2D BottomLeftPanel;
+	public static Texture2D BottomPanel;
 	public static List<Texture2D> BottomLeftButtons;
 	public static Texture2D Tooltip;
 
@@ -88,6 +89,7 @@ static class Sprites
 		// UI
 		Clock = content.Load<Texture2D>("UI_maybe/clock");
 		BottomLeftPanel = content.Load<Texture2D>("UI_maybe/panel1");
+		BottomPanel = content.Load<Texture2D>("UI_maybe/bottom_panel");
 		BottomLeftButtons = LoadTextures("UI_maybe/buttons", 8);
 		Tooltip = content.Load<Texture2D>("UI_maybe/tooltip");
 	}

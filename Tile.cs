@@ -167,6 +167,11 @@ public class Tile
             b.Update();
     }
 
+    public void DailyUpdate()
+    {
+        Stockpile.DailyUpdate();
+    }
+
     public void Unhighlight()
     {
         Vector2 pos = BaseSprite.Position;

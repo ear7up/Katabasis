@@ -26,21 +26,16 @@ public class Building : Drawable
     public BuildingType Type;
     public Sprite Sprite;
 
-    public static Building Random(bool temporary = false)
+    public static Building Random(BuildingType type = BuildingType.NONE, bool temporary = false)
     {
         // Random building type (excluding NONE)
-        Array buildingTypes = Enum.GetValues(typeof(BuildingType));
-        int i = Globals.Rand.Next(buildingTypes.Length - 1);
+        if (type == BuildingType.NONE)
+        {
+            Array buildingTypes = Enum.GetValues(typeof(BuildingType));
+            type = (BuildingType)Globals.Rand.Next(buildingTypes.Length - 1);
+        }
 
-        //Sprite sprite = new Sprite(Sprites.RandomBuilding(), Vector2.Zero);
-        //sprite.ScaleDown(0.7f);
-        //Building b = new Building(null, sprite);
-
-        Building b = CreateBuilding(null, (BuildingType)i);
-
-        //if (!temporary)
-        //    Globals.Ybuffer.Add(b);
-
+        Building b = CreateBuilding(null, type);
         return b;
     }
 
@@ -55,10 +50,7 @@ public class Building : Drawable
         Type = buildingType;
     }
 
-    public static Building CreateBuilding(
-        Tile location, 
-        BuildingType buildingType = BuildingType.NONE, 
-        Sprite sprite = null)
+    public static Building CreateBuilding(Tile location, BuildingType buildingType = BuildingType.NONE)
     {
         // Try lay out the buliding in the empty space on the diamond based on buliding count
         Vector2 position = Vector2.Zero;
@@ -69,30 +61,12 @@ public class Building : Drawable
             position.Y = location.GetPosition().Y;
         }
 
-        /*
-        switch (location.Buildings.Count)
-        {
-            case 0: position += new Vector2(0, -Map.TileSize.Y / 2); break;
-            case 1: position += new Vector2(Map.TileSize.X / 2, 0); break;
-            case 2: position += new Vector2(0, Map.TileSize.X / 2); break;
-            case 3: position += new Vector2(-Map.TileSize.X / 2, 0); break;
-        }
-        */
-
         // TODO: need sprites for all building types
-        switch (buildingType)
-        {
-            default: sprite = new Sprite(Sprites.RandomBuilding(buildingType), position); break;
-        }
-
-        // TODO: this building won't get Update() called on it
+        Sprite sprite = new Sprite(Sprites.RandomBuilding(buildingType), position);
         Building b = new Building(location, sprite, buildingType);
-        //b.Sprite.ScaleDown(0.7f);
 
         if (location != null)
             location.AddBuilding(b);
-
-        //Globals.Ybuffer.Add(b);
 
         return b;    
     }
@@ -122,6 +96,9 @@ public class Building : Drawable
 
     public static bool ConfirmBuilding(Building building, Tile location)
     {
+        if (location == null)
+            return false;
+
         // Force farms to be river type on rivers
         if (location.Type == TileType.RIVER && building.Type == BuildingType.FARM)
         {

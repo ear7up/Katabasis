@@ -14,15 +14,22 @@ public class UIElement
     public Action OnClick;
     public Action<Object> OnHover;
     public string TooltipText;
+    public bool Hidden;
 
-    public UIElement(Texture2D texture, float scale = 1f, Action onClick = null, Action<Object> onHover = null)
+    public UIElement(
+        Texture2D texture, 
+        float scale = 1f, 
+        Action onClick = null, 
+        Action<Object> onHover = null,
+        string tooltip = "")
     {
         Image = new Sprite(texture, Vector2.Zero);
         Image.DrawRelativeToOrigin = false;
         Image.Scale = scale;
         OnClick = onClick;
         OnHover = onHover;
-        TooltipText = "";
+        TooltipText = tooltip;
+        Hidden = false;
 
         Padding = new int[4] { 0, 0, 0, 0 };
         Margin = new int[4] { 10, 0, 0, 10 };
@@ -34,8 +41,22 @@ public class UIElement
         Content = content;
     }
 
+    public virtual void Hide()
+    {
+        Hidden = true;
+    }
+
+    public virtual void Unhide()
+    {
+        Hidden = false;
+    }
+
     public virtual void Update()
     {
+        // Don't process clicks or hovers on hidden elements
+        if (Hidden)
+            return;
+
         if (OnClick != null && InputManager.Clicked && Image.GetBounds().Contains(InputManager.MousePos))
         {
             // Consume the click event and call the OnClick function
@@ -51,6 +72,9 @@ public class UIElement
 
     public virtual void Draw(Vector2 offset)
     {
+        if (Hidden)
+            return;
+
         // Assume all UIElement images inherit their position from their UI container
         Image.Position = offset;
         Image.Draw();
@@ -66,27 +90,29 @@ public class UIElement
         }
     }
 
-    public void SetPadding(int top = -1, int right = -1, int bottom = -1, int left = -1)
+    // TODO: you can't remove padding once set
+    public void SetPadding(int top = 0, int right = 0, int bottom = 0, int left = 0)
     {
-        if (top >= 0)
+        if (top != 0)
             Padding[(int)Direction.TOP] = top;
-        if (right >= 0)
+        if (right != 0)
             Padding[(int)Direction.RIGHT] = right;
-        if (bottom >= 0)
+        if (bottom != 0)
             Padding[(int)Direction.BOTTOM] = bottom;
-        if (left >= 0)
+        if (left != 0)
             Padding[(int)Direction.LEFT] = left;
     }
 
-    public void SetMargin(int top = -1, int right = -1, int bottom = -1, int left = -1)
+    // TODO: you can't remove margin once set
+    public void SetMargin(int top = 0, int right = 0, int bottom = 0, int left = 0)
     {
-        if (top >= 0)
+        if (top != 0)
             Margin[(int)Direction.TOP] = top;
-        if (right >= 0)
+        if (right != 0)
             Margin[(int)Direction.RIGHT] = right;
-        if (bottom >= 0)
+        if (bottom != 0)
             Margin[(int)Direction.BOTTOM] = bottom;
-        if (left >= 0)
+        if (left != 0)
             Margin[(int)Direction.LEFT] = left;
     }
 
@@ -99,8 +125,8 @@ public class UIElement
 
     public int Height()
     {
-        return Padding[(int)Direction.LEFT] + 
+        return Padding[(int)Direction.TOP] + 
                (int)(Image.GetBounds().Height) + 
-               Padding[(int)Direction.RIGHT];
+               Padding[(int)Direction.BOTTOM];
     }
 }
