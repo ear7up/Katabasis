@@ -66,8 +66,8 @@ public class Sprite
             Bounds.Y = (int)Position.Y;
         }
         
-        Bounds.Width =  (int)(Texture.Width);
-        Bounds.Height = (int)(Texture.Height);
+        Bounds.Width =  (int)(Texture.Width * Scale);
+        Bounds.Height = (int)(Texture.Height * Scale);
         return Bounds;
     }
 }

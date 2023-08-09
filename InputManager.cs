@@ -61,7 +61,7 @@ public static class InputManager
     }
 
     // Switch to camera mode and re-initialize variables
-    private static void SwitchToMode(int mode)
+    public static void SwitchToMode(int mode)
     {
         Mode = mode;
         _dragStart = Vector2.Zero;
@@ -73,8 +73,6 @@ public static class InputManager
     {
         // If 'R' was pressed, set the CameraReset state
         CameraReset = keyboardState.IsKeyUp(Keys.R) && lastKeyboardState.IsKeyDown(Keys.R);
-
-        Clicked = (mouseState.LeftButton == ButtonState.Released && lastMouseState.LeftButton == ButtonState.Pressed);
 
         // Track click-and-drag
         if (mouseState.LeftButton == ButtonState.Pressed && lastMouseState.LeftButton != ButtonState.Pressed)
@@ -103,7 +101,7 @@ public static class InputManager
             SwitchToMode(CAMERA_MODE);
         }
         // Confirm the building if left click is pressed
-        else if (lastMouseState.LeftButton == ButtonState.Released && mouseState.LeftButton == ButtonState.Pressed)
+        else if (Clicked)
         {
             ConfirmBuilding = true;
         }
@@ -115,6 +113,11 @@ public static class InputManager
         {
             ConfirmBuilding = false;
         }
+    }
+
+    public static void ConsumeClick()
+    {
+        ConfirmBuilding = false;
     }
 
     public static void Update()
@@ -138,6 +141,9 @@ public static class InputManager
         ScrollValue = currentMouseWheelValue - previousMouseWheelValue;
 
         DetermineMode();
+
+        Clicked = (mouseState.LeftButton == ButtonState.Released && 
+                  lastMouseState.LeftButton == ButtonState.Pressed);
 
         // Default to camera mode controls unless the mode blocks camera movement
         switch (Mode)

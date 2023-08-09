@@ -56,24 +56,28 @@ public class GameManager
         BuildingInfo.Init();
 
         UI.Init();
-        //UI.AddElement(new UIElement(Sprites.BottomLeftPanel, scale: 1.1f), UI.Position.BOTTOM_LEFT);
-        UI.AddElement(new UIElement(Sprites.Clock, scale: 0.5f, onClick: TogglePause), UI.Position.TOP_RIGHT);
+
+        UI.AddElement(new UIElement(Sprites.Clock, scale: 0.5f, onClick: TogglePause), 
+            UI.Position.TOP_RIGHT);
 
         // Create the bottom left panel with a 2x3 grid of clickable buttons
-        const int ROWS = 2;
-        Action[] buttonActions = { Button1, Button2, Button3, Button4, Button5, Button6 };
+        Action[] buttonActions = { BuildButton, Button2, Button3, Button4, Button5, Button6 };
         _bottomLeftPanel = new(Sprites.BottomLeftPanel);
         _bottomLeftPanel.SetMargin(left: 49, top: 133);
 
-        for (int y = 0; y < ROWS; y++)
-        {
-            for (int x = 0; x < 3; x++)
-            {
-                Texture2D button = Sprites.BottomLeftButtons[y * 3 + x];
-                Action buttonAction = buttonActions[y * 3 + x];
-                _bottomLeftPanel.SetContent(x, y, new UIElement(button, onClick: buttonAction));
-            }
-        }
+        UIElement buildElement = new(
+            Sprites.BottomLeftButtons[0], 
+            onClick: BuildButton, 
+            onHover: UI.SetTooltipText);
+        buildElement.TooltipText = "Build";
+
+        _bottomLeftPanel.SetContent(0, 0, buildElement);
+        _bottomLeftPanel.SetContent(0, 1, new UIElement(Sprites.BottomLeftButtons[1], onClick: Button2));
+        _bottomLeftPanel.SetContent(1, 0, new UIElement(Sprites.BottomLeftButtons[2], onClick: Button3));
+        _bottomLeftPanel.SetContent(1, 1, new UIElement(Sprites.BottomLeftButtons[3], onClick: Button4));
+        _bottomLeftPanel.SetContent(2, 0, new UIElement(Sprites.BottomLeftButtons[4], onClick: Button5));
+        _bottomLeftPanel.SetContent(2, 1, new UIElement(Sprites.BottomLeftButtons[5], onClick: Button6));
+
         UI.AddElement(_bottomLeftPanel, UI.Position.BOTTOM_LEFT);
 
         if (TEST)
@@ -113,9 +117,12 @@ public class GameManager
         InputManager.Paused = !InputManager.Paused;
     }
 
-    public void Button1()
+    public void BuildButton()
     {
-        Console.WriteLine("Button 1 pressed");
+        if (InputManager.Mode == InputManager.BUILD_MODE)
+            InputManager.SwitchToMode(InputManager.CAMERA_MODE);
+        else
+            InputManager.SwitchToMode(InputManager.BUILD_MODE);
     }
 
     public void Button2()

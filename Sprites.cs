@@ -44,6 +44,7 @@ static class Sprites
 	public static Texture2D Clock;
 	public static Texture2D BottomLeftPanel;
 	public static List<Texture2D> BottomLeftButtons;
+	public static Texture2D Tooltip;
 
 	public static void Load(ContentManager content)
 	{
@@ -88,6 +89,7 @@ static class Sprites
 		Clock = content.Load<Texture2D>("UI_maybe/clock");
 		BottomLeftPanel = content.Load<Texture2D>("UI_maybe/panel1");
 		BottomLeftButtons = LoadTextures("UI_maybe/buttons", 8);
+		Tooltip = content.Load<Texture2D>("UI_maybe/tooltip");
 	}
 
 	public static Texture2D RandomBuilding()

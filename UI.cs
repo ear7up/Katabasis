@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 static class UI
@@ -7,6 +8,9 @@ static class UI
     public static List<UIElement> BottomLeft;
     public static List<UIElement> TopRight;
     public static List<UIElement> BottomRight;
+
+    public static UIElement Tooltip;
+    public static TextSprite TooltipText;
 
     public enum Position
     {
@@ -20,6 +24,8 @@ static class UI
         BottomLeft = new();
         TopRight = new();
         BottomRight = new();
+        Tooltip = new(Sprites.Tooltip);
+        TooltipText = new TextSprite(Sprites.Font);
     }
 
     public static void AddElement(UIElement element, Position position)
@@ -36,6 +42,12 @@ static class UI
 
     public static void Update()
     {
+        // Tooltip text needs to be cleared to disable hover,
+        // must be cleared before updating UI elements, which will update on hover
+        TooltipText.Text = "";
+        Tooltip.Image.Position = InputManager.ScreenMousePos + new Vector2(15f, -15f);
+        TooltipText.Position = Tooltip.Image.Position + new Vector2(1f, 1f);
+
         List<UIElement>[] all = { Top, TopLeft, TopRight, BottomLeft, BottomRight };
         foreach (List<UIElement> list in all)
             foreach (UIElement element in list)
@@ -87,5 +99,21 @@ static class UI
             relative.Y = Globals.WindowSize.Y - element.Height();
             element.Draw(relative);
         }
+
+        // Resize tooltip box to fit text
+        float ratio = TooltipText.Width() / Tooltip.Image.Texture.Width;
+        Tooltip.Image.Scale = ratio + 0.07f;
+
+        // Draw tooltip at cursor if the text is set
+        if (TooltipText.Text.Length > 0)
+        {
+            Tooltip.Draw(Tooltip.Image.Position);
+            TooltipText.Draw();
+        }
+    }
+
+    public static void SetTooltipText(object obj)
+    {
+        TooltipText.Text = obj.ToString();
     }
 }

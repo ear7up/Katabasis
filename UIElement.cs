@@ -12,13 +12,17 @@ public class UIElement
     public Sprite Image;
     public UIElement Content;
     public Action OnClick;
+    public Action<Object> OnHover;
+    public string TooltipText;
 
-    public UIElement(Texture2D texture, float scale = 1f, Action onClick = null)
+    public UIElement(Texture2D texture, float scale = 1f, Action onClick = null, Action<Object> onHover = null)
     {
         Image = new Sprite(texture, Vector2.Zero);
         Image.DrawRelativeToOrigin = false;
         Image.Scale = scale;
         OnClick = onClick;
+        OnHover = onHover;
+        TooltipText = "";
 
         Padding = new int[4] { 0, 0, 0, 0 };
         Margin = new int[4] { 10, 0, 0, 10 };
@@ -33,7 +37,16 @@ public class UIElement
     public virtual void Update()
     {
         if (OnClick != null && InputManager.Clicked && Image.GetBounds().Contains(InputManager.MousePos))
+        {
+            // Consume the click event and call the OnClick function
+            InputManager.ConsumeClick();
             OnClick();
+            
+        }
+        else if (OnHover != null && Image.GetBounds().Contains(InputManager.MousePos))
+        {
+            OnHover(TooltipText);
+        }
     }
 
     public virtual void Draw(Vector2 offset)
@@ -80,14 +93,14 @@ public class UIElement
     public int Width()
     {
         return Padding[(int)Direction.LEFT] + 
-               (int)(Image.GetBounds().Width * Image.Scale) + 
+               (int)(Image.GetBounds().Width) + 
                Padding[(int)Direction.RIGHT];
     }
 
     public int Height()
     {
         return Padding[(int)Direction.LEFT] + 
-               (int)(Image.GetBounds().Height * Image.Scale) + 
+               (int)(Image.GetBounds().Height) + 
                Padding[(int)Direction.RIGHT];
     }
 }
