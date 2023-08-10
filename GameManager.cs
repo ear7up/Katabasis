@@ -20,6 +20,9 @@ public class GameManager
     private static TextSprite _logoDisplay2;
     private static GridLayout _bottomLeftPanel;
     private static GridLayout _bottomPanel;
+    public static GridLayout _popupPanel;
+    private static TextSprite _popupText1;
+    private static TextSprite _popupText2;
     
     public bool TEST = false;
 
@@ -56,13 +59,15 @@ public class GameManager
         GoodsInfo.Init();
         BuildingInfo.Init();
 
+        // Depends on GoodsInfo.Init()
+        Market.Init();
+
         UI.Init();
 
         UI.AddElement(new UIElement(Sprites.Clock, scale: 0.5f, onClick: TogglePause), 
             UI.Position.TOP_RIGHT);
 
         // Create the bottom left panel with a 2x3 grid of clickable buttons
-        Action[] buttonActions = { BuildButton, TileButton, Button3, Button4, Button5, Button6 };
         _bottomLeftPanel = new(Sprites.BottomLeftPanel);
         _bottomLeftPanel.SetMargin(left: 49, top: 70);
         _bottomLeftPanel.SetPadding(right: -20, bottom: -170);
@@ -71,15 +76,16 @@ public class GameManager
             Sprites.BottomLeftButtons[0], 
             onClick: BuildButton, 
             onHover: UI.SetTooltipText);
-        buildElement.TooltipText = "Build (B)";
+        buildElement.TooltipText = "(B)uild";
 
         _bottomLeftPanel.SetContent(0, 0, buildElement);
         _bottomLeftPanel.SetContent(1, 0, new UIElement(Sprites.BottomLeftButtons[1], 
-            onClick: TileButton, onHover: UI.SetTooltipText, tooltip: "Acquire Tile (T)"));
+            onClick: TileButton, onHover: UI.SetTooltipText, tooltip: "Buy (T)ile"));
         _bottomLeftPanel.SetContent(2, 0, new UIElement(Sprites.BottomLeftButtons[2], onClick: Button3));
         _bottomLeftPanel.SetContent(0, 1, new UIElement(Sprites.BottomLeftButtons[3], onClick: Button4));
         _bottomLeftPanel.SetContent(1, 1, new UIElement(Sprites.BottomLeftButtons[4], onClick: Button5));
-        _bottomLeftPanel.SetContent(2, 1, new UIElement(Sprites.BottomLeftButtons[5], onClick: Button6));
+        _bottomLeftPanel.SetContent(2, 1, new UIElement(Sprites.BottomLeftButtons[5], 
+            onHover: UI.SetTooltipText, tooltip: "(I)nventory", onClick: ToggleGoodsDisplay));
 
         UI.AddElement(_bottomLeftPanel, UI.Position.BOTTOM_LEFT);
 
@@ -101,6 +107,15 @@ public class GameManager
         _bottomPanel.Hide();
 
         UI.AddElement(_bottomPanel, UI.Position.BOTTOM_LEFT);
+
+        _popupPanel = new(Sprites.TallPanel);
+        _popupPanel.Hidden = true;
+        _popupText1 = new(Sprites.Font);
+        _popupText1.Hidden = true;
+        _popupText1.Scale = 0.6f;
+        _popupText2 = new(Sprites.Font);
+        _popupText2.Hidden = true;
+        _popupText2.Scale = 0.6f;
 
         if (TEST)
         {
@@ -200,9 +215,41 @@ public class GameManager
         Console.WriteLine("Button 5 pressed");
     }
 
-    public void Button6()
+    public void ToggleGoodsDisplay()
     {
-        Console.WriteLine("Button 6 pressed");
+        if (_popupPanel.Hidden)
+        {
+            _popupPanel.Unhide();
+            _popupText1.Unhide();
+            _popupText2.Unhide();
+
+            _popupPanel.Image.Position = new Vector2(Globals.WindowSize.X / 2 - _popupPanel.Width() / 2, 50f);
+            _popupText1.Position = _popupPanel.Image.Position + new Vector2(40f, 75f);
+            _popupText2.Position = _popupPanel.Image.Position + new Vector2(265f, 75f);
+        }
+        else
+        {
+            _popupPanel.Hide();
+            _popupText1.Hide();
+            _popupText2.Hide();
+        }
+    }
+
+    public void HandleInventoryDisplay()
+    {
+        string goods = _player1.Kingdom.PrivateGoods();
+        string[] lines = goods.Split('\n');
+        
+        // Currently supports showing up to 72 goods
+        string goods1 = "";
+        string goods2 = "";
+        for (int i = 0; i < lines.Length; i++)
+            if (i < 35)
+                goods1 += lines[i] + "\n";
+            else if (i < 73)
+                goods2 += lines[i] + "\n";
+        _popupText1.Text = goods1;
+        _popupText2.Text = goods2;
     }
 
     public void Update(GameTime gameTime)
@@ -215,6 +262,9 @@ public class GameManager
         
         if (InputManager.BPressed)
             BuildButton();
+
+        if (InputManager.IPressed)
+            ToggleGoodsDisplay();
 
         // Calculate the real mouse position by inverting the camera transformations
         InputManager.MousePos = Vector2.Transform(InputManager.MousePos, Matrix.Invert(_camera.Transform));
@@ -231,6 +281,11 @@ public class GameManager
 
         _player1.Update();
         _map.Update();
+        Market.Update();
+
+        // TODO: Write code to support click and drag on UIElements
+        _popupPanel.Update();
+        HandleInventoryDisplay();
 
         HandleTileAcquisition();
 
@@ -328,6 +383,11 @@ public class GameManager
 
         // Draw the user interface
         UI.Draw();
+
+        // Draw the popup interface
+        _popupPanel.Draw(_popupPanel.Image.Position);
+        _popupText1.Draw();
+        _popupText2.Draw();
 
         // Draw the current coordinates at the cursor location
         _coordinateDisplay.Draw();

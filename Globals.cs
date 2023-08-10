@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content;
 
@@ -14,5 +15,10 @@ public static class Globals
     public static void Update(GameTime gt)
     {
         Time = (float)gt.ElapsedGameTime.TotalSeconds;
+    }
+
+    public static string Title(string s)
+    {
+        return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(s.Replace('_', ' ').ToLower());
     }
 }

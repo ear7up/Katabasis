@@ -20,6 +20,19 @@ public class Stockpile
         goods.Quantity = 0;
     }
 
+    // Add goods from another stockpile to this one
+    public void Sum(Stockpile other)
+    {
+        foreach (Goods g in other.Values())
+        {
+            Goods current = (Goods)_stock[g.GetId()];
+            if (current != null)
+                current.Quantity += g.Quantity;
+            else
+                _stock.Add(g.GetId(), new Goods(g));
+        }
+    }
+
     // Takes goods from the stockpile, sets quantity to the amount taken (may be less than requested)
     public void Take(Goods goods)
     {
@@ -91,11 +104,10 @@ public class Stockpile
 
     public override string ToString()
     {
-        string s = "[\n";
+        string s = "\n";
         foreach (Goods g in _stock.Values)
-        {
-            s += "  " + g.ToString() + "\n";
-        }
-        return s + "]";
+            if (g.Quantity >= 1f)
+                s += "  " + g.ToString() + "\n";
+        return s + "";
     }
 }

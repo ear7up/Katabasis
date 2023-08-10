@@ -107,4 +107,18 @@ public class Kingdom
             wealth += t.Wealth();
         return wealth;
     }
+
+    // Add up all the goods in all citizen's stockpiles, plus the tile stockpiles
+    // and return a detailed list of goods, quantities, and values
+    public string PrivateGoods()
+    {
+        string s = "Privately Owned Goods\n====================\n";
+        Stockpile total = new();
+        foreach (Person p in People)
+            total.Sum(p.PersonalStockpile);
+        foreach (Tile t in OwnedTiles)
+            total.Sum(t.Stockpile);
+        s += total.ToString();
+        return s;
+    }
 }

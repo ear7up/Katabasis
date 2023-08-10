@@ -108,7 +108,7 @@ public class GoodsInfo
                     case Goods.War.CHARIOT: DefaultPrice = 12f; break;
                     default: DefaultPrice = 6f; break;
                 }
-                UseRate = 0.001f; 
+                UseRate = 0.001f;
                 break;
             }
             case GoodsType.SMITHED:
@@ -170,10 +170,16 @@ public class GoodsInfo
             }
         }
 
+        // Value units are in seconds, so these are the same thing at init time
+        TimeToProduce = DefaultPrice;
+
         // If it takes a long time to use the object, only produce a few at a time and grant bonus skill xp
         if (UseRate < 0.005f && DecayRate == 0f)
         {
-            DefaultProductionQuanity = 4;
+            if (type == GoodsType.TOOL)
+                DefaultProductionQuanity = 1;
+            else
+                DefaultProductionQuanity = 4;
             Experience = 5;
         }
     }
@@ -250,7 +256,10 @@ public class GoodsInfo
     {
         int type = Goods.TypeFromId(goodsId);
         int subType = Goods.SubTypeFromid(goodsId);
-        return Data[type][subType].DefaultPrice;
+        GoodsInfo[] goods = Data[type];
+        if (subType < goods.Length)
+            return goods[subType].DefaultPrice;
+        return 0f;
     }
 
     // Skill modifiers?

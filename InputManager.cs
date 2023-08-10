@@ -19,6 +19,7 @@ public static class InputManager
     // Pressing B no longer toggles build mode, it just toggles the build ui
     // clicking on a building type in the UI is what enables build mode
     public static bool BPressed;
+    public static bool IPressed;
 
     // Camera movement
     private static Vector2 _dragStart;
@@ -137,6 +138,7 @@ public static class InputManager
                   lastMouseState.LeftButton == ButtonState.Pressed);
 
         BPressed = keyboardState.IsKeyUp(Keys.B) && lastKeyboardState.IsKeyDown(Keys.B);
+        IPressed = keyboardState.IsKeyUp(Keys.I) && lastKeyboardState.IsKeyDown(Keys.I);
 
         // Default to camera mode controls unless the mode blocks camera movement
         switch (Mode)

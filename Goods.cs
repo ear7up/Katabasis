@@ -93,8 +93,8 @@ public class Goods
 
     public enum RawMeat
     {
-        PORK, BEEF, MUTTON, DUCK, FOWL, 
-        GOOSE, QUAIL, GAME, FISH
+        RAW_PORK, RAW_BEEF, RAW_MUTTON, RAW_DUCK, RAW_FOWL, 
+        RAW_GOOSE, RAW_QUAIL, RAW_GAME, RAW_FISH
     }
 
     public static int NUM_GOODS_TYPES = 0;
@@ -159,7 +159,7 @@ public class Goods
 
     public override string ToString()
     {
-        string typeName = Enum.GetName(typeof(GoodsType), Type);
+        string typeName = Globals.Title(Enum.GetName(typeof(GoodsType), Type));
         string subTypeName = "UNDEFINED";
         switch (Type)
         {
@@ -175,7 +175,10 @@ public class Goods
             case GoodsType.SMITHED: subTypeName = Enum.GetName(typeof(Smithed), SubType); break;
             case GoodsType.RAW_MEAT: subTypeName = Enum.GetName(typeof(RawMeat), SubType); break;
         }
-        return $"({typeName}.{subTypeName}, qty={Quantity})";
+        subTypeName = Globals.Title(subTypeName);
+        float value = Market.CheckPrice(GetId()) * Quantity;
+        //return $"{typeName}.{subTypeName} x{(int)Quantity} (${value}";
+        return $"{subTypeName} x{(int)Quantity} (${(int)value})";
     }
 
     // Subtract and return as much of the requested quantity if possible

@@ -79,6 +79,17 @@ public class Building : Drawable
                Type == BuildingType.RANCH;
     }
 
+    public static bool EquivalentType(BuildingType a, BuildingType b)
+    {
+        if (a == b)
+            return true;
+        if (a == BuildingType.FARM && b == BuildingType.FARM_RIVER)
+            return true;
+        if (a == BuildingType.FARM_RIVER && b == BuildingType.FARM)
+            return true;
+        return false;
+    }
+
     public static bool ValidPlacement(Building building, Tile location)
     {
         if (location == null)

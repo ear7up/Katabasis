@@ -182,14 +182,14 @@ public class GoodsProduction
         g.SubType = (int)Goods.FoodAnimal.BEEF;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.BEEF)),
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_BEEF)),
             levelRequirement: new SkillLevel(Skill.COOKING, 10)));
 
         // raw duck -> duck
         g.SubType = (int)Goods.FoodAnimal.DUCK;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.DUCK)),
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_DUCK)),
             levelRequirement: new SkillLevel(Skill.COOKING, 10)));
 
         // farm -> eggs
@@ -203,21 +203,21 @@ public class GoodsProduction
         g.SubType = (int)Goods.FoodAnimal.FISH;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.FISH)),
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_FISH)),
             levelRequirement: new SkillLevel(Skill.COOKING, 10)));
 
         // raw game -> game
         g.SubType = (int)Goods.FoodAnimal.GAME;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.GAME)),
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_GAME)),
             levelRequirement: new SkillLevel(Skill.COOKING, 10)));
 
         // raw goose -> goose
         g.SubType = (int)Goods.FoodAnimal.GOOSE;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.GOOSE)),
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_GOOSE)),
             levelRequirement: new SkillLevel(Skill.COOKING, 10)));
 
         // farm + forest -> honey
@@ -238,28 +238,28 @@ public class GoodsProduction
         g.SubType = (int)Goods.FoodAnimal.MUTTON;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.MUTTON)),
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_MUTTON)),
             levelRequirement: new SkillLevel(Skill.COOKING, 20)));
 
         // raw fowl -> fowl
         g.SubType = (int)Goods.FoodAnimal.FOWL;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.FOWL)),
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_FOWL)),
             levelRequirement: new SkillLevel(Skill.COOKING, 20)));
 
         // raw pork -> pork
         g.SubType = (int)Goods.FoodAnimal.PORK;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.PORK)),
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_PORK)),
             levelRequirement: new SkillLevel(Skill.COOKING, 20)));
 
         // raw quail -> quail
         g.SubType = (int)Goods.FoodAnimal.QUAIL;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.QUAIL)),
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_QUAIL)),
             levelRequirement: new SkillLevel(Skill.COOKING, 20)));
 
         g.Type = GoodsType.FOOD_PLANT;
@@ -459,63 +459,63 @@ public class GoodsProduction
         g.Type = GoodsType.RAW_MEAT;
 
         // farming: farm + cows -> raw beef
-        g.SubType = (int)Goods.RawMeat.BEEF;
+        g.SubType = (int)Goods.RawMeat.RAW_BEEF;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
             tileRequirement: TileType.COW,
             levelRequirement: new SkillLevel(Skill.FARMING, 20)));
 
         // farming: farm + ducks -> raw duck
-        g.SubType = (int)Goods.RawMeat.DUCK;
+        g.SubType = (int)Goods.RawMeat.RAW_DUCK;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
             tileRequirement: TileType.DUCK,
             levelRequirement: new SkillLevel(Skill.FARMING, 20)));
 
         // fishing: river + net -> raw fish
-        g.SubType = (int)Goods.RawMeat.FISH;
+        g.SubType = (int)Goods.RawMeat.RAW_FISH;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             tileRequirement: TileType.RIVER,
             toolRequirement: Goods.Tool.FISHING_NET,
             levelRequirement: new SkillLevel(Skill.FISHING, 10)));
 
         // hunting: wild animals + spear -> raw game
-        g.SubType = (int)Goods.RawMeat.GAME;
+        g.SubType = (int)Goods.RawMeat.RAW_GAME;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             tileRequirement: TileType.WILD_ANIMAL,
             toolRequirement: Goods.Tool.SPEAR,
             levelRequirement: new SkillLevel(Skill.HUNTING, 10)));
 
         // farming: RANCH + goose -> raw goose
-        g.SubType = (int)Goods.RawMeat.GOOSE;
+        g.SubType = (int)Goods.RawMeat.RAW_GOOSE;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
             tileRequirement: TileType.GOOSE,
             levelRequirement: new SkillLevel(Skill.FARMING, 20)));
 
         // farming: RANCH + sheep -> raw mutton
-        g.SubType = (int)Goods.RawMeat.MUTTON;
+        g.SubType = (int)Goods.RawMeat.RAW_MUTTON;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
             tileRequirement: TileType.SHEEP,
             levelRequirement: new SkillLevel(Skill.FARMING, 20)));
 
         // farming: RANCH + fowl -> raw fowl
-        g.SubType = (int)Goods.RawMeat.FOWL;
+        g.SubType = (int)Goods.RawMeat.RAW_FOWL;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
             tileRequirement: TileType.FOWL,
             levelRequirement: new SkillLevel(Skill.FARMING, 20)));
 
         // farming: RANCH + pigs -> raw pork
-        g.SubType = (int)Goods.RawMeat.PORK;
+        g.SubType = (int)Goods.RawMeat.RAW_PORK;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
             tileRequirement: TileType.PIG,
             levelRequirement: new SkillLevel(Skill.FARMING, 20)));
 
         // farming: RANCH + quail -> raw qual
-        g.SubType = (int)Goods.RawMeat.QUAIL;
+        g.SubType = (int)Goods.RawMeat.RAW_QUAIL;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
             tileRequirement: TileType.QUAIL,

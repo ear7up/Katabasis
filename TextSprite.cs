@@ -6,6 +6,7 @@ public class TextSprite
 
     public float Scale;
     public Color FontColor;
+    public bool Hidden;
 
     public TextSprite(SpriteFont font)
     {
@@ -14,6 +15,7 @@ public class TextSprite
         FontColor = Color.Blue;
         Position = Vector2.Zero;
         Scale = 1f;
+        Hidden = false;
     }
 
     public void Update()
@@ -31,8 +33,21 @@ public class TextSprite
         return Font.MeasureString(Text).Y * Scale;
     }
 
+    public void Hide()
+    {
+        Hidden = true;
+    }
+
+    public void Unhide()
+    {
+        Hidden = false;
+    }
+
     public void Draw()
     {
+        if (Hidden)
+            return;
+
         // Origin = Zero means draw relative to the top-left
         //Vector2 dimensions = Font.MeasureString(Text);
         //Vector2 origin = new(dimensions.X / 2, dimensions.Y / 2);

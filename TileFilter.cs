@@ -31,7 +31,7 @@ public class TileFilterBuliding : TileFilter
     {
         foreach (Building b in t.Buildings)
         {
-            if (b.Type == BuildingType)
+            if (Building.EquivalentType(b.Type, BuildingType))
             {
                 return b;
             }
@@ -57,7 +57,7 @@ public class TileFilterBulidingOnTile : TileFilter
             return null;
 
         foreach (Building b in t.Buildings)
-            if (b.Type == BuildingType)
+            if (Building.EquivalentType(b.Type, BuildingType))
                 return new BuildingAndTile(b, t);
 
         return null;

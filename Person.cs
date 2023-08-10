@@ -82,7 +82,13 @@ public class Person : Entity, Drawable
         {
             // Random skills, older people have more
             int level = (int)(Globals.Rand.Next(10, 35) * ((Age + 90) / 100));
-            Skills.Add(new SkillLevel(skill, level), level);
+            int weight = level;
+
+            // Bias people toward cooking
+            if (skill == Skill.COOKING)
+                weight *= 4;
+            
+            Skills.Add(new SkillLevel(skill, level), weight);
         }
     }
 

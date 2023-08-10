@@ -38,14 +38,28 @@ static class Market
         SellOrders = new();
 
         Array goodsTypes = Enum.GetValues(typeof(GoodsType));
-        Prices = new float[goodsTypes.Length * Goods.MAX_GOODS_PER_CATEGORY];
+        int num_goods = goodsTypes.Length * Goods.MAX_GOODS_PER_CATEGORY;
+
+        Prices = new float[num_goods];
         for (int g = 0; g < Prices.Length; g++)
             Prices[g] = GoodsInfo.GetDefaultPrice(g);
     }
 
     public static void Update()
     {
-        // Shift prices
+        // Increase or decrease prices proportiontely to supply and demand
+        // E.g. 10 buy orders, 3 sell orders for wheat, increase prices by 0.7%/s
+        for (int i = 0; i < Prices.Length; i++)
+        {
+            // Consider capping prices at a multiple of the default price
+            // this may be unnecessary as long as villagers prioritize the most profitable work
+            // AND they need to cancel orders when work becomes unprofitable
+            List<MarketOrder> buying = (List<MarketOrder>)BuyOrders[i];
+            List<MarketOrder> selling = (List<MarketOrder>)SellOrders[i]; 
+            if (buying == null || selling == null)
+                continue;
+            Prices[i] *= (1 + 0.001f * (buying.Count - selling.Count)) * Globals.Time;
+        }
     }
 
     public static string Describe()
