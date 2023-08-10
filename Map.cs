@@ -8,7 +8,7 @@ public class Map
 
     private Building _editBuilding;
 
-    private Tile _highlightedTile;
+    public Tile HighlightedTile;
 
     public static Point TileSize { get; private set; }
     public Point MapSize { get; private set; }
@@ -238,27 +238,42 @@ public class Map
         return null;
     }
 
+    public void UnhighlightTile()
+    {
+        if (HighlightedTile != null)
+        {
+            HighlightedTile.Unhighlight();
+            HighlightedTile.BaseSprite.SpriteColor = Color.White;
+            HighlightedTile = null;
+        }
+    }
+
+    public void MakeHighlightTileRed()
+    {
+        if (HighlightedTile != null)
+        {
+            HighlightedTile.BaseSprite.SpriteColor = Color.OrangeRed;
+        }
+    }
+
     public void Update()
     {
         if (InputManager.Mode == InputManager.TILE_MODE)
         {
             Tile t = TileAtPos(InputManager.MousePos);
-            if (t != null)
+            if (t != null && t != HighlightedTile)
             {
                 // Clear the highlighted tile
-                if (_highlightedTile != null)
-                {
-                    _highlightedTile.Unhighlight();
-                }
+                if (HighlightedTile != null)
+                    UnhighlightTile();
 
-                _highlightedTile = t;
-                _highlightedTile.Highlight();
+                HighlightedTile = t;
+                HighlightedTile.Highlight();
             }
         }
-        else if (_highlightedTile != null)
+        else if (HighlightedTile != null)
         {
-            _highlightedTile.Unhighlight();
-            _highlightedTile = null;
+            UnhighlightTile();
         }
 
         if (_editBuilding != null)
@@ -293,10 +308,10 @@ public class Map
                 _editBuilding = null;
             }            
         }
-        // When build mode is first enabled, create a building at the mouse cursor
         else if (_editBuilding == null && InputManager.Mode == InputManager.BUILD_MODE)
         {
-            CreateEditBuilding();
+            // When build mode is first enabled, create a building at the mouse cursor
+            //CreateEditBuilding();
         }
 
         // Update tiles

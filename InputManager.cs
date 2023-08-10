@@ -16,6 +16,10 @@ public static class InputManager
 
     public static bool Clicked;
 
+    // Pressing B no longer toggles build mode, it just toggles the build ui
+    // clicking on a building type in the UI is what enables build mode
+    public static bool BPressed;
+
     // Camera movement
     private static Vector2 _dragStart;
     public static Vector2 MouseDrag = Vector2.Zero;
@@ -34,19 +38,6 @@ public static class InputManager
 
     private static void DetermineMode()
     {
-        // Toggle build mode when 'B' is pressed
-        if (keyboardState.IsKeyUp(Keys.B) && lastKeyboardState.IsKeyDown(Keys.B))
-        {
-            if (Mode == BUILD_MODE)
-            {
-                SwitchToMode(CAMERA_MODE);
-            }
-            else
-            {
-                SwitchToMode(BUILD_MODE);
-            }
-        }
-
         if (keyboardState.IsKeyUp(Keys.T) && lastKeyboardState.IsKeyDown(Keys.T))
         {
             if (Mode == TILE_MODE)
@@ -145,12 +136,22 @@ public static class InputManager
         Clicked = (mouseState.LeftButton == ButtonState.Released && 
                   lastMouseState.LeftButton == ButtonState.Pressed);
 
+        BPressed = keyboardState.IsKeyUp(Keys.B) && lastKeyboardState.IsKeyDown(Keys.B);
+
         // Default to camera mode controls unless the mode blocks camera movement
         switch (Mode)
         {
             case BUILD_MODE : ProcessBuildingInputs(); break;
             case CAMERA_MODE: ProcessCameraInputs();   break;
             default: ProcessCameraInputs(); break;
+        }
+        
+        // Cancel tile mode with right click
+        if (Mode == TILE_MODE && 
+            lastMouseState.RightButton == ButtonState.Released && 
+            mouseState.RightButton == ButtonState.Pressed)
+        {
+            SwitchToMode(CAMERA_MODE);
         }
 
         if (keyboardState.IsKeyUp(Keys.P) && lastKeyboardState.IsKeyDown(Keys.P))

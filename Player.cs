@@ -18,4 +18,15 @@ public class Player
     {
         Property.DailyUpdate();
     }
+
+    public float Wealth()
+    {
+        float wealth = 0f;
+        foreach (Goods g in Property.Values())
+        {
+            // TODO: lookup value of good once values exist
+            wealth += g.Quantity; /* Market.GetValue(g.GetId()); */
+        }
+        return wealth;
+    }
 }

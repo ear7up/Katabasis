@@ -61,7 +61,7 @@ public class GameManager
             UI.Position.TOP_RIGHT);
 
         // Create the bottom left panel with a 2x3 grid of clickable buttons
-        Action[] buttonActions = { BuildButton, Button2, Button3, Button4, Button5, Button6 };
+        Action[] buttonActions = { BuildButton, TileButton, Button3, Button4, Button5, Button6 };
         _bottomLeftPanel = new(Sprites.BottomLeftPanel);
         _bottomLeftPanel.SetMargin(left: 49, top: 133);
         _bottomLeftPanel.SetPadding(right: -20);
@@ -70,13 +70,14 @@ public class GameManager
             Sprites.BottomLeftButtons[0], 
             onClick: BuildButton, 
             onHover: UI.SetTooltipText);
-        buildElement.TooltipText = "Build";
+        buildElement.TooltipText = "Build (B)";
 
         _bottomLeftPanel.SetContent(0, 0, buildElement);
-        _bottomLeftPanel.SetContent(0, 1, new UIElement(Sprites.BottomLeftButtons[1], onClick: Button2));
-        _bottomLeftPanel.SetContent(1, 0, new UIElement(Sprites.BottomLeftButtons[2], onClick: Button3));
-        _bottomLeftPanel.SetContent(1, 1, new UIElement(Sprites.BottomLeftButtons[3], onClick: Button4));
-        _bottomLeftPanel.SetContent(2, 0, new UIElement(Sprites.BottomLeftButtons[4], onClick: Button5));
+        _bottomLeftPanel.SetContent(1, 0, new UIElement(Sprites.BottomLeftButtons[1], 
+            onClick: TileButton, onHover: UI.SetTooltipText, tooltip: "Acquire Tile (T)"));
+        _bottomLeftPanel.SetContent(2, 0, new UIElement(Sprites.BottomLeftButtons[2], onClick: Button3));
+        _bottomLeftPanel.SetContent(0, 1, new UIElement(Sprites.BottomLeftButtons[3], onClick: Button4));
+        _bottomLeftPanel.SetContent(1, 1, new UIElement(Sprites.BottomLeftButtons[4], onClick: Button5));
         _bottomLeftPanel.SetContent(2, 1, new UIElement(Sprites.BottomLeftButtons[5], onClick: Button6));
 
         UI.AddElement(_bottomLeftPanel, UI.Position.BOTTOM_LEFT);
@@ -149,6 +150,18 @@ public class GameManager
         }
     }
 
+    public void TileButton()
+    {
+        if (InputManager.Mode == InputManager.TILE_MODE)
+        {
+            InputManager.SwitchToMode(InputManager.CAMERA_MODE);
+        }
+        else
+        {
+            InputManager.SwitchToMode(InputManager.TILE_MODE);
+        }
+    }
+
     public void RunTests()
     {
         //MarketTests.RunTests();
@@ -169,11 +182,6 @@ public class GameManager
     public void TogglePause()
     {
         InputManager.Paused = !InputManager.Paused;
-    }
-
-    public void Button2()
-    {
-        Console.WriteLine("Button 2 pressed");
     }
 
     public void Button3()
@@ -203,6 +211,9 @@ public class GameManager
         InputManager.Update();
         _camera.UpdateCamera(KatabasisGame.Viewport);
         UI.Update();
+        
+        if (InputManager.BPressed)
+            BuildButton();
 
         // Calculate the real mouse position by inverting the camera transformations
         InputManager.MousePos = Vector2.Transform(InputManager.MousePos, Matrix.Invert(_camera.Transform));
@@ -219,6 +230,8 @@ public class GameManager
 
         _player1.Update();
         _map.Update();
+
+        HandleTileAcquisition();
 
         // Give a "daily" update for tasks that don't need to be constantly checked
         TimeOfDay += Globals.Time;
@@ -259,6 +272,22 @@ public class GameManager
 
         _logoDisplay.Position.X = Globals.WindowSize.X - _logoDisplay.Width() - 30;
         _logoDisplay2.Position.X = _logoDisplay.Position.X + 5;
+    }
+
+    public void HandleTileAcquisition()
+    {
+        if (InputManager.Clicked && _map.HighlightedTile != null)
+        {
+            if (_player1.Kingdom.TryToAcquireTile(_map.HighlightedTile))
+            {
+                _map.UnhighlightTile();
+                InputManager.SwitchToMode(InputManager.CAMERA_MODE);
+            }
+            else
+            {
+                _map.MakeHighlightTileRed();
+            }
+        }
     }
 
     public void Draw()

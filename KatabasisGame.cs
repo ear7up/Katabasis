@@ -14,7 +14,7 @@ public class KatabasisGame : Game
     public static Vector2 ScreenSize { get { return new Vector2(Viewport.Width, Viewport.Height); } }
     
     private Song _defaultBGM;
-    private GameManager _gameManager;
+    public GameManager _gameManager;
 
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
