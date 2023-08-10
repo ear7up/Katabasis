@@ -37,6 +37,7 @@ public class GameManager
 
         _debugDisplay = new(Sprites.Font);
         _debugDisplay.Position = new Vector2(30f, 30f);
+        _debugDisplay.Scale = 0.7f;
 
         _logoDisplay = new(Sprites.Font2);
         _logoDisplay.Text = "Katabasis";
@@ -63,8 +64,8 @@ public class GameManager
         // Create the bottom left panel with a 2x3 grid of clickable buttons
         Action[] buttonActions = { BuildButton, TileButton, Button3, Button4, Button5, Button6 };
         _bottomLeftPanel = new(Sprites.BottomLeftPanel);
-        _bottomLeftPanel.SetMargin(left: 49, top: 133);
-        _bottomLeftPanel.SetPadding(right: -20);
+        _bottomLeftPanel.SetMargin(left: 49, top: 70);
+        _bottomLeftPanel.SetPadding(right: -20, bottom: -170);
 
         UIElement buildElement = new(
             Sprites.BottomLeftButtons[0], 
@@ -264,11 +265,16 @@ public class GameManager
         else if (InputManager.Clicked)
             _camera.Follow(clickedPerson);
 
+        // Write statistics to debug
+        _debugDisplay.Text = 
+            $"Public Wealth: {(int)_player1.Kingdom.PublicWealth()}\n" +
+            $"Private Wealth: {(int)_player1.Kingdom.PrivateWealth()}\n";
+
         // Write information about the currently selected person to the top left
         if (_camera.Following != null)
-            _debugDisplay.Text = _camera.Following.ToString();
+            _debugDisplay.Text += _camera.Following.ToString();
         else
-            _debugDisplay.Text = "";
+            _debugDisplay.Text += "";
 
         _logoDisplay.Position.X = Globals.WindowSize.X - _logoDisplay.Width() - 30;
         _logoDisplay2.Position.X = _logoDisplay.Position.X + 5;

@@ -81,6 +81,14 @@ public class Stockpile
         return _stock.Values;
     }
 
+    public float Wealth()
+    {
+        float wealth = 0f;
+        foreach (Goods g in _stock.Values)
+            wealth += g.Value();
+        return wealth;
+    }
+
     public override string ToString()
     {
         string s = "[\n";

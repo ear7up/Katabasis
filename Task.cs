@@ -242,7 +242,7 @@ public class SourceGoodsTask : Task
     public Goods GoodsRequest;
     public float QuantityRequired;
     public float QuantityAcquired;
-    public Market Market;
+    public Building MarketBuilding;
     public bool FindMarket;
     public SourceGoodsTask(Goods goods) : base()
     {
@@ -250,7 +250,7 @@ public class SourceGoodsTask : Task
         GoodsRequest = new Goods(goods);
         QuantityRequired = Goods.Quantity;
         QuantityAcquired = 0;
-        Market = null;
+        MarketBuilding = null;
         FindMarket = true;
     }
 
@@ -290,21 +290,21 @@ public class SourceGoodsTask : Task
         if (FindMarket)
         {
             Building market = (Building)Tile.Find(p.Home, new TileFilterBuliding(BuildingType.MARKET));
-            // TODO: markets don't actually coexist with the building type yet
             if (market != null)
-                Market = null;
+                MarketBuilding = market;
             FindMarket = false;
         }
 
         // Try to buy goods if still needed
-        if (Market != null && QuantityRequired > QuantityAcquired)
+        if (MarketBuilding != null && QuantityRequired > QuantityAcquired)
         {
             GoodsRequest.Quantity = QuantityRequired - QuantityAcquired;
-            float price = Market.CheckPrice(Goods);
+            float price = Market.CheckPrice(GoodsRequest.GetId()) * GoodsRequest.Quantity;
             if (price < p.Money)
             {
-                MarketOrder order = new(p, true, GoodsRequest, price / GoodsRequest.Quantity);
-                subTasks.Enqueue(new BuyFromMarketTask(Market.Sprite.Position, Market, order));
+                // Go to the market, place this order, and come back
+                MarketOrder order = new(p, true, GoodsRequest);
+                subTasks.Enqueue(new BuyFromMarketTask(p.Position, MarketBuilding.Sprite.Position, order));
                 return Status;
             }
         }
@@ -613,10 +613,10 @@ public class TryToProduceTask : Task
 
 public class BuyFromMarketTask : Task
 {
-    public BuyFromMarketTask(Vector2 startPosition, Market market, MarketOrder order) : base()
+    public BuyFromMarketTask(Vector2 startPosition, Vector2 marketPosition, MarketOrder order) : base()
     {
-        subTasks.Enqueue(new GoToTask(market.Sprite.Position));
-        subTasks.Enqueue(new BuyTask(market, order));
+        subTasks.Enqueue(new GoToTask(marketPosition));
+        subTasks.Enqueue(new BuyTask(order));
         subTasks.Enqueue(new GoToTask(startPosition));
     }
 
@@ -642,11 +642,9 @@ public class BuyFromMarketTask : Task
 // Attempts to buy as much of the order quantity as is available
 public class BuyTask : Task
 {
-    public Market Market;
     public MarketOrder Order;
-    public BuyTask(Market market, MarketOrder order) : base()
+    public BuyTask(MarketOrder order) : base()
     {
-        Market = market;
         Order = order;
     }
     public override TaskStatus Execute(Person p)

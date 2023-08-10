@@ -12,6 +12,7 @@ public class GoodsInfo
     public float UseRate { get; protected set; }
     public int Satiation { get; protected set; }
     public int Experience { get; protected set; }
+    public float DefaultPrice { get; protected set; }
 
     public GoodsInfo(Goods g) : this(g.Type, g.SubType) { }
 
@@ -35,6 +36,9 @@ public class GoodsInfo
         // How much to increase the odds of a level up when producing this good
         Experience = 1;
 
+        // How much does it cost
+        DefaultPrice = 1.5f;
+
         // Set broad defaults by type (can be overriden later in Init function)
         switch (type)
         {
@@ -47,6 +51,7 @@ public class GoodsInfo
                     DecayRate = 0.005f;
                 Satiation = 10;
                 UseRate = 1f;
+                DefaultPrice = 5f;
                 break;
             }
             case GoodsType.FOOD_PLANT:
@@ -57,6 +62,7 @@ public class GoodsInfo
                 if (subType == (int)Goods.FoodPlant.WILD_EDIBLE)
                     Satiation = 2;
                 UseRate = 1f;
+                DefaultPrice = 2f;
                 break;
             }
             case GoodsType.FOOD_PROCESSED: 
@@ -64,13 +70,104 @@ public class GoodsInfo
                 DecayRate = 0.001f; 
                 Satiation = 8;
                 UseRate = 1f;
+                DefaultPrice = 5f;
                 break;
             }
-            case GoodsType.RAW_MEAT: DecayRate = 0.01f; break;
-
-            case GoodsType.TOOL: UseRate = 0.001f; break;
-            case GoodsType.CRAFT_GOODS: UseRate = 0.001f; break;
-            case GoodsType.WAR_GOODS: UseRate = 0.001f; break;
+            case GoodsType.RAW_MEAT:
+            {
+                DecayRate = 0.01f; 
+                DefaultPrice = 4f;
+                break;
+            }
+            case GoodsType.TOOL: 
+            {
+                UseRate = 0.001f; 
+                DefaultPrice = 2f; // need to distinguish stone tools from metal
+                break;
+            }
+            case GoodsType.CRAFT_GOODS: 
+            {
+                switch ((Goods.Crafted)subType)
+                {
+                    // Simple craft goods like bricks and pottery should be cheap
+                    // Complex goods like jewelry and instruments should be expensive
+                    case Goods.Crafted.BRICKS: DefaultPrice = 1.8f; break;
+                    case Goods.Crafted.POTTERY: DefaultPrice = 2f; break;
+                    case Goods.Crafted.JEWELRY: DefaultPrice = 8f; break;
+                    case Goods.Crafted.INSTRUMENTS: DefaultPrice = 7f; break;
+                    default: DefaultPrice = 5f; break;
+                }
+                UseRate = 0.001f; 
+                break;
+            }
+            case GoodsType.WAR_GOODS:
+            {
+                switch ((Goods.War)subType)
+                {
+                    case Goods.War.SLING: DefaultPrice = 3f; break;
+                    case Goods.War.CHARIOT: DefaultPrice = 12f; break;
+                    default: DefaultPrice = 6f; break;
+                }
+                UseRate = 0.001f; 
+                break;
+            }
+            case GoodsType.SMITHED:
+            {
+                switch ((Goods.Smithed)subType)
+                {
+                    case Goods.Smithed.COPPER: DefaultPrice = 3f; break;
+                    case Goods.Smithed.BRONZE: DefaultPrice = 4.5f; break;
+                    case Goods.Smithed.TIN: DefaultPrice = 2f; break;
+                    case Goods.Smithed.IRON: DefaultPrice = 4f; break;
+                    case Goods.Smithed.LEAD: DefaultPrice = 2f; break;
+                    case Goods.Smithed.GOLD: DefaultPrice = 20f; break;
+                    case Goods.Smithed.SILVER: DefaultPrice = 10f; break;
+                }
+                break;
+            }
+            case GoodsType.MATERIAL_ANIMAL:
+            {
+                switch ((Goods.MaterialAnimal)subType)
+                {
+                    case Goods.MaterialAnimal.BONE: DefaultPrice = 1.5f; break;
+                    case Goods.MaterialAnimal.HIDE: DefaultPrice = 3.5f; break;
+                    case Goods.MaterialAnimal.IVORY: DefaultPrice = 7f; break;
+                    case Goods.MaterialAnimal.WOOL: DefaultPrice = 2.5f; break;
+                }
+                break;
+            }
+            case GoodsType.MATERIAL_NATURAL:
+            {
+                switch ((Goods.MaterialNatural)subType)
+                {
+                    case Goods.MaterialNatural.CLAY: DefaultPrice = 1.1f; break;
+                    case Goods.MaterialNatural.FLINT: DefaultPrice = 1.2f; break;
+                    case Goods.MaterialNatural.LAPIS_LAZULI: DefaultPrice = 7f; break;
+                    case Goods.MaterialNatural.MALACHITE: DefaultPrice = 5.5f; break;
+                    case Goods.MaterialNatural.OBSIDIAN: DefaultPrice = 6.5f; break;
+                    case Goods.MaterialNatural.RAW_COPPER: DefaultPrice = 2.5f; break;
+                    case Goods.MaterialNatural.RAW_GOLD: DefaultPrice = 18f; break;
+                    case Goods.MaterialNatural.RAW_IRON: DefaultPrice = 3f; break;
+                    case Goods.MaterialNatural.RAW_LEAD: DefaultPrice = 1.5f; break;
+                    case Goods.MaterialNatural.RAW_SILVER: DefaultPrice = 8f; break;
+                    case Goods.MaterialNatural.RAW_TIN: DefaultPrice = 1.5f; break;
+                    case Goods.MaterialNatural.SALT: DefaultPrice = 2.5f; break;
+                    case Goods.MaterialNatural.SANDSTONE: DefaultPrice = 1.6f; break;
+                    case Goods.MaterialNatural.STONE: DefaultPrice = 1.1f; break;
+                }
+                break;
+            }
+            case GoodsType.MATERIAL_PLANT:
+            {
+                switch ((Goods.MaterialPlant)subType)
+                {
+                    case Goods.MaterialPlant.CEDAR: DefaultPrice = 1.8f; break;
+                    case Goods.MaterialPlant.EBONY: DefaultPrice = 2.3f; break;
+                    case Goods.MaterialPlant.FLAX: DefaultPrice = 2f; break;
+                    case Goods.MaterialPlant.PAPYRUS: DefaultPrice = 1.6f; break;
+                }
+                break;
+            }
         }
 
         // If it takes a long time to use the object, only produce a few at a time and grant bonus skill xp
@@ -142,6 +239,18 @@ public class GoodsInfo
     public static int GetExperience(Goods g)
     {
         return Data[(int)g.Type][g.SubType].Experience;
+    }
+
+    public static float GetDefaultPrice(Goods g)
+    {
+        return Data[(int)g.Type][g.SubType].DefaultPrice;
+    }
+
+    public static float GetDefaultPrice(int goodsId)
+    {
+        int type = Goods.TypeFromId(goodsId);
+        int subType = Goods.SubTypeFromid(goodsId);
+        return Data[type][subType].DefaultPrice;
     }
 
     // Skill modifiers?

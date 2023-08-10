@@ -133,6 +133,16 @@ public class Goods
         return new Goods((GoodsType)(id / MAX_GOODS_PER_CATEGORY), id % MAX_GOODS_PER_CATEGORY);
     }
 
+    public static int TypeFromId(int id)
+    {
+        return id / MAX_GOODS_PER_CATEGORY;
+    }
+
+    public static int SubTypeFromid(int id)
+    {
+        return id % MAX_GOODS_PER_CATEGORY;
+    }
+
     public Goods(GoodsType goodsType, int subType, int quantity = 1)
     {
         Type = goodsType;
@@ -221,5 +231,10 @@ public class Goods
     public bool IsWarGood(War t)
     {
         return Type == GoodsType.WAR_GOODS && (War)SubType == t;
+    }
+
+    public float Value()
+    {
+        return Quantity; /* TODO: times market value */
     }
 }

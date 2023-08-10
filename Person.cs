@@ -278,4 +278,10 @@ public class Person : Entity, Drawable
         Owner.Kingdom.PersonDied(this);
         Globals.Ybuffer.Remove(this);
     }
+
+    public float Wealth()
+    {
+        float wealth = Money + PersonalStockpile.Wealth();
+        return wealth;
+    }
 }

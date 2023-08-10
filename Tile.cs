@@ -219,4 +219,9 @@ public class Tile
         }
         return null;
     }
+
+    public float Wealth()
+    {
+        return Stockpile.Wealth();
+    }
 }

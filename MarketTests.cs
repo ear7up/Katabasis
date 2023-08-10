@@ -4,7 +4,7 @@ public class MarketTests
 {
     public static void RunTests()
     {
-        // TEMPORARY
+        /*
         Person seller1 = Person.CreatePerson(Vector2.Zero, null);
         Person seller2 = Person.CreatePerson(Vector2.Zero, null);
         Person seller3 = Person.CreatePerson(Vector2.Zero, null);
@@ -32,5 +32,6 @@ public class MarketTests
         Console.WriteLine($"Seller1 money: {seller1.Money}"); 
         Console.WriteLine($"Seller2 money: {seller2.Money}"); 
         Console.WriteLine($"Seller3 money: {seller3.Money}"); 
+        */
     }
 }

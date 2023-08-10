@@ -10,6 +10,7 @@ public class Kingdom
     public List<Tile> OwnedTiles;
     public List<Person> People;
     public List<Person> Deceased;
+    public Stockpile Treasury;
 
     public Kingdom(Player owner, Tile startTile)
     {
@@ -20,6 +21,7 @@ public class Kingdom
         AcquireTilesAround(startTile);
         People = new();
         Deceased = new();
+        Treasury = new();
     }
 
     // Checks if tile is adjacent to one owned by the player
@@ -68,7 +70,7 @@ public class Kingdom
     public void Update()
     {
         // For now, 1 tile allowed per 1000 wealth
-        MaxTiles = (int)(START_MAX_TILES + Owner.Wealth() * 0.001f);
+        MaxTiles = (int)(START_MAX_TILES + PublicWealth() * 0.001f);
 
         // Remove every person who died
         foreach (Person p in Deceased)
@@ -78,5 +80,31 @@ public class Kingdom
 
         foreach (Person p in People)
             p.Update();
+    }
+
+    public void DailyUpdate()
+    {
+        // TODO: Disable decay for food in granary?
+        Treasury.DailyUpdate();
+    }
+
+    public float TotalWealth()
+    {
+        return PublicWealth() + PrivateWealth();
+    }
+
+    public float PublicWealth()
+    {
+        return Treasury.Wealth();
+    }
+
+    public float PrivateWealth()
+    {
+        float wealth = 0f;
+        foreach (Person p in People)
+            wealth += p.Wealth();
+        foreach (Tile t in OwnedTiles)
+            wealth += t.Wealth();
+        return wealth;
     }
 }
