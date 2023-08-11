@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public class Kingdom
 {
-    public const int START_MAX_TILES = 20;
+    public const int START_MAX_TILES = 30;
 
     public Player Owner;
     public Tile StartTile;
@@ -18,10 +18,14 @@ public class Kingdom
         StartTile = startTile;
         MaxTiles = START_MAX_TILES;
         OwnedTiles = new();
-        AcquireTilesAround(startTile);
         People = new();
         Deceased = new();
         Treasury = new();
+
+        // Start with 25 tiles centered around the start tile, which will contain a market
+        AcquireTilesAround(startTile, distance: 2);
+        Building market = Building.CreateBuilding(startTile, BuildingType.MARKET);
+        market.Sprite.Scale = 0.5f;
     }
 
     // Checks if tile is adjacent to one owned by the player
@@ -40,6 +44,8 @@ public class Kingdom
 
     public bool AcquireTile(Tile tile)
     {
+        if (tile == null)
+            return false;
         OwnedTiles.Add(tile);
         tile.Highlight();
         tile.Owner = Owner;
@@ -47,12 +53,38 @@ public class Kingdom
     }
 
     // Be careful not to add the same tile twice to the OwnedTiles list
-    public bool AcquireTilesAround(Tile tile)
+    public bool AcquireTilesAround(Tile tile, int distance = 1)
     {
         AcquireTile(tile);
-        foreach (Tile neighbor in tile.Neighbors)
-            if (neighbor != null)
-                AcquireTile(neighbor);
+        //foreach (Tile neighbor in tile.Neighbors)
+        //    if (neighbor != null)
+        //        AcquireTile(neighbor);
+        int num_tiles = (2 * distance + 1) * (2 * distance + 1);
+
+        Tile current = tile;
+
+        // Take 1 step NE, then 1 step SE, then 2 steps SW, 2 steps NW, and so on
+        // to complete a ring around the starting tile. Keep making larger rings
+        // until all tiles within the requested radius have been claimed
+        int i = 1;
+        float steps = 1f;
+        int direction = (int)Cardinal.NE;
+        while (i < num_tiles)
+        {
+            for (int j = 0; j < (int)steps && current != null; j++)
+            {
+                current = current.Neighbors[direction];
+                AcquireTile(current);
+                if (++i >= num_tiles)
+                    break;
+            }
+            direction = (int)Tile.GetNextDirection(direction);
+            steps += 0.5f;
+
+            if (current == null)
+                break;
+        }
+
         return true;
     }
 

@@ -139,6 +139,10 @@ public static class InputManager
 
         BPressed = keyboardState.IsKeyUp(Keys.B) && lastKeyboardState.IsKeyDown(Keys.B);
         IPressed = keyboardState.IsKeyUp(Keys.I) && lastKeyboardState.IsKeyDown(Keys.I);
+        
+        // Toggle show borders with the 'H' key
+        if (keyboardState.IsKeyUp(Keys.H) && lastKeyboardState.IsKeyDown(Keys.H))
+            Config.ShowBorders = !Config.ShowBorders;
 
         // Default to camera mode controls unless the mode blocks camera movement
         switch (Mode)

@@ -36,7 +36,7 @@ public class Tile
 
     public bool DrawBase;
     public Sprite BaseSprite { get; protected set; }
-    public Sprite BulidingSprite;
+    public Sprite BuildingSprite;
     
     public Tile[] Neighbors { get; set; }
     
@@ -79,8 +79,8 @@ public class Tile
         DrawBase = true;
 
         BaseSprite = new Sprite(baseTexture, position);
-        if (BulidingSprite != null)
-            BulidingSprite = new Sprite(buildingTexture, position);
+        if (BuildingSprite != null)
+            BuildingSprite = new Sprite(buildingTexture, position);
 
         Stockpile = new();
         
@@ -114,13 +114,51 @@ public class Tile
         return Neighbors[(int)direction] == null || Neighbors[(int)direction].Owner != Owner;
     }
 
-    public void Draw()
+    // Draw tile with borders
+    public void DrawOwnedTile()
     {
         if (DrawBase)
+        {
+            BaseSprite.SpriteColor = Color.SteelBlue;
             BaseSprite.Draw();
 
-        if (BulidingSprite != null)
-            BulidingSprite.Draw();
+            BaseSprite.Scale -= 0.02f;
+            BaseSprite.SpriteColor = Color.White;
+            BaseSprite.Draw();
+            BaseSprite.Scale += 0.02f;
+        }
+
+        if (BuildingSprite != null)
+        {
+            if (DrawBase)
+            {
+                BuildingSprite.Draw();    
+            }
+            else
+            {
+                BuildingSprite.SpriteColor = Color.SteelBlue;
+                BuildingSprite.Draw();
+
+                BuildingSprite.Scale -= 0.02f;
+                BuildingSprite.SpriteColor = Color.White;
+                BuildingSprite.Draw();
+                BuildingSprite.Scale += 0.02f;
+            }
+        }
+    }
+
+    public void Draw()
+    {
+        if (Owner != null && Config.ShowBorders)
+        {
+            DrawOwnedTile();
+            return;
+        }
+
+        if (DrawBase)
+            BaseSprite.Draw();
+        if (BuildingSprite != null)
+            BuildingSprite.Draw();
     }
 
     public void Highlight()
@@ -144,8 +182,8 @@ public class Tile
         // otherwise, added it to the ybuffer so overlaps are avoidable
         if (building.IsWholeTile())
         {
-            BulidingSprite = building.Sprite;
-            BulidingSprite.Position = BaseSprite.Position;
+            BuildingSprite = building.Sprite;
+            BuildingSprite.Position = BaseSprite.Position;
         }
         else
         {

@@ -121,6 +121,7 @@ static class Sprites
 			case BuildingType.FARM_RIVER: textures = farmsRiver; break;
 			case BuildingType.BARRACKS: textures = barracks; break;
 			case BuildingType.GRANARY: textures = granaries; break;
+			//case BuildingType.MARKET: textures = markets; break;
 			default: textures = buildings; break;
 		}
 

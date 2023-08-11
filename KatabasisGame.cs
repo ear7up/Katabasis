@@ -27,24 +27,18 @@ public class KatabasisGame : Game
         Globals.WindowSize = new(1600, 900);
         _graphics.PreferredBackBufferWidth = Globals.WindowSize.X;
         _graphics.PreferredBackBufferHeight = Globals.WindowSize.Y;
+        _graphics.HardwareModeSwitch = false;
 
         IsMouseVisible = true;
     }
 
     public void ToggleFullscreen()
     {
-        if (_graphics.IsFullScreen)
-        {
-            Globals.WindowSize = new(1600, 900);
-            _graphics.PreferredBackBufferWidth = 1600;
-            _graphics.PreferredBackBufferHeight = 900;
-        }
-        else
-        {
-            Globals.WindowSize = new(GraphicsDevice.Viewport.Bounds.Width, GraphicsDevice.Viewport.Bounds.Height);
-        }
         _graphics.ToggleFullScreen();
         _graphics.ApplyChanges();
+        Globals.WindowSize = new(
+            GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
+            GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
     }
 
     protected override void Initialize()

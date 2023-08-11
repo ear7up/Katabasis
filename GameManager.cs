@@ -45,13 +45,10 @@ public class GameManager
         _logoDisplay = new(Sprites.Font2);
         _logoDisplay.Text = "Katabasis";
         _logoDisplay.FontColor = Color.White;
-        _logoDisplay.Position.Y = Globals.WindowSize.Y - _logoDisplay.Height() - 30;
         
         _logoDisplay2 = new(Sprites.Font2);
         _logoDisplay2.Text = "Katabasis";
-        _logoDisplay2.Position.Y = Globals.WindowSize.Y - 95;
         _logoDisplay2.FontColor = Color.Black;
-        _logoDisplay2.Position.Y = _logoDisplay.Position.Y + 5;
 
         Goods.CalcGoodsTypecounts();
         GoodsProduction.Init();
@@ -252,6 +249,16 @@ public class GameManager
         _popupText2.Text = goods2;
     }
 
+    public void RepositionUI()
+    {
+        // Write the current world coordinate at the mouse position
+        _coordinateDisplay.Text = $"({_coordinateDisplay.Position.X:0.0}, {_coordinateDisplay.Position.Y:0.0})";  
+        _coordinateDisplay.Position = InputManager.ScreenMousePos + new Vector2(15f, 15f);
+
+        _logoDisplay.Position.Y = Globals.WindowSize.Y - _logoDisplay.Height() - 30;
+        _logoDisplay2.Position.Y = _logoDisplay.Position.Y + 5;
+    }
+
     public void Update(GameTime gameTime)
     {
         Globals.Update(gameTime);
@@ -269,9 +276,7 @@ public class GameManager
         // Calculate the real mouse position by inverting the camera transformations
         InputManager.MousePos = Vector2.Transform(InputManager.MousePos, Matrix.Invert(_camera.Transform));
 
-        // Write the current world coordinate at the mouse position
-        _coordinateDisplay.Text = $"({_coordinateDisplay.Position.X:0.0}, {_coordinateDisplay.Position.Y:0.0})";  
-        _coordinateDisplay.Position = InputManager.ScreenMousePos + new Vector2(15f, 15f);
+        RepositionUI();
 
         HandlePersonFollowing();
 
