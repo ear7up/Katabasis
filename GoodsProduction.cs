@@ -274,11 +274,12 @@ public class GoodsProduction
                 levelRequirement: new SkillLevel(Skill.FARMING, 20)));
         }
 
-        // No skill or building required to forage for wild plants, does need a tile with vegetation, though
+        // Scavenge for food on a vegetation tile
+        // Does not require a farm, uses cooking level 1 to make hungry villagers more likely to do it
         g.SubType = (int)Goods.FoodPlant.WILD_EDIBLE;
         r = (ProductionRequirements)Requirements[g.GetId()];
         r.BuildingRequirement = BuildingType.NONE;
-        r.SkillRequirement = null;
+        r.SkillRequirement = new SkillLevel(Skill.COOKING, 1);
         r.TileRequirement = TileType.VEGETATION;
         r.ToolRequirement = Goods.Tool.NONE;
 
@@ -350,6 +351,7 @@ public class GoodsProduction
         g.SubType = (int)Goods.MaterialNatural.LAPIS_LAZULI;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
+            buildingSubTypeRequirement: BuildingSubType.LAPIS_LAZULI_MINE,
             toolRequirement: Goods.Tool.PICKAXE,
             levelRequirement: new SkillLevel(Skill.MINING, 60)));
 
@@ -357,6 +359,7 @@ public class GoodsProduction
         g.SubType = (int)Goods.MaterialNatural.MALACHITE;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
+            buildingSubTypeRequirement: BuildingSubType.MALACHITE_MINE,
             toolRequirement: Goods.Tool.PICKAXE,
             levelRequirement: new SkillLevel(Skill.MINING, 50)));
 
@@ -371,6 +374,7 @@ public class GoodsProduction
         g.SubType = (int)Goods.MaterialNatural.RAW_COPPER;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
+            buildingSubTypeRequirement: BuildingSubType.COPPER_MINE,
             toolRequirement: Goods.Tool.PICKAXE,
             levelRequirement: new SkillLevel(Skill.MINING, 20)));
 
@@ -378,6 +382,7 @@ public class GoodsProduction
         g.SubType = (int)Goods.MaterialNatural.RAW_GOLD;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
+            buildingSubTypeRequirement: BuildingSubType.GOLD_MINE,
             toolRequirement: Goods.Tool.PICKAXE,
             levelRequirement: new SkillLevel(Skill.MINING, 60)));
 
@@ -385,6 +390,7 @@ public class GoodsProduction
         g.SubType = (int)Goods.MaterialNatural.RAW_IRON;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
+            buildingSubTypeRequirement: BuildingSubType.IRON_MINE,
             toolRequirement: Goods.Tool.PICKAXE,
             levelRequirement: new SkillLevel(Skill.MINING, 30)));
 
@@ -392,6 +398,7 @@ public class GoodsProduction
         g.SubType = (int)Goods.MaterialNatural.RAW_LEAD;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
+            buildingSubTypeRequirement: BuildingSubType.LEAD_MINE,
             toolRequirement: Goods.Tool.PICKAXE,
             levelRequirement: new SkillLevel(Skill.MINING, 20)));
 
@@ -399,6 +406,7 @@ public class GoodsProduction
         g.SubType = (int)Goods.MaterialNatural.RAW_SILVER;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
+            buildingSubTypeRequirement: BuildingSubType.SILVER_MINE,
             toolRequirement: Goods.Tool.PICKAXE,
             levelRequirement: new SkillLevel(Skill.MINING, 50)));
 
@@ -406,6 +414,7 @@ public class GoodsProduction
         g.SubType = (int)Goods.MaterialNatural.RAW_TIN;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
+            buildingSubTypeRequirement: BuildingSubType.TIN_MINE,
             toolRequirement: Goods.Tool.PICKAXE,
             levelRequirement: new SkillLevel(Skill.MINING, 10)));
 
@@ -413,6 +422,7 @@ public class GoodsProduction
         g.SubType = (int)Goods.MaterialNatural.SALT;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
+            buildingSubTypeRequirement: BuildingSubType.SALT_MINE,
             toolRequirement: Goods.Tool.PICKAXE,
             levelRequirement: new SkillLevel(Skill.MINING, 10)));
 

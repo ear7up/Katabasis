@@ -48,6 +48,8 @@ public class Tile
     public const float RIVER_SOIL_QUALITY_BONUS = 0.25f;
     public const float VEGETATION_SOIL_QUALITY_BONUS = 0.1f;
     public float SoilQuality { get; set; }
+
+    public MineralType Minerals;
     
     // Every tile has a resource stockpile that can be used for production/consumption
     public Stockpile Stockpile;
@@ -87,6 +89,8 @@ public class Tile
         SoilQuality = Globals.Rand.NextFloat(MIN_SOIL_QUALITY, MAX_SOIL_QUALITY);
         if (type == TileType.VEGETATION)
             SoilQuality += VEGETATION_SOIL_QUALITY_BONUS;
+
+        Minerals = MineralType.NONE;
     }
 
     public Vector2 GetPosition()
@@ -149,17 +153,52 @@ public class Tile
         }
     }
 
-    public void Draw(bool showSoilQuality = false)
+    public enum DisplayType
     {
-        if (showSoilQuality)
+        SOIL_QUALITY,
+        MINERALS,
+        PLACING_RANCH,
+        BUYING_TILE,
+        DEFAULT
+    }
+
+    public void Draw(DisplayType displayType)
+    {
+        if (displayType == DisplayType.SOIL_QUALITY)
         {
-            float percent = SoilQuality / (MAX_SOIL_QUALITY + 2 * RIVER_SOIL_QUALITY_BONUS + VEGETATION_SOIL_QUALITY_BONUS);
-            Color c = new Color(0.25f, MathHelper.Clamp(percent + 0.2f, 0.5f, 1.0f), 0.25f);
+            float max = MAX_SOIL_QUALITY + (2 * RIVER_SOIL_QUALITY_BONUS) + VEGETATION_SOIL_QUALITY_BONUS;
+            Color c = new Color(0.25f, MathHelper.Clamp((SoilQuality / max) + 0.2f, 0.5f, 1.0f), 0.25f);
             BaseSprite.SpriteColor = c;
+            if (BuildingSprite != null)
+                BuildingSprite.SpriteColor = BaseSprite.SpriteColor;
+        }
+        else if (displayType == DisplayType.MINERALS)
+        {
+            BaseSprite.SpriteColor = MineralInfo.GetColor(Minerals);
+            if (BuildingSprite != null)
+                BuildingSprite.SpriteColor = BaseSprite.SpriteColor;
+        }
+        else if (displayType == DisplayType.PLACING_RANCH)
+        {
+            if (Type == TileType.WILD_ANIMAL)
+                BaseSprite.SpriteColor = Color.LightGreen;
+        }
+        else if (displayType == DisplayType.BUYING_TILE)
+        {
+            foreach (Tile neighbor in Neighbors)
+            {
+                if (neighbor != null && Owner == null && neighbor.Owner != null)
+                {
+                    BaseSprite.SpriteColor = Color.SteelBlue;
+                    break;
+                }
+            }
         }
         else
         {
             BaseSprite.SpriteColor = Color.White;
+            if (BuildingSprite != null)
+                BuildingSprite.SpriteColor = Color.White;
         }
 
         if (Owner != null && Config.ShowBorders)

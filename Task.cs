@@ -219,7 +219,7 @@ public class FindTileByTypeTask : Task
 
     public override TaskStatus Execute(Person p)
     {   
-        Tile found = (Tile)Tile.Find(p.Home, new TileFilterByType(TileType));
+        Tile found = (Tile)Tile.Find(p.Home, new TileFilter(TileType));
         if (found == null)
             Debug($"  {TileType} tile not found near {p.Position}");
         Status.Complete = true;
@@ -289,7 +289,7 @@ public class SourceGoodsTask : Task
         // Try to find a market once
         if (FindMarket)
         {
-            Building market = (Building)Tile.Find(p.Home, new TileFilterBuilding(BuildingType.MARKET));
+            Building market = (Building)Tile.Find(p.Home, new TileFilter(TileType.NONE, BuildingType.MARKET));
             if (market != null)
                 MarketBuilding = market;
             FindMarket = false;
@@ -344,89 +344,36 @@ public class SourceGoodsTask : Task
 public class FindBuildingTask : Task
 {
     public BuildingType BuildingType;
-    public FindBuildingTask(BuildingType buildingType)
-    {
-        BuildingType = buildingType;
-    }
-    public override TaskStatus Execute(Person p)
-    {
-        Building b = null;
-
-        // Try to complete subtasks first
-        TaskStatus subStatus = base.Execute(p);
-        if (subStatus != null)
-        {
-            if (!subStatus.Complete)
-            {
-                return Status;
-            }
-            else if (subStatus.Failed)
-            {
-                Status.Complete = true;
-                Status.Failed = true;
-                return Status;
-            }
-            else if (subStatus.ReturnValue != null && subStatus.ReturnValue is Building)
-            {
-                b = (Building)subStatus.ReturnValue;
-            }
-        }
-
-        if (b == null)
-            b = (Building)Tile.Find(p.Home, new TileFilterBuilding(BuildingType));
-
-        // Uncomment to enable villagers to automatically build buildings
-        //if (b == null)
-        //    subTasks.Enqueue(new TryToBuildTask(BuildingType));
-
-        if (subTasks.Count == 0)
-        {
-            Status.ReturnValue = b;
-            Status.Complete = true;
-            Status.Failed = (b == null);
-        }
-        return Status;
-    }
-
-    public override string Describe(string extra = "")
-    {
-        string s = base.Describe(BuildingType.ToString());
-        return s;
-    }
-}
-
-public class BuildingAndTile
-{
-    public Building Building;
-    public Tile Tile;
-    public BuildingAndTile(Building building, Tile tile)
-    {
-        Building = building;
-        Tile = tile;
-    }
-}
-
-public class FindBuildingOnTileTask : Task
-{
-    public BuildingType BuildingType;
+    public BuildingSubType BuildingSubType;
     public TileType TileType;
-    public FindBuildingOnTileTask(BuildingType buildingType, TileType tileType)
+
+    public FindBuildingTask(
+        BuildingType buildingType, 
+        BuildingSubType buildingSubType = BuildingSubType.NONE,
+        TileType tileType = TileType.NONE)
     {
         BuildingType = buildingType;
+        BuildingSubType = buildingSubType;
         TileType = tileType;
     }
+
     public override TaskStatus Execute(Person p)
     {
-        BuildingAndTile bt = (BuildingAndTile)Tile.Find(p.Home, new TileFilterBuildingOnTile(BuildingType, TileType));
-        Status.ReturnValue = bt;
+        Building b = (Building)Tile.Find(p.Home, new TileFilter(TileType, BuildingType, BuildingSubType));
+        Status.ReturnValue = b;
         Status.Complete = true;
-        Status.Failed = (bt == null);
+        Status.Failed = (b == null);
         return Status;
+
+        // Villagers cannot build automatically, but this is how they would
+        // if (b == null)
+        //     subTasks.Enqueue(new TryToBuildTask(BuildingType));
     }
 
     public override string Describe(string extra = "")
     {
-        string s = base.Describe(BuildingType.ToString() + " on " + TileType.ToString());
+        string s = base.Describe(BuildingType.ToString() + " " + 
+            BuildingSubType.ToString() + " " + TileType.ToString());
         return s;
     }
 }
@@ -492,14 +439,7 @@ public class TryToProduceTask : Task
             {
                 Building = (Building)subStatus.ReturnValue;
                 Building.StartUsing();
-                subTasks.Enqueue(new GoToTask(Building.Sprite.Position));
-            }
-            else if (subStatus.Task is FindBuildingOnTileTask)
-            {
-                BuildingAndTile bt = (BuildingAndTile)subStatus.ReturnValue;
-                Building = bt.Building;
-                Building.StartUsing();
-                Tile = bt.Tile;
+                Tile = Building.Location;
                 subTasks.Enqueue(new GoToTask(Building.Sprite.Position));
             }
             else if (subStatus.Task is SourceGoodsTask)
@@ -524,15 +464,14 @@ public class TryToProduceTask : Task
         }
 
         BuildingType bReq = Requirements.BuildingRequirement;
+        BuildingSubType bReq2 = Requirements.BuildingSubTypeRequirement;
         TileType tReq = Requirements.TileRequirement;
 
         // Queue up subtasks to find all the necessary prerequisites to produce the good
         if (Requirements.ToolRequirement != Goods.Tool.NONE && Tool == null)
             subTasks.Enqueue(new SourceGoodsTask(new Goods(GoodsType.TOOL, (int)Requirements.ToolRequirement, 1)));
-        else if (bReq != BuildingType.NONE && tReq != TileType.NONE && Building == null)
-            subTasks.Enqueue(new FindBuildingOnTileTask(bReq, tReq));
         else if (bReq != BuildingType.NONE && Building == null)
-            subTasks.Enqueue(new FindBuildingTask(bReq));
+            subTasks.Enqueue(new FindBuildingTask(bReq, bReq2, tReq));
         else if (tReq != TileType.NONE && Tile == null)
             subTasks.Enqueue(new FindTileByTypeTask(tReq));
         else if (GoodsRequirements != null && AcquiredGoods.Count < NumRequiredGoods)

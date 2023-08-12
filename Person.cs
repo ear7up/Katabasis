@@ -141,6 +141,11 @@ public class Person : Entity, Drawable
 
             // Pick a skill, biased toward high-level skills, then pick a task that uses that skill
             SkillLevel weightedRandomChoice = Skills.Next();
+            
+            // When a person starts starving, they will only think about producing food
+            if (Hunger >= STARVING)
+                weightedRandomChoice = Skills[(int)Skill.COOKING];
+
             Task task = Task.RandomUsingSkill(weightedRandomChoice);
             Tasks.Enqueue(task);
         }
@@ -235,19 +240,6 @@ public class Person : Entity, Drawable
             ChooseNextTask();
 
         float r = Globals.Rand.NextFloat(0f, 1f);
-
-        if (Hunger >= STARVING)
-        {
-            // Hunt if you have a spear, otherwise scavenge for wild plants
-            if (PersonalStockpile.Has(new Goods(GoodsType.TOOL, (int)Goods.Tool.SPEAR)))
-                AssignPriorityTask(new SourceGoodsTask(
-                    new Goods(GoodsType.FOOD_ANIMAL, (int)Goods.FoodAnimal.GAME)), 
-                    Task.HIGH_PRIORITY);
-            else
-                AssignPriorityTask(new SourceGoodsTask(
-                    new Goods(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.WILD_EDIBLE)), 
-                    Task.HIGH_PRIORITY);
-        }
 
         // FindNewHomeTask pathfinds relative to home tile, so it can't be null
         if (Home != null && Home.Population > Tile.MAX_POP)

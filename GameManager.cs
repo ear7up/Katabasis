@@ -32,6 +32,7 @@ public class GameManager
         GoodsProduction.Init();
         BuildingProduction.Init();
         GoodsInfo.Init();
+        MineralInfo.Init();
         BuildingInfo.Init();
         // Market depends on GoodsInfo.Init()
         Market.Init();

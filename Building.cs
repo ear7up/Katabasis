@@ -17,6 +17,20 @@ public enum BuildingType
     NONE
 }
 
+public enum BuildingSubType
+{
+    GOLD_MINE,
+    SILVER_MINE,
+    COPPER_MINE,
+    LEAD_MINE,
+    MALACHITE_MINE,
+    LAPIS_LAZULI_MINE,
+    TIN_MINE,
+    IRON_MINE,
+    SALT_MINE,
+    NONE
+}
+
 public class Building : Drawable
 {
     public static int IdCounter = 0;
@@ -24,6 +38,7 @@ public class Building : Drawable
     public int Id;
     public Tile Location;
     public BuildingType Type;
+    public BuildingSubType SubType;
     public Sprite Sprite;
 
     public int CurrentUsers;
@@ -51,6 +66,7 @@ public class Building : Drawable
         Location = location;
         Sprite = sprite;
         Type = buildingType;
+        SubType = BuildingSubType.NONE;
         MaxUsers = BuildingInfo.GetMaxUsers(buildingType);
     }
 
@@ -121,7 +137,7 @@ public class Building : Drawable
 
     public static bool ConfirmBuilding(Building building, Tile location)
     {
-        if (location == null)
+        if (location == null || building == null)
             return false;
 
         // Force farms to be river type on rivers
@@ -134,6 +150,22 @@ public class Building : Drawable
         if (ValidPlacement(building, location))
         {
             location.AddBuilding(building);
+
+            if (building.Type == BuildingType.MINE)
+            {
+                switch (location.Minerals)
+                {
+                    case MineralType.IRON: building.SubType = BuildingSubType.IRON_MINE; break;
+                    case MineralType.COPPER: building.SubType = BuildingSubType.COPPER_MINE; break;
+                    case MineralType.GOLD: building.SubType = BuildingSubType.GOLD_MINE; break;
+                    case MineralType.LAPIS_LAZULI: building.SubType = BuildingSubType.LAPIS_LAZULI_MINE; break;
+                    case MineralType.LEAD: building.SubType = BuildingSubType.LEAD_MINE; break;
+                    case MineralType.MALACHITE: building.SubType = BuildingSubType.MALACHITE_MINE; break;
+                    case MineralType.SILVER: building.SubType = BuildingSubType.SILVER_MINE; break;
+                    case MineralType.TIN: building.SubType = BuildingSubType.TIN_MINE; break;
+                    case MineralType.SALT: building.SubType = BuildingSubType.SALT_MINE; break;
+                }
+            }
             return true;
         }
         return false;

@@ -6,7 +6,7 @@ public class Map
     private readonly Point _mapTileSize = new(128, 128);
     public Tile[] tiles;
 
-    private Building _editBuilding;
+    private Building _editBuilding = null;
 
     public Tile HighlightedTile;
 
@@ -47,6 +47,7 @@ public class Map
         {
             Texture2D texture = null;
             TileType tileType = TileType.DESERT;
+            MineralType mineralType = MineralType.NONE;
             double r = random.NextDouble();
 
             // Assign random tile textures
@@ -60,6 +61,7 @@ public class Map
                 // 15% desert with hills
                 texture = desertHillTextures[random.Next(0, desertHillTextures.Count)];
                 tileType = TileType.HILLS;
+                mineralType = MineralInfo.Random();
             }
             else if (r < 0.98)
             {
@@ -92,6 +94,9 @@ public class Map
                 tile = new TileAnimal(new(xpos, ypos), texture, feature);
             else
                 tile = new(tileType, new(xpos, ypos), texture, feature);
+
+            if (mineralType != MineralType.NONE)
+                tile.Minerals = mineralType;
 
             tiles[n] = tile;
 
@@ -208,6 +213,7 @@ public class Map
         {
             t.BaseSprite.Texture = desertRiverTextures[Globals.Rand.Next(0, desertRiverTextures.Count)];
             t.Type = TileType.RIVER;
+            t.Minerals = MineralType.NONE;
 
             // Rivers improve the soil quality of neighboring tiles, overlap is intentional (river itself gets 2x bonus)
             foreach (Tile neighbor in t.Neighbors)
@@ -262,6 +268,7 @@ public class Map
                 if (column == null)
                     break;
                 column.Type = TileType.FOREST;
+                column.Minerals = MineralType.NONE;
                 column.BaseSprite.Texture = desertForestTextures[Globals.Rand.Next(desertForestTextures.Count)];
             }
 
@@ -274,6 +281,7 @@ public class Map
                 if (column == null)
                     break;
                 column.Type = TileType.FOREST;
+                column.Minerals = MineralType.NONE;
                 column.BaseSprite.Texture = desertForestTextures[Globals.Rand.Next(desertForestTextures.Count)];
             }
         }
@@ -396,12 +404,20 @@ public class Map
 
     public void DrawTiles()
     {
-        bool showSoilQuality = _editBuilding != null && _editBuilding.Type == BuildingType.FARM;
+        Tile.DisplayType displayType = Tile.DisplayType.DEFAULT;
+        if (_editBuilding != null && _editBuilding.Type == BuildingType.FARM)
+            displayType = Tile.DisplayType.SOIL_QUALITY;
+        else if (_editBuilding != null && _editBuilding.Type == BuildingType.MINE)
+            displayType = Tile.DisplayType.MINERALS;
+        else if (_editBuilding != null && _editBuilding.Type == BuildingType.RANCH)
+            displayType = Tile.DisplayType.PLACING_RANCH;
+        else if (InputManager.Mode == InputManager.TILE_MODE)
+            displayType = Tile.DisplayType.BUYING_TILE;
 
         // Draw map tiles
         for (int n = 0; n < _mapTileSize.X * _mapTileSize.Y; n++)
         {
-            tiles[n].Draw(showSoilQuality);
+            tiles[n].Draw(displayType);
 
             // Debuging - show where the sprite's position is (it's more or less in the center of the isometric shape)
             //Sprites.Circle.Position = _tiles[n].BaseSprite.Position;
@@ -425,7 +441,9 @@ public class Map
         if (t == null)
             t = TileAtPos(b.Sprite.Position);
 
-        if (!Building.ConfirmBuilding(b, t))
+        if (t == null)
+            Console.WriteLine("Failed to find tile at position " + b.Sprite.Position.ToString());
+        else if (!Building.ConfirmBuilding(b, t))
             Console.WriteLine("Failed to add building at tile " + t.ToString());
     }
 }
