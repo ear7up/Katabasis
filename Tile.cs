@@ -119,11 +119,12 @@ public class Tile
     {
         if (DrawBase)
         {
+            Color temp = BaseSprite.SpriteColor;
             BaseSprite.SpriteColor = Color.SteelBlue;
             BaseSprite.Draw();
 
             BaseSprite.Scale -= 0.02f;
-            BaseSprite.SpriteColor = Color.White;
+            BaseSprite.SpriteColor = temp;
             BaseSprite.Draw();
             BaseSprite.Scale += 0.02f;
         }
@@ -136,19 +137,31 @@ public class Tile
             }
             else
             {
+                Color temp = BuildingSprite.SpriteColor;
                 BuildingSprite.SpriteColor = Color.SteelBlue;
                 BuildingSprite.Draw();
 
                 BuildingSprite.Scale -= 0.02f;
-                BuildingSprite.SpriteColor = Color.White;
+                BuildingSprite.SpriteColor = temp;
                 BuildingSprite.Draw();
                 BuildingSprite.Scale += 0.02f;
             }
         }
     }
 
-    public void Draw()
+    public void Draw(bool showSoilQuality = false)
     {
+        if (showSoilQuality)
+        {
+            float percent = SoilQuality / (MAX_SOIL_QUALITY + 2 * RIVER_SOIL_QUALITY_BONUS + VEGETATION_SOIL_QUALITY_BONUS);
+            Color c = new Color(0.25f, MathHelper.Clamp(percent + 0.2f, 0.5f, 1.0f), 0.25f);
+            BaseSprite.SpriteColor = c;
+        }
+        else
+        {
+            BaseSprite.SpriteColor = Color.White;
+        }
+
         if (Owner != null && Config.ShowBorders)
         {
             DrawOwnedTile();

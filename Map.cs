@@ -391,10 +391,12 @@ public class Map
 
     public void DrawTiles()
     {
+        bool showSoilQuality = _editBuilding != null && _editBuilding.Type == BuildingType.FARM;
+
         // Draw map tiles
         for (int n = 0; n < _mapTileSize.X * _mapTileSize.Y; n++)
         {
-            tiles[n].Draw();
+            tiles[n].Draw(showSoilQuality);
 
             // Debuging - show where the sprite's position is (it's more or less in the center of the isometric shape)
             //Sprites.Circle.Position = _tiles[n].BaseSprite.Position;
