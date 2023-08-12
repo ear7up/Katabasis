@@ -22,9 +22,9 @@ public class Map
         tiles = new Tile[_mapTileSize.X *_mapTileSize.Y];
 
         // Load all of the tile textures
-        List<Texture2D> desertTextures = Sprites.LoadTextures("desert/flat", 30);
-        List<Texture2D> desertHillTextures = Sprites.LoadTextures("desert/hills", 5);
-        List<Texture2D> desertVegetationTextures = Sprites.LoadTextures("desert/vegetation", 6);
+        List<Texture2D> desertTextures = Sprites.LoadTextures("desert/flat", 18);
+        List<Texture2D> desertHillTextures = Sprites.LoadTextures("desert/hills", 7);
+        List<Texture2D> desertVegetationTextures = Sprites.LoadTextures("desert/vegetation", 12);
         List<Texture2D> desertBedouinTextures = Sprites.LoadTextures("desert/bedouin_camps", 5);
 
         // 500x345
@@ -219,7 +219,7 @@ public class Map
 
     public void GenerateForests()
     {
-        List<Texture2D> desertForestTextures = Sprites.LoadTextures("desert/forest", 3);
+        List<Texture2D> desertForestTextures = Sprites.LoadTextures("desert/forest", 5);
 
         // Make some forests, e.g. about 80 for a 128x128 map
         int NUM_FORESTS = (int)(0.005 * _mapTileSize.X * _mapTileSize.Y);
@@ -248,7 +248,12 @@ public class Map
             row.BaseSprite.Texture = desertForestTextures[Globals.Rand.Next(desertForestTextures.Count)];
 
             // Draw some number of tiles to the northeast for this row
-            int h = (int)(w * Globals.Rand.NextFloat(0.8f, 1.2f));
+            int h = w;
+            if (Globals.Rand.Next(2) == 0)
+                h += (int)(w * Globals.Rand.NextFloat(0.2f, 0.3f));
+            else
+                h -= (int)(w * Globals.Rand.NextFloat(0.2f, 0.3f));
+
             column = row;
 
             for (int y = 0; y < h / 2; y++)

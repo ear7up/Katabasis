@@ -43,9 +43,9 @@ public class Tile
     public const int MAX_BUILDINGS = 6;
     public List<Building> Buildings { get; set; }
 
-    public const float MIN_SOIL_QUALITY = 0.4f;
-    public const float MAX_SOIL_QUALITY = 0.8f;
-    public const float RIVER_SOIL_QUALITY_BONUS = 0.2f;
+    public const float MIN_SOIL_QUALITY = 0.3f;
+    public const float MAX_SOIL_QUALITY = 0.6f;
+    public const float RIVER_SOIL_QUALITY_BONUS = 0.25f;
     public const float VEGETATION_SOIL_QUALITY_BONUS = 0.1f;
     public float SoilQuality { get; set; }
     
