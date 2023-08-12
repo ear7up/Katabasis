@@ -28,6 +28,14 @@ public class GameManager
 
     public GameManager()
     {
+        Goods.CalcGoodsTypecounts();
+        GoodsProduction.Init();
+        BuildingProduction.Init();
+        GoodsInfo.Init();
+        BuildingInfo.Init();
+        // Market depends on GoodsInfo.Init()
+        Market.Init();
+
         _sky = new Sprite(Globals.Content.Load<Texture2D>("sky"), Vector2.Zero);
         _sky.Scale = 2f;
         _map = new();
@@ -49,15 +57,6 @@ public class GameManager
         _logoDisplay2 = new(Sprites.Font2);
         _logoDisplay2.Text = "Katabasis";
         _logoDisplay2.FontColor = Color.Black;
-
-        Goods.CalcGoodsTypecounts();
-        GoodsProduction.Init();
-        BulidingProduction.Init();
-        GoodsInfo.Init();
-        BuildingInfo.Init();
-
-        // Depends on GoodsInfo.Init()
-        Market.Init();
 
         UI.Init();
 

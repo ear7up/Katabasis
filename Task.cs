@@ -289,7 +289,7 @@ public class SourceGoodsTask : Task
         // Try to find a market once
         if (FindMarket)
         {
-            Building market = (Building)Tile.Find(p.Home, new TileFilterBuliding(BuildingType.MARKET));
+            Building market = (Building)Tile.Find(p.Home, new TileFilterBuilding(BuildingType.MARKET));
             if (market != null)
                 MarketBuilding = market;
             FindMarket = false;
@@ -373,7 +373,7 @@ public class FindBuildingTask : Task
         }
 
         if (b == null)
-            b = (Building)Tile.Find(p.Home, new TileFilterBuliding(BuildingType));
+            b = (Building)Tile.Find(p.Home, new TileFilterBuilding(BuildingType));
 
         // Uncomment to enable villagers to automatically build buildings
         //if (b == null)
@@ -417,7 +417,7 @@ public class FindBuildingOnTileTask : Task
     }
     public override TaskStatus Execute(Person p)
     {
-        BuildingAndTile bt = (BuildingAndTile)Tile.Find(p.Home, new TileFilterBulidingOnTile(BuildingType, TileType));
+        BuildingAndTile bt = (BuildingAndTile)Tile.Find(p.Home, new TileFilterBuildingOnTile(BuildingType, TileType));
         Status.ReturnValue = bt;
         Status.Complete = true;
         Status.Failed = (bt == null);
@@ -482,6 +482,8 @@ public class TryToProduceTask : Task
             {
                 Status.Complete = true;
                 Status.Failed = true;
+                if (Building != null)
+                    Building.StopUsing();
                 return Status;
             }
 
@@ -489,12 +491,14 @@ public class TryToProduceTask : Task
             if (subStatus.Task is FindBuildingTask)
             {
                 Building = (Building)subStatus.ReturnValue;
+                Building.StartUsing();
                 subTasks.Enqueue(new GoToTask(Building.Sprite.Position));
             }
             else if (subStatus.Task is FindBuildingOnTileTask)
             {
                 BuildingAndTile bt = (BuildingAndTile)subStatus.ReturnValue;
                 Building = bt.Building;
+                Building.StartUsing();
                 Tile = bt.Tile;
                 subTasks.Enqueue(new GoToTask(Building.Sprite.Position));
             }
@@ -598,6 +602,8 @@ public class TryToProduceTask : Task
                 float q = Goods.Quantity;
                 p.PersonalStockpile.Add(Goods);
                 Goods.Quantity = q;
+                if (Building != null)
+                    Building.StopUsing();
                 Task.Debug($"Successfully produced {Goods}");
             }
         }
@@ -734,7 +740,7 @@ public class TryToBuildTask : Task
         TimeSpent = 0f;
         ToolBorrowed = false;
         BuildingType = buildingType;
-        ProductionRequirements reqs = (ProductionRequirements)BulidingProduction.Requirements[BuildingType];
+        ProductionRequirements reqs = (ProductionRequirements)BuildingProduction.Requirements[BuildingType];
 
         if (reqs.ToolRequirement != Goods.Tool.NONE)
             subTasks.Enqueue(new SourceGoodsTask(new Goods(GoodsType.TOOL, (int)reqs.ToolRequirement)));

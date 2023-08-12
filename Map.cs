@@ -329,7 +329,7 @@ public class Map
 
         if (_editBuilding != null)
         {
-            // Make the currently editing buliding follow the mouse pointer
+            // Make the currently editing building follow the mouse pointer
             _editBuilding.Sprite.Position = InputManager.MousePos;
 
             Tile location = TileAtPos(InputManager.MousePos);
@@ -345,7 +345,7 @@ public class Map
                 AddBuilding(_editBuilding);
                 _editBuilding = null;
             }
-            // Resize the buliding before placing it (scroll wheel while in build mode)
+            // Resize the building before placing it (scroll wheel while in build mode)
             else if (InputManager.Mode == InputManager.BUILD_MODE && InputManager.ScrollValue > 0)
             {
                 _editBuilding.Sprite.ScaleUp(SCALE_CONSTANT);

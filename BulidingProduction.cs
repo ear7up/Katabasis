@@ -1,6 +1,6 @@
 using System.Collections;
 
-public class BulidingProduction
+public class BuildingProduction
 {
     public static Hashtable Requirements;
 

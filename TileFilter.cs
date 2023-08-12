@@ -19,10 +19,10 @@ public class TileFilterHome : TileFilter
 }
 
 // Find a building
-public class TileFilterBuliding : TileFilter
+public class TileFilterBuilding : TileFilter
 {
     public BuildingType BuildingType;
-    public TileFilterBuliding(BuildingType buildingType)
+    public TileFilterBuilding(BuildingType buildingType)
     {
         BuildingType = buildingType;
     }
@@ -31,7 +31,7 @@ public class TileFilterBuliding : TileFilter
     {
         foreach (Building b in t.Buildings)
         {
-            if (Building.EquivalentType(b.Type, BuildingType))
+            if (Building.EquivalentType(b.Type, BuildingType) && b.CurrentUsers < b.MaxUsers)
             {
                 return b;
             }
@@ -41,11 +41,11 @@ public class TileFilterBuliding : TileFilter
 }
 
 // Find a building
-public class TileFilterBulidingOnTile : TileFilter
+public class TileFilterBuildingOnTile : TileFilter
 {
     public BuildingType BuildingType;
     public TileType TileType;
-    public TileFilterBulidingOnTile(BuildingType buildingType, TileType tileType)
+    public TileFilterBuildingOnTile(BuildingType buildingType, TileType tileType)
     {
         BuildingType = buildingType;
         TileType = tileType;
@@ -57,7 +57,7 @@ public class TileFilterBulidingOnTile : TileFilter
             return null;
 
         foreach (Building b in t.Buildings)
-            if (Building.EquivalentType(b.Type, BuildingType))
+            if (Building.EquivalentType(b.Type, BuildingType) && b.CurrentUsers < b.MaxUsers)
                 return new BuildingAndTile(b, t);
 
         return null;

@@ -26,6 +26,9 @@ public class Building : Drawable
     public BuildingType Type;
     public Sprite Sprite;
 
+    public int CurrentUsers;
+    public int MaxUsers;
+
     public static Building Random(BuildingType type = BuildingType.NONE, bool temporary = false)
     {
         // Random building type (excluding NONE)
@@ -48,11 +51,12 @@ public class Building : Drawable
         Location = location;
         Sprite = sprite;
         Type = buildingType;
+        MaxUsers = BuildingInfo.GetMaxUsers(buildingType);
     }
 
     public static Building CreateBuilding(Tile location, BuildingType buildingType = BuildingType.NONE)
     {
-        // Try lay out the buliding in the empty space on the diamond based on buliding count
+        // Try lay out the building in the empty space on the diamond based on building count
         Vector2 position = Vector2.Zero;
 
         if (location != null)
@@ -77,6 +81,16 @@ public class Building : Drawable
                Type == BuildingType.FARM_RIVER || 
                Type == BuildingType.MINE || 
                Type == BuildingType.RANCH;
+    }
+    
+    public void StartUsing()
+    {
+        CurrentUsers++;
+    }
+
+    public void StopUsing()
+    {
+        CurrentUsers--;
     }
 
     public static bool EquivalentType(BuildingType a, BuildingType b)

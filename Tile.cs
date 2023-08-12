@@ -178,7 +178,7 @@ public class Tile
     {
         Buildings.Add(building);
 
-        // If the buliding replaces the whole tile, set it as a sprite to be drawn on the tile layer
+        // If the building replaces the whole tile, set it as a sprite to be drawn on the tile layer
         // otherwise, added it to the ybuffer so overlaps are avoidable
         if (building.IsWholeTile())
         {

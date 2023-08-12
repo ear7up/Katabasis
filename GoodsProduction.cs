@@ -134,7 +134,7 @@ public class GoodsProduction
             toolRequirement: Goods.Tool.HAMMER,
             levelRequirement: new SkillLevel(Skill.CRAFTING, 70)));
 
-        // Leather requires animal hides, should it require a tannery buliding?
+        // Leather requires animal hides, should it require a tannery building?
         g.SubType = (int)Goods.Crafted.LEATHER;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
