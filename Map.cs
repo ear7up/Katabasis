@@ -169,6 +169,7 @@ public class Map
             }
         }
 
+        GenerateForests();
         GenerateRivers();
 
         // Fix the map origin to account for overlap and perspective
@@ -199,9 +200,7 @@ public class Map
         Tile t = startingFromTop ? tiles[0] : tiles[tiles.Length - 1];
 
         for (int i = 0; i < steps1; i++)
-        {
             t = t.Neighbors[startingFromTop ? (int)Cardinal.SE : (int)Cardinal.NW];
-        }
 
         // Place a random number of river tiles toward the center
         int length1 = Globals.Rand.Next(_mapTileSize.Y / 3, 3 * _mapTileSize.Y / 4);
@@ -212,14 +211,66 @@ public class Map
 
             // Rivers improve the soil quality of neighboring tiles, overlap is intentional (river itself gets 2x bonus)
             foreach (Tile neighbor in t.Neighbors)
-            {
                 if (neighbor != null)
-                {
                     neighbor.SoilQuality += Tile.RIVER_SOIL_QUALITY_BONUS;
-                }
+            t = t.Neighbors[startingFromTop ? (int)Cardinal.SW : (int)Cardinal.NE];
+        }
+    }
+
+    public void GenerateForests()
+    {
+        List<Texture2D> desertForestTextures = Sprites.LoadTextures("desert/forest", 3);
+
+        // Make some forests, e.g. about 80 for a 128x128 map
+        int NUM_FORESTS = (int)(0.005 * _mapTileSize.X * _mapTileSize.Y);
+        for (int i = 0; i < NUM_FORESTS; i++)
+            GenerateForest(desertForestTextures);
+    }
+
+    public void GenerateForest(List<Texture2D> desertForestTextures)
+    {
+        int i = Globals.Rand.Next(tiles.Length);
+        Tile start = tiles[i];
+
+        int w = Globals.Rand.Next(3, 6);
+
+        // Traverse south-east from the start tile
+        // At each step, draw a number of 
+        Tile row = start;
+        Tile column = start;
+        for (int x = 0; x < w; x++)
+        {
+            row = row.Neighbors[(int)Cardinal.SE];
+            if (row == null)
+                break;
+
+            row.Type = TileType.FOREST;
+            row.BaseSprite.Texture = desertForestTextures[Globals.Rand.Next(desertForestTextures.Count)];
+
+            // Draw some number of tiles to the northeast for this row
+            int h = (int)(w * Globals.Rand.NextFloat(0.8f, 1.2f));
+            column = row;
+
+            for (int y = 0; y < h / 2; y++)
+            {
+                column = column.Neighbors[(int)Cardinal.NE];
+                if (column == null)
+                    break;
+                column.Type = TileType.FOREST;
+                column.BaseSprite.Texture = desertForestTextures[Globals.Rand.Next(desertForestTextures.Count)];
             }
 
-            t = t.Neighbors[startingFromTop ? (int)Cardinal.SW : (int)Cardinal.NE];
+            // Draw some number of tiles to the southwest for this row
+            column = row;
+
+            for (int y = 0; y < h / 2; y++)
+            {
+                column = column.Neighbors[(int)Cardinal.SW];
+                if (column == null)
+                    break;
+                column.Type = TileType.FOREST;
+                column.BaseSprite.Texture = desertForestTextures[Globals.Rand.Next(desertForestTextures.Count)];
+            }
         }
     }
 
