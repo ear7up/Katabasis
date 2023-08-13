@@ -34,10 +34,13 @@ public class Goods
         FLOUR, BREAD, BEER, WINE, SALTED_MEAT
     }
 
+    // Cooked versions MUST parallel with RawMeat
     public enum FoodAnimal
     {
-        PORK, BEEF, MUTTON, DUCK, FOWL, GOOSE, 
-        QUAIL, GAME, FISH, MILK, EGGS, HONEY
+        PORK, BEEF, MUTTON, DUCK, FOWL, 
+        GOOSE, QUAIL, GAME, FISH, 
+
+        MILK, EGGS, HONEY
     }
 
     public enum FoodPlant
@@ -208,12 +211,35 @@ public class Goods
 
     public bool IsEdible()
     {
-        return Type == GoodsType.FOOD_ANIMAL || Type == GoodsType.FOOD_PLANT || Type == GoodsType.FOOD_PROCESSED;
+        // Don't eat uncooked flour, you can get salmonella
+        return 
+            Type == GoodsType.FOOD_ANIMAL || 
+            Type == GoodsType.FOOD_PLANT || 
+            (Type == GoodsType.FOOD_PROCESSED && SubType != (int)Goods.ProcessedFood.FLOUR);
     }
 
-    public bool IsTool(Tool t)
+    public bool IsCookable()
     {
-        return Type == GoodsType.TOOL && (Tool)SubType == t;
+        return 
+            Type == GoodsType.RAW_MEAT || 
+            (Type == GoodsType.FOOD_PROCESSED && SubType == (int)Goods.ProcessedFood.FLOUR);
+    }
+
+    // Converts a cookable good into its cooked version
+    public void Cook()
+    {
+        if (!IsCookable())
+            return;
+
+        if (Type == GoodsType.FOOD_PROCESSED && SubType == (int)Goods.ProcessedFood.FLOUR)
+            SubType = (int)Goods.ProcessedFood.BREAD;
+        else if (Type == GoodsType.RAW_MEAT)
+            Type = GoodsType.FOOD_ANIMAL;
+    }
+
+    public bool IsTool()
+    {
+        return Type == GoodsType.TOOL;
     }
 
     public bool IsMaterialAnimal(MaterialAnimal t)

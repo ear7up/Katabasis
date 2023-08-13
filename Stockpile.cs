@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 
 public class Stockpile
 {
@@ -38,11 +39,7 @@ public class Stockpile
     {
         Goods available = (Goods)_stock[goods.GetId()];
         if (available != null)
-        {
             goods.Quantity = available.Take(goods.Quantity);
-            if (available.Quantity == 0)
-                _stock.Remove(available.GetId());
-        }
         else
             goods.Quantity = 0;
     }
@@ -52,6 +49,15 @@ public class Stockpile
     {
         foreach (Goods g in _stock.Values)
             g.Quantity *= (1 - GoodsInfo.GetDecayRate(g));
+
+        // Remove goods with zero or near-zero quantiy
+        List<int> toRemove = new();
+        foreach (Goods g in _stock.Values)
+            if (g.Quantity <= 0.001f)
+                toRemove.Add(g.GetId());
+
+        foreach (int gid in toRemove)
+            _stock.Remove(gid);
     }
 
     // Takes goods from the stockpile, sets quantity to the amount taken (may be less than requested)
@@ -68,6 +74,14 @@ public class Stockpile
     {
         Goods available = (Goods)_stock[goods.GetId()];
         if (available == null || available.Quantity < goods.Quantity)
+            return false;
+        return true;
+    }
+
+    public bool HasSome(Goods goods)
+    {
+        Goods available = (Goods)_stock[goods.GetId()];
+        if (available == null || available.Quantity <= 0.01f)
             return false;
         return true;
     }
@@ -109,5 +123,32 @@ public class Stockpile
             if (g.Quantity >= 1f)
                 s += "  " + g.ToString() + "\n";
         return s + "";
+    }
+
+    public void DepositInto(Stockpile other)
+    {
+        foreach (Goods g in _stock.Values)
+            other.Add(g);
+        _stock.Clear();
+    }
+
+    public void DepositIntoExcludingFoodAndTools(Stockpile other)
+    {
+        List<Goods> keep = new();
+        foreach (Goods g in _stock.Values)
+            if (g.IsEdible() || g.IsTool())
+                keep.Add(g);
+            else
+                other.Add(g);
+
+        _stock.Clear();
+        foreach (Goods g in keep)
+            Add(g);
+    }
+
+    // To allow foreach over Stockpile goods
+    public IEnumerator GetEnumerator()
+    {
+        return _stock.Values.GetEnumerator();
     }
 }

@@ -148,7 +148,8 @@ public class Kingdom
         foreach (Person p in People)
             total.Sum(p.PersonalStockpile);
         foreach (Tile t in OwnedTiles)
-            total.Sum(t.Stockpile);
+            foreach (Building b in t.Buildings)
+                total.Sum(b.Stockpile);
         s += total.ToString();
         return s;
     }

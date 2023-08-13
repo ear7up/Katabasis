@@ -50,9 +50,6 @@ public class Tile
     public float SoilQuality { get; set; }
 
     public MineralType Minerals;
-    
-    // Every tile has a resource stockpile that can be used for production/consumption
-    public Stockpile Stockpile;
 
     public static Cardinal GetOppositeDirection(Cardinal direction)
     {
@@ -83,8 +80,6 @@ public class Tile
         BaseSprite = new Sprite(baseTexture, position);
         if (BuildingSprite != null)
             BuildingSprite = new Sprite(buildingTexture, position);
-
-        Stockpile = new();
         
         SoilQuality = Globals.Rand.NextFloat(MIN_SOIL_QUALITY, MAX_SOIL_QUALITY);
         if (type == TileType.VEGETATION)
@@ -259,7 +254,8 @@ public class Tile
 
     public void DailyUpdate()
     {
-        Stockpile.DailyUpdate();
+        foreach (Building b in Buildings)
+            b.DailyUpdate();
     }
 
     public void Unhighlight()
@@ -312,6 +308,9 @@ public class Tile
 
     public float Wealth()
     {
-        return Stockpile.Wealth();
+        float sum = 0f;
+        foreach (Building b in Buildings)
+            sum += b.Wealth();
+        return sum;
     }
 }

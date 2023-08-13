@@ -45,6 +45,9 @@ public class Building : Drawable
     public int MaxUsers;
     public bool Selected;
 
+    // This is intended to be used for property in houses
+    public Stockpile Stockpile;
+
     public static Building Random(BuildingType type = BuildingType.NONE, bool temporary = false)
     {
         // Random building type (excluding NONE)
@@ -70,6 +73,7 @@ public class Building : Drawable
         SubType = BuildingSubType.NONE;
         MaxUsers = BuildingInfo.GetMaxUsers(buildingType);
         Selected = false;
+        Stockpile = new();
     }
 
     public static Building CreateBuilding(Tile location, BuildingType buildingType = BuildingType.NONE)
@@ -229,5 +233,15 @@ public class Building : Drawable
     {
         // For perspective, let Person sprites be drawn over top of the bottom 30% of the building
         return Sprite.GetMaxY() - (Sprite.Scale * Sprite.Texture.Height * 0.3f) + (Id * 0.001f);
+    }
+
+    public void DailyUpdate()
+    {
+        Stockpile.DailyUpdate();
+    }
+
+    public float Wealth()
+    {
+        return Stockpile.Wealth();
     }
 }

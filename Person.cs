@@ -110,10 +110,16 @@ public class Person : Entity, Drawable
         if (Task.Peek(Tasks) != null)
             task  = Tasks.Peek().Describe();
 
+        string house = "homeless";
+        if (House != null)
+            house = House.Sprite.Position.ToString();
+
         return $"Person('{Name}' ({Age}) hunger={Hunger}\n" +
                $"Task=[{task}]\n" +
                $"Skill={skills}\n" +
-               $"Items={PersonalStockpile})";
+               $"Items={PersonalStockpile})\n" + 
+               $"Position={Position}\n" + 
+               $"House={house}";
     }
 
     public static Person CreatePerson(Vector2 position, Tile home)
@@ -230,7 +236,15 @@ public class Person : Entity, Drawable
             return;
         }
 
-        // Queue up a task to remind them to eat
+        // If you have a house, go there, desposit your inventory, then try to cook
+        if (House != null)
+        {
+            Tasks.Enqueue(new GoToTask(House.Sprite.Position));
+            Tasks.Enqueue(new DepositInventoryTask());
+            Tasks.Enqueue(new CookTask());
+        }
+
+        // Eat unti you run out of food or are no longer hungry
         Tasks.Enqueue(new EatTask());
 
         // Figure out what they want and queue up a task to buy it

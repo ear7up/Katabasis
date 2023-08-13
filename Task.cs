@@ -276,10 +276,20 @@ public class SourceGoodsTask : Task
             }
         }
 
+        GoodsRequest.Quantity = QuantityRequired - QuantityAcquired;
+
+        // If it exists at the house, take it immediately, then head there
+        // taking goods instantly prevents another member of the household from taking it
+        if (GoodsRequest.Quantity > 0 && p.House != null && p.House.Stockpile.Has(GoodsRequest))
+        {
+            p.House.Stockpile.Take(GoodsRequest);
+            QuantityAcquired = QuantityRequired;
+            subTasks.Enqueue(new GoToTask(p.House.Sprite.Position));
+        }
+
         // Keep requesting more from the stockpile
         if (QuantityRequired > QuantityAcquired)
         {
-            GoodsRequest.Quantity = QuantityRequired - QuantityAcquired;
             p.PersonalStockpile.Take(GoodsRequest);
             QuantityAcquired += GoodsRequest.Quantity;
 
@@ -328,7 +338,7 @@ public class SourceGoodsTask : Task
         }
 
         // Task is complete when all goods are acquired or we've exhuasted all possible avenues
-        if (QuantityAcquired >= QuantityRequired || subTasks.Count == 0)
+        if (subTasks.Count == 0)
         {
             GoodsRequest.Quantity = QuantityAcquired;
             Status.Complete = true;
@@ -757,5 +767,114 @@ public class TryToBuildTask : Task
     {
         string s = base.Describe(BuildingType.ToString());
         return s;
+    }
+}
+
+public class DepositInventoryTask : Task
+{
+    public DepositInventoryTask() : base()
+    {
+
+    }
+
+    public override TaskStatus Execute(Person p)
+    {
+        if (p.House == null)
+        {
+            Status.Complete = true;
+            Status.Failed = true;
+            return Status;
+        }
+        p.PersonalStockpile.DepositIntoExcludingFoodAndTools(p.House.Stockpile);
+        Status.Complete = true;
+        return Status;
+    }
+}
+
+public class CookTask : Task
+{
+    public bool Initialized;
+    public float TimeToProduce;
+    public float TimeSpent;
+    public Queue<Goods> ToCook;
+
+    public CookTask() : base()
+    {
+        TimeSpent = 0f;
+        TimeToProduce = 0f;
+        Initialized = false;
+        ToCook = new();
+    }
+
+    public override TaskStatus Execute(Person p)
+    {
+        if (!Initialized)
+        {
+            Init(p);
+            Initialized = true;
+            return Status;
+        }
+
+        if (ToCook.Count > 0)
+        {
+            Goods current = ToCook.Peek();
+            TimeToProduce = GoodsInfo.GetTime(current) * current.Quantity;
+            
+            TimeSpent += Globals.Time;
+            if (TimeSpent >= TimeToProduce)
+            {
+                ToCook.Dequeue();
+                current.Cook();
+                p.PersonalStockpile.Add(current);
+                TimeSpent = 0f;
+            }
+        }
+
+        if (ToCook.Count == 0)
+            Status.Complete = true;
+        return Status;
+    }
+
+    public void Init(Person p)
+    {
+        if (p.House == null)
+        {
+            Status.Complete = true;
+            Status.Failed = true;
+            return;
+        }
+
+        // Try to cook as much as you want to eat, or three days worth
+        float current = 0;
+        float limit = p.Hunger + Person.DAILY_HUNGER * 3f;
+        foreach (Goods g in p.House.Stockpile)
+        {
+            if (g.IsCookable())
+            {
+                // Try to take as much as needed to reach limit
+                Goods cooked = new Goods(g);
+                cooked.Cook();
+                int satiation = GoodsInfo.GetSatiation(cooked);
+
+                Goods req = new Goods(g);
+                req.Quantity = (limit - current) / satiation;
+                p.House.Stockpile.Take(req);
+                current += req.Quantity * satiation;
+
+                if (req.Quantity > 0f)
+                    ToCook.Enqueue(req);
+            }
+
+            if (current >= limit)
+                break;
+        }
+    }
+
+    public override string Describe(string extra = "")
+    {
+        string food = "planning";
+        if (ToCook.Count > 0)
+            food = ToCook.Peek().ToString();
+        return base.Describe(food);
     }
 }
