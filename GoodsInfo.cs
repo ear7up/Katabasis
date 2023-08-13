@@ -71,6 +71,12 @@ public class GoodsInfo
                 Satiation = 8;
                 UseRate = 1f;
                 DefaultPrice = 5f;
+                
+                if (subType == (int)Goods.ProcessedFood.FLOUR)
+                {
+                    DefaultPrice = 2.5f;
+                    Satiation = 2;
+                }
                 break;
             }
             case GoodsType.RAW_MEAT:

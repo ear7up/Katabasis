@@ -57,8 +57,8 @@ public class Sprite
         // Calculate top-left corner
         if (DrawRelativeToOrigin)
         {
-            Bounds.X = (int)(Position.X - Origin.X);
-            Bounds.Y = (int)(Position.Y - Origin.Y);
+            Bounds.X = (int)(Position.X - Texture.Width * Scale / 2f);
+            Bounds.Y = (int)(Position.Y - Texture.Height * Scale / 2f);
         }
         else
         {

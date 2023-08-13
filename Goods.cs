@@ -31,7 +31,7 @@ public class Goods
 
     public enum ProcessedFood
     {
-        BREAD, BEER, WINE
+        FLOUR, BREAD, BEER, WINE, SALTED_MEAT
     }
 
     public enum FoodAnimal

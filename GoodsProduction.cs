@@ -292,12 +292,20 @@ public class GoodsProduction
                 new Goods(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.BARLEY)),
             levelRequirement: new SkillLevel(Skill.COOKING, 30)));
 
-        // wheat -> bread
-        g.SubType = (int)Goods.ProcessedFood.BREAD;
+        // wheat -> flour
+        g.SubType = (int)Goods.ProcessedFood.FLOUR;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.WHEAT)),
+            buildingRequirement: BuildingType.GRANARY,
             levelRequirement: new SkillLevel(Skill.COOKING, 10)));
+
+        // flour -> bread
+        g.SubType = (int)Goods.ProcessedFood.BREAD;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.FOOD_PROCESSED, (int)Goods.ProcessedFood.FLOUR)),
+            levelRequirement: new SkillLevel(Skill.COOKING, 20)));
 
         // grapes -> wine
         g.SubType = (int)Goods.ProcessedFood.WINE;

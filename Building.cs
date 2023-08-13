@@ -43,6 +43,7 @@ public class Building : Drawable
 
     public int CurrentUsers;
     public int MaxUsers;
+    public bool Selected;
 
     public static Building Random(BuildingType type = BuildingType.NONE, bool temporary = false)
     {
@@ -68,6 +69,7 @@ public class Building : Drawable
         Type = buildingType;
         SubType = BuildingSubType.NONE;
         MaxUsers = BuildingInfo.GetMaxUsers(buildingType);
+        Selected = false;
     }
 
     public static Building CreateBuilding(Tile location, BuildingType buildingType = BuildingType.NONE)
@@ -164,6 +166,7 @@ public class Building : Drawable
         if (ValidPlacement(building, location))
         {
             location.AddBuilding(building);
+            building.Location = location;
 
             if (building.Type == BuildingType.MINE)
             {
@@ -190,17 +193,35 @@ public class Building : Drawable
         if (InputManager.Mode == InputManager.CAMERA_MODE && InputManager.Clicked)
         {
             if (Sprite.GetBounds().Contains(InputManager.MousePos))
+            {
                 Console.WriteLine("Building clicked: " + this.ToString() + $"(max_y = {this.GetMaxY()})");
+                Selected = true;
+            }
+            else
+            {
+                Selected = false;
+            }
         }
     }
 
     public override string ToString()
     {
-        return base.ToString() + " " + Sprite.Position.ToString() + " " + Type.ToString();
+        return base.ToString() + " " + Sprite.Position.ToString() + " " + Type.ToString() + " " +
+            $"users=({CurrentUsers}/{MaxUsers})";
     }
 
     public void Draw()
     {
+        if (Selected)
+        {
+            Sprite.SpriteColor = Color.Cyan;
+            Sprite.Scale += 0.025f;
+            Sprite.Draw();
+
+            Sprite.SpriteColor = Color.White;
+            Sprite.Scale -= 0.025f;
+        }
+
         Sprite.Draw();
     }
 

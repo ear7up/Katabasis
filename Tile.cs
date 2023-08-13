@@ -31,7 +31,7 @@ public class Tile
 
     public const int HIGHLIGHT_HEIGHT = 30;
     
-    public const int MAX_POP = 8;
+    public const int MAX_POP = 32;
     public int Population { get; set; }
 
     public bool DrawBase;

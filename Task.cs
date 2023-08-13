@@ -46,16 +46,20 @@ public class Task
     public Vector2 location;
     public int currentSubtask;
     public TaskStatus Status;
+    public Action<Object> OnSuccess;
+    public Action<Object> OnFailure;
     
     // completion criteria ?
 
-    public Task()
+    public Task(Action<Object> onComplete = null, Action<Object> onFailure = null)
     {
         skillsNeeded = new();
         subTasks = new();
         location = new();
         currentSubtask = 0;
         Status = new(this);
+        OnSuccess = onComplete;
+        OnFailure = onFailure;
     }
 
     public static Task Peek(PriorityQueue2<Task, int> tasks)
@@ -430,7 +434,10 @@ public class TryToProduceTask : Task
                 Status.Complete = true;
                 Status.Failed = true;
                 if (Building != null)
+                {
+                    p.BuildingUsing = null;
                     Building.StopUsing();
+                }   
                 return Status;
             }
 
@@ -439,6 +446,7 @@ public class TryToProduceTask : Task
             {
                 Building = (Building)subStatus.ReturnValue;
                 Building.StartUsing();
+                p.BuildingUsing = Building;
                 Tile = Building.Location;
                 subTasks.Enqueue(new GoToTask(Building.Sprite.Position));
             }

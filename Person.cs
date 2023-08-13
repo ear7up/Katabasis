@@ -32,6 +32,9 @@ public class Person : Entity, Drawable
     public const int OLD_AGE = 70;
 
     public Tile Home;
+    public Building House;
+    public bool SearchingForHouse;
+    public Building BuildingUsing;
     public Player Owner;
     public PersonType Type;
 
@@ -48,7 +51,7 @@ public class Person : Entity, Drawable
     public PriorityQueue2<Task, int> Tasks;
     public WeightedList<SkillLevel> Skills; // inherited by children Lamarck-style?
 
-    private Person(Vector2 position)
+    private Person(Vector2 position, Tile home)
     {
         Id = IdCounter++;
         Owner = null;
@@ -69,7 +72,10 @@ public class Person : Entity, Drawable
         SetImage(image);
         Name = NameGenerator.Random(Gender);
         Age = Globals.Rand.Next(10, 50);
-        Home = null;
+        Home = home;
+        House = null;
+        SearchingForHouse = false;
+        BuildingUsing = null;
         
         Tasks = new();
         PersonalStockpile = new();
@@ -112,24 +118,33 @@ public class Person : Entity, Drawable
 
     public static Person CreatePerson(Vector2 position, Tile home)
     {
-        Person person = new Person(position);
+        Person person = new Person(position, home);
         person.Scale = 0.05f;
-        person.Home = home;
         home.Population += 1;
         Globals.Ybuffer.Add(person);
         return person;
     }
 
+    public void SetHouse(Object x)
+    {
+        House = (Building)x;
+        House.StartUsing();
+        Home = House.Location;
+    }
+
+    public void NoHouseFound(Object x)
+    {
+        SearchingForHouse = false;
+    }
+
     public void ChooseNextTask()
     {
         // If the Person's home is too populated, find a new home
-        if (Home == null || Home.Population > Tile.MAX_POP)
+        if (Home != null && Home.Population > Tile.MAX_POP)
         {
             Tasks.Enqueue(new FindNewHomeTask());
             return;
         }
-
-        // TODO: build a house
 
         float r = Globals.Rand.NextFloat(0f, 1f);
 
@@ -203,9 +218,9 @@ public class Person : Entity, Drawable
         foreach (SkillLevel skill in Skills)
             sum += skill.level;
 
-        if (sum >= 300)
+        if (sum >= 350)
             SetImage((Gender == GenderType.MALE) ? Sprites.ManG : Sprites.WomanG);
-        else if (sum >= 200)
+        else if (sum >= 250)
             SetImage((Gender == GenderType.MALE) ? Sprites.ManS : Sprites.WomanS);
 
         Hunger += DAILY_HUNGER;
@@ -221,6 +236,16 @@ public class Person : Entity, Drawable
         // Figure out what they want and queue up a task to buy it
         UpdateGoodsDemand();
         GoToMarket();
+
+        if (House == null && !SearchingForHouse)
+        {
+            FindBuildingTask find = new(BuildingType.HOUSE);
+            find.OnSuccess = SetHouse;
+            find.OnFailure = NoHouseFound;
+            Tasks.Enqueue(find);
+            SearchingForHouse = true;
+            return;
+        }
     }
 
     public bool CheckIfClicked()
@@ -240,10 +265,6 @@ public class Person : Entity, Drawable
             ChooseNextTask();
 
         float r = Globals.Rand.NextFloat(0f, 1f);
-
-        // FindNewHomeTask pathfinds relative to home tile, so it can't be null
-        if (Home != null && Home.Population > Tile.MAX_POP)
-            Tasks.Enqueue(new FindNewHomeTask(), 1);
         
         // Peek will grab highest priority task unless no priority is set, then it will grab the oldest assigned task
         Task current = Task.Peek(Tasks);
@@ -254,6 +275,11 @@ public class Person : Entity, Drawable
             // This happens often if the task prerequisites cannot be fulfilled
             if (currentStatus.Complete || currentStatus.Failed)
                 Tasks.Dequeue();
+
+            if (currentStatus.Complete && !currentStatus.Failed && current.OnSuccess != null)
+                current.OnSuccess(currentStatus.ReturnValue);
+            else if (currentStatus.Complete && currentStatus.Failed && current.OnFailure != null)
+                current.OnFailure(currentStatus.ReturnValue);
         }
     }
 
@@ -273,6 +299,10 @@ public class Person : Entity, Drawable
     {
         if (Home != null)
             Home.Population--;
+        if (House != null)
+            House.StopUsing();
+        if (BuildingUsing != null)
+            BuildingUsing.StopUsing();
         Owner.Kingdom.PersonDied(this);
         Globals.Ybuffer.Remove(this);
     }
