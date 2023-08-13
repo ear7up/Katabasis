@@ -95,12 +95,17 @@ public class GameManager
             onClick: BuildMine, onHover: UI.SetTooltipText, tooltip: "Mine"));
         _bottomPanel.SetContent(2, 0, new UIElement(Sprites.ranches[0], scale: 0.3f, 
             onClick: BuildRanch, onHover: UI.SetTooltipText, tooltip: "Ranch"));
-        _bottomPanel.SetContent(0, 1, new UIElement(Sprites.barracks[0], scale: 0.3f, 
-            onClick: BuildBarracks, onHover: UI.SetTooltipText, tooltip: "Barracks"));
-        _bottomPanel.SetContent(1, 1, new UIElement(Sprites.houses[0], scale: 0.3f, 
+        _bottomPanel.SetContent(3, 0, new UIElement(Sprites.markets[0], scale: 0.3f, 
+            onClick: BuildMarket, onHover: UI.SetTooltipText, tooltip: "Market"));
+
+        _bottomPanel.SetContent(0, 1, new UIElement(Sprites.houses[0], scale: 0.3f, 
             onClick: BuildHouse, onHover: UI.SetTooltipText, tooltip: "House"));
+        _bottomPanel.SetContent(1, 1, new UIElement(Sprites.barracks[0], scale: 0.3f, 
+            onClick: BuildBarracks, onHover: UI.SetTooltipText, tooltip: "Barracks"));
         _bottomPanel.SetContent(2, 1, new UIElement(Sprites.granaries[0], scale: 0.3f, 
             onClick: BuildGranary, onHover: UI.SetTooltipText, tooltip: "Granary"));
+        _bottomPanel.SetContent(3, 1, new UIElement(Sprites.smithies[0], scale: 0.3f, 
+            onClick: BuildSmithy, onHover: UI.SetTooltipText, tooltip: "Smithy"));
         _bottomPanel.Hide();
 
         UI.AddElement(_bottomPanel, UI.Position.BOTTOM_LEFT);
@@ -132,9 +137,12 @@ public class GameManager
     public void BuildFarm() { Build(BuildingType.FARM); }
     public void BuildMine() { Build(BuildingType.MINE); }
     public void BuildRanch() { Build(BuildingType.RANCH); }
+    public void BuildMarket() { Build(BuildingType.MARKET); }
+
     public void BuildBarracks() { Build(BuildingType.BARRACKS); }
-    public void BuildHouse() { Build(BuildingType.STONE_HOUSE); }
+    public void BuildHouse() { Build(BuildingType.HOUSE); }
     public void BuildGranary() { Build(BuildingType.GRANARY); }
+    public void BuildSmithy() { Build(BuildingType.SMITHY); }
 
     public void Build(BuildingType buildingType)
     {

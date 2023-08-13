@@ -2,9 +2,9 @@ using System;
 
 public enum BuildingType
 {
+    CITY,
     MARKET,
-    WOOD_HOUSE,
-    STONE_HOUSE,
+    HOUSE,
     LUMBERMILL,
     FORGE,
     FARM,
@@ -85,6 +85,9 @@ public class Building : Drawable
         Sprite sprite = new Sprite(Sprites.RandomBuilding(buildingType), position);
         Building b = new Building(location, sprite, buildingType);
 
+        if (!b.IsWholeTile())
+            sprite.Scale = 0.4f;
+
         if (location != null)
             location.AddBuilding(b);
 
@@ -96,7 +99,9 @@ public class Building : Drawable
         return Type == BuildingType.FARM || 
                Type == BuildingType.FARM_RIVER || 
                Type == BuildingType.MINE || 
-               Type == BuildingType.RANCH;
+               Type == BuildingType.RANCH || 
+               Type == BuildingType.CITY ||
+               Type == BuildingType.MARKET;
     }
     
     public void StartUsing()
@@ -120,6 +125,8 @@ public class Building : Drawable
         return false;
     }
 
+    public const int MAX_BUILDINGS_PER_TILE = 4;
+
     public static bool ValidPlacement(Building building, Tile location)
     {
         if (location == null)
@@ -130,8 +137,15 @@ public class Building : Drawable
             return false;
         if (building.Type == BuildingType.RANCH && location.Type != TileType.WILD_ANIMAL)
             return false;
-        if (location.Buildings.Count > 0)
+        if (location.Buildings.Count >= MAX_BUILDINGS_PER_TILE)
             return false;
+        if (building.IsWholeTile() && location.Buildings.Count != 0)
+            return false;
+        if (location.Owner == null)
+            return false;
+        foreach (Building b in location.Buildings)
+            if (b.IsWholeTile())
+                return false;
         return true;
     }
 

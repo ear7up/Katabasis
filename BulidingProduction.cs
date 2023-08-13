@@ -31,21 +31,13 @@ public class BuildingProduction
             toolRequirement: Goods.Tool.FURNACE,
             levelRequirement: new SkillLevel(Skill.BUILDING, 20)));
 
-        // building: cedar + saw -> wood house
-        Requirements.Add(BuildingType.WOOD_HOUSE, new ProductionRequirements(
+        // building: [bricks or wood] -> house
+        Requirements.Add(BuildingType.HOUSE, new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.CEDAR, 30)),
+                new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.BRICKS, 30),
+                new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.CEDAR, 30),
+                new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.EBONY, 30)),
             toolRequirement: Goods.Tool.SAW,
-            levelRequirement: new SkillLevel(Skill.BUILDING, 10)));
-
-        // building: [stone or sandstone] -> house
-        // TODO: add stone/sandstone bricks and use those instead?
-        Requirements.Add(BuildingType.STONE_HOUSE, new ProductionRequirements(
-            goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.STONE, 30),
-                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.SANDSTONE, 30),
-                new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.BRICKS, 30)),
-            toolRequirement: Goods.Tool.CHISEL,
             levelRequirement: new SkillLevel(Skill.BUILDING, 10)));
 
         // building: cedar + saw -> lumbermill

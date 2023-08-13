@@ -25,6 +25,9 @@ static class Sprites
 	public static List<Texture2D> houses;
 	public static List<Texture2D> mines;
 	public static List<Texture2D> ranches;
+	public static List<Texture2D> cities;
+	public static List<Texture2D> markets;
+	public static List<Texture2D> smithies;
 
 	// Animals
 	public static Texture2D Cow;
@@ -72,6 +75,9 @@ static class Sprites
 		houses = LoadTextures("buildings/house", 9);
 		mines = LoadTextures("buildings/mine", 4);
 		ranches = LoadTextures("buildings/ranch", 5);
+		cities = LoadTextures("buildings/city", 2);
+		markets = LoadTextures("buildings/market", 7);
+		smithies = LoadTextures("buildings/smithy", 4);
 
 		// Animals
 		Cow = content.Load<Texture2D>("animals/bull_copper");
@@ -114,14 +120,15 @@ static class Sprites
 		switch (buildingType)
 		{
 			case BuildingType.MINE: textures = mines; break;
-			case BuildingType.WOOD_HOUSE: textures = houses; break;
-			case BuildingType.STONE_HOUSE: textures = houses; break;
+			case BuildingType.HOUSE: textures = houses; break;
 			case BuildingType.RANCH: textures = ranches; break;
 			case BuildingType.FARM: textures = farms; break;
 			case BuildingType.FARM_RIVER: textures = farmsRiver; break;
 			case BuildingType.BARRACKS: textures = barracks; break;
 			case BuildingType.GRANARY: textures = granaries; break;
-			//case BuildingType.MARKET: textures = markets; break;
+			case BuildingType.MARKET: textures = markets; break;
+			case BuildingType.CITY: textures = cities; break;
+			case BuildingType.SMITHY: textures = smithies; break;
 			default: textures = buildings; break;
 		}
 

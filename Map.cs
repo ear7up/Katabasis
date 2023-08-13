@@ -252,6 +252,7 @@ public class Map
 
             row.Type = TileType.FOREST;
             row.BaseSprite.Texture = desertForestTextures[Globals.Rand.Next(desertForestTextures.Count)];
+            row.Minerals = MineralType.NONE;
 
             // Draw some number of tiles to the northeast for this row
             int h = w;

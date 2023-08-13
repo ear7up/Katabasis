@@ -13,9 +13,10 @@ public class BuildingInfo
         switch (type)
         {
             case BuildingType.MARKET: MaxUsers = 999999; break;
-            case BuildingType.WOOD_HOUSE: MaxUsers = 8; break;
-            case BuildingType.STONE_HOUSE: MaxUsers = 8; break;
+            case BuildingType.HOUSE: MaxUsers = 8; break;
             case BuildingType.BARRACKS: MaxUsers = 50; break;
+            case BuildingType.SMITHY: MaxUsers = 2; break;
+            case BuildingType.FORGE: MaxUsers = 2; break;
             default: MaxUsers = 4; break;
         }
     }

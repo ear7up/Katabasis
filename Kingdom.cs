@@ -24,8 +24,10 @@ public class Kingdom
 
         // Start with 25 tiles centered around the start tile, which will contain a market
         AcquireTilesAround(startTile, distance: 2);
-        Building market = Building.CreateBuilding(startTile, BuildingType.MARKET);
-        market.Sprite.Scale = 0.5f;
+        Building city = Building.CreateBuilding(startTile, BuildingType.CITY);
+        Building market = Building.CreateBuilding(startTile.Neighbors[0], BuildingType.MARKET);
+        //market.Sprite.Scale = 0.5f;
+
     }
 
     // Checks if tile is adjacent to one owned by the player
@@ -56,9 +58,6 @@ public class Kingdom
     public bool AcquireTilesAround(Tile tile, int distance = 1)
     {
         AcquireTile(tile);
-        //foreach (Tile neighbor in tile.Neighbors)
-        //    if (neighbor != null)
-        //        AcquireTile(neighbor);
         int num_tiles = (2 * distance + 1) * (2 * distance + 1);
 
         Tile current = tile;
