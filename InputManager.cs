@@ -22,8 +22,10 @@ public static class InputManager
     // clicking on a building type in the UI is what enables build mode
     public static bool BPressed;
     public static bool IPressed;
+    public static bool XPressed;
     public static bool PlusPressed;
     public static bool MinusPressed;
+    public static bool ShiftHeld;
 
     // Camera movement
     private static Vector2 _dragStart;
@@ -103,7 +105,10 @@ public static class InputManager
         }
         else if (ConfirmBuilding)
         {
-            SwitchToMode(CAMERA_MODE);
+            if (!ShiftHeld)
+                SwitchToMode(CAMERA_MODE);
+            else
+                ConfirmBuilding = false;
         }
         else
         {
@@ -156,9 +161,13 @@ public static class InputManager
 
         BPressed = keyboardState.IsKeyUp(Keys.B) && lastKeyboardState.IsKeyDown(Keys.B);
         IPressed = keyboardState.IsKeyUp(Keys.I) && lastKeyboardState.IsKeyDown(Keys.I);
+        XPressed = keyboardState.IsKeyUp(Keys.X) && lastKeyboardState.IsKeyDown(Keys.X);
         PlusPressed = keyboardState.IsKeyUp(Keys.OemPlus) && lastKeyboardState.IsKeyDown(Keys.OemPlus);
         MinusPressed = keyboardState.IsKeyUp(Keys.OemMinus) && lastKeyboardState.IsKeyDown(Keys.OemMinus);
         
+        ShiftHeld = (keyboardState.IsKeyDown(Keys.LeftShift) && lastKeyboardState.IsKeyDown(Keys.LeftShift)) ||
+                    (keyboardState.IsKeyDown(Keys.RightShift) && lastKeyboardState.IsKeyDown(Keys.RightShift));
+
         // Toggle show borders with the 'H' key
         if (keyboardState.IsKeyUp(Keys.H) && lastKeyboardState.IsKeyDown(Keys.H))
             Config.ShowBorders = !Config.ShowBorders;

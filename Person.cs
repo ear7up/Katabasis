@@ -226,7 +226,7 @@ public class Person : Entity, Drawable
 
         if (sum >= 350)
             SetImage((Gender == GenderType.MALE) ? Sprites.ManG : Sprites.WomanG);
-        else if (sum >= 250)
+        else if (sum >= 300)
             SetImage((Gender == GenderType.MALE) ? Sprites.ManS : Sprites.WomanS);
 
         Hunger += DAILY_HUNGER;

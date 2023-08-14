@@ -18,11 +18,13 @@ public class GameManager
     private static TextSprite _debugDisplay;
     private static TextSprite _logoDisplay;
     private static TextSprite _logoDisplay2;
-    private static GridLayout _bottomLeftPanel;
+    private static GridLayout _buttonPanel;
     private static GridLayout _bottomPanel;
-    public static GridLayout _popupPanel;
-    private static TextSprite _popupText1;
-    private static TextSprite _popupText2;
+    public static GridLayout _inventoryPanel;
+    public static TabLayout _statsPanel;
+    public static TextSprite _statsOverviewText;
+    private static TextSprite _inventoryText1;
+    private static TextSprite _inventoryText2;
     
     public bool TEST = false;
 
@@ -44,12 +46,12 @@ public class GameManager
 
         _player1 = new(_map.GetOriginTile());
 
-        _coordinateDisplay = new(Sprites.Font);
-        _coordinateDisplay.Scale = 0.7f;
+        _coordinateDisplay = new(Sprites.Font, hasDropShadow: true);
+        _coordinateDisplay.ScaleDown(0.2f);
 
         _debugDisplay = new(Sprites.Font);
         _debugDisplay.Position = new Vector2(30f, 30f);
-        _debugDisplay.Scale = 0.7f;
+        _debugDisplay.ScaleDown(0.3f);
 
         _logoDisplay = new(Sprites.Font2);
         _logoDisplay.Text = "Katabasis";
@@ -65,9 +67,9 @@ public class GameManager
             UI.Position.TOP_RIGHT);
 
         // Create the bottom left panel with a 2x3 grid of clickable buttons
-        _bottomLeftPanel = new(Sprites.BottomLeftPanel);
-        _bottomLeftPanel.SetMargin(left: 49, top: 70);
-        _bottomLeftPanel.SetPadding(right: -20, bottom: -170);
+        _buttonPanel = new(Sprites.BottomLeftPanel);
+        _buttonPanel.SetMargin(left: 49, top: 70);
+        _buttonPanel.SetPadding(right: -20, bottom: -170);
 
         UIElement buildElement = new(
             Sprites.BottomLeftButtons[0], 
@@ -75,16 +77,17 @@ public class GameManager
             onHover: UI.SetTooltipText);
         buildElement.TooltipText = "(B)uild";
 
-        _bottomLeftPanel.SetContent(0, 0, buildElement);
-        _bottomLeftPanel.SetContent(1, 0, new UIElement(Sprites.BottomLeftButtons[1], 
+        _buttonPanel.SetContent(0, 0, buildElement);
+        _buttonPanel.SetContent(1, 0, new UIElement(Sprites.BottomLeftButtons[1], 
             onClick: TileButton, onHover: UI.SetTooltipText, tooltip: "Buy (T)ile"));
-        _bottomLeftPanel.SetContent(2, 0, new UIElement(Sprites.BottomLeftButtons[2], onClick: Button3));
-        _bottomLeftPanel.SetContent(0, 1, new UIElement(Sprites.BottomLeftButtons[3], onClick: Button4));
-        _bottomLeftPanel.SetContent(1, 1, new UIElement(Sprites.BottomLeftButtons[4], onClick: Button5));
-        _bottomLeftPanel.SetContent(2, 1, new UIElement(Sprites.BottomLeftButtons[5], 
+        _buttonPanel.SetContent(2, 0, new UIElement(Sprites.BottomLeftButtons[2], onClick: Button3));
+        _buttonPanel.SetContent(0, 1, new UIElement(Sprites.BottomLeftButtons[3], onClick: Button4));
+        _buttonPanel.SetContent(1, 1, new UIElement(Sprites.BottomLeftButtons[4], 
+            onHover: UI.SetTooltipText, tooltip: "Statistics(X)", onClick: ToggleStatistics));
+        _buttonPanel.SetContent(2, 1, new UIElement(Sprites.BottomLeftButtons[5], 
             onHover: UI.SetTooltipText, tooltip: "(I)nventory", onClick: ToggleGoodsDisplay));
 
-        UI.AddElement(_bottomLeftPanel, UI.Position.BOTTOM_LEFT);
+        UI.AddElement(_buttonPanel, UI.Position.BOTTOM_LEFT);
 
         _bottomPanel = new(Sprites.BottomPanel);
         _bottomPanel.SetPadding(bottom: -250);
@@ -110,14 +113,30 @@ public class GameManager
 
         UI.AddElement(_bottomPanel, UI.Position.BOTTOM_LEFT);
 
-        _popupPanel = new(Sprites.TallPanel);
-        _popupPanel.Hidden = true;
-        _popupText1 = new(Sprites.Font);
-        _popupText1.Hidden = true;
-        _popupText1.Scale = 0.6f;
-        _popupText2 = new(Sprites.Font);
-        _popupText2.Hidden = true;
-        _popupText2.Scale = 0.6f;
+        _inventoryPanel = new(Sprites.TallPanel);
+        _inventoryPanel.SetMargin(top: 80, left: 40);
+        _inventoryText1 = new(Sprites.Font);
+        _inventoryText1.ScaleDown(0.4f);
+        _inventoryText2 = new(Sprites.Font);
+        _inventoryText2.ScaleDown(0.4f);
+        _inventoryPanel.SetContent(0, 0, _inventoryText1);
+        _inventoryPanel.SetContent(1, 0, _inventoryText2);
+        _inventoryPanel.Hide();
+
+        _statsOverviewText = new TextSprite(Sprites.Font);
+        _statsOverviewText.ScaleDown(0.4f);
+        
+        UIElement silverMan = new UIElement(Sprites.ManS);
+        silverMan.ScaleDown(0.9f);
+        UIElement goldMan = new UIElement(Sprites.ManG);
+        goldMan.ScaleDown(0.9f);
+
+        _statsPanel = new();
+        _statsPanel.Image = new Sprite(Sprites.TallPanel, Vector2.Zero);
+        _statsPanel.Image.DrawRelativeToOrigin = false;
+        _statsPanel.SetMargin(top: 50, left: 30);
+        _statsPanel.AddTab("Overview", silverMan, goldMan, _statsOverviewText);
+        _statsPanel.Hide();
 
         if (TEST)
         {
@@ -215,29 +234,21 @@ public class GameManager
         Console.WriteLine("Button 4 pressed");
     }
 
-    public void Button5(Object clicked)
+    public void ToggleStatistics(Object clicked)
     {
-        Console.WriteLine("Button 5 pressed");
+        _statsOverviewText.Text = _player1.Kingdom.Statistics();
+        if (_statsPanel.Hidden)
+            _statsPanel.Unhide();
+        else
+            _statsPanel.Hide();
     }
 
     public void ToggleGoodsDisplay(Object clicked)
     {
-        if (_popupPanel.Hidden)
-        {
-            _popupPanel.Unhide();
-            _popupText1.Unhide();
-            _popupText2.Unhide();
-
-            _popupPanel.Image.Position = new Vector2(Globals.WindowSize.X / 2 - _popupPanel.Width() / 2, 50f);
-            _popupText1.Position = _popupPanel.Image.Position + new Vector2(40f, 75f);
-            _popupText2.Position = _popupPanel.Image.Position + new Vector2(265f, 75f);
-        }
+        if (_inventoryPanel.Hidden)
+            _inventoryPanel.Unhide();
         else
-        {
-            _popupPanel.Hide();
-            _popupText1.Hide();
-            _popupText2.Hide();
-        }
+            _inventoryPanel.Hide();
     }
 
     public void HandleInventoryDisplay()
@@ -253,18 +264,8 @@ public class GameManager
                 goods1 += lines[i] + "\n";
             else if (i < 73)
                 goods2 += lines[i] + "\n";
-        _popupText1.Text = goods1;
-        _popupText2.Text = goods2;
-    }
-
-    public void RepositionUI()
-    {
-        // Write the current world coordinate at the mouse position
-        _coordinateDisplay.Text = $"({_coordinateDisplay.Position.X:0.0}, {_coordinateDisplay.Position.Y:0.0})";  
-        _coordinateDisplay.Position = InputManager.ScreenMousePos + new Vector2(15f, 15f);
-
-        _logoDisplay.Position.Y = Globals.WindowSize.Y - _logoDisplay.Height() - 30;
-        _logoDisplay2.Position.Y = _logoDisplay.Position.Y + 5;
+        _inventoryText1.Text = goods1;
+        _inventoryText2.Text = goods2;
     }
 
     public void Update(GameTime gameTime)
@@ -277,12 +278,12 @@ public class GameManager
         if (InputManager.PlusPressed)
         {
             UI.ScaleUp(0.05f);
-            _bottomLeftPanel.ScaleUp(0.05f);
+            _buttonPanel.ScaleUp(0.05f);
         }
         else if (InputManager.MinusPressed)
         {
             UI.ScaleDown(0.05f);
-            _bottomLeftPanel.ScaleDown(0.05f);
+            _buttonPanel.ScaleDown(0.05f);
         }
         UI.Update();
         
@@ -292,10 +293,11 @@ public class GameManager
         if (InputManager.IPressed)
             ToggleGoodsDisplay(null);
 
+        if (InputManager.XPressed)
+            ToggleStatistics(null);
+
         // Calculate the real mouse position by inverting the camera transformations
         InputManager.MousePos = Vector2.Transform(InputManager.MousePos, Matrix.Invert(_camera.Transform));
-
-        RepositionUI();
 
         HandlePersonFollowing();
 
@@ -308,7 +310,7 @@ public class GameManager
         Market.Update();
 
         // TODO: Write code to support click and drag on UIElements
-        _popupPanel.Update();
+        _inventoryPanel.Update();
         HandleInventoryDisplay();
 
         HandleTileAcquisition();
@@ -402,22 +404,28 @@ public class GameManager
         Globals.SpriteBatch.Begin();
 
         // Draw logo and shadow
-        _logoDisplay2.Draw();
-        _logoDisplay.Draw();
+        Vector2 logoOffset = new Vector2(
+            Globals.WindowSize.X - _logoDisplay.Width() - 30,
+            Globals.WindowSize.Y - _logoDisplay.Height() - 30); 
+        _logoDisplay2.Draw(logoOffset + new Vector2(5f, 5f));
+        _logoDisplay.Draw(logoOffset);
 
         // Draw the user interface
         UI.Draw();
 
         // Draw the popup interface
-        _popupPanel.Draw(_popupPanel.Image.Position);
-        _popupText1.Draw();
-        _popupText2.Draw();
+        _inventoryPanel.Draw(new Vector2(
+            Globals.WindowSize.X / 2 - _inventoryPanel.Width() / 2, 50f));
+
+        _statsPanel.Draw(new Vector2(
+            Globals.WindowSize.X / 2 - _statsPanel.Width() / 2, 50f));
 
         // Draw the current coordinates at the cursor location
-        _coordinateDisplay.Draw();
+        _coordinateDisplay.Text = $"({InputManager.ScreenMousePos.X:0.0}, {InputManager.ScreenMousePos.Y:0.0})";
+        _coordinateDisplay.Draw(InputManager.ScreenMousePos + new Vector2(15f, 15f));
 
         // Draw debug text
-        _debugDisplay.Draw();
+        _debugDisplay.Draw(new Vector2(30f, 30f));
 
         Globals.SpriteBatch.End();
     }

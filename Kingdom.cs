@@ -4,6 +4,7 @@ public class Kingdom
 {
     public const int START_MAX_TILES = 30;
 
+    public int Day;
     public Player Owner;
     public Tile StartTile;
     public int MaxTiles;
@@ -11,9 +12,11 @@ public class Kingdom
     public List<Person> People;
     public List<Person> Deceased;
     public Stockpile Treasury;
+    public int StarvationDeaths;
 
     public Kingdom(Player owner, Tile startTile)
     {
+        Day = 1;
         Owner = owner;
         StartTile = startTile;
         MaxTiles = START_MAX_TILES;
@@ -21,6 +24,7 @@ public class Kingdom
         People = new();
         Deceased = new();
         Treasury = new();
+        StarvationDeaths = 0;
 
         // Start with 25 tiles centered around the start tile, which will contain a market
         AcquireTilesAround(startTile, distance: 2);
@@ -95,6 +99,8 @@ public class Kingdom
 
     public void PersonDied(Person person)
     {
+        if (person.Hunger >= Person.STARVED_TO_DEATH)
+            StarvationDeaths++;
         Deceased.Add(person);
     }
 
@@ -115,7 +121,7 @@ public class Kingdom
 
     public void DailyUpdate()
     {
-        // TODO: Disable decay for food in granary?
+        Day++;
         Treasury.DailyUpdate();
     }
 
@@ -152,5 +158,36 @@ public class Kingdom
                 total.Sum(b.Stockpile);
         s += total.ToString();
         return s;
+    }
+
+    public string Statistics()
+    {
+        float totalHunger = 0f;
+        float totalAge = 0f;
+        float totalWealth = 0f;
+        int totalLevel = 0;
+        int homeless = 0;
+        foreach (Person p in People)
+        {
+            totalWealth += p.Wealth();
+            if (p.House == null)
+                homeless++;
+            else
+                totalWealth += p.House.Wealth() / p.House.CurrentUsers;
+            totalHunger += p.Hunger;
+            totalAge +=  p.Age;
+            foreach (SkillLevel s in p.Skills)
+                totalLevel += s.level;
+        }
+
+        return 
+            $"Day: {Day}\n" + 
+            $"Number of People: {People.Count}\n" + 
+            $"Homelessness: {homeless}/{People.Count}\n" + 
+            $"Average Hunger: {totalHunger / People.Count}/{Person.STARVED_TO_DEATH}\n" + 
+            $"Starvation Deaths: {StarvationDeaths}\n" + 
+            $"Average Age: {totalAge / People.Count}\n" + 
+            $"Average Wealth: {totalWealth / People.Count}\n" +
+            $"Average Skill Total: {totalLevel / People.Count}";
     }
 }

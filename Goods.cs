@@ -211,11 +211,16 @@ public class Goods
 
     public bool IsEdible()
     {
+        return IsEdible(Type, SubType);
+    }
+
+    public static bool IsEdible(GoodsType type, int subType)
+    {
         // Don't eat uncooked flour, you can get salmonella
         return 
-            Type == GoodsType.FOOD_ANIMAL || 
-            Type == GoodsType.FOOD_PLANT || 
-            (Type == GoodsType.FOOD_PROCESSED && SubType != (int)Goods.ProcessedFood.FLOUR);
+            type == GoodsType.FOOD_ANIMAL || 
+            type == GoodsType.FOOD_PLANT || 
+            (type == GoodsType.FOOD_PROCESSED && subType != (int)Goods.ProcessedFood.FLOUR);
     }
 
     public bool IsCookable()

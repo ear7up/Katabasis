@@ -357,7 +357,12 @@ public class Map
             {
                 _editBuilding.Sprite.SpriteColor = Color.White;
                 AddBuilding(_editBuilding);
-                _editBuilding = null;
+            
+                // Keep building more of the same type if shift is held
+                if (InputManager.ShiftHeld)
+                    CreateEditBuilding(_editBuilding.Type);
+                else
+                    _editBuilding = null;
             }
             // Resize the building before placing it (scroll wheel while in build mode)
             else if (InputManager.Mode == InputManager.BUILD_MODE && InputManager.ScrollValue > 0)

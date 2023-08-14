@@ -1,56 +1,47 @@
-public class TextSprite
+public class TextSprite : UIElement
 {
     public SpriteFont Font;
+    public SpriteFont Shadow;
     public Vector2 Position;
     public string Text;
 
-    public float Scale;
     public Color FontColor;
-    public bool Hidden;
+    public bool HasDropShadow;
 
-    public TextSprite(SpriteFont font)
+    public TextSprite(SpriteFont font, bool hasDropShadow = true) : base()
     {
         Font = font;
         Text = "";
-        FontColor = Color.Blue;
-        Position = Vector2.Zero;
-        Scale = 1f;
-        Hidden = false;
-    }
+        HasDropShadow = hasDropShadow;
 
-    public void Update()
-    {
+        if (HasDropShadow)
+            FontColor = Color.White;
+        else
+            FontColor = Color.Blue;
         
     }
 
-    public float Width()
+    public override int Width()
     {
-        return Font.MeasureString(Text).X * Scale;
+        return (int)(Font.MeasureString(Text).X * Scale.X);
     }
 
-    public float Height()
+    public override int Height()
     {
-        return Font.MeasureString(Text).Y * Scale;
+        return (int)(Font.MeasureString(Text).Y * Scale.Y);
     }
 
-    public void Hide()
-    {
-        Hidden = true;
-    }
-
-    public void Unhide()
-    {
-        Hidden = false;
-    }
-
-    public void Draw()
+    public override void Draw(Vector2 offset)
     {
         if (Hidden)
             return;
 
-        // Origin = Zero means draw relative to the top-left
-        //Vector2 dimensions = Font.MeasureString(Text);
-        //Vector2 origin = new(dimensions.X / 2, dimensions.Y / 2);
-        Globals.SpriteBatch.DrawString(Font, Text, Position, FontColor, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
+        if (HasDropShadow)
+        {
+            Globals.SpriteBatch.DrawString(Font, Text, offset + new Vector2(2f, 2f), 
+                Color.Black, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
+        }
+
+        Globals.SpriteBatch.DrawString(Font, Text, offset, FontColor, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
     }
 }

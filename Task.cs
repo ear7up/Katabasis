@@ -844,9 +844,9 @@ public class CookTask : Task
             return;
         }
 
-        // Try to cook as much as you want to eat, or three days worth
+        // Try to cook as much as you want to eat, or two days worth if not very hungry
         float current = 0;
-        float limit = p.Hunger + Person.DAILY_HUNGER * 3f;
+        float limit = Math.Max(p.Hunger, Person.DAILY_HUNGER * 2f);
         foreach (Goods g in p.House.Stockpile)
         {
             if (g.IsCookable())

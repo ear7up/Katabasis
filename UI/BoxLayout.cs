@@ -66,6 +66,9 @@ public class BoxLayout : Layout
 
     public override void Draw(Vector2 offset)
     {
+        if (Hidden)
+            return;
+
         // Draw the layout background (if set)
         if (Image != null)
         {

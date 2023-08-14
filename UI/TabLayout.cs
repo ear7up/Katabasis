@@ -12,6 +12,7 @@ public class TabLayout : Layout
     {
         Layout = new();
         TabBox = new();
+        Tabs = new();
         Layout.Add(TabBox);
         CurrentTab = "";
     }
@@ -28,6 +29,16 @@ public class TabLayout : Layout
 
     public override void Draw(Vector2 offset)
     {
+        if (Hidden)
+            return;
+
+        if (Image != null)
+        {
+            Image.Position = offset;
+            //Image.SetScaleX((float)Layout.Width() / Image.Texture.Width);
+            Image.Draw();
+        }
+
         Vector2 margin = new Vector2(GetLeftMargin(), GetTopMargin());
         Layout.Draw(offset + margin);
     }
@@ -40,6 +51,7 @@ public class TabLayout : Layout
 
         Tabs[button.Name] = content;
         content.Hide();
+        Layout.Add(content);
 
         if (CurrentTab.Length == 0)
             SwitchTab(button);

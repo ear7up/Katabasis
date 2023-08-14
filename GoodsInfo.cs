@@ -179,6 +179,9 @@ public class GoodsInfo
         // Value units are in seconds, so these are the same thing at init time
         TimeToProduce = DefaultPrice;
 
+        if (Goods.IsEdible(type, subType))
+            TimeToProduce /= 2;
+
         // If it takes a long time to use the object, only produce a few at a time and grant bonus skill xp
         if (UseRate < 0.005f && DecayRate == 0f)
         {
