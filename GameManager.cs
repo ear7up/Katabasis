@@ -38,7 +38,7 @@ public class GameManager
         Market.Init();
 
         _sky = new Sprite(Globals.Content.Load<Texture2D>("sky"), Vector2.Zero);
-        _sky.Scale = 2f;
+        _sky.SetScale(2f);
         _map = new();
         _camera = new(KatabasisGame.Viewport, _map.Origin);
 
@@ -134,15 +134,15 @@ public class GameManager
         }
     }
 
-    public void BuildFarm() { Build(BuildingType.FARM); }
-    public void BuildMine() { Build(BuildingType.MINE); }
-    public void BuildRanch() { Build(BuildingType.RANCH); }
-    public void BuildMarket() { Build(BuildingType.MARKET); }
+    public void BuildFarm(Object clicked) { Build(BuildingType.FARM); }
+    public void BuildMine(Object clicked) { Build(BuildingType.MINE); }
+    public void BuildRanch(Object clicked) { Build(BuildingType.RANCH); }
+    public void BuildMarket(Object clicked) { Build(BuildingType.MARKET); }
 
-    public void BuildBarracks() { Build(BuildingType.BARRACKS); }
-    public void BuildHouse() { Build(BuildingType.HOUSE); }
-    public void BuildGranary() { Build(BuildingType.GRANARY); }
-    public void BuildSmithy() { Build(BuildingType.SMITHY); }
+    public void BuildBarracks(Object clicked) { Build(BuildingType.BARRACKS); }
+    public void BuildHouse(Object clicked) { Build(BuildingType.HOUSE); }
+    public void BuildGranary(Object clicked) { Build(BuildingType.GRANARY); }
+    public void BuildSmithy(Object clicked) { Build(BuildingType.SMITHY); }
 
     public void Build(BuildingType buildingType)
     {
@@ -157,7 +157,7 @@ public class GameManager
         }
     }
 
-    public void BuildButton()
+    public void BuildButton(Object clicked)
     {
         if (_bottomPanel.Hidden)
         {
@@ -171,7 +171,7 @@ public class GameManager
         }
     }
 
-    public void TileButton()
+    public void TileButton(Object clicked)
     {
         if (InputManager.Mode == InputManager.TILE_MODE)
         {
@@ -200,27 +200,27 @@ public class GameManager
         return 0;
     }
 
-    public void TogglePause()
+    public void TogglePause(Object clicked)
     {
         InputManager.Paused = !InputManager.Paused;
     }
 
-    public void Button3()
+    public void Button3(Object clicked)
     {
         Console.WriteLine("Button 3 pressed");
     }
 
-    public void Button4()
+    public void Button4(Object clicked)
     {
         Console.WriteLine("Button 4 pressed");
     }
 
-    public void Button5()
+    public void Button5(Object clicked)
     {
         Console.WriteLine("Button 5 pressed");
     }
 
-    public void ToggleGoodsDisplay()
+    public void ToggleGoodsDisplay(Object clicked)
     {
         if (_popupPanel.Hidden)
         {
@@ -273,13 +273,24 @@ public class GameManager
 
         InputManager.Update();
         _camera.UpdateCamera(KatabasisGame.Viewport);
+
+        if (InputManager.PlusPressed)
+        {
+            UI.ScaleUp(0.05f);
+            _bottomLeftPanel.ScaleUp(0.05f);
+        }
+        else if (InputManager.MinusPressed)
+        {
+            UI.ScaleDown(0.05f);
+            _bottomLeftPanel.ScaleDown(0.05f);
+        }
         UI.Update();
         
         if (InputManager.BPressed)
-            BuildButton();
+            BuildButton(null);
 
         if (InputManager.IPressed)
-            ToggleGoodsDisplay();
+            ToggleGoodsDisplay(null);
 
         // Calculate the real mouse position by inverting the camera transformations
         InputManager.MousePos = Vector2.Transform(InputManager.MousePos, Matrix.Invert(_camera.Transform));

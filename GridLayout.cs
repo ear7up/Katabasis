@@ -56,6 +56,8 @@ public class GridLayout : UIElement
         // Draw the background content
         base.Draw(offset);
 
+        Vector2 margin = new(GetLeftMargin(), GetTopMargin());
+
         // Draw each item in the grid
         Vector2 relative = Vector2.Zero;
         foreach (List<UIElement> row in GridContent)
@@ -64,12 +66,28 @@ public class GridLayout : UIElement
             foreach (UIElement element in row)
             {
                 // Left-align all the objects, don't bother aligning them to a grid properly
-                element.Draw(offset + relative + new Vector2(Margin[(int)Direction.LEFT], Margin[(int)Direction.TOP]));
+                element.Draw(offset + relative + margin);
                 relative.X += element.Width();
             }
 
             // Assume they're the same height
             relative.Y += row[0].Height();
         }
+    }
+
+    public override void ScaleUp(float s)
+    {
+        base.ScaleUp(s);
+        foreach (List<UIElement> row in GridContent)
+            foreach (UIElement element in row)
+                element.ScaleUp(s);
+    }
+
+    public override void ScaleDown(float s)
+    {
+        base.ScaleDown(s);
+        foreach (List<UIElement> row in GridContent)
+            foreach (UIElement element in row)
+                element.ScaleDown(s);
     }
 }

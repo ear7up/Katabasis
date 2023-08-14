@@ -92,7 +92,7 @@ public class Building : Drawable
         Building b = new Building(location, sprite, buildingType);
 
         if (!b.IsWholeTile())
-            sprite.Scale = 0.4f;
+            sprite.SetScale(0.4f);
 
         if (location != null)
             location.AddBuilding(b);
@@ -219,11 +219,11 @@ public class Building : Drawable
         if (Selected)
         {
             Sprite.SpriteColor = Color.Cyan;
-            Sprite.Scale += 0.025f;
+            Sprite.ScaleUp(0.025f);
             Sprite.Draw();
 
             Sprite.SpriteColor = Color.White;
-            Sprite.Scale -= 0.025f;
+            Sprite.ScaleDown(0.025f);
         }
 
         Sprite.Draw();
@@ -232,7 +232,7 @@ public class Building : Drawable
     public float GetMaxY()
     {
         // For perspective, let Person sprites be drawn over top of the bottom 30% of the building
-        return Sprite.GetMaxY() - (Sprite.Scale * Sprite.Texture.Height * 0.3f) + (Id * 0.001f);
+        return Sprite.GetMaxY() - (Sprite.Scale.Y * Sprite.Texture.Height * 0.3f) + (Id * 0.001f);
     }
 
     public void DailyUpdate()

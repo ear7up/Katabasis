@@ -54,6 +54,22 @@ static class UI
                 element.Update();
     }
 
+    public static void ScaleUp(float s)
+    {
+        List<UIElement>[] all = { Top, TopLeft, TopRight, BottomLeft, BottomRight };
+        foreach (List<UIElement> list in all)
+            foreach (UIElement element in list)
+                element.ScaleUp(s);
+    }
+
+    public static void ScaleDown(float s)
+    {
+        List<UIElement>[] all = { Top, TopLeft, TopRight, BottomLeft, BottomRight };
+        foreach (List<UIElement> list in all)
+            foreach (UIElement element in list)
+                element.ScaleDown(s);
+    }
+
     public static void Draw()
     {
         // Shift each image over to the right
@@ -102,7 +118,7 @@ static class UI
 
         // Resize tooltip box to fit text
         float ratio = TooltipText.Width() / Tooltip.Image.Texture.Width;
-        Tooltip.Image.Scale = ratio + 0.07f;
+        Tooltip.Image.SetScaleX(ratio + 0.07f);
 
         // Draw tooltip at cursor if the text is set
         if (TooltipText.Text.Length > 0)

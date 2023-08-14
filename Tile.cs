@@ -122,10 +122,10 @@ public class Tile
             BaseSprite.SpriteColor = Color.SteelBlue;
             BaseSprite.Draw();
 
-            BaseSprite.Scale -= 0.02f;
+            BaseSprite.ScaleDown(0.02f);
             BaseSprite.SpriteColor = temp;
             BaseSprite.Draw();
-            BaseSprite.Scale += 0.02f;
+            BaseSprite.ScaleUp(0.02f);
         }
 
         if (BuildingSprite != null)
@@ -140,10 +140,10 @@ public class Tile
                 BuildingSprite.SpriteColor = Color.SteelBlue;
                 BuildingSprite.Draw();
 
-                BuildingSprite.Scale -= 0.02f;
+                BuildingSprite.ScaleDown(0.02f);
                 BuildingSprite.SpriteColor = temp;
                 BuildingSprite.Draw();
-                BuildingSprite.Scale += 0.02f;
+                BuildingSprite.ScaleUp(0.02f);
             }
         }
     }

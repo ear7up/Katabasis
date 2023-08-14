@@ -15,11 +15,15 @@ public static class InputManager
     public static float ScrollValue;
 
     public static bool Clicked;
+    public static bool ClickAndHold;
+    public static bool MouseDown;
 
     // Pressing B no longer toggles build mode, it just toggles the build ui
     // clicking on a building type in the UI is what enables build mode
     public static bool BPressed;
     public static bool IPressed;
+    public static bool PlusPressed;
+    public static bool MinusPressed;
 
     // Camera movement
     private static Vector2 _dragStart;
@@ -67,7 +71,7 @@ public static class InputManager
         CameraReset = keyboardState.IsKeyUp(Keys.R) && lastKeyboardState.IsKeyDown(Keys.R);
 
         // Track click-and-drag
-        if (mouseState.LeftButton == ButtonState.Pressed && lastMouseState.LeftButton != ButtonState.Pressed)
+        if (ClickAndHold)
         {
             _dragStart = new Vector2(mouseState.X, mouseState.Y);
         }
@@ -137,8 +141,23 @@ public static class InputManager
         Clicked = (mouseState.LeftButton == ButtonState.Released && 
                   lastMouseState.LeftButton == ButtonState.Pressed);
 
+        ClickAndHold = 
+            (mouseState.LeftButton == ButtonState.Pressed && 
+            lastMouseState.LeftButton != ButtonState.Pressed);
+
+        // Ignore off-screen clicks
+        if (!KatabasisGame.Viewport.TitleSafeArea.Contains(ScreenMousePos))
+        {
+            Clicked = false;
+            ClickAndHold = false;
+        }
+
+        MouseDown = (mouseState.LeftButton == ButtonState.Pressed);
+
         BPressed = keyboardState.IsKeyUp(Keys.B) && lastKeyboardState.IsKeyDown(Keys.B);
         IPressed = keyboardState.IsKeyUp(Keys.I) && lastKeyboardState.IsKeyDown(Keys.I);
+        PlusPressed = keyboardState.IsKeyUp(Keys.OemPlus) && lastKeyboardState.IsKeyDown(Keys.OemPlus);
+        MinusPressed = keyboardState.IsKeyUp(Keys.OemMinus) && lastKeyboardState.IsKeyDown(Keys.OemMinus);
         
         // Toggle show borders with the 'H' key
         if (keyboardState.IsKeyUp(Keys.H) && lastKeyboardState.IsKeyDown(Keys.H))
