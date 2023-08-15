@@ -25,6 +25,7 @@ public class GameManager
     public static TextSprite _statsOverviewText;
     private static TextSprite _inventoryText1;
     private static TextSprite _inventoryText2;
+    private UIElement _clockHand;
     
     public bool TEST = false;
 
@@ -63,8 +64,13 @@ public class GameManager
 
         UI.Init();
 
-        UI.AddElement(new UIElement(Sprites.Clock, scale: 0.5f, onClick: TogglePause), 
-            UI.Position.TOP_RIGHT);
+        _clockHand = new UIElement(Sprites.ClockHand, scale: 0.5f);
+        _clockHand.Image.DrawRelativeToOrigin = true;
+
+        OverlapLayout clockLayout = new();
+        clockLayout.Add(new UIElement(Sprites.Clock, scale: 0.5f, onClick: TogglePause));
+        clockLayout.Add(_clockHand);
+        UI.AddElement(clockLayout, UI.Position.TOP_RIGHT);
 
         // Create the bottom left panel with a 2x3 grid of clickable buttons
         _buttonPanel = new(Sprites.BottomLeftPanel);
@@ -326,6 +332,8 @@ public class GameManager
             foreach (Person p in _player1.Kingdom.People)
                 p.DailyUpdate();
         }
+
+        _clockHand.Image.Rotation = MathHelper.TwoPi * (TimeOfDay / SECONDS_PER_DAY);
     }
 
     public void HandlePersonFollowing()

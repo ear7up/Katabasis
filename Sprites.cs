@@ -45,6 +45,7 @@ static class Sprites
 
 	// UI
 	public static Texture2D Clock;
+	public static Texture2D ClockHand;
 	public static Texture2D BottomLeftPanel;
 	public static Texture2D BottomPanel;
 	public static Texture2D TallPanel;
@@ -95,6 +96,7 @@ static class Sprites
 
 		// UI
 		Clock = content.Load<Texture2D>("UI_maybe/clock");
+		ClockHand = content.Load<Texture2D>("UI_maybe/clock_hand");
 		BottomLeftPanel = content.Load<Texture2D>("UI_maybe/panel1");
 		BottomPanel = content.Load<Texture2D>("UI_maybe/bottom_panel");
 		TallPanel = content.Load<Texture2D>("UI_maybe/tall_panel");

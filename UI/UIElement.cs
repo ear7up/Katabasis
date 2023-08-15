@@ -83,6 +83,8 @@ public class UIElement
         if (Image != null)
         {
             Image.Position = offset;
+            if (Image.DrawRelativeToOrigin)
+                Image.Position += Image.Origin * Image.Scale;
             Image.Draw();
         }
     }

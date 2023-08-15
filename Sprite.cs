@@ -7,7 +7,8 @@ public class Sprite
     public bool DrawRelativeToOrigin;
     public Vector2 Origin { get; protected set; }
     public Vector2 Scale { get; set; }
-    public Color SpriteColor { get; set;}
+    public Color SpriteColor { get; set; }
+    public float Rotation { get; set; }
     private Rectangle Bounds;
 
     public Sprite(Texture2D texture, Vector2 position)
@@ -17,6 +18,7 @@ public class Sprite
         Origin = new(Texture.Width / 2, Texture.Height / 2);
         Scale = new Vector2(1f, 1f);
         SpriteColor = Color.White;
+        Rotation = 0f;
         DrawRelativeToOrigin = true;
 
         Bounds = new Rectangle(
@@ -39,7 +41,7 @@ public class Sprite
     {
         Globals.SpriteBatch.Draw(
             Texture, Position, null, 
-            SpriteColor, 0f, 
+            SpriteColor, Rotation, 
             (DrawRelativeToOrigin) ? Origin : Vector2.Zero, 
             Scale, SpriteEffects.None, 0f);
     }
