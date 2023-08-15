@@ -44,6 +44,14 @@ public class Stockpile
             goods.Quantity = 0;
     }
 
+    public float Take(int goodsId, float quantity)
+    {
+        Goods available = (Goods)_stock[goodsId];
+        if (available != null)
+            return available.Take(quantity);
+        return 0f;
+    }
+
     // Apply decay rates ("daily" rather than continuous)
     public void DailyUpdate()
     {
@@ -68,6 +76,14 @@ public class Stockpile
             goods.Quantity = available.Borrow(goods.Quantity);
         else
             goods.Quantity = 0;
+    }
+
+    public float Borrow(int goodsId, float quantity)
+    {
+        Goods available = (Goods)_stock[goodsId];
+        if (available != null)
+            return available.Borrow(quantity);
+        return 0f;
     }
 
     public bool Has(Goods goods)
@@ -144,6 +160,14 @@ public class Stockpile
         _stock.Clear();
         foreach (Goods g in keep)
             Add(g);
+    }
+
+    public float TotalSatiation()
+    {
+        float satiation = 0f;
+        foreach (Goods g in _stock.Values)
+            satiation += GoodsInfo.GetSatiation(g) * g.Quantity;
+        return satiation;
     }
 
     // To allow foreach over Stockpile goods

@@ -148,6 +148,7 @@ public class GameManager
             for (int i = 0 ; i < NUM_PEOPLE; i++)
             {
                 Person person = Person.CreatePerson(_map.Origin, _map.GetOriginTile());
+                person.Money = Globals.Rand.Next(20, 50);
                 _player1.Kingdom.AddPerson(person);
             }
         }

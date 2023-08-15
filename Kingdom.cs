@@ -12,6 +12,7 @@ public class Kingdom
     public List<Person> People;
     public List<Person> Deceased;
     public Stockpile Treasury;
+    public float Money;
     public int StarvationDeaths;
 
     public Kingdom(Player owner, Tile startTile)
@@ -24,6 +25,7 @@ public class Kingdom
         People = new();
         Deceased = new();
         Treasury = new();
+        Money = 1000f;
         StarvationDeaths = 0;
 
         // Start with 25 tiles centered around the start tile, which will contain a market

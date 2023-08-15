@@ -160,6 +160,13 @@ public class Goods
         Quantity = orig.Quantity;
     }
 
+    public Goods(Goods orig, float quantity)
+    {
+        Type = orig.Type;
+        SubType = orig.SubType;
+        Quantity = quantity;
+    }
+
     public override string ToString()
     {
         string typeName = Globals.Title(Enum.GetName(typeof(GoodsType), Type));

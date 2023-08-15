@@ -214,12 +214,70 @@ public class Person : Entity, Drawable
 
         // A year is 10 days, chance to die every 1/10th of a year after hitting old age
         Age += 0.1f;
+        if (OldAgeCheck())
+            return;
+
+        // Guaranteed death after hunger >= Person.STARVED_TO_DEATH
+        Hunger += DAILY_HUNGER;
+        if (HungerCheck())
+            return;
+
+        // Change sprites based on total level (simply cosmetic)
+        TotalLevelCheck();
+
+        // If you have a house, go there, desposit your inventory, then try to cook
+        if (House != null && Home != null)
+            DailyHomeTasks();
+
+        // Eat until you run out of food or are no longer hungry
+        Tasks.Enqueue(new EatTask());
+
+        // Randomly add demand for diffrent types of consumer goods
+        UpdateGoodsDemand();
+
+        if (House == null && !SearchingForHouse)
+            FindHouse();
+    }
+
+    public void DailyHomeTasks()
+    {
+        Tasks.Enqueue(new GoToTask("Going home for the day", House.Sprite.Position));
+        Tasks.Enqueue(new DepositInventoryTask());
+        Tasks.Enqueue(new CookTask());
+        Tasks.Enqueue(new SellAtMarketTask());
+    }
+
+    public void FindHouse()
+    {
+        FindBuildingTask find = new(BuildingType.HOUSE);
+        find.OnSuccess = SetHouse;
+        find.OnFailure = NoHouseFound;
+        Tasks.Enqueue(find);
+        SearchingForHouse = true;
+    }
+
+    public bool OldAgeCheck()
+    {
         if (Age >= OLD_AGE && Globals.Rand.NextFloat(0f, 1f) <= 0.01f)
         {
             Die();
-            return;
+            return true;
         }
+        return false;
+    }
 
+    public bool HungerCheck()
+    {
+        if (Hunger >= STARVED_TO_DEATH)
+        {
+            Die();
+            return true;
+        }
+        return false;
+    }
+
+    public void TotalLevelCheck()
+    {
         int sum = 0;
         foreach (SkillLevel skill in Skills)
             sum += skill.level;
@@ -228,38 +286,48 @@ public class Person : Entity, Drawable
             SetImage((Gender == GenderType.MALE) ? Sprites.ManG : Sprites.WomanG);
         else if (sum >= 300)
             SetImage((Gender == GenderType.MALE) ? Sprites.ManS : Sprites.WomanS);
+    }
 
-        Hunger += DAILY_HUNGER;
-        if (Hunger >= STARVED_TO_DEATH)
+    // Takes excess goods from person's home and adds to their personal stockpile
+    public List<Goods> FigureOutWhatToSell()
+    {
+        List<Goods> extras = new();
+
+        // Try to keep enough food to feed everyone in the household for 3 days
+        float totalSatiation = House.Stockpile.TotalSatiation();
+        float keepSatiation = House.CurrentUsers * Person.DAILY_HUNGER * 3;
+
+        foreach (Goods g in House.Stockpile)
         {
-            Die();
-            return;
+            // Try to keep twice the production quantity of the good lying around
+            float keepAmount = GoodsInfo.GetDefaultProductionQuantity(g) * 2f;
+
+            // However, for food, just try to keep enough to feed everyone
+            float satiation = GoodsInfo.GetSatiation(g);
+
+            if (satiation > 0f)
+            {
+                float qtyToTake = Math.Max(0f, (totalSatiation - keepSatiation) / satiation);
+                qtyToTake = Math.Min(qtyToTake, g.Quantity);
+                
+                float qty = House.Stockpile.Take(g.GetId(), qtyToTake);
+                if (qty > 0f)
+                {
+                    PersonalStockpile.Add(new Goods(g, qty));
+                    extras.Add(new Goods(g, qty));
+                }
+            }
+            else if (g.Quantity > keepAmount)
+            {
+                float qty = House.Stockpile.Take(g.GetId(), g.Quantity - keepAmount);
+                if (qty > 0f)
+                {
+                    PersonalStockpile.Add(new Goods(g, qty));
+                    extras.Add(new Goods(g, qty));
+                }
+            }
         }
-
-        // If you have a house, go there, desposit your inventory, then try to cook
-        if (House != null)
-        {
-            Tasks.Enqueue(new GoToTask(House.Sprite.Position));
-            Tasks.Enqueue(new DepositInventoryTask());
-            Tasks.Enqueue(new CookTask());
-        }
-
-        // Eat unti you run out of food or are no longer hungry
-        Tasks.Enqueue(new EatTask());
-
-        // Figure out what they want and queue up a task to buy it
-        UpdateGoodsDemand();
-        GoToMarket();
-
-        if (House == null && !SearchingForHouse)
-        {
-            FindBuildingTask find = new(BuildingType.HOUSE);
-            find.OnSuccess = SetHouse;
-            find.OnFailure = NoHouseFound;
-            Tasks.Enqueue(find);
-            SearchingForHouse = true;
-            return;
-        }
+        return extras;
     }
 
     public bool CheckIfClicked()

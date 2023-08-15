@@ -41,23 +41,24 @@ public class Task
     public const int LOW_PRIORITY = 3;
     public const int DEFAULT_PRIORITY = 3;
 
+    public string Description;
     public List<SkillLevel> skillsNeeded;
     public Queue<Task> subTasks;
     public Vector2 location;
-    public int currentSubtask;
     public TaskStatus Status;
+    public bool Initialized;
     public Action<Object> OnSuccess;
     public Action<Object> OnFailure;
     
-    // completion criteria ?
-
-    public Task(Action<Object> onComplete = null, Action<Object> onFailure = null)
+    public Task(string description, Action<Object> onComplete = null, Action<Object> onFailure = null)
     {
         skillsNeeded = new();
         subTasks = new();
         location = new();
-        currentSubtask = 0;
         Status = new(this);
+        Initialized = false;
+
+        Description = description;
         OnSuccess = onComplete;
         OnFailure = onFailure;
     }
@@ -127,7 +128,7 @@ public class Task
 
     public virtual string Describe(string extra = "")
     {
-        string s = base.ToString() + " [" + extra + "]";
+        string s = $"<{base.ToString()}> {Description} [{extra}]";
         foreach (Task subtask in subTasks)
             s += "\n" + subtask.Describe();
         return s;
@@ -136,7 +137,7 @@ public class Task
 
 public class FindNewHomeTask : Task
 {
-    public FindNewHomeTask() : base()
+    public FindNewHomeTask() : base("Searching for a new home")
     {
 
     }
@@ -169,7 +170,7 @@ public class IdleAtHomeTask : Task
     private Vector2 direction;
     private float Duration;
 
-    public IdleAtHomeTask() : base()
+    public IdleAtHomeTask() : base("Going for a walk")
     {
         destination = Vector2.Zero;
         direction = Vector2.Zero;
@@ -216,7 +217,7 @@ public class IdleAtHomeTask : Task
 public class FindTileByTypeTask : Task
 {
     public TileType TileType;
-    public FindTileByTypeTask(TileType tileType) : base()
+    public FindTileByTypeTask(TileType tileType) : base("Searching for a " + Globals.Title(tileType.ToString()))
     {
         TileType = tileType;
     }
@@ -248,7 +249,7 @@ public class SourceGoodsTask : Task
     public float QuantityAcquired;
     public Building MarketBuilding;
     public bool FindMarket;
-    public SourceGoodsTask(Goods goods) : base()
+    public SourceGoodsTask(Goods goods) : base("Trying to find " + goods.ToString())
     {
         Goods = goods;
         GoodsRequest = new Goods(goods);
@@ -284,7 +285,7 @@ public class SourceGoodsTask : Task
         {
             p.House.Stockpile.Take(GoodsRequest);
             QuantityAcquired = QuantityRequired;
-            subTasks.Enqueue(new GoToTask(p.House.Sprite.Position));
+            subTasks.Enqueue(new GoToTask("Going home to pick up an item", p.House.Sprite.Position));
         }
 
         // Keep requesting more from the stockpile
@@ -306,11 +307,10 @@ public class SourceGoodsTask : Task
             Building market = (Building)Tile.Find(p.Home, new TileFilter(TileType.NONE, BuildingType.MARKET));
             if (market != null)
                 MarketBuilding = market;
-            FindMarket = false;
         }
 
-        // Try to buy goods if still needed
-        if (MarketBuilding != null && QuantityRequired > QuantityAcquired)
+        // Only try to buy goods from the market once
+        if (FindMarket && MarketBuilding != null && QuantityRequired > QuantityAcquired)
         {
             GoodsRequest.Quantity = QuantityRequired - QuantityAcquired;
             float price = Market.CheckPrice(GoodsRequest.GetId()) * GoodsRequest.Quantity;
@@ -318,10 +318,13 @@ public class SourceGoodsTask : Task
             {
                 // Go to the market, place this order, and come back
                 MarketOrder order = new(p, true, GoodsRequest);
-                subTasks.Enqueue(new BuyFromMarketTask(p.Position, MarketBuilding.Sprite.Position, order));
+                subTasks.Enqueue(new BuyFromMarketTask(MarketBuilding.Sprite.Position, order));
+                FindMarket = false;
                 return Status;
             }
         }
+
+        FindMarket = false;
 
         // See if we can produce it
         ProductionRequirements rule = (ProductionRequirements)GoodsProduction.Requirements[Goods.GetId()];
@@ -364,7 +367,7 @@ public class FindBuildingTask : Task
     public FindBuildingTask(
         BuildingType buildingType, 
         BuildingSubType buildingSubType = BuildingSubType.NONE,
-        TileType tileType = TileType.NONE)
+        TileType tileType = TileType.NONE) : base("Looking for a " + Globals.Title(buildingType.ToString()))
     {
         BuildingType = buildingType;
         BuildingSubType = buildingSubType;
@@ -405,7 +408,7 @@ public class TryToProduceTask : Task
     public float TimeToProduce;
     public float TimeSpent;
 
-    public TryToProduceTask(Goods goods)
+    public TryToProduceTask(Goods goods) : base("Trying to produce " + goods.ToString())
     {
         Goods = goods;
         Requirements = (ProductionRequirements)GoodsProduction.Requirements[goods.GetId()];
@@ -458,7 +461,9 @@ public class TryToProduceTask : Task
                 Building.StartUsing();
                 p.BuildingUsing = Building;
                 Tile = Building.Location;
-                subTasks.Enqueue(new GoToTask(Building.Sprite.Position));
+                subTasks.Enqueue(new GoToTask(
+                    "Going to " + Globals.Title(Building.Type.ToString()), 
+                    Building.Sprite.Position));
             }
             else if (subStatus.Task is SourceGoodsTask)
             {
@@ -477,7 +482,8 @@ public class TryToProduceTask : Task
             {
                 // Go to the tile
                 Tile = (Tile)subStatus.ReturnValue;
-                subTasks.Enqueue(new GoToTask(Tile.GetPosition()));
+                subTasks.Enqueue(new GoToTask(
+                    "Going to " + Globals.Title(Tile.Type.ToString()), Tile.GetPosition()));
             }
         }
 
@@ -576,11 +582,11 @@ public class TryToProduceTask : Task
 
 public class BuyFromMarketTask : Task
 {
-    public BuyFromMarketTask(Vector2 startPosition, Vector2 marketPosition, MarketOrder order) : base()
+    public BuyFromMarketTask(Vector2 marketPosition, MarketOrder order)
+        : base("")
     {
-        subTasks.Enqueue(new GoToTask(marketPosition));
+        subTasks.Enqueue(new GoToTask("Going to the market", marketPosition));
         subTasks.Enqueue(new BuyTask(order));
-        subTasks.Enqueue(new GoToTask(startPosition));
     }
 
     public override TaskStatus Execute(Person p)
@@ -606,15 +612,33 @@ public class BuyFromMarketTask : Task
 public class BuyTask : Task
 {
     public MarketOrder Order;
-    public BuyTask(MarketOrder order) : base()
+    public BuyTask(MarketOrder order) : base("Buying " + order.goods.ToString())
     {
         Order = order;
     }
     public override TaskStatus Execute(Person p)
     {
-        Market.AttemptTransact(Order);
         Status.Complete = true;
-        Status.ReturnValue = Order.goods;
+        if (Market.AttemptTransact(Order))
+            Status.ReturnValue = Order.goods;
+        return Status;
+    }
+}
+
+public class SellTask : Task
+{
+    public List<Goods> Goods;
+    public SellTask(List<Goods> goods) : base("Selling ")
+    {
+        foreach (Goods g in goods)
+            Description += g.ToString() + ", ";
+        Goods = goods;
+    }
+    public override TaskStatus Execute(Person p)
+    {
+        foreach (Goods g in Goods)
+            Market.PlaceSellOrder(new MarketOrder(p, false, g));
+        Status.Complete = true;
         return Status;
     }
 }
@@ -623,7 +647,7 @@ public class GoToTask : Task
 {
     public Vector2 destination;
     public Vector2 direction;
-    public GoToTask(Vector2 position) : base()
+    public GoToTask(string description, Vector2 position) : base(description)
     {
         destination = position;
         direction = Vector2.Zero;
@@ -653,14 +677,62 @@ public class GoToTask : Task
 
     public override string Describe(string extra = "")
     {
-        string s = base.Describe(destination.ToString());
+        string s = base.Describe(Description + " " + destination.ToString());
         return s;
+    }
+}
+
+public class SellAtMarketTask : Task
+{
+    public SellAtMarketTask() : base("Selling goods at the market")
+    {
+      
+    }
+
+    public override TaskStatus Execute(Person p)
+    {
+        if (!Initialized)
+            Init(p);
+
+        // Try to complete subtasks first
+        TaskStatus subStatus = base.Execute(p);
+        if (subStatus != null && !subStatus.Complete)
+            return Status;
+
+        // But only when all subtasks are done
+        if (subTasks.Count == 0)
+            Status.Complete = true;
+
+        return Status;
+    }
+
+    public void Init(Person p)
+    {
+        // Figure out what to take to market and sell
+        Building market = (Building)Tile.Find(p.Home, 
+            new TileFilter(buildingType: BuildingType.MARKET));
+
+        if (market != null)
+        {    
+            List<Goods> toSell = p.FigureOutWhatToSell();
+            if (toSell.Count > 0)
+            {
+                subTasks.Enqueue(new GoToTask("Going to the market", market.Sprite.Position));
+                subTasks.Enqueue(new SellTask(toSell));
+            }
+        }
+        Initialized = true;
     }
 }
 
 // Eat any food  you're holding until you're no longer hungry
 public class EatTask : Task
 {
+    public EatTask() : base("Eating food")
+    {
+
+    }
+
     public override TaskStatus Execute(Person p)
     {
         foreach (Goods g in p.PersonalStockpile.Values())
@@ -690,7 +762,7 @@ public class TryToBuildTask : Task
     public bool ToolBorrowed;
     public BuildingType BuildingType;
 
-    public TryToBuildTask(BuildingType buildingType)
+    public TryToBuildTask(BuildingType buildingType) : base("Trying to build")
     {
         Tool = null;
         DestTile = null;
@@ -735,7 +807,7 @@ public class TryToBuildTask : Task
         else if (subStatus.Task is FindTileByTypeTask)
         {
             DestTile = (Tile)subStatus.ReturnValue;
-            subTasks.Enqueue(new GoToTask(DestTile.GetPosition()));
+            subTasks.Enqueue(new GoToTask("Going to build site", DestTile.GetPosition()));
         }
 
         // All queued tasks complete, add build time
@@ -772,7 +844,7 @@ public class TryToBuildTask : Task
 
 public class DepositInventoryTask : Task
 {
-    public DepositInventoryTask() : base()
+    public DepositInventoryTask() : base("Depositing inventory at home")
     {
 
     }
@@ -793,16 +865,14 @@ public class DepositInventoryTask : Task
 
 public class CookTask : Task
 {
-    public bool Initialized;
     public float TimeToProduce;
     public float TimeSpent;
     public Queue<Goods> ToCook;
 
-    public CookTask() : base()
+    public CookTask() : base("Cooking food")
     {
         TimeSpent = 0f;
         TimeToProduce = 0f;
-        Initialized = false;
         ToCook = new();
     }
 

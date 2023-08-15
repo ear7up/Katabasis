@@ -45,12 +45,18 @@ static class Market
             Prices[g] = GoodsInfo.GetDefaultPrice(g);
     }
 
+    // Large numbers of villagers will attemp to place buy orders, but won't actually
+    // place them, use the number of requests to increase prices of in-demand goods
     public static void Update()
     {
         // Increase or decrease prices proportiontely to supply and demand
         // E.g. 10 buy orders, 3 sell orders for wheat, increase prices by 0.7%/s
         for (int i = 0; i < Prices.Length; i++)
         {
+            // TODO: this currently doesn't work because buyers don't wait around
+            // they just AttemptTransact and bail if they can't buy immediately
+            // so buying always equals null
+
             // Consider capping prices at a multiple of the default price
             // this may be unnecessary as long as villagers prioritize the most profitable work
             // AND they need to cancel orders when work becomes unprofitable
@@ -197,6 +203,9 @@ static class Market
         if (!AttemptTransact(o))
         {
             List<MarketOrder> orders = (List<MarketOrder>)SellOrders[o.goods.GetId()];
+
+            // Remove the goods from the seller's inventory
+            o.requestor.PersonalStockpile.Take(o.goods);
 
             // If there are no orders for the good, add it
             if (orders == null)
