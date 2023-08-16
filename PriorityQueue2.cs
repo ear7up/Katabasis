@@ -41,4 +41,9 @@ public class PriorityQueue2<TElement, TPriority>
     {
         return pq.Count == 0 && q.Count == 0;
     }
+
+    public Queue<TElement>.Enumerator GetEnumerator()
+    {
+        return q.GetEnumerator();
+    }
 }

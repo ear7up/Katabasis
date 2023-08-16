@@ -126,11 +126,14 @@ public class Task
         return new TryToProduceTask(goods);
     }
 
-    public virtual string Describe(string extra = "")
+    public virtual string Describe(string extra = "", bool debug = true, string depth = "")
     {
-        string s = $"<{base.ToString()}> {Description} [{extra}]";
+        string s = $"{depth}<{base.ToString()}> {Description} [{extra}]";
+        if (!debug)
+            s = $"{depth}{Description} {extra}";
+
         foreach (Task subtask in subTasks)
-            s += "\n" + subtask.Describe();
+            s += "\n" + subtask.Describe("", debug, depth + "  ");
         return s;
     }
 }
@@ -232,12 +235,6 @@ public class FindTileByTypeTask : Task
         Status.ReturnValue = found;
         return Status;
     }
-
-    public override string Describe(string extra = "")
-    {
-        string s = base.Describe(TileType.ToString());
-        return s;
-    }
 }
 
 // Tries to find goods and add to the person's invenctory
@@ -289,7 +286,7 @@ public class SourceGoodsTask : Task
         }
 
         // Keep requesting more from the stockpile
-        if (QuantityRequired > QuantityAcquired)
+        if (QuantityAcquired == 0f)
         {
             p.PersonalStockpile.Take(GoodsRequest);
             QuantityAcquired += GoodsRequest.Quantity;
@@ -350,12 +347,6 @@ public class SourceGoodsTask : Task
         }
         return Status;
     }
-
-    public override string Describe(string extra = "")
-    {
-        string s = base.Describe(GoodsRequest.ToString());
-        return s;
-    }
 }
 
 public class FindBuildingTask : Task
@@ -386,13 +377,6 @@ public class FindBuildingTask : Task
         // if (b == null)
         //     subTasks.Enqueue(new TryToBuildTask(BuildingType));
     }
-
-    public override string Describe(string extra = "")
-    {
-        string s = base.Describe(BuildingType.ToString() + " " + 
-            BuildingSubType.ToString() + " " + TileType.ToString());
-        return s;
-    }
 }
 
 public class TryToProduceTask : Task
@@ -417,7 +401,7 @@ public class TryToProduceTask : Task
         Tool = null;
         NumRequiredGoods = 0;
         GoodsRequirements = null;
-        TimeToProduce = GoodsInfo.GetTime(goods) * goods.Quantity;
+        TimeToProduce = 0f;
 
         TimeSpent = 0f;
 
@@ -520,8 +504,15 @@ public class TryToProduceTask : Task
         }
         else if (subTasks.Count == 0)
         {
-            //Status.Complete = true;
-            // TODO: possibly modify quantity produced
+            // If not enough materials were sourced, produce a smaller amount
+            if (Requirements.GoodsRequirement != null)
+            {
+                float minQuantity = 0f;
+                foreach (Goods g in AcquiredGoods)
+                    if (g.Quantity < minQuantity || minQuantity == 0)
+                        minQuantity = g.Quantity;
+                Goods.Quantity = minQuantity;
+            }
 
             // Update the progress on the goods production
             TimeSpent += Globals.Time;
@@ -532,23 +523,26 @@ public class TryToProduceTask : Task
                 //p.PersonalStockpile.Add(Tool);
             }
 
-            float productionTime = TimeToProduce;
-
-            // Reduce time to produce by 0.5% per skill level
-            if (Requirements.SkillRequirement != null)
+            if (TimeToProduce == 0f)
             {
-                int skill = (int)Requirements.SkillRequirement.skill;
-                productionTime *= (200 - p.Skills[skill].level) / 200f;
+                TimeToProduce = GoodsInfo.GetTime(Goods) * Goods.Quantity;
+
+                // Reduce time to produce by 0.5% per skill level
+                if (Requirements.SkillRequirement != null)
+                {
+                    int skill = (int)Requirements.SkillRequirement.skill;
+                    TimeToProduce *= (200 - p.Skills[skill].level) / 200f;
+                }
+
+                // Modify harvest yield time by  soil quality (better near rivers)
+                if (Goods.Type == GoodsType.FOOD_PLANT && Tile != null)
+                    TimeToProduce /= Tile.SoilQuality;
             }
 
-            if (TimeSpent >= productionTime)
+            if (TimeSpent >= TimeToProduce)
             {
                 Status.ReturnValue = Goods;
                 Status.Complete = true;
-
-                // Modify harvest yield by soil quality (better near rivers)
-                if (Goods.Type == GoodsType.FOOD_PLANT && Tile != null)
-                    Goods.Quantity *= Tile.SoilQuality;
 
                 // If the task required a skill, give it a chance to increase the skill by 1
                 if (Requirements.SkillRequirement != null)
@@ -571,12 +565,6 @@ public class TryToProduceTask : Task
             }
         }
         return Status;
-    }
-
-    public override string Describe(string extra = "")
-    {
-        string s = base.Describe(Goods.ToString());
-        return s;
     }
 }
 
@@ -658,7 +646,6 @@ public class GoToTask : Task
         {
             direction = destination - p.Position;
             direction.Normalize();
-            Debug($"  Moving to position {destination}");
         }
 
         // Move in the direction of the destination at default movespeed scaled by time elapsed
@@ -673,12 +660,6 @@ public class GoToTask : Task
             Status.Complete = true;
         }
         return Status;
-    }
-
-    public override string Describe(string extra = "")
-    {
-        string s = base.Describe(Description + " " + destination.ToString());
-        return s;
     }
 }
 
@@ -762,7 +743,8 @@ public class TryToBuildTask : Task
     public bool ToolBorrowed;
     public BuildingType BuildingType;
 
-    public TryToBuildTask(BuildingType buildingType) : base("Trying to build")
+    public TryToBuildTask(BuildingType buildingType) 
+        : base("Trying to build " + Globals.Title(buildingType.ToString()))
     {
         Tool = null;
         DestTile = null;
@@ -834,12 +816,6 @@ public class TryToBuildTask : Task
 
         return Status;
     }
-
-    public override string Describe(string extra = "")
-    {
-        string s = base.Describe(BuildingType.ToString());
-        return s;
-    }
 }
 
 public class DepositInventoryTask : Task
@@ -869,7 +845,7 @@ public class CookTask : Task
     public float TimeSpent;
     public Queue<Goods> ToCook;
 
-    public CookTask() : base("Cooking food")
+    public CookTask() : base("Cooking")
     {
         TimeSpent = 0f;
         TimeToProduce = 0f;
@@ -940,11 +916,11 @@ public class CookTask : Task
         }
     }
 
-    public override string Describe(string extra = "")
+    public override string Describe(string extra = "", bool debug = true, string depth = "")
     {
-        string food = "planning";
+        string food = "(preparing)";
         if (ToCook.Count > 0)
-            food = ToCook.Peek().ToString();
-        return base.Describe(food);
+            food = new Goods(ToCook.Peek()).Cook().ToString();
+        return base.Describe(food, debug, depth);
     }
 }

@@ -134,9 +134,9 @@ public class Stockpile
 
     public override string ToString()
     {
-        string s = "\n";
+        string s = "";
         foreach (Goods g in _stock.Values)
-            if (g.Quantity >= 1f)
+            if (g.Quantity >= 0.1f)
                 s += "  " + g.ToString() + "\n";
         return s + "";
     }

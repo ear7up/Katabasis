@@ -8,10 +8,10 @@ public class TextSprite : UIElement
     public Color FontColor;
     public bool HasDropShadow;
 
-    public TextSprite(SpriteFont font, bool hasDropShadow = true) : base()
+    public TextSprite(SpriteFont font, bool hasDropShadow = true, string text = "") : base()
     {
         Font = font;
-        Text = "";
+        Text = text;
         HasDropShadow = hasDropShadow;
 
         if (HasDropShadow)
@@ -23,12 +23,18 @@ public class TextSprite : UIElement
 
     public override int Width()
     {
-        return (int)(Font.MeasureString(Text).X * Scale.X);
+        return (int)(
+            GetLeftPadding() + 
+            Font.MeasureString(Text).X * Scale.X) + 
+            GetRightPadding();
     }
 
     public override int Height()
     {
-        return (int)(Font.MeasureString(Text).Y * Scale.Y);
+        return (int)(
+            GetTopPadding() + 
+            Font.MeasureString(Text).Y * Scale.Y) + 
+            GetBottomPadding();
     }
 
     public override void Draw(Vector2 offset)

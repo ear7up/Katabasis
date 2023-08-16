@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 // Crappy GridLayout implementation, assumes all objects have equal dimensions
@@ -5,7 +6,7 @@ public class GridLayout : UIElement
 {
     public List<List<UIElement>> GridContent;
 
-    public GridLayout(Texture2D texture) : base(texture)
+    public GridLayout(Texture2D texture = null) : base(texture)
     {
         GridContent = new();
     }
@@ -58,21 +59,44 @@ public class GridLayout : UIElement
 
         Vector2 margin = new(GetLeftMargin(), GetTopMargin());
 
+        List<int> columnWidths = new();
+        if (GridContent.Count > 0)
+        {
+            int col = 0;
+            foreach (UIElement _ in GridContent[0])
+                columnWidths.Add(ColumnWidth(col++));
+        }
+
         // Draw each item in the grid
         Vector2 relative = Vector2.Zero;
         foreach (List<UIElement> row in GridContent)
         {
+            int col = 0;
             relative.X = 0f;
             foreach (UIElement element in row)
             {
-                // Left-align all the objects, don't bother aligning them to a grid properly
                 element.Draw(offset + relative + margin);
-                relative.X += element.Width();
+                relative.X += columnWidths[col++];
             }
 
             // Assume they're the same height
             relative.Y += row[0].Height();
         }
+    }
+    
+    public int ColumnWidth(int col)
+    {
+        if (Hidden || GridContent.Count == 0)
+            return 0;
+
+        if (col >= GridContent[0].Count)
+            return 0;
+
+        float maxWidth = 0f;
+        foreach (List<UIElement> row in GridContent)
+            maxWidth = Math.Max(maxWidth, row[col].Width());
+
+        return (int)maxWidth;
     }
 
     public override void ScaleUp(float s)
@@ -89,5 +113,39 @@ public class GridLayout : UIElement
         foreach (List<UIElement> row in GridContent)
             foreach (UIElement element in row)
                 element.ScaleDown(s);
+    }
+
+    public override int Width()
+    {
+        if (Hidden)
+            return 0;
+
+        float maxWidth = 0f;
+        foreach (List<UIElement> row in GridContent)
+        {
+            float sumWidth = 0f;
+            foreach (UIElement element in row)
+                sumWidth += element.Width();
+            maxWidth = Math.Max(maxWidth, sumWidth);
+        }
+        maxWidth += GetLeftPadding() + GetRightPadding();
+        return (int)Math.Max(maxWidth, base.Width());
+    }
+
+    public override int Height()
+    {
+        if (Hidden)
+            return 0;
+
+        float sumHeight = 0f;
+        foreach (List<UIElement> row in GridContent)
+        {
+            float maxHeight = 0f;
+            foreach (UIElement element in row)
+                maxHeight = Math.Max(maxHeight, element.Height());
+            sumHeight += maxHeight;
+        }
+        sumHeight += GetTopPadding() + GetBottomPadding();
+        return (int)Math.Max(sumHeight, base.Height());
     }
 }

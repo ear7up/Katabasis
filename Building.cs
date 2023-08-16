@@ -149,6 +149,8 @@ public class Building : Drawable
             return false;
         if (location.Owner == null)
             return false;
+        if (location.Type == TileType.CAMP)
+            return false;
         foreach (Building b in location.Buildings)
             if (b.IsWholeTile())
                 return false;

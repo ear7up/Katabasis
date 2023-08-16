@@ -26,6 +26,7 @@ public class GameManager
     private static TextSprite _inventoryText1;
     private static TextSprite _inventoryText2;
     private UIElement _clockHand;
+    private PersonPanel _personPanel;
     
     public bool TEST = false;
 
@@ -116,6 +117,9 @@ public class GameManager
         _bottomPanel.SetContent(3, 1, new UIElement(Sprites.smithies[0], scale: 0.3f, 
             onClick: BuildSmithy, onHover: UI.SetTooltipText, tooltip: "Smithy"));
         _bottomPanel.Hide();
+
+        _personPanel = new(null);
+        _personPanel.Hide();
 
         UI.AddElement(_bottomPanel, UI.Position.BOTTOM_LEFT);
 
@@ -213,6 +217,15 @@ public class GameManager
     {
         //MarketTests.RunTests();
         TasksTest.RunTests(_map);
+    }
+
+    public void SetPersonTracking(Person p)
+    {
+        _personPanel.SetPerson(p);
+        if (p == null)
+            _personPanel.Hide();
+        else
+            _personPanel.Unhide();
     }
 
     public static int CompareDrawable(Drawable a, Drawable b)
@@ -318,6 +331,7 @@ public class GameManager
 
         // TODO: Write code to support click and drag on UIElements
         _inventoryPanel.Update();
+        _personPanel.Update();
         HandleInventoryDisplay();
 
         HandleTileAcquisition();
@@ -351,9 +365,15 @@ public class GameManager
 
         // If the player clicked off, return camera control, otherwise follow the player
         if (InputManager.Clicked && clickedPerson == null)
+        {
+            SetPersonTracking(null);
             _camera.Unfollow();
+        }
         else if (InputManager.Clicked)
+        {
+            SetPersonTracking(clickedPerson);
             _camera.Follow(clickedPerson);
+        }
 
         // Write statistics to debug
         _debugDisplay.Text = 
@@ -361,10 +381,12 @@ public class GameManager
             $"Private Wealth: {(int)_player1.Kingdom.PrivateWealth()}\n";
 
         // Write information about the currently selected person to the top left
+        /*
         if (_camera.Following != null)
             _debugDisplay.Text += _camera.Following.ToString();
         else
             _debugDisplay.Text += "";
+        */
 
         _logoDisplay.Position.X = Globals.WindowSize.X - _logoDisplay.Width() - 30;
         _logoDisplay2.Position.X = _logoDisplay.Position.X + 5;
@@ -428,6 +450,9 @@ public class GameManager
 
         _statsPanel.Draw(new Vector2(
             Globals.WindowSize.X / 2 - _statsPanel.Width() / 2, 50f));
+
+        _personPanel.Draw(new Vector2(
+            Globals.WindowSize.X - _personPanel.Width(), 50f));
 
         // Draw the current coordinates at the cursor location
         _coordinateDisplay.Text = $"({InputManager.ScreenMousePos.X:0.0}, {InputManager.ScreenMousePos.Y:0.0})";

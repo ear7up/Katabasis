@@ -188,7 +188,7 @@ public class Goods
         subTypeName = Globals.Title(subTypeName);
         float value = Market.CheckPrice(GetId()) * Quantity;
         //return $"{typeName}.{subTypeName} x{(int)Quantity} (${value}";
-        return $"{subTypeName} x{(int)Quantity} (${(int)value})";
+        return $"{subTypeName} x{Quantity:0.0} (${value:0.0})";
     }
 
     // Subtract and return as much of the requested quantity if possible
@@ -238,15 +238,16 @@ public class Goods
     }
 
     // Converts a cookable good into its cooked version
-    public void Cook()
+    public Goods Cook()
     {
         if (!IsCookable())
-            return;
+            return this;
 
         if (Type == GoodsType.FOOD_PROCESSED && SubType == (int)Goods.ProcessedFood.FLOUR)
             SubType = (int)Goods.ProcessedFood.BREAD;
         else if (Type == GoodsType.RAW_MEAT)
             Type = GoodsType.FOOD_ANIMAL;
+        return this;
     }
 
     public bool IsTool()

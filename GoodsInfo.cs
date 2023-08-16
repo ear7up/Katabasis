@@ -8,7 +8,7 @@ public class GoodsInfo
     // Qualities of each type of good
     public float TimeToProduce { get; protected set; }
     public float DecayRate { get; protected set; }
-    public int DefaultProductionQuanity { get; protected set; }
+    public float DefaultProductionQuanity { get; protected set; }
     public float UseRate { get; protected set; }
     public int Satiation { get; protected set; }
     public int Experience { get; protected set; }
@@ -25,7 +25,7 @@ public class GoodsInfo
         DecayRate = 0f;
 
         // How many of these to make in a task
-        DefaultProductionQuanity = 20;
+        DefaultProductionQuanity = 20f;
 
         // How quickly the Use() function should destroy this
         UseRate = 0f;
@@ -182,6 +182,9 @@ public class GoodsInfo
         if (Goods.IsEdible(type, subType))
             TimeToProduce /= 2;
 
+        // Try to limit seconds per production task
+        DefaultProductionQuanity = 20f / TimeToProduce;
+
         // If it takes a long time to use the object, only produce a few at a time and grant bonus skill xp
         if (UseRate < 0.005f && DecayRate == 0f)
         {
@@ -236,7 +239,7 @@ public class GoodsInfo
         return Data[(int)g.Type][g.SubType].DecayRate;
     }
 
-    public static int GetDefaultProductionQuantity(Goods g)
+    public static float GetDefaultProductionQuantity(Goods g)
     {
         return Data[(int)g.Type][g.SubType].DefaultProductionQuanity;
     }

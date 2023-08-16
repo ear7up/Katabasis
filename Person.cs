@@ -122,6 +122,24 @@ public class Person : Entity, Drawable
                $"House={house}";
     }
 
+    public string Describe()
+    {
+        string description = 
+            $"Name: {Name}\n" + 
+            $"Age: {Age}\n" + 
+            $"Money: ${Money}\n" + 
+            $"Hunger: {Hunger}";
+        return description;
+    }
+
+    public string DescribeTasks()
+    {
+        string description = "";
+        foreach (Task task in Tasks)
+            description += task.Describe(debug: false) + "\n";
+        return description;
+    }
+
     public static Person CreatePerson(Vector2 position, Tile home)
     {
         Person person = new Person(position, home);
@@ -230,7 +248,7 @@ public class Person : Entity, Drawable
             DailyHomeTasks();
 
         // Eat until you run out of food or are no longer hungry
-        Tasks.Enqueue(new EatTask());
+        AssignPriorityTask(new EatTask(), 1);
 
         // Randomly add demand for diffrent types of consumer goods
         UpdateGoodsDemand();
