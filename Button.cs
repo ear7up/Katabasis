@@ -34,7 +34,7 @@ public class Button : UIElement
             return;
         }
 
-        if (OnClick != null && InputManager.Clicked)
+        if (OnClick != null && InputManager.UnconsumedClick())
         {
             // Consume the click event and call the OnClick function
             InputManager.ConsumeClick();

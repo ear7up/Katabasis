@@ -38,8 +38,6 @@ public class GameManager
         GoodsInfo.Init();
         MineralInfo.Init();
         BuildingInfo.Init();
-        // Market depends on GoodsInfo.Init()
-        Market.Init();
 
         _sky = new Sprite(Globals.Content.Load<Texture2D>("sky"), Vector2.Zero);
         _sky.SetScale(2f);
@@ -47,6 +45,7 @@ public class GameManager
         _camera = new(KatabasisGame.Viewport, _map.Origin);
 
         _player1 = new(_map.GetOriginTile());
+        Market.Init(_player1.Kingdom);
 
         _coordinateDisplay = new(Sprites.Font, hasDropShadow: true);
         _coordinateDisplay.ScaleDown(0.2f);
@@ -364,12 +363,12 @@ public class GameManager
         }
 
         // If the player clicked off, return camera control, otherwise follow the player
-        if (InputManager.Clicked && clickedPerson == null)
+        if (InputManager.UnconsumedClick() && clickedPerson == null)
         {
             SetPersonTracking(null);
             _camera.Unfollow();
         }
-        else if (InputManager.Clicked)
+        else if (clickedPerson != null)
         {
             SetPersonTracking(clickedPerson);
             _camera.Follow(clickedPerson);
@@ -394,8 +393,10 @@ public class GameManager
 
     public void HandleTileAcquisition()
     {
-        if (InputManager.Clicked && _map.HighlightedTile != null)
+        if (InputManager.UnconsumedClick() && _map.HighlightedTile != null)
         {
+            InputManager.ConsumeClick();
+
             if (_player1.Kingdom.TryToAcquireTile(_map.HighlightedTile))
             {
                 _map.UnhighlightTile();

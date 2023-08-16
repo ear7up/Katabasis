@@ -350,9 +350,10 @@ public class Person : Entity, Drawable
 
     public bool CheckIfClicked()
     {
-        if (InputManager.Mode == InputManager.CAMERA_MODE && InputManager.Clicked &&
+        if (InputManager.Mode == InputManager.CAMERA_MODE && InputManager.UnconsumedClick() &&
             GetBounds().Contains(InputManager.MousePos))
         {
+            InputManager.ConsumeClick();
             return true;
         }
         return false;

@@ -133,7 +133,11 @@ public class Task
             s = $"{depth}{Description} {extra}";
 
         foreach (Task subtask in subTasks)
-            s += "\n" + subtask.Describe("", debug, depth + "  ");
+        {
+            string subtaskDescription = subtask.Describe("", debug, depth + "  ");
+            if (subtaskDescription.Length > 0)
+                s += "\n" + subtaskDescription;
+        }
         return s;
     }
 }
@@ -310,7 +314,7 @@ public class SourceGoodsTask : Task
         if (FindMarket && MarketBuilding != null && QuantityRequired > QuantityAcquired)
         {
             GoodsRequest.Quantity = QuantityRequired - QuantityAcquired;
-            float price = Market.CheckPrice(GoodsRequest.GetId()) * GoodsRequest.Quantity;
+            float price = Market.GetPrice(GoodsRequest.GetId()) * GoodsRequest.Quantity;
             if (price < p.Money)
             {
                 // Go to the market, place this order, and come back
@@ -478,8 +482,6 @@ public class TryToProduceTask : Task
         // Queue up subtasks to find all the necessary prerequisites to produce the good
         if (Requirements.ToolRequirement != Goods.Tool.NONE && Tool == null)
             subTasks.Enqueue(new SourceGoodsTask(new Goods(GoodsType.TOOL, (int)Requirements.ToolRequirement, 1)));
-        else if (bReq != BuildingType.NONE && Building == null)
-            subTasks.Enqueue(new FindBuildingTask(bReq, bReq2, tReq));
         else if (tReq != TileType.NONE && Tile == null)
             subTasks.Enqueue(new FindTileByTypeTask(tReq));
         else if (GoodsRequirements != null && AcquiredGoods.Count < NumRequiredGoods)
@@ -501,6 +503,11 @@ public class TryToProduceTask : Task
                 req.Quantity = Goods.Quantity;
                 subTasks.Enqueue(new SourceGoodsTask(req));
             }
+        }
+        // A GoToTask will be issued once this task returns, should be queued after sourcing goods
+        else if (bReq != BuildingType.NONE && Building == null)
+        {
+            subTasks.Enqueue(new FindBuildingTask(bReq, bReq2, tReq));
         }
         else if (subTasks.Count == 0)
         {
@@ -760,7 +767,6 @@ public class TryToBuildTask : Task
             foreach (Goods g in reqs.GoodsRequirement.ToList())
                 subTasks.Enqueue(new SourceGoodsTask(g));
 
-        // TODO: additional constraint Tile.MAX_BUILDINGS
         if (reqs.TileRequirement != TileType.NONE)
             subTasks.Enqueue(new FindTileByTypeTask(reqs.TileRequirement));
     }

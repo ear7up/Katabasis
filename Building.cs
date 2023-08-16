@@ -196,14 +196,21 @@ public class Building : Drawable
 
     public void Update()
     {
-        if (InputManager.Mode == InputManager.CAMERA_MODE && InputManager.Clicked)
+        if (InputManager.Mode == InputManager.CAMERA_MODE)
         {
-            if (Sprite.GetBounds().Contains(InputManager.MousePos))
+            if (InputManager.UnconsumedClick() && Sprite.Contains(InputManager.MousePos))
             {
+                InputManager.ConsumeClick();
+
                 Console.WriteLine("Building clicked: " + this.ToString() + $"(max_y = {this.GetMaxY()})");
                 Selected = true;
+
+                if (Type == BuildingType.MARKET)
+                    Console.WriteLine(Market.Describe());
+                else if (Type == BuildingType.HOUSE)
+                    Console.WriteLine("House contents:\n" + Stockpile.ToString());
             }
-            else
+            else if (InputManager.Clicked)
             {
                 Selected = false;
             }

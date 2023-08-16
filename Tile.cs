@@ -305,12 +305,4 @@ public class Tile
         }
         return null;
     }
-
-    public float Wealth()
-    {
-        float sum = 0f;
-        foreach (Building b in Buildings)
-            sum += b.Wealth();
-        return sum;
-    }
 }

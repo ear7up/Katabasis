@@ -62,7 +62,8 @@ public class UIElement
         if (Hidden || Image == null)
             return;
 
-        if (OnClick != null && InputManager.Clicked && Image.GetBounds().Contains(InputManager.MousePos))
+        if (OnClick != null && InputManager.UnconsumedClick() && 
+            Image.GetBounds().Contains(InputManager.MousePos))
         {
             // Consume the click event and call the OnClick function
             InputManager.ConsumeClick();

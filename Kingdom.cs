@@ -13,6 +13,7 @@ public class Kingdom
     public List<Person> Deceased;
     public Stockpile Treasury;
     public float Money;
+    public float TaxRate;
     public int StarvationDeaths;
 
     public Kingdom(Player owner, Tile startTile)
@@ -26,6 +27,7 @@ public class Kingdom
         Deceased = new();
         Treasury = new();
         Money = 1000f;
+        TaxRate = 0.1f;
         StarvationDeaths = 0;
 
         // Start with 25 tiles centered around the start tile, which will contain a market
@@ -108,8 +110,8 @@ public class Kingdom
 
     public void Update()
     {
-        // For now, 1 tile allowed per 1000 wealth
-        MaxTiles = (int)(START_MAX_TILES + PublicWealth() * 0.001f);
+        // For now, 1 tile allowed per 500 wealth
+        MaxTiles = (int)(START_MAX_TILES + PublicWealth() * 0.002f);
 
         // Remove every person who died
         foreach (Person p in Deceased)
@@ -134,7 +136,7 @@ public class Kingdom
 
     public float PublicWealth()
     {
-        return Treasury.Wealth();
+        return Treasury.Wealth() + Money;
     }
 
     public float PrivateWealth()
@@ -142,8 +144,6 @@ public class Kingdom
         float wealth = 0f;
         foreach (Person p in People)
             wealth += p.Wealth();
-        foreach (Tile t in OwnedTiles)
-            wealth += t.Wealth();
         return wealth;
     }
 
@@ -153,11 +153,16 @@ public class Kingdom
     {
         string s = "Privately Owned Goods\n====================\n";
         Stockpile total = new();
+
+        // Sum all goods stored in villager inventories
         foreach (Person p in People)
             total.Sum(p.PersonalStockpile);
+
+        // Sum all goods stored in villager houses
         foreach (Tile t in OwnedTiles)
             foreach (Building b in t.Buildings)
                 total.Sum(b.Stockpile);
+
         s += total.ToString();
         return s;
     }

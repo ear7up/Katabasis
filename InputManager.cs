@@ -15,6 +15,7 @@ public static class InputManager
     public static float ScrollValue;
 
     public static bool Clicked;
+    public static bool ClickConsumed;
     public static bool ClickAndHold;
     public static bool MouseDown;
 
@@ -119,6 +120,12 @@ public static class InputManager
     public static void ConsumeClick()
     {
         ConfirmBuilding = false;
+        ClickConsumed = true;
+    }
+
+    public static bool UnconsumedClick()
+    {
+        return Clicked && !ClickConsumed;
     }
 
     public static void Update()
@@ -145,6 +152,7 @@ public static class InputManager
 
         Clicked = (mouseState.LeftButton == ButtonState.Released && 
                   lastMouseState.LeftButton == ButtonState.Pressed);
+        ClickConsumed = false;
 
         ClickAndHold = 
             (mouseState.LeftButton == ButtonState.Pressed && 

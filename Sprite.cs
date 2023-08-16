@@ -70,7 +70,17 @@ public class Sprite
         
         Bounds.Width =  (int)(Texture.Width * Scale.X);
         Bounds.Height = (int)(Texture.Height * Scale.Y);
+
         return Bounds;
+    }
+
+    public bool Contains(Vector2 pos)
+    {
+        Rectangle bounds = GetBounds();
+
+        // Shave off the width, most of it is transparent
+        bounds.Inflate(Bounds.Width * -0.4f, 0f);
+        return bounds.Contains(pos);
     }
 
     public void SetScale(float s)

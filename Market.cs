@@ -17,7 +17,7 @@ public class MarketOrder
 
     public override string ToString()
     {
-        return $"MarketOrder(requestor={requestor}, buying={buying}, goods={goods})";
+        return $"MarketOrder(requestor={requestor.Name}, buying={buying}, goods={goods})";
     }
 }
 
@@ -32,8 +32,11 @@ static class Market
     // Keep a tabulated list of market prices where each index is the id of a good
     public static float[] Prices;
 
-    public static void Init()
+    public static Kingdom Kingdom;
+
+    public static void Init(Kingdom kingdom)
     {
+        Kingdom = kingdom;
         BuyOrders = new();
         SellOrders = new();
 
@@ -94,7 +97,7 @@ static class Market
             orders = BuyOrders;
 
         // Trying to buy, can't afford it
-        float cost = CheckPrice(o.goods.GetId()) * o.goods.Quantity;
+        float cost = GetPrice(o.goods.GetId()) * o.goods.Quantity;
         if (o.buying && o.requestor.Money < cost)
             return false;
         
@@ -116,7 +119,9 @@ static class Market
 
             // Can't buy or sell more than each individual trader is offering
             float sale_quantity = MathHelper.Min(o.goods.Quantity, trade.goods.Quantity);
-            cost = sale_quantity * CheckPrice(o.goods.GetId());
+            cost = sale_quantity * GetPrice(o.goods.GetId());
+
+            float tax = GetTax(cost);
 
             // Trying to buy, can't afford it (price probably went up, defer until later)
             if (o.buying && o.requestor.Money < cost)
@@ -129,7 +134,8 @@ static class Market
             if (o.buying)
             {    
                 o.requestor.Money -= cost;
-                trade.requestor.Money += cost;
+                trade.requestor.Money += (cost - tax);
+                Kingdom.Money += tax;
 
                 Goods purchased = new Goods(o.goods);
                 purchased.Quantity = sale_quantity;
@@ -137,8 +143,9 @@ static class Market
             }
             else if (!o.buying)
             {
-                o.requestor.Money += cost;
+                o.requestor.Money += (cost - tax);
                 trade.requestor.Money -= cost;
+                Kingdom.Money += tax;
 
                 Goods sold = new Goods(o.goods);
                 sold.Quantity = sale_quantity;
@@ -164,7 +171,7 @@ static class Market
     // Returns false if the order could not be placed (e.g. not enough money)
     public static bool PlaceBuyOrder(MarketOrder o)
     {
-        float unitPrice = CheckPrice(o.goods.GetId());
+        float unitPrice = GetPrice(o.goods.GetId());
 
         // Requestor cannot afford his order
         if (o.requestor.Money < o.goods.Quantity * unitPrice)
@@ -191,9 +198,16 @@ static class Market
         orders.RemoveAll(order => order.requestor == p);
     }
 
-    public static float CheckPrice(int goodsId)
+    // Get the price of one unit of the given good, plus taxes
+    public static float GetPrice(int goodsId)
     {
-        return Prices[goodsId];
+        return Prices[goodsId] * (1 + Kingdom.TaxRate);
+    }
+
+    // Get just the tax amount from the total price including tax
+    public static float GetTax(float price)
+    {
+        return price * (1f / (1f + Kingdom.TaxRate));
     }
 
     // Tries to execute the order first, then adds it if note complete
