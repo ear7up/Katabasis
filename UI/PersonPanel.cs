@@ -38,10 +38,13 @@ public class PersonPanel : UIElement
             SkillsLayout.SetContent(0, y, skillText);
 
             OverlapLayout levelDisplay = new();
+            UIElement startLevelBar = new(Sprites.VerticalGreenBar);
             UIElement levelBar = new(Sprites.VerticalGreenBar);
+            levelBar.Image.SpriteColor = Color.Goldenrod;
             TextSprite levelText = new(Sprites.Font);
             levelText.ScaleDown(0.45f);
             levelDisplay.Add(levelBar);
+            levelDisplay.Add(startLevelBar);
             levelDisplay.Add(levelText);
             SkillsLayout.SetContent(1, y, levelDisplay);
             y++;
@@ -77,9 +80,10 @@ public class PersonPanel : UIElement
 
         foreach (SkillLevel s in PersonTracking.Skills)
         {
-            OverlapLayout skillBarLayout = (OverlapLayout)SkillsLayout.GridContent[(int)s.skill][1];
-            skillBarLayout.Elements[0].Image.SetScaleX(200f * (s.level / 100f));
-            ((TextSprite)skillBarLayout.Elements[1]).Text = s.level.ToString();
+            OverlapLayout levelDisplay = (OverlapLayout)SkillsLayout.GridContent[(int)s.skill][1];
+            levelDisplay.Elements[0].Image.SetScaleX(200f * (s.level / 100f));
+            levelDisplay.Elements[1].Image.SetScaleX(200f * (s.startLevel / 100f));
+            ((TextSprite)levelDisplay.Elements[2]).Text = s.level.ToString();
         }
 
         TaskDescription.Text = "[ Tasks ]\n" + PersonTracking.DescribeTasks();

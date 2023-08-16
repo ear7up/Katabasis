@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public class Kingdom
 {
-    public const int START_MAX_TILES = 30;
+    public const int START_MAX_TILES = 25;
 
     public int Day;
     public Player Owner;
@@ -110,8 +110,8 @@ public class Kingdom
 
     public void Update()
     {
-        // For now, 1 tile allowed per 500 wealth
-        MaxTiles = (int)(START_MAX_TILES + PublicWealth() * 0.002f);
+        // For now, 1 tile allowed per 100 wealth
+        MaxTiles = (int)(START_MAX_TILES + PublicWealth() * 0.01f);
 
         // Remove every person who died
         foreach (Person p in Deceased)

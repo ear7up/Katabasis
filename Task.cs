@@ -557,10 +557,7 @@ public class TryToProduceTask : Task
                     float r = Globals.Rand.NextFloat(0f, 1f);
                     int skill = (int)Requirements.SkillRequirement.skill;
                     float experience = GoodsInfo.GetExperience(Goods) * Goods.Quantity;
-
-                    // E.g. if making 20 units of 1xp goods, chance is 10% + 20% = 30% to gain a level
-                    if (r < SkillLevel.INCREASE_CHANCE + experience / 100)
-                        p.Skills[skill].level++;
+                    p.Skills[skill].GainExperience(experience);
                 }
 
                 float q = Goods.Quantity;
