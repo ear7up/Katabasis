@@ -143,6 +143,16 @@ public class Task
         }
         return s.TrimEnd();
     }
+
+    public virtual void Init()
+    {
+
+    }
+
+    public virtual bool Complete(Person p)
+    {
+        return true;
+    }
 }
 
 public class FindNewHomeTask : Task
@@ -247,111 +257,77 @@ public class FindTileByTypeTask : Task
 // Tries to find goods and add to the person's invenctory
 public class SourceGoodsTask : Task
 {
-    public Goods Goods;
     public Goods GoodsRequest;
-    public float QuantityRequired;
-    public float QuantityAcquired;
-    public Building MarketBuilding;
-    public bool FindMarket;
+
     public SourceGoodsTask(Goods goods) : base("Trying to find " + goods.ToString())
     {
-        Goods = goods;
         GoodsRequest = new Goods(goods);
-        QuantityRequired = Goods.Quantity;
-        QuantityAcquired = 0;
-        MarketBuilding = null;
-        FindMarket = true;
     }
 
     public override TaskStatus Execute(Person p)
     {   
-        // Try to complete subtasks first
+        if (!Initialized)
+            return Init(p);
+
         TaskStatus subStatus = base.Execute(p);
-        if (subStatus != null)
+
+        if (subStatus != null && subStatus.Failed)
+            return subStatus;
+
+        if (subTasks.Count > 0)
+            return Status;
+
+        Status.Complete = Complete(p);
+        return Status;
+    }
+
+    public TaskStatus Init(Person p)
+    {
+        Initialized = true;
+
+        int id = GoodsRequest.GetId();
+        
+        // Goods already in the person's inventory (accept partial for tools)
+        if ((GoodsRequest.IsTool() && p.PersonalStockpile.HasSome(GoodsRequest)) || 
+            p.PersonalStockpile.Has(GoodsRequest))
         {
-            if (!subStatus.Complete)
-            {
-                return Status;
-            }
-            else if (subStatus.ReturnValue != null && subStatus.ReturnValue is Goods)
-            {
-                // Add the acquired goods from the subtask to our total
-                Goods g = (Goods)subStatus.ReturnValue;
-                QuantityAcquired += g.Quantity;
-            }
-        }
-
-        GoodsRequest.Quantity = QuantityRequired - QuantityAcquired;
-
-        // If it exists at the house, take it immediately, then head there
-        // taking goods instantly prevents another member of the household from taking it
-        if (GoodsRequest.Quantity > 0 && p.House != null && p.House.Stockpile.Has(GoodsRequest))
-        {
-            p.House.Stockpile.Take(GoodsRequest);
-            QuantityAcquired = QuantityRequired;
-            subTasks.Enqueue(new GoToTask("Going home to pick up an item", p.House.Sprite.Position));
-        }
-
-        // Keep requesting more from the stockpile
-        if (GoodsRequest.Quantity > 0 && p.PersonalStockpile.Has(GoodsRequest))
-        {
-            p.PersonalStockpile.Take(GoodsRequest);
-            QuantityAcquired += GoodsRequest.Quantity;
-
-            // Hack for items where quantity ~= durability
-            // we'll interptret hammer quantity = 4 -> at least 4 uses of a hammer
-            float useRate = GoodsInfo.GetUseRate(Goods);
-            if (useRate > 0 && QuantityAcquired > useRate * QuantityRequired)
-                QuantityRequired = QuantityAcquired;
-        }
-
-        // Try to find a market once
-        if (FindMarket)
-        {
-            Building market = (Building)Tile.Find(p.Home, new TileFilter(TileType.NONE, BuildingType.MARKET));
-            if (market != null)
-                MarketBuilding = market;
-        }
-
-        // Only try to buy goods from the market once
-        if (FindMarket && MarketBuilding != null && QuantityRequired > QuantityAcquired)
-        {
-            GoodsRequest.Quantity = QuantityRequired - QuantityAcquired;
-            float price = Market.GetPrice(GoodsRequest.GetId()) * GoodsRequest.Quantity;
-            if (price < p.Money)
-            {
-                // Go to the market, place this order, and come back
-                MarketOrder order = new(p, true, GoodsRequest);
-                subTasks.Enqueue(new BuyFromMarketTask(MarketBuilding.Sprite.Position, order));
-                FindMarket = false;
-                return Status;
-            }
-        }
-
-        FindMarket = false;
-
-        // See if we can produce it
-        ProductionRequirements rule = (ProductionRequirements)GoodsProduction.Requirements[Goods.GetId()];
-        if (rule != null && QuantityRequired > QuantityAcquired)
-        {
-            GoodsRequest.Quantity = QuantityRequired - QuantityAcquired;
-            SkillLevel req = rule.SkillRequirement;
-            // null indicates no skill requirement to check
-            if (req == null || p.Skills[(int)req.skill].level >= req.level)
-            {
-                // Player can try to produce the good
-                subTasks.Enqueue(new TryToProduceTask(GoodsRequest));
-            }
-        }
-
-        // Task is complete when all goods are acquired or we've exhuasted all possible avenues
-        if (subTasks.Count == 0)
-        {
-            GoodsRequest.Quantity = QuantityAcquired;
             Status.Complete = true;
-            Status.Failed = (QuantityAcquired < QuantityRequired);
-            Status.ReturnValue = GoodsRequest;
+            return Status;
         }
+
+        // Remove goods from house and add to personal inventory
+        if (p.House != null && p.House.Stockpile.Has(GoodsRequest))
+        {
+            // Take the goods immediately so that they aren't taken before the villager arrives
+            p.House.Stockpile.Take(id, GoodsRequest.Quantity);
+            p.PersonalStockpile.Add(id, GoodsRequest.Quantity);
+            subTasks.Enqueue(new GoToTask("Going home to pick up item", p.House.Sprite.Position));
+            return Status;
+        }
+
+        // Try to buy the goods from the market
+        Building market = (Building)Tile.Find(p.Home, new TileFilter(TileType.NONE, BuildingType.MARKET));
+        if (market != null && Market.AttemptTransact(new MarketOrder(p, true, new Goods(GoodsRequest))))
+        {
+            subTasks.Enqueue(new GoToTask("Buying from market", market.Sprite.Position));
+            return Status;
+        }
+
+        // Try to produce the goods
+        ProductionRequirements rule = (ProductionRequirements)GoodsProduction.Requirements[id];
+        if (rule == null)
+        {
+            Status.Failed = true;
+            return Status;
+        }
+
+        // null indicates no skill requirement to check
+        SkillLevel req = rule.SkillRequirement;
+        if (req == null || p.Skills[(int)req.skill].level >= req.level)
+            subTasks.Enqueue(new TryToProduceTask(new Goods(GoodsRequest)));
+        else
+            Status.Failed = true;
+
         return Status;
     }
 }
@@ -389,188 +365,181 @@ public class FindBuildingTask : Task
 public class TryToProduceTask : Task
 {
     public ProductionRequirements Requirements;
-    public Goods Goods;
-    public int NumRequiredGoods;
-    public List<Goods> GoodsRequirements;
-    public List<Goods> AcquiredGoods;
-    public Building Building;
-    public Tile Tile;
-    public Goods Tool;
+    public List<Goods> RequiredGoods;
     public float TimeToProduce;
+    public Building Building;
     public float TimeSpent;
+    public Goods Goods;
 
     public TryToProduceTask(Goods goods) : base("Trying to produce " + goods.ToString())
     {
-        Goods = goods;
         Requirements = (ProductionRequirements)GoodsProduction.Requirements[goods.GetId()];
-        Building = null;
-        Tile = null;
-        Tool = null;
-        NumRequiredGoods = 0;
-        GoodsRequirements = null;
+        RequiredGoods = null;
         TimeToProduce = 0f;
-
+        Building = null;
         TimeSpent = 0f;
+        Goods = new Goods(goods);
 
-        AcquiredGoods = new();
-        if (Requirements.GoodsRequirement != null)
-        {
-            GoodsRequirements = Requirements.GoodsRequirement.ToList();
-            if (Requirements.GoodsRequirement.And)
-                NumRequiredGoods = GoodsRequirements.Count;
-            else
-                NumRequiredGoods = 1;
-        }
+        RequiredGoods = new();
     }
 
     public override TaskStatus Execute(Person p)
     {
-        // Try to complete subtasks first
+        if (!Initialized)
+            return Init(p);
+
         TaskStatus subStatus = base.Execute(p);
 
-        if (subStatus != null)
+        if (subStatus != null && subStatus.Failed)
+            return subStatus;
+
+        if (subTasks.Count > 0)
+            return Status;
+
+        // Mark the building as in-use
+        if (TimeSpent == 0f && Building != null)
+            Building.StartUsing();
+
+        // Add progress
+        TimeSpent += Globals.Time;
+        if (TimeSpent >= TimeToProduce)
         {
-            if (!subStatus.Complete)
-                return subStatus;
-
-            if (subStatus.Failed)
-            {
-                Status.Complete = true;
-                Status.Failed = true;
-                if (Building != null)
-                {
-                    p.BuildingUsing = null;
-                    Building.StopUsing();
-                }   
-                return Status;
-            }
-
-            // Get sourced requirements from subtask
-            if (subStatus.Task is FindBuildingTask)
-            {
-                Building = (Building)subStatus.ReturnValue;
-                Building.StartUsing();
-                p.BuildingUsing = Building;
-                Tile = Building.Location;
-                subTasks.Enqueue(new GoToTask(
-                    "Going to " + Globals.Title(Building.Type.ToString()), 
-                    Building.Sprite.Position));
-            }
-            else if (subStatus.Task is SourceGoodsTask)
-            {
-                Goods goods = (Goods)subStatus.ReturnValue;
-                if (goods.Type == GoodsType.TOOL)
-                {
-                    // Add the tool quantity back, we're just borrowing it to use
-                    // TODO: this is bugged, if the tool was sourced from the PersonalStockpile, this dupes it
-                    Tool = goods;
-                    p.PersonalStockpile.Add(Tool);
-                }
-                else if (goods.Quantity > 0)
-                    AcquiredGoods.Add(goods);
-            }
-            else if (Tile == null && subStatus.Task is FindTileByTypeTask)
-            {
-                // Go to the tile
-                Tile = (Tile)subStatus.ReturnValue;
-                subTasks.Enqueue(new GoToTask(
-                    "Going to " + Globals.Title(Tile.Type.ToString()), Tile.GetPosition()));
-            }
+            Status.Complete = Complete(p);
         }
+
+        return Status;
+    }
+
+    // Logic to run when the task completes,
+    // adds goods to the person's stockpile, always returns true
+    public override bool Complete(Person p)
+    {
+        // If the task required a skill, give it a chance to increase the skill by 1
+        if (Requirements.SkillRequirement != null)
+        {
+            float r = Globals.Rand.NextFloat(0f, 1f);
+            int skill = (int)Requirements.SkillRequirement.skill;
+            float experience = GoodsInfo.GetExperience(Goods) * Goods.Quantity;
+            p.Skills[skill].GainExperience(experience);
+        }
+
+        // Remove the goods used to produce the item
+        float minQty = Goods.Quantity;
+        foreach (Goods g in RequiredGoods)
+        {
+            // HasSome because ingredients like raw meat may have spoiled slightly
+            if (!p.PersonalStockpile.HasSome(g))
+                Console.WriteLine("Missing requirement producing " + Goods.ToString());
+            p.PersonalStockpile.Take(g.GetId(), g.Quantity);
+
+            minQty = Math.Min(minQty, g.Quantity);
+        }
+
+        // If we lost a few ingredients, reduce the amount produced
+        Goods.Quantity = minQty;
+
+        // If a tool was used, decrement its durability
+        if (Requirements.ToolRequirement != Goods.Tool.NONE)
+            p.PersonalStockpile.UseTool(Requirements.ToolRequirement);
+
+        // Finish by adding the completed goods to the person's stockpile
+        p.PersonalStockpile.Add(Goods);
+        if (Building != null)
+            Building.StopUsing();
+        return true;
+    }
+
+    public TaskStatus Init(Person p)
+    {
+        Initialized = true;
 
         BuildingType bReq = Requirements.BuildingRequirement;
         BuildingSubType bReq2 = Requirements.BuildingSubTypeRequirement;
         TileType tReq = Requirements.TileRequirement;
 
         // Queue up subtasks to find all the necessary prerequisites to produce the good
-        if (Requirements.ToolRequirement != Goods.Tool.NONE && Tool == null)
-            subTasks.Enqueue(new SourceGoodsTask(new Goods(GoodsType.TOOL, (int)Requirements.ToolRequirement, 1)));
-        else if (tReq != TileType.NONE && Tile == null)
-            subTasks.Enqueue(new FindTileByTypeTask(tReq));
-        else if (GoodsRequirements != null && AcquiredGoods.Count < NumRequiredGoods)
+        if (Requirements.ToolRequirement != Goods.Tool.NONE)
+        {
+            subTasks.Enqueue(new SourceGoodsTask(
+                new Goods(GoodsType.TOOL, (int)Requirements.ToolRequirement, 1)));
+        }
+
+        // Fail if building or tile requirement cannot be satisfied
+        TileFilter filter = new();
+
+        if (tReq != TileType.NONE)
+            filter.FilterTileType = tReq;
+        if (bReq != BuildingType.NONE)
+            filter.FilterBuildingType = bReq;
+        if (bReq2 != BuildingSubType.NONE)
+            filter.FilterBuildingSubType = bReq2;
+
+        // Only search if there's a requirement to do so
+        Object found = null;
+        if (tReq != TileType.NONE || bReq != BuildingType.NONE)
+        {
+            found = Tile.Find(p.Home, filter);
+            if (found == null)
+            {
+                Status.Failed = true;
+                return Status;
+            }
+        }
+
+        if (Requirements.GoodsRequirement != null)
         {
             // If it's an 'AND' requirement, source all of the goods
             if (Requirements.GoodsRequirement.And)
             {
-                foreach (Goods g in GoodsRequirements)
+                foreach (Goods g in Requirements.GoodsRequirement.Options.Values)
                 {
-                    Goods req = new Goods(g);
-                    req.Quantity = Goods.Quantity;
+                    Goods req = Goods.FromId(g.GetId(), Goods.Quantity);
                     subTasks.Enqueue(new SourceGoodsTask(req));
+                    RequiredGoods.Add(new Goods(req));
                 }
             }
             // Otherwise, just pick one good to source
             else
             {
-                Goods req = new Goods(GoodsRequirements[Globals.Rand.Next(GoodsRequirements.Count)]);
+                List<Goods> reqs = Requirements.GoodsRequirement.ToList();
+                Goods req = new Goods(reqs[Globals.Rand.Next(reqs.Count)]);
                 req.Quantity = Goods.Quantity;
                 subTasks.Enqueue(new SourceGoodsTask(req));
+                RequiredGoods.Add(new Goods(req));
             }
         }
-        // A GoToTask will be issued once this task returns, should be queued after sourcing goods
-        else if (bReq != BuildingType.NONE && Building == null)
+        
+        // Queue up task to go to the required location after the task to source goods has completed
+        if (found == null)
         {
-            subTasks.Enqueue(new FindBuildingTask(bReq, bReq2, tReq));
+            // No destination required
         }
-        else if (subTasks.Count == 0)
+        else if (found is Building)
         {
-            // If not enough materials were sourced, produce a smaller amount
-            if (Requirements.GoodsRequirement != null)
-            {
-                float minQuantity = 0f;
-                foreach (Goods g in AcquiredGoods)
-                    if (g.Quantity < minQuantity || minQuantity == 0)
-                        minQuantity = g.Quantity;
-                Goods.Quantity = minQuantity;
-            }
-
-            // Update the progress on the goods production
-            TimeSpent += Globals.Time;
- 
-            if (Tool != null)
-            {
-                Tool.Use();
-                //p.PersonalStockpile.Add(Tool);
-            }
-
-            if (TimeToProduce == 0f)
-            {
-                TimeToProduce = GoodsInfo.GetTime(Goods) * Goods.Quantity;
-
-                // Reduce time to produce by 0.5% per skill level
-                if (Requirements.SkillRequirement != null)
-                {
-                    int skill = (int)Requirements.SkillRequirement.skill;
-                    TimeToProduce *= (200 - p.Skills[skill].level) / 200f;
-                }
-
-                // Modify harvest yield time by  soil quality (better near rivers)
-                if (Goods.Type == GoodsType.FOOD_PLANT && Tile != null)
-                    TimeToProduce /= Tile.SoilQuality;
-            }
-
-            if (TimeSpent >= TimeToProduce)
-            {
-                Status.ReturnValue = Goods;
-                Status.Complete = true;
-
-                // If the task required a skill, give it a chance to increase the skill by 1
-                if (Requirements.SkillRequirement != null)
-                {
-                    float r = Globals.Rand.NextFloat(0f, 1f);
-                    int skill = (int)Requirements.SkillRequirement.skill;
-                    float experience = GoodsInfo.GetExperience(Goods) * Goods.Quantity;
-                    p.Skills[skill].GainExperience(experience);
-                }
-
-                float q = Goods.Quantity;
-                p.PersonalStockpile.Add(Goods);
-                Goods.Quantity = q;
-                if (Building != null)
-                    Building.StopUsing();
-                Task.Debug($"Successfully produced {Goods}");
-            }
+            Building b = (Building)found;
+            Building = b;
+            subTasks.Enqueue(new GoToTask("Going to " + Globals.Title(b.Type.ToString()), b.Sprite.Position));
         }
+        else if (found is Tile)
+        {
+            Tile t = (Tile)found;
+            subTasks.Enqueue(new GoToTask("Going to " + Globals.Title(t.Type.ToString()), t.GetPosition()));
+        }
+
+        // Calculate how long it will take to produce the goods
+        TimeToProduce = GoodsInfo.GetTime(Goods) * Goods.Quantity;
+
+        // Reduce time to produce by 0.5% per skill level
+        if (Requirements.SkillRequirement != null)
+        {
+            int skill = (int)Requirements.SkillRequirement.skill;
+            TimeToProduce *= (200 - p.Skills[skill].level) / 200f;
+        }
+
+        // Modify harvest yield time by soil quality (better near rivers)
+        if (found != null && found is Tile && Goods.Type == GoodsType.FOOD_PLANT)
+            TimeToProduce /= ((Tile)found).SoilQuality;
+
         return Status;
     }
 }

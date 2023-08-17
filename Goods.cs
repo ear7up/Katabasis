@@ -131,9 +131,10 @@ public class Goods
     }
 
     // Reverse of GetId, assumes there are max 1000 goods per type category
-    public static Goods FromId(int id)
+    public static Goods FromId(int id, float quantity = 1)
     {
-        return new Goods((GoodsType)(id / MAX_GOODS_PER_CATEGORY), id % MAX_GOODS_PER_CATEGORY);
+        return new Goods((GoodsType)(id / MAX_GOODS_PER_CATEGORY), 
+            id % MAX_GOODS_PER_CATEGORY, quantity);
     }
 
     public static int TypeFromId(int id)
@@ -146,7 +147,7 @@ public class Goods
         return id % MAX_GOODS_PER_CATEGORY;
     }
 
-    public Goods(GoodsType goodsType, int subType, int quantity = 1)
+    public Goods(GoodsType goodsType, int subType, float quantity = 1)
     {
         Type = goodsType;
         SubType = subType;

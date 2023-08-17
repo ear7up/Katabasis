@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -19,6 +20,15 @@ public class Stockpile
         else
             _stock.Add(goods.GetId(), new Goods(goods));    
         goods.Quantity = 0;
+    }
+
+    public void Add(int goodsId, float quantity)
+    {
+        Goods current = (Goods)_stock[goodsId];
+        if (current != null)
+            current.Quantity += quantity;
+        else
+            _stock.Add(goodsId, Goods.FromId(goodsId, quantity));
     }
 
     // Add goods from another stockpile to this one
@@ -174,5 +184,14 @@ public class Stockpile
     public IEnumerator GetEnumerator()
     {
         return _stock.Values.GetEnumerator();
+    }
+
+    public void UseTool(Goods.Tool toolType)
+    {
+        Goods g = (Goods)_stock[Goods.GetId(GoodsType.TOOL, (int)toolType)];
+        if (g != null)
+            g.Use();
+        else
+            Console.WriteLine("Failed to use tool " + toolType.ToString());
     }
 }
