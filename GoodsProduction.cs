@@ -285,11 +285,13 @@ public class GoodsProduction
 
         g.Type = GoodsType.FOOD_PROCESSED;
 
-        // barley -> beer
+        // barley + pottery -> beer
         g.SubType = (int)Goods.ProcessedFood.BEER;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.BARLEY)),
+                new Goods(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.BARLEY),
+                new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.POTTERY),
+                and: true),
             levelRequirement: new SkillLevel(Skill.COOKING, 30)));
 
         // wheat -> flour

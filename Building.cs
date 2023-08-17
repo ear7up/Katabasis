@@ -232,7 +232,7 @@ public class Building : Drawable
             Sprite.Draw();
 
             Sprite.SpriteColor = Color.White;
-            Sprite.ScaleDown(0.025f);
+            Sprite.ScaleDown(Globals.UndoScaleUp(0.025f));
         }
 
         Sprite.Draw();

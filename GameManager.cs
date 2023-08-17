@@ -319,6 +319,7 @@ public class GameManager
         InputManager.MousePos = Vector2.Transform(InputManager.MousePos, Matrix.Invert(_camera.Transform));
 
         HandlePersonFollowing();
+        _personPanel.Update();
 
         // Anything after this return will be pauseable
         if (InputManager.Paused)
@@ -330,7 +331,6 @@ public class GameManager
 
         // TODO: Write code to support click and drag on UIElements
         _inventoryPanel.Update();
-        _personPanel.Update();
         HandleInventoryDisplay();
 
         HandleTileAcquisition();

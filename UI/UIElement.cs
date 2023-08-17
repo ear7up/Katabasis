@@ -174,14 +174,14 @@ public class UIElement
 
     public virtual void ScaleUp(float s)
     {
-        Scale += new Vector2(s, s);
+        Scale *= new Vector2(1 + s, 1 + s);
         if (Image != null)
             Image.ScaleUp(s);
     }
 
     public virtual void ScaleDown(float s)
     {
-        Scale -= new Vector2(s, s);
+        Scale *= new Vector2(1 - s, 1 - s);
         if (Image != null)
             Image.ScaleDown(s);
     }

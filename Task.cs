@@ -128,17 +128,20 @@ public class Task
 
     public virtual string Describe(string extra = "", bool debug = true, string depth = "")
     {
-        string s = $"{depth}<{base.ToString()}> {Description} [{extra}]";
+        string s = $"{depth}<{base.ToString()}> {Description} [{extra}]\n";
         if (!debug)
-            s = $"{depth}{Description} {extra}";
+            s = $"{depth}{Description} {extra}\n";
+
+        if (s.Trim().Length == 0)
+            s = s.Trim();
 
         foreach (Task subtask in subTasks)
         {
             string subtaskDescription = subtask.Describe("", debug, depth + "  ");
             if (subtaskDescription.Length > 0)
-                s += "\n" + subtaskDescription;
+                s += subtaskDescription + "\n";
         }
-        return s;
+        return s.TrimEnd();
     }
 }
 
@@ -290,7 +293,7 @@ public class SourceGoodsTask : Task
         }
 
         // Keep requesting more from the stockpile
-        if (QuantityAcquired == 0f)
+        if (GoodsRequest.Quantity > 0 && p.PersonalStockpile.Has(GoodsRequest))
         {
             p.PersonalStockpile.Take(GoodsRequest);
             QuantityAcquired += GoodsRequest.Quantity;

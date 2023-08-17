@@ -29,12 +29,12 @@ public class Sprite
 
     public void ScaleUp(float s)
     {
-        Scale += new Vector2(s, s);
+        Scale *= new Vector2(1 + s, 1 + s);
     }
 
     public void ScaleDown(float s)
     {
-        Scale -= new Vector2(s, s);
+        Scale *= new Vector2(1 - s, 1 - s);
     }
 
     public void Draw()

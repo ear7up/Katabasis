@@ -125,7 +125,7 @@ public class Tile
             BaseSprite.ScaleDown(0.02f);
             BaseSprite.SpriteColor = temp;
             BaseSprite.Draw();
-            BaseSprite.ScaleUp(0.02f);
+            BaseSprite.ScaleUp(Globals.UndoScaleDown(0.02f));
         }
 
         if (BuildingSprite != null)
@@ -143,7 +143,7 @@ public class Tile
                 BuildingSprite.ScaleDown(0.02f);
                 BuildingSprite.SpriteColor = temp;
                 BuildingSprite.Draw();
-                BuildingSprite.ScaleUp(0.02f);
+                BuildingSprite.ScaleUp(Globals.UndoScaleDown(0.02f));
             }
         }
     }
@@ -272,36 +272,38 @@ public class Tile
         }
     }
 
-    // Breadth-first search for a tile based on critera in TileFilter.Match
-    // Max depth defaults to 50
-    public static Object Find(Tile start, TileFilter f, int maxDepth = 50)
+    public static Object Find(Tile start, TileFilter f, int distance = 8)
     {
-        Stack<Tile> searchStack = new();
-        searchStack.Push(start);
+        int num_tiles = (2 * distance + 1) * (2 * distance + 1);
 
-        int n = -1;
-        while (searchStack.Count > 0)
+        Tile current = start;
+        Object match = f.Match(current);
+        if (match != null)
+            return match;
+
+        // Take 1 step NE, then 1 step SE, then 2 steps SW, 2 steps NW, and so on
+        // to complete a ring around the starting tile. Keep making larger rings
+        // until all tiles within the requested radius have been claimed
+        int i = 1;
+        float steps = 1f;
+        int direction = Globals.Rand.Next(4);
+        while (i < num_tiles)
         {
-            Tile t = searchStack.Pop();
-
-            if (n++ / 4 > maxDepth)
-                return null;
-
-            if (t == null)
-                continue;
-
-            // Randomize the search order so that it's not biased in one direction
-            foreach (int i in Enumerable.Range(0, t.Neighbors.Length).OrderBy(x => Globals.Rand.Next()))
+            for (int j = 0; j < (int)steps && current != null; j++)
             {
-                Tile neighbor = t.Neighbors[i];
-                if (neighbor != null)
-                {
-                    Object match = f.Match(neighbor);
-                    if (match != null)
-                        return match;
-                }
-                searchStack.Push(neighbor);
+                current = current.Neighbors[direction];
+                match = f.Match(current);
+                if (match != null)
+                    return match;
+
+                if (++i >= num_tiles)
+                    break;
             }
+            direction = (int)Tile.GetNextDirection(direction);
+            steps += 0.5f;
+
+            if (current == null)
+                break;
         }
         return null;
     }

@@ -21,6 +21,8 @@ public class TileFilter
     // returns null if no match is found
     public virtual Object Match(Tile t)
     {
+        if (t == null)
+            return null;
         if (FilterTileType != TileType.NONE && t.Type != FilterTileType)
             return null;
         if (FilterBuildingType == BuildingType.NONE) 

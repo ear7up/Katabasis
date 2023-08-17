@@ -21,4 +21,14 @@ public static class Globals
     {
         return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(s.Replace('_', ' ').ToLower());
     }
+
+    public static float UndoScaleUp(float scale)
+    {
+        return (1f / (1 + scale) + 1f);
+    }
+
+    public static float UndoScaleDown(float scale)
+    {
+        return (1f / (1 - scale) - 1f);
+    }
 }
