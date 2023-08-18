@@ -15,17 +15,23 @@ public class MarketPanel : UIElement
     public MarketPanel() : base(Sprites.TallPanel)
     {
         Layout = new();
+        Layout.SetMargin(top: 60, left: 35);
         PriceLayout = new();
         SellingLayout = new();
 
         Layout.Add(new TextSprite(Sprites.Font, text: "Market Prices"));
         Layout.Add(PriceLayout);
-        Layout.Add(new TextSprite(Sprites.Font, text: "Sell Orders"));
-        Layout.Add(SellingLayout);
+
+        // TODO: This probably needs its own tab for space
+        //Layout.Add(new TextSprite(Sprites.Font, text: "Sell Orders"));
+        //Layout.Add(SellingLayout);
 
         PriceDisplayHash = new();
 
-        const int GOODS_ROWS = 4;
+        const int GOODS_ROWS = 8;
+
+        AccordionLayout categoryAccordion = new();
+        PriceLayout.Add(categoryAccordion);
 
         int i = 0;
         foreach (Type goodsType in Goods.GoodsEnums)
@@ -43,6 +49,7 @@ public class MarketPanel : UIElement
 
                 UIElement priceBar = new(Sprites.VerticalBar);
                 priceBar.Image.SpriteColor = Color.Green;
+                priceBar.SetPadding(right: 5);
 
                 TextSprite priceText = new TextSprite(Sprites.Font, text: "0.0");
                 priceText.ScaleDown(0.4f);
@@ -58,7 +65,8 @@ public class MarketPanel : UIElement
                 categoryLayout.SetContent(col + 1, row, priceDisplay);
                 j++;
             }
-            PriceLayout.Add(categoryLayout);
+
+            categoryAccordion.AddSection(Goods.Categories[i], categoryLayout);
             i++;
         }
     }

@@ -27,7 +27,7 @@ public class BoxLayout : Layout
         }
 
         if (Image != null)
-            maxWidth = Math.Max(maxWidth, Image.GetBounds().Width);
+            maxWidth = Math.Max(maxWidth, GetBounds().Width);
 
         int realWidth = 0;
         if (Layout == LayoutDirection.VERTICAL)
@@ -35,7 +35,7 @@ public class BoxLayout : Layout
         else if (Layout == LayoutDirection.HORIZONTAL)
             realWidth = sumWidth;
 
-        return GetLeftMargin() + realWidth + GetRightMargin();
+        return GetLeftPadding() + realWidth + GetRightPadding();
     }
 
     public override int Height()
@@ -53,7 +53,7 @@ public class BoxLayout : Layout
         }
 
         if (Image != null)
-            maxHeight = Math.Max(maxHeight, Image.GetBounds().Height);
+            maxHeight = Math.Max(maxHeight, GetBounds().Height);
 
         int realHeight = 0;
         if (Layout == LayoutDirection.VERTICAL)

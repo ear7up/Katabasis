@@ -44,6 +44,21 @@ public class Goods
         typeof(RawMeat)
     };
 
+    public static string[] Categories = 
+    {
+        "Food (Processed)",
+        "Food (Animal)",
+        "Food (Produce)",
+        "Tools",
+        "Animal Products", 
+        "Grown Materials",
+        "Rocks and Minerals",
+        "Craft Goods",
+        "Tools of War",
+        "Refined Metals",
+        "Raw Meat"
+    };
+
     public enum ProcessedFood
     {
         FLOUR, BREAD, BEER, WINE, SALTED_MEAT

@@ -59,20 +59,27 @@ public class UIElement
     public virtual void Update()
     {
         // Don't process clicks or hovers on hidden elements
-        if (Hidden || Image == null)
+        if (Hidden)
             return;
 
         if (OnClick != null && InputManager.UnconsumedClick() && 
-            Image.GetBounds().Contains(InputManager.MousePos))
+            GetBounds().Contains(InputManager.ScreenMousePos))
         {
             // Consume the click event and call the OnClick function
             InputManager.ConsumeClick();
             OnClick(this);
         }
-        else if (OnHover != null && Image.GetBounds().Contains(InputManager.MousePos))
+        else if (OnHover != null && GetBounds().Contains(InputManager.ScreenMousePos))
         {
             OnHover(TooltipText);
         }
+    }
+
+    public virtual Rectangle GetBounds()
+    {
+        if (Image == null)
+            return Rectangle.Empty;
+        return Image.GetBounds();
     }
 
     public virtual void Draw(Vector2 offset)

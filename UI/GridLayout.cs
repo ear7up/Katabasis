@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 // Crappy GridLayout implementation, assumes all objects have equal dimensions
-public class GridLayout : UIElement
+public class GridLayout : Layout
 {
     public List<List<UIElement>> GridContent;
 

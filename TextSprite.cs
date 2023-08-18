@@ -13,6 +13,7 @@ public class TextSprite : UIElement
         Font = font;
         Text = text;
         HasDropShadow = hasDropShadow;
+        Position = Vector2.Zero;
 
         if (HasDropShadow)
             FontColor = Color.White;
@@ -37,10 +38,17 @@ public class TextSprite : UIElement
             GetBottomPadding();
     }
 
+    public override Rectangle GetBounds()
+    {
+        return new Rectangle((int)Position.X, (int)Position.Y, Width(), Height());
+    }
+
     public override void Draw(Vector2 offset)
     {
         if (Hidden)
             return;
+
+        Position = offset;
 
         if (HasDropShadow)
         {

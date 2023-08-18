@@ -4,7 +4,7 @@ public abstract class Layout : UIElement
 {
     public List<UIElement> Elements;
 
-    protected Layout() : base()
+    protected Layout(Texture2D texture = null) : base(texture)
     {
         Elements = new();
     }

@@ -213,7 +213,7 @@ public class Building : Drawable
                 else if (Type == BuildingType.HOUSE)
                     Console.WriteLine("House contents:\n" + Stockpile.ToString());
             }
-            else if (InputManager.Clicked && Selected)
+            else if (InputManager.UnconsumedClick() && Selected)
             {
                 if (Type == BuildingType.MARKET)
                     Katabasis.GameManager.ToggleMarketPanel();
