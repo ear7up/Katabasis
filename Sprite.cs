@@ -37,6 +37,16 @@ public class Sprite
         Scale *= new Vector2(1 - s, 1 - s);
     }
 
+    public void UndoScaleUp(float s)
+    {
+        Scale /= new Vector2(1 + s, 1 + s);
+    }
+
+    public void UndoScaleDown(float s)
+    {
+        Scale /= new Vector2(1 - s, 1 - s);
+    }
+
     public void Draw()
     {
         Globals.SpriteBatch.Draw(

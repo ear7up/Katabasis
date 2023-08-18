@@ -32,6 +32,9 @@ static class Market
     // Keep a tabulated list of market prices where each index is the id of a good
     public static float[] Prices;
 
+    // Net quantity attempted to purchase vs amount being sold
+    public static float[] Demand;
+
     public static Kingdom Kingdom;
 
     public static void Init(Kingdom kingdom)
@@ -46,28 +49,24 @@ static class Market
         Prices = new float[num_goods];
         for (int g = 0; g < Prices.Length; g++)
             Prices[g] = GoodsInfo.GetDefaultPrice(g);
+
+        Demand = new float[num_goods];
     }
 
-    // Large numbers of villagers will attemp to place buy orders, but won't actually
-    // place them, use the number of requests to increase prices of in-demand goods
     public static void Update()
     {
         // Increase or decrease prices proportiontely to supply and demand
-        // E.g. 10 buy orders, 3 sell orders for wheat, increase prices by 0.7%/s
         for (int i = 0; i < Prices.Length; i++)
         {
-            // TODO: this currently doesn't work because buyers don't wait around
-            // they just AttemptTransact and bail if they can't buy immediately
-            // so buying always equals null
+            // No change if demand is 0
+            // Price changes by (0.01 * d) percent per second where d is net quantity surplus/excess
+            // E.g. an outstanding request for 50 units will increase price by 0.05% per second (3%/min)
+            float demand = Demand[i];
+            Prices[i] *= 1 + (0.00001f * demand * Globals.Time);
 
-            // Consider capping prices at a multiple of the default price
-            // this may be unnecessary as long as villagers prioritize the most profitable work
-            // AND they need to cancel orders when work becomes unprofitable
-            List<MarketOrder> buying = (List<MarketOrder>)BuyOrders[i];
-            List<MarketOrder> selling = (List<MarketOrder>)SellOrders[i]; 
-            if (buying == null || selling == null)
-                continue;
-            Prices[i] *= (1 + 0.001f * (buying.Count - selling.Count)) * Globals.Time;
+            // Limit price fluctuations so they don't get too crazy
+            float defaultPrice = GoodsInfo.GetDefaultPrice(i);
+            Prices[i] = MathHelper.Clamp(Prices[i], defaultPrice * 0.25f, defaultPrice * 4f);
         }
     }
 
@@ -95,6 +94,11 @@ static class Market
         Hashtable orders = SellOrders;
         if (!o.buying)
             orders = BuyOrders;
+
+        if (o.buying)
+            Demand[o.goods.GetId()]++;
+        else
+            Demand[o.goods.GetId()]--;
 
         // Trying to buy, can't afford it
         float cost = GetPrice(o.goods.GetId()) * o.goods.Quantity;

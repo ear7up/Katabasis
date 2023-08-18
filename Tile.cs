@@ -125,7 +125,7 @@ public class Tile
             BaseSprite.ScaleDown(0.02f);
             BaseSprite.SpriteColor = temp;
             BaseSprite.Draw();
-            BaseSprite.ScaleUp(Globals.UndoScaleDown(0.02f));
+            BaseSprite.UndoScaleDown(0.02f);
         }
 
         if (BuildingSprite != null)
@@ -143,7 +143,7 @@ public class Tile
                 BuildingSprite.ScaleDown(0.02f);
                 BuildingSprite.SpriteColor = temp;
                 BuildingSprite.Draw();
-                BuildingSprite.ScaleUp(Globals.UndoScaleDown(0.02f));
+                BuildingSprite.UndoScaleDown(0.02f);
             }
         }
     }

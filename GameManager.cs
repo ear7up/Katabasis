@@ -27,6 +27,7 @@ public class GameManager
     private static TextSprite _inventoryText2;
     private UIElement _clockHand;
     private PersonPanel _personPanel;
+    public static MarketPanel MarketPanel;
     
     public bool TEST = false;
 
@@ -119,6 +120,9 @@ public class GameManager
 
         _personPanel = new(null);
         _personPanel.Hide();
+
+        MarketPanel = new();
+        MarketPanel.Hide();
 
         UI.AddElement(_bottomPanel, UI.Position.BOTTOM_LEFT);
 
@@ -227,6 +231,14 @@ public class GameManager
             _personPanel.Unhide();
     }
 
+    public static void ToggleMarketPanel()
+    {
+        if (MarketPanel.Hidden)
+            MarketPanel.Unhide();
+        else
+            MarketPanel.Hide();
+    }
+
     public static int CompareDrawable(Drawable a, Drawable b)
     {
         float ya = a.GetMaxY();
@@ -320,6 +332,7 @@ public class GameManager
 
         HandlePersonFollowing();
         _personPanel.Update();
+        MarketPanel.Update();
 
         // Anything after this return will be pauseable
         if (InputManager.Paused)
@@ -454,6 +467,9 @@ public class GameManager
 
         _personPanel.Draw(new Vector2(
             Globals.WindowSize.X - _personPanel.Width(), 50f));
+
+        MarketPanel.Draw(new Vector2(
+            Globals.WindowSize.X - MarketPanel.Width(), 50f));
 
         // Draw the current coordinates at the cursor location
         _coordinateDisplay.Text = $"({InputManager.ScreenMousePos.X:0.0}, {InputManager.ScreenMousePos.Y:0.0})";

@@ -52,6 +52,7 @@ static class Sprites
 	public static List<Texture2D> BottomLeftButtons;
 	public static Texture2D Tooltip;
 	public static Texture2D VerticalGreenBar;
+	public static Texture2D VerticalBar;
 
 	public static void Load(ContentManager content)
 	{
@@ -104,6 +105,7 @@ static class Sprites
 		BottomLeftButtons = LoadTextures("UI_maybe/buttons", 8);
 		Tooltip = content.Load<Texture2D>("UI_maybe/tooltip");
 		VerticalGreenBar = content.Load<Texture2D>("UI_maybe/vertical_green_bar");
+		VerticalBar = content.Load<Texture2D>("UI_maybe/vertical_bar");
 	}
 
 	public static Texture2D RandomBuilding()

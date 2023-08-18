@@ -29,6 +29,21 @@ public class Goods
     public int SubType { get; set; }
     public float Quantity { get; set; }
 
+    public static Type[] GoodsEnums = 
+    {
+        typeof(ProcessedFood),
+        typeof(FoodAnimal),
+        typeof(FoodPlant),
+        typeof(Tool),
+        typeof(MaterialAnimal),
+        typeof(MaterialPlant),
+        typeof(MaterialNatural),
+        typeof(Crafted),
+        typeof(War),
+        typeof(Smithed),
+        typeof(RawMeat)
+    };
+
     public enum ProcessedFood
     {
         FLOUR, BREAD, BEER, WINE, SALTED_MEAT
@@ -122,12 +137,17 @@ public class Goods
     // Return a unique identifier for each good
     public int GetId()
     {
-        return (int)Type * MAX_GOODS_PER_CATEGORY + SubType;
+        return GetId(Type, SubType);
     }
 
     public static int GetId(GoodsType type, int subType)
     {
-        return (int)type * MAX_GOODS_PER_CATEGORY + subType;
+        return GetId((int)type, subType);
+    }
+
+    public static int GetId(int type, int subType)
+    {
+        return type * MAX_GOODS_PER_CATEGORY + subType;
     }
 
     // Reverse of GetId, assumes there are max 1000 goods per type category

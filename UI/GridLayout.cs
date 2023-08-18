@@ -80,7 +80,8 @@ public class GridLayout : UIElement
             }
 
             // Assume they're the same height
-            relative.Y += row[0].Height();
+            if (row.Count > 0)
+                relative.Y += row[0].Height();
         }
     }
     
@@ -94,7 +95,8 @@ public class GridLayout : UIElement
 
         float maxWidth = 0f;
         foreach (List<UIElement> row in GridContent)
-            maxWidth = Math.Max(maxWidth, row[col].Width());
+            if (col < row.Count)
+                maxWidth = Math.Max(maxWidth, row[col].Width());
 
         return (int)maxWidth;
     }

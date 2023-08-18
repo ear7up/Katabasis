@@ -206,12 +206,17 @@ public class Building : Drawable
                 Selected = true;
 
                 if (Type == BuildingType.MARKET)
+                {
                     Console.WriteLine(Market.Describe());
+                    Katabasis.GameManager.ToggleMarketPanel();
+                }
                 else if (Type == BuildingType.HOUSE)
                     Console.WriteLine("House contents:\n" + Stockpile.ToString());
             }
-            else if (InputManager.Clicked)
+            else if (InputManager.Clicked && Selected)
             {
+                if (Type == BuildingType.MARKET)
+                    Katabasis.GameManager.ToggleMarketPanel();
                 Selected = false;
             }
         }
@@ -232,7 +237,7 @@ public class Building : Drawable
             Sprite.Draw();
 
             Sprite.SpriteColor = Color.White;
-            Sprite.ScaleDown(Globals.UndoScaleUp(0.025f));
+            Sprite.UndoScaleUp(0.025f);
         }
 
         Sprite.Draw();
