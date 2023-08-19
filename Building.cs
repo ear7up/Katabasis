@@ -44,6 +44,7 @@ public class Building : Drawable
     public int CurrentUsers;
     public int MaxUsers;
     public bool Selected;
+    public TextSprite SelectedText;
 
     // This is intended to be used for property in houses
     public Stockpile Stockpile;
@@ -73,6 +74,10 @@ public class Building : Drawable
         SubType = BuildingSubType.NONE;
         MaxUsers = BuildingInfo.GetMaxUsers(buildingType);
         Selected = false;
+        SelectedText = new TextSprite(Sprites.Font);
+        SelectedText.ScaleDown(0.3f);
+        SelectedText.Hide();
+        Globals.TextBuffer.Add(SelectedText);
         Stockpile = new();
     }
 
@@ -200,9 +205,7 @@ public class Building : Drawable
         {
             if (InputManager.UnconsumedClick() && Sprite.Contains(InputManager.MousePos))
             {
-                InputManager.ConsumeClick();
-
-                Console.WriteLine("Building clicked: " + this.ToString() + $"(max_y = {this.GetMaxY()})");
+                InputManager.ConsumeClick(this);
                 Selected = true;
 
                 if (Type == BuildingType.MARKET)
@@ -213,7 +216,8 @@ public class Building : Drawable
                 else if (Type == BuildingType.HOUSE)
                     Console.WriteLine("House contents:\n" + Stockpile.ToString());
             }
-            else if (InputManager.UnconsumedClick() && Selected)
+            else if (Selected && InputManager.Clicked && 
+                (InputManager.ClickConsumer == null || !(InputManager.ClickConsumer is UIElement))) 
             {
                 if (Type == BuildingType.MARKET)
                     Katabasis.GameManager.ToggleMarketPanel();
@@ -238,6 +242,17 @@ public class Building : Drawable
 
             Sprite.SpriteColor = Color.White;
             Sprite.UndoScaleUp(0.025f);
+
+            SelectedText.Unhide();
+            SelectedText.Text = $"Occupants: ({CurrentUsers}/{MaxUsers})";
+
+            Rectangle bounds = Sprite.GetBounds();
+            SelectedText.Position.X = bounds.X + bounds.Width / 2 - SelectedText.Width() / 2; 
+            SelectedText.Position.Y = bounds.Y + bounds.Height * 0.8f;
+        }
+        else
+        {
+            SelectedText.Hide();
         }
 
         Sprite.Draw();

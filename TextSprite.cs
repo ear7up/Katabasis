@@ -1,8 +1,7 @@
-public class TextSprite : UIElement
+public class TextSprite : UIElement, Drawable
 {
     public SpriteFont Font;
     public SpriteFont Shadow;
-    public Vector2 Position;
     public string Text;
 
     public Color FontColor;
@@ -46,18 +45,30 @@ public class TextSprite : UIElement
     public override void Draw(Vector2 offset)
     {
         base.Draw(offset);
-        
+
         if (Hidden)
             return;
 
         Position = offset;
 
+        // Draw using layerDepth = 1f, draw text above everything else on layer 0 (default)
         if (HasDropShadow)
         {
             Globals.SpriteBatch.DrawString(Font, Text, offset + new Vector2(2f, 2f), 
-                Color.Black, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
+                Color.Black, 0f, Vector2.Zero, Scale, SpriteEffects.None, 1f);
         }
 
-        Globals.SpriteBatch.DrawString(Font, Text, offset, FontColor, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
+        Globals.SpriteBatch.DrawString(Font, Text, offset, 
+            FontColor, 0f, Vector2.Zero, Scale, SpriteEffects.None, 1f);
+    }
+
+    public void Draw()
+    {
+        Draw(Position);
+    }
+
+    public float GetMaxY()
+    {
+        throw new System.NotImplementedException();
     }
 }

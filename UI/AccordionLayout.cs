@@ -37,7 +37,7 @@ public class AccordionLayout : VBox
     // Luckily the text of the TextSprite is also the section name
     public void ToggleSection(object clicked)
     {
-        InputManager.ConsumeClick();
+        InputManager.ConsumeClick(this);
         ToggleSection(((TextSprite)clicked).Text);
     }
 

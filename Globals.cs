@@ -11,6 +11,7 @@ public static class Globals
     public static Point WindowSize { get; set; }
     public static Random Rand { get; set; }
     public static List<Drawable> Ybuffer = new();
+    public static List<Drawable> TextBuffer = new();
 
     public static void Update(GameTime gt)
     {

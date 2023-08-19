@@ -76,7 +76,7 @@ public class UIElement
             GetBounds().Contains(InputManager.ScreenMousePos))
         {
             // Consume the click event and call the OnClick function
-            InputManager.ConsumeClick();
+            InputManager.ConsumeClick(this);
             OnClick(this);
         }
         else if (OnHover != null && GetBounds().Contains(InputManager.ScreenMousePos))
@@ -223,6 +223,6 @@ public class UIElement
 
     public void ConsumeClick(Object clicked)
     {
-        InputManager.ConsumeClick();
+        InputManager.ConsumeClick(this);
     }
 }

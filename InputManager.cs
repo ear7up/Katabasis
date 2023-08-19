@@ -16,6 +16,7 @@ public static class InputManager
 
     public static bool Clicked;
     public static bool ClickConsumed;
+    public static object ClickConsumer;
     public static bool ClickAndHold;
     public static bool MouseDown;
 
@@ -117,10 +118,11 @@ public static class InputManager
         }
     }
 
-    public static void ConsumeClick()
+    public static void ConsumeClick(Object consumer)
     {
         ConfirmBuilding = false;
         ClickConsumed = true;
+        ClickConsumer = consumer;
     }
 
     public static bool UnconsumedClick()
@@ -153,6 +155,7 @@ public static class InputManager
         Clicked = (mouseState.LeftButton == ButtonState.Released && 
                   lastMouseState.LeftButton == ButtonState.Pressed);
         ClickConsumed = false;
+        ClickConsumer = null;
 
         ClickAndHold = 
             (mouseState.LeftButton == ButtonState.Pressed && 

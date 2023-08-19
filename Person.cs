@@ -353,7 +353,7 @@ public class Person : Entity, Drawable
         if (InputManager.Mode == InputManager.CAMERA_MODE && InputManager.UnconsumedClick() &&
             GetBounds().Contains(InputManager.MousePos))
         {
-            InputManager.ConsumeClick();
+            InputManager.ConsumeClick(this);
             return true;
         }
         return false;

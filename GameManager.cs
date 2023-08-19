@@ -410,7 +410,7 @@ public class GameManager
     {
         if (InputManager.UnconsumedClick() && _map.HighlightedTile != null)
         {
-            InputManager.ConsumeClick();
+            InputManager.ConsumeClick(this);
 
             if (_player1.Kingdom.TryToAcquireTile(_map.HighlightedTile))
             {
@@ -440,6 +440,10 @@ public class GameManager
         
         // Draw elements by their furthest Y coordinate
         foreach (Drawable d in Globals.Ybuffer)
+            d.Draw();
+
+        // Draw text on top
+        foreach (Drawable d in Globals.TextBuffer)
             d.Draw();
 
         // Draw the UI on top
