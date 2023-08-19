@@ -45,6 +45,8 @@ public class TextSprite : UIElement
 
     public override void Draw(Vector2 offset)
     {
+        base.Draw(offset);
+        
         if (Hidden)
             return;
 

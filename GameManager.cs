@@ -139,16 +139,16 @@ public class GameManager
         _statsOverviewText = new TextSprite(Sprites.Font);
         _statsOverviewText.ScaleDown(0.4f);
         
-        UIElement silverMan = new UIElement(Sprites.ManS);
-        silverMan.ScaleDown(0.9f);
-        UIElement goldMan = new UIElement(Sprites.ManG);
-        goldMan.ScaleDown(0.9f);
+        UIElement manButton = new UIElement(Sprites.ManS);
+        manButton.ScaleDown(0.9f);
+        manButton.AddSelectedImage(Sprites.ManG);
+        manButton.SelectedImage.ScaleDown(0.9f);
 
         _statsPanel = new();
         _statsPanel.Image = new Sprite(Sprites.TallPanel, Vector2.Zero);
         _statsPanel.Image.DrawRelativeToOrigin = false;
         _statsPanel.SetMargin(top: 50, left: 30);
-        _statsPanel.AddTab("Overview", silverMan, goldMan, _statsOverviewText);
+        _statsPanel.AddTab("Overview", manButton, _statsOverviewText);
         _statsPanel.Hide();
 
         if (TEST)
@@ -316,7 +316,6 @@ public class GameManager
             UI.ScaleDown(0.05f);
             _buttonPanel.ScaleDown(0.05f);
         }
-        UI.Update();
         
         if (InputManager.BPressed)
             BuildButton(null);
@@ -333,6 +332,9 @@ public class GameManager
         HandlePersonFollowing();
         _personPanel.Update();
         MarketPanel.Update();
+
+        // Update UI last (pop-up panels are on top, they should get clicks first)
+        UI.Update();
 
         // Anything after this return will be pauseable
         if (InputManager.Paused)

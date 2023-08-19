@@ -42,5 +42,8 @@ public abstract class Layout : UIElement
     {
         foreach (UIElement element in Elements)
             element.Update();
+
+        // Update yourself last, we don't want to consume a click meant for a child element
+        base.Update();
     }
 }

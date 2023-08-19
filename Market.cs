@@ -65,6 +65,7 @@ static class Market
             Prices[i] *= 1 + (0.00001f * demand * Globals.Time);
 
             // Limit price fluctuations so they don't get too crazy
+            // Also, this prevents the UI price bars from stretching out too far
             float defaultPrice = GoodsInfo.GetDefaultPrice(i);
             Prices[i] = MathHelper.Clamp(Prices[i], defaultPrice * 0.25f, defaultPrice * 4f);
         }

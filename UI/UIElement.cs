@@ -11,11 +11,15 @@ public class UIElement
     private int[] _margin;
     public Vector2 Scale;
     public Sprite Image;
+    public Sprite SelectedImage;
+    public Vector2 Position;
     public Action<Object> OnClick;
     public Action<Object> OnHover;
     public string TooltipText;
     public bool Hidden;
     public string Name;
+    public bool IsSelected;
+    
 
     public UIElement(
         Texture2D texture = null,
@@ -36,10 +40,16 @@ public class UIElement
         }
 
         OnClick = onClick;
+        if (OnClick == null)
+            OnClick = ConsumeClick;
+
         OnHover = onHover;
         TooltipText = tooltip;
         Name = "";
         Hidden = false;
+        SelectedImage = null;
+        IsSelected = false;
+        Position = Vector2.Zero;
         
         _padding = new int[4] { 0, 0, 0, 0 };
         _margin = new int[4] { 10, 0, 0, 10 };
@@ -78,22 +88,33 @@ public class UIElement
     public virtual Rectangle GetBounds()
     {
         if (Image == null)
-            return Rectangle.Empty;
+            return new Rectangle((int)Position.X, (int)Position.Y, Width(), Height());
         return Image.GetBounds();
     }
 
     public virtual void Draw(Vector2 offset)
     {
+        Position = offset;
+
         if (Hidden)
             return;
 
-        // Assume all UIElement images inherit their position from their UI container
         if (Image != null)
-        {
             Image.Position = offset;
-            if (Image.DrawRelativeToOrigin)
-                Image.Position += Image.Origin * Image.Scale;
-            Image.Draw();
+        if (SelectedImage != null)
+            SelectedImage.Position = offset;
+
+        Sprite draw = Image;
+        if (IsSelected && SelectedImage != null)
+            draw = SelectedImage;
+
+        // Assume all UIElement images inherit their position from their UI container
+        if (draw != null)
+        {
+            draw.Position = offset;
+            if (draw.DrawRelativeToOrigin)
+                draw.Position += draw.Origin * draw.Scale;
+            draw.Draw();
         }
     }
 
@@ -191,5 +212,17 @@ public class UIElement
         Scale *= new Vector2(1 - s, 1 - s);
         if (Image != null)
             Image.ScaleDown(s);
+    }
+
+    public void AddSelectedImage(Texture2D texture)
+    {
+        Sprite selected = new Sprite(texture, Vector2.Zero);
+        selected.DrawRelativeToOrigin = false;
+        SelectedImage = selected;
+    }
+
+    public void ConsumeClick(Object clicked)
+    {
+        InputManager.ConsumeClick();
     }
 }

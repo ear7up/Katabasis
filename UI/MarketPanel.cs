@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class MarketPanel : UIElement
 {
-    public VBox Layout;
+    public TabLayout Layout;
     
     // Map goods ids to OverlapLayouts containig price information
     public Hashtable PriceDisplayHash;
@@ -15,22 +15,30 @@ public class MarketPanel : UIElement
     public MarketPanel() : base(Sprites.TallPanel)
     {
         Layout = new();
-        Layout.SetMargin(top: 60, left: 35);
+        Layout.TabBox.Image = new Sprite(Sprites.TabBackground, Vector2.Zero);
+        Layout.TabBox.Image.DrawRelativeToOrigin = false;
+        Layout.SetMargin(top: 30, left: 35);
+
         PriceLayout = new();
+        PriceLayout.SetMargin(top: 1, left: 1);
+        PriceLayout.Add(new TextSprite(Sprites.Font, text: "Market Prices"));
         SellingLayout = new();
+        SellingLayout.Add(new TextSprite(Sprites.Font, text: "Sell Orders"));
 
-        Layout.Add(new TextSprite(Sprites.Font, text: "Market Prices"));
-        Layout.Add(PriceLayout);
+        UIElement tab1 = new UIElement(Sprites.TabUnselected);
+        tab1.AddSelectedImage(Sprites.TabSelected);
+        UIElement tab2 = new UIElement(Sprites.TabUnselected);
+        tab2.AddSelectedImage(Sprites.TabSelected);
 
-        // TODO: This probably needs its own tab for space
-        //Layout.Add(new TextSprite(Sprites.Font, text: "Sell Orders"));
-        //Layout.Add(SellingLayout);
+        Layout.AddTab("Market Prices", tab1, PriceLayout);
+        Layout.AddTab("Sell Orders", tab2, SellingLayout);
 
         PriceDisplayHash = new();
 
         const int GOODS_ROWS = 8;
 
         AccordionLayout categoryAccordion = new();
+        categoryAccordion.SetMargin(top: 1, left: 1);
         PriceLayout.Add(categoryAccordion);
 
         int i = 0;
@@ -49,7 +57,7 @@ public class MarketPanel : UIElement
 
                 UIElement priceBar = new(Sprites.VerticalBar);
                 priceBar.Image.SpriteColor = Color.Green;
-                priceBar.SetPadding(right: 5);
+                priceBar.SetPadding(right: 15);
 
                 TextSprite priceText = new TextSprite(Sprites.Font, text: "0.0");
                 priceText.ScaleDown(0.4f);
@@ -92,7 +100,12 @@ public class MarketPanel : UIElement
                 float price = Market.Prices[id];
                 float defaultPrice = GoodsInfo.GetDefaultPrice(id);
                 priceText.Text = $"{price:0.0}";
-                priceBar.Image.SetScaleX(20f * price / defaultPrice);
+
+                if (price > defaultPrice)
+                    priceBar.Image.SetScaleX(25f + 3f * price/defaultPrice);
+                else
+                    priceBar.Image.SetScaleX(25f - 3f * defaultPrice/price);
+
                 if (price == defaultPrice)
                     priceBar.Image.SpriteColor = Color.Green;
                 else if (price > defaultPrice)
@@ -104,6 +117,7 @@ public class MarketPanel : UIElement
             i++;
         }
         Layout.Update();
+        base.Update();
     }
 
     public override void Draw(Vector2 offset)

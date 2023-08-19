@@ -66,15 +66,10 @@ public class BoxLayout : Layout
 
     public override void Draw(Vector2 offset)
     {
+        base.Draw(offset);
+
         if (Hidden)
             return;
-
-        // Draw the layout background (if set)
-        if (Image != null)
-        {
-            Image.Position = offset;
-            Image.Draw();
-        }
 
         Vector2 margin = new Vector2(GetLeftMargin(), GetTopMargin());
 

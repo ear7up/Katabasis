@@ -53,6 +53,9 @@ static class Sprites
 	public static Texture2D Tooltip;
 	public static Texture2D VerticalGreenBar;
 	public static Texture2D VerticalBar;
+	public static Texture2D TabBackground;
+	public static Texture2D TabSelected;
+	public static Texture2D TabUnselected;
 
 	public static void Load(ContentManager content)
 	{
@@ -106,6 +109,9 @@ static class Sprites
 		Tooltip = content.Load<Texture2D>("UI_maybe/tooltip");
 		VerticalGreenBar = content.Load<Texture2D>("UI_maybe/vertical_green_bar");
 		VerticalBar = content.Load<Texture2D>("UI_maybe/vertical_bar");
+		TabBackground = content.Load<Texture2D>("UI_maybe/tab_background");
+		TabSelected = content.Load<Texture2D>("UI_maybe/tab_selected");
+		TabUnselected = content.Load<Texture2D>("UI_maybe/tab_unselected");
 	}
 
 	public static Texture2D RandomBuilding()

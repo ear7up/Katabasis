@@ -50,6 +50,7 @@ public class GridLayout : Layout
         foreach (List<UIElement> row in GridContent)
             foreach (UIElement element in row)
                 element.Update();
+        base.Update();
     }
 
     public override void Draw(Vector2 offset)

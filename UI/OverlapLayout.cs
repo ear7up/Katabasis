@@ -4,15 +4,10 @@ public class OverlapLayout : Layout
 {
     public override void Draw(Vector2 offset)
     {
+        base.Draw(offset);
+
         if (Hidden)
             return;
-
-        // Assume all UIElement images inherit their position from their UI container
-        if (Image != null)
-        {
-            Image.Position = offset;
-            Image.Draw();
-        }
 
         foreach (UIElement element in Elements)
             element.Draw(offset);
