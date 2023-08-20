@@ -203,6 +203,21 @@ public class Goods
         Quantity = quantity;
     }
 
+    public Goods()
+    {
+
+    }
+
+    public static Goods Create(GoodsType type, int subType, float quantity)
+    {
+        Goods goods = new() {
+            Type = type,
+            SubType = subType,
+            Quantity = quantity
+        };
+        return goods;
+    }
+
     public override string ToString()
     {
         string typeName = Globals.Title(Enum.GetName(typeof(GoodsType), Type));
@@ -313,6 +328,6 @@ public class Goods
 
     public float Value()
     {
-        return Quantity; /* TODO: times market value */
+        return Quantity * Market.GetPrice(GetId());
     }
 }

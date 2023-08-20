@@ -41,9 +41,10 @@ public class GameManager
         _sky.SetScale(2f);
         TileMap = new();
         TileMap.Generate();
-        GameCamera = new(KatabasisGame.Viewport, TileMap.Origin);
+        GameCamera = Camera.Create(KatabasisGame.Viewport, TileMap.Origin);
 
-        Player1 = new(TileMap.GetOriginTile());
+        Player1 = Player.Create(TileMap.GetOriginTile());
+        Player1.Kingdom.Init();
         Market.Init(Player1.Kingdom);
 
         _coordinateDisplay = new(Sprites.Font, hasDropShadow: true);

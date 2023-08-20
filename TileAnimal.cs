@@ -43,15 +43,22 @@ public class Animal : Entity, Drawable
 
 public class TileAnimal : Tile
 {
-    private List<Entity> Animals;
-    public TileType AnimalType;
+    private List<Entity> Animals { get; set; }
+    public TileType AnimalType { get; set; }
 
-    public TileAnimal(Vector2 position, Texture2D baseTexture, Texture2D tileFeatureTexture) 
-        : base(TileType.WILD_ANIMAL, position, baseTexture, tileFeatureTexture)
+    public static TileAnimal Create(Vector2 position, Texture2D baseTexture, Texture2D buildingTexture)
+    {
+        TileAnimal tile = new();
+        tile.SetAttributes(TileType.WILD_ANIMAL, position, baseTexture, buildingTexture);
+        return tile;
+    }
+
+    public override void SetAttributes(TileType type, Vector2 position, Texture2D baseTexture, Texture2D buildingTexture)
     {
         // TileAnimal will default to WILD_ANIMAL type, allowing hunting RawMeat.GAME
+        base.SetAttributes(type, position, baseTexture, buildingTexture);
+
         // AnimalType will replace tile type once a Ranch is built, allowing specific goods to be farmed
-        Animals = new();
         AnimalType = (TileType)Globals.Rand.Next((int)TileType.ANIMAL + 1, (int)TileType.WILD_ANIMAL);
 
         Texture2D animalTexture = null;
@@ -59,7 +66,6 @@ public class TileAnimal : Tile
         {
             // Elephants are a special case, can only be hunted for ivory, not farmed
             case TileType.ELEPHANT: animalTexture = Sprites.Elephant; Type = TileType.ELEPHANT; break;
-
             case TileType.COW: animalTexture = Sprites.Cow; break;
             case TileType.DONKEY: animalTexture = Sprites.Donkey; break;
             case TileType.DUCK: animalTexture = Sprites.Duck; break;
@@ -78,6 +84,11 @@ public class TileAnimal : Tile
         int numAnimals = Globals.Rand.Next(2, 5);
         for (int i = 0; i < numAnimals; i++)
             Animals.Add(new Animal(this, animalTexture));
+    }
+
+    public TileAnimal() : base()
+    {
+        Animals = new();
     }
 
     // In addition to the base tile behavior, call Update on each animal in the tile

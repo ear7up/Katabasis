@@ -6,10 +6,21 @@ public class Player
     // Serialized content
     public Kingdom Kingdom { get; set; }
     
-    // TODO: remove constructor params
-    public Player(Tile startTile)
+    public Player()
     {
-        Kingdom = new(this, startTile);
+        
+    }
+
+    public static Player Create(Tile startTile)
+    {
+        Player player = new();
+        player.SetAttributes(startTile);
+        return player;
+    }
+
+    public void SetAttributes(Tile startTile)
+    {
+        Kingdom = Kingdom.Create(this, startTile);
     }
 
     public void Update()

@@ -110,9 +110,9 @@ public class Map
 
             // 5% chance to add animals to plain desert tiles
             if (r < 0.05)
-                tile = new TileAnimal(new(xpos, ypos), texture, feature);
+                tile = TileAnimal.Create(new(xpos, ypos), texture, feature);
             else
-                tile = new(tileType, new(xpos, ypos), texture, feature);
+                tile = Tile.Create(tileType, new(xpos, ypos), texture, feature);
 
             if (mineralType != MineralType.NONE)
                 tile.Minerals = mineralType;
@@ -162,27 +162,39 @@ public class Map
             if (tile_in_row < tiles_per_row - 1 || halfway)
             {
                 // the row right after the midpoint is wrong
-                ne = tiles[i - tiles_per_row + ((row <= _mapTileSize.Y) ? 1 : 0)];
+                int offset = i - tiles_per_row + ((row <= _mapTileSize.Y) ? 1 : 0);
+                if (row == _mapTileSize.Y + 1)
+                    offset++;
+                ne = tiles[offset];
             }
             // Top-half, all nodes have SE neighbor (except the last node in the middle row)
             // Bottom-half, last node has no SE neighbor
-            if (tile_in_row < tiles_per_row - 1 || (!halfway && row != _mapTileSize.Y))
+            if (tile_in_row < tiles_per_row - 1 || (!halfway && row <= _mapTileSize.Y))
             {
-                se = tiles[i + tiles_per_row + ((row < _mapTileSize.Y) ? 1 : 0)];
+                int offset = i + tiles_per_row + ((row < _mapTileSize.Y) ? 1 : 0);
+                if (row == _mapTileSize.Y)
+                    offset--;
+                se = tiles[offset];
             }
             // Top-half, last node in row has no NW neighbor
             // Bottom-half, all nodes have NW neighbor
             if (tile_in_row > 0 || halfway)
             {
-                nw = tiles[i - tiles_per_row  - (halfway ? 1 : 0)];
+                int offset = i - tiles_per_row  - (halfway ? 1 : 0);
+                if (row == _mapTileSize.Y + 1)
+                    offset++;
+                nw = tiles[offset];
             }
             // Top-half, all nodes have SW neighbor (except the first node in the middle row)
             // Bottom-half, first node has no SW Neighbor
             if (tile_in_row > 0 || !halfway)
             {
-                sw = tiles[i + tiles_per_row - ((row >= _mapTileSize.Y) ? 1 : 0)];
+                int offset = (row >= _mapTileSize.Y) ? 1 : 0;
+                if (row == _mapTileSize.Y)
+                    offset++;
+                sw = tiles[i + tiles_per_row - offset];
             }
-            t.Neighbors = new(new Tile[]{ ne, se, sw, nw });
+            t.Neighbors = new Tile[]{ ne, se, sw, nw };
 
             tile_in_row++;
 

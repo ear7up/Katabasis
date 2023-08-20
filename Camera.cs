@@ -17,11 +17,21 @@ public class Camera
     private const float MIN_ZOOM = 0.14f;
     private const float MAX_ZOOM = 3.0f;
 
-    // TODO: remove constructor params
-    public Camera(Viewport viewport, Vector2 position)
+    public Camera()
+    {
+        Zoom = DEFAULT_ZOOM;
+    }
+
+    public static Camera Create(Viewport viewport, Vector2 position)
+    {
+        Camera camera = new();
+        camera.SetAttributes(viewport, position);
+        return camera;
+    }
+
+    public void SetAttributes(Viewport viewport, Vector2 position)
     {
         Bounds = viewport.Bounds;
-        Zoom = DEFAULT_ZOOM;
         Position = position;
         StartingPosition = position;
     }

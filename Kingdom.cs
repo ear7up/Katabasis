@@ -20,11 +20,9 @@ public class Kingdom
     public Stockpile Treasury { get; set; }
 
     // TODO: remove constructor params
-    public Kingdom(Player owner, Tile startTile)
+    public Kingdom()
     {
         Day = 1;
-        Owner = owner;
-        StartTile = startTile;
         MaxTiles = START_MAX_TILES;
         OwnedTiles = new();
         People = new();
@@ -33,8 +31,19 @@ public class Kingdom
         Money = 1000f;
         TaxRate = 0.1f;
         StarvationDeaths = 0;
+    }
 
-        Init();
+    public static Kingdom Create(Player owner, Tile startTile)
+    {
+        Kingdom kingdom = new();
+        kingdom.SetAttributes(owner, startTile);
+        return kingdom;
+    }
+
+    public void SetAttributes(Player owner, Tile startTile)
+    {
+        Owner = owner;
+        StartTile = startTile;
     }
 
     public void Init()

@@ -64,18 +64,19 @@ public class Building : Drawable
         return b;
     }
 
-    // TODO: remove parameters from constructor
-    public Building(
-        Tile location, 
-        Sprite sprite,
-        BuildingType buildingType = BuildingType.NONE)
+    public void SetAttributes(Tile location, Sprite sprite, BuildingType buildingType = BuildingType.NONE)
     {
-        Id = IdCounter++;
         Location = location;
         Sprite = sprite;
         Type = buildingType;
-        SubType = BuildingSubType.NONE;
+
         MaxUsers = BuildingInfo.GetMaxUsers(buildingType);
+    }
+
+    public Building()
+    {
+        Id = IdCounter++;
+        SubType = BuildingSubType.NONE;
         Selected = false;
         SelectedText = new TextSprite(Sprites.Font);
         SelectedText.ScaleDown(0.3f);
@@ -97,7 +98,8 @@ public class Building : Drawable
 
         // TODO: need sprites for all building types
         Sprite sprite = new Sprite(Sprites.RandomBuilding(buildingType), position);
-        Building b = new Building(location, sprite, buildingType);
+        Building b = new Building();
+        b.SetAttributes(location, sprite, buildingType);
 
         if (!b.IsWholeTile())
             sprite.SetScale(0.4f);

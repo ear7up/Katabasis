@@ -50,7 +50,17 @@ public class Tile
 
     // Can't be saved due to cycle resolution error
     [JsonIgnore]
-    public List<Tile> Neighbors { get; set; }
+    public Tile[] Neighbors { get; set; }
+
+    public Tile()
+    {
+        Owner = null;
+        Neighbors = new Tile[] { null, null, null, null};
+        Population = 0;
+        Buildings = new();
+        DrawBase = true;
+        Minerals = MineralType.NONE;
+    }
 
     public static Cardinal GetOppositeDirection(Cardinal direction)
     {
@@ -69,25 +79,28 @@ public class Tile
         return (direction + 1) % 4;
     }
 
-    // TODO: remove constructor params
-    public Tile(TileType type, Vector2 position, Texture2D baseTexture, Texture2D buildingTexture)
+    public static Tile Create(
+        TileType type, 
+        Vector2 position, 
+        Texture2D baseTexture, 
+        Texture2D buildingTexture)
+    {
+        Tile tile = new();
+        tile.SetAttributes(type, position, baseTexture, buildingTexture);
+        return tile;
+    }
+
+    public virtual void SetAttributes(TileType type, Vector2 position, Texture2D baseTexture, Texture2D buildingTexture)
     {
         Type = type;
-        Owner = null;
-        Neighbors = new();
-        Population = 0;
-        Buildings = new();
-        DrawBase = true;
-
         BaseSprite = new Sprite(baseTexture, position);
-        if (BuildingSprite != null)
+        if (buildingTexture != null)
             BuildingSprite = new Sprite(buildingTexture, position);
-        
+
         SoilQuality = Globals.Rand.NextFloat(MIN_SOIL_QUALITY, MAX_SOIL_QUALITY);
+
         if (type == TileType.VEGETATION)
             SoilQuality += VEGETATION_SOIL_QUALITY_BONUS;
-
-        Minerals = MineralType.NONE;
     }
 
     public Vector2 GetPosition()

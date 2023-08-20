@@ -111,6 +111,7 @@ public class KatabasisGame : Game
     {
         string jsonText = File.ReadAllText("save.json");
         _gameManager = JsonSerializer.Deserialize<GameManager>(jsonText, Globals.JsonOptions);
+        _gameManager.TileMap.ComputeNeighbors();
     }
 
     protected override void Draw(GameTime gameTime)
