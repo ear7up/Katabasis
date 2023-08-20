@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 public class MarketOrder
 {
-    public Person requestor;
-    public bool buying;
-    public Goods goods;
+    public Person requestor { get; set; }
+    public bool buying { get; set; }
+    public Goods goods { get; set; }
 
     public MarketOrder(Person requestor, bool buying, Goods goods)
     {

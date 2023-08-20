@@ -1,15 +1,20 @@
 
 
+using System.Text.Json.Serialization;
+
 public class Sprite
 {
+    [JsonIgnore]
     public Texture2D Texture;
+    
     public Vector2 Position { get; set; }
-    public bool DrawRelativeToOrigin;
+    public bool DrawRelativeToOrigin { get; set; }
     public Vector2 Origin { get; protected set; }
     public Vector2 Scale { get; set; }
     public Color SpriteColor { get; set; }
     public float Rotation { get; set; }
-    private Rectangle Bounds;
+    
+    public Rectangle Bounds;
 
     public Sprite(Texture2D texture, Vector2 position)
     {

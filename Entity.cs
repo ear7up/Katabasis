@@ -1,18 +1,19 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using System.Text.Json.Serialization;
 
 public abstract class Entity
 {
+    [JsonIgnore]
     public Texture2D image { get; protected set; }
     
     // The tint of the image. This will also allow us to change the transparency.
     protected Color color = Color.White;
 
-    public Vector2 Position, Velocity;
-    public float Orientation;
-    public float Radius = 20;	// used for circular collision detection
-    public float Scale;
-    //public bool IsExpired;		// true if the entity was destroyed and should be deleted.
+    public Vector2 Position { get; set; }
+    public Vector2 Velocity { get; set; }
+    public float Orientation { get; set; }
+    public float Scale { get; set; }
 
     private Rectangle Bounds;
 
@@ -31,7 +32,6 @@ public abstract class Entity
             image.Bounds.X, image.Bounds.Y,
             (int)(image.Bounds.Width * Scale), 
             (int)(image.Bounds.Height * Scale));
-        Radius = image.Width / 2f;
     }
 
     public Rectangle GetBounds()

@@ -1,3 +1,6 @@
+using System.IO;
+using System.Text.Json;
+
 public class Camera
 {
     public float Zoom { get; set; }
@@ -19,6 +22,24 @@ public class Camera
         Zoom = DEFAULT_ZOOM;
         Position = position;
         StartingPosition = position;
+    }
+
+    public void Save(FileStream fileStream)
+    {
+        // Zoom
+        // Position
+        // Bounds?
+        // VisibleArea?
+        // Transform
+        // InverseViewMatrix
+        // Following [Person ref]
+        // StartingPosition
+        JsonSerializer.Serialize(fileStream, this, Globals.JsonOptions);
+    }
+
+    public void Load()
+    {
+
     }
 
     public Vector2 DeprojectScreenPosition(Vector2 position)

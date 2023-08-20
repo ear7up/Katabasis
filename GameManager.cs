@@ -1,6 +1,8 @@
 using System;
+using System.Text.Json;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Media;
+using System.IO;
 
 namespace Katabasis;
 
@@ -12,7 +14,7 @@ public class GameManager
     private Player _player1;
 
     public const int SECONDS_PER_DAY = 60;
-    private float TimeOfDay = 0;
+    public float TimeOfDay { get; set; }
 
     private TextSprite _coordinateDisplay;
     private static TextSprite _debugDisplay;
@@ -39,6 +41,8 @@ public class GameManager
         GoodsInfo.Init();
         MineralInfo.Init();
         BuildingInfo.Init();
+
+        TimeOfDay = 0f;
 
         _sky = new Sprite(Globals.Content.Load<Texture2D>("sky"), Vector2.Zero);
         _sky.SetScale(2f);
@@ -157,14 +161,37 @@ public class GameManager
         }
         else
         {
-            const int NUM_PEOPLE = 100;
-            for (int i = 0 ; i < NUM_PEOPLE; i++)
-            {
-                Person person = Person.CreatePerson(_map.Origin, _map.GetOriginTile());
-                person.Money = Globals.Rand.Next(20, 50);
-                _player1.Kingdom.AddPerson(person);
-            }
+            Init();
         }
+    }
+
+    public void Init()
+    {
+        const int NUM_PEOPLE = 100;
+        for (int i = 0 ; i < NUM_PEOPLE; i++)
+        {
+            Person person = Person.CreatePerson(_map.Origin, _map.GetOriginTile());
+            person.Money = Globals.Rand.Next(20, 50);
+            _player1.Kingdom.AddPerson(person);
+        }
+    }
+
+    public void Save()
+    {
+        FileStream fileStream = File.Create("save.json");
+
+        // TimeOfDay
+        JsonSerializer.Serialize(fileStream, this, Globals.JsonOptions);
+        //_map.Save(fileStream);
+        _camera.Save(fileStream);
+        _player1.Save(fileStream);
+
+        fileStream.Close();
+    }
+
+    public void Load()
+    {
+
     }
 
     public void BuildFarm(Object clicked) { Build(BuildingType.FARM); }
@@ -316,6 +343,9 @@ public class GameManager
             UI.ScaleDown(0.05f);
             _buttonPanel.ScaleDown(0.05f);
         }
+
+        if (InputManager.SavePressed)
+            Save();
         
         if (InputManager.BPressed)
             BuildButton(null);
@@ -402,8 +432,13 @@ public class GameManager
             _debugDisplay.Text += "";
         */
 
-        _logoDisplay.Position.X = Globals.WindowSize.X - _logoDisplay.Width() - 30;
-        _logoDisplay2.Position.X = _logoDisplay.Position.X + 5;
+        _logoDisplay.Position = new Vector2(
+            Globals.WindowSize.X - _logoDisplay.Width() - 30,
+            _logoDisplay.Position.Y);
+
+        _logoDisplay2.Position = new Vector2(
+            _logoDisplay.Position.X + 5,
+            _logoDisplay.Position.Y);
     }
 
     public void HandleTileAcquisition()

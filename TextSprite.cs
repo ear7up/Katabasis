@@ -1,11 +1,17 @@
+using System.Text.Json.Serialization;
+
 public class TextSprite : UIElement, Drawable
 {
+    [JsonIgnore]
     public SpriteFont Font;
-    public SpriteFont Shadow;
-    public string Text;
 
-    public Color FontColor;
-    public bool HasDropShadow;
+    [JsonIgnore]
+    public SpriteFont Shadow;
+
+    public string Text { get; set; }
+
+    public Color FontColor { get; set; }
+    public bool HasDropShadow { get; set; }
 
     public TextSprite(SpriteFont font, bool hasDropShadow = true, string text = "") : base()
     {
@@ -69,6 +75,6 @@ public class TextSprite : UIElement, Drawable
 
     public float GetMaxY()
     {
-        throw new System.NotImplementedException();
+        return Position.Y + Height();
     }
 }

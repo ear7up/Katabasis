@@ -19,9 +19,10 @@ public class SkillLevel
 {
     public const float INCREASE_CHANCE = 0.5f;
 
-    public Skill skill;
-    public int level;
-    public int startLevel;
+    public Skill skill { get; set; }
+    public int level { get; set; }
+    public int startLevel { get; set; }
+    
     public SkillLevel(Skill skill, int level)
     {
         this.skill = skill;

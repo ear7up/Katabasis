@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content;
+using System.Text.Json;
 
 public static class Globals
 {
@@ -12,6 +13,11 @@ public static class Globals
     public static Random Rand { get; set; }
     public static List<Drawable> Ybuffer = new();
     public static List<Drawable> TextBuffer = new();
+
+    public static JsonSerializerOptions JsonOptions = new() { 
+        WriteIndented = true, 
+        
+        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles };
 
     public static void Update(GameTime gt)
     {

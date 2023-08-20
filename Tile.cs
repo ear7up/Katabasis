@@ -1,7 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public enum TileType
 {
@@ -26,18 +29,20 @@ public enum Cardinal
 
 public class Tile
 {
-    public TileType Type;
-    public Player Owner;
+    public TileType Type { get; set; }
+    public Player Owner { get; set; }
 
     public const int HIGHLIGHT_HEIGHT = 30;
     
     public const int MAX_POP = 32;
     public int Population { get; set; }
 
-    public bool DrawBase;
+    public bool DrawBase { get; set; }
     public Sprite BaseSprite { get; protected set; }
-    public Sprite BuildingSprite;
+    public Sprite BuildingSprite { get; set; }
     
+    // TODO: infinite recursion when serializing tiles referencing other tiles
+    [JsonIgnore]
     public Tile[] Neighbors { get; set; }
     
     public const int MAX_BUILDINGS = 6;
@@ -49,7 +54,27 @@ public class Tile
     public const float VEGETATION_SOIL_QUALITY_BONUS = 0.1f;
     public float SoilQuality { get; set; }
 
-    public MineralType Minerals;
+    public MineralType Minerals { get; set; }
+
+    public void Save(FileStream fileStream)
+    {
+        // Type
+        // Owner [ref Person]
+        // Population
+        // DrawBase
+        // BaseSprite [ref Sprite]
+        // BuildingSprite [ref Sprite]
+        // Neighbors [ref Sprite[]]
+        // Buildings [ref List<Building>]
+        // SoilQuality
+        // Minerals
+        JsonSerializer.Serialize(fileStream, this, Globals.JsonOptions);
+    }
+
+    public void Load()
+    {
+
+    }
 
     public static Cardinal GetOppositeDirection(Cardinal direction)
     {

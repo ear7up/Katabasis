@@ -1,20 +1,22 @@
 using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 
 public class Kingdom
 {
     public const int START_MAX_TILES = 25;
 
-    public int Day;
+    public int Day { get; set; }
     public Player Owner;
-    public Tile StartTile;
-    public int MaxTiles;
-    public List<Tile> OwnedTiles;
-    public List<Person> People;
-    public List<Person> Deceased;
-    public Stockpile Treasury;
-    public float Money;
-    public float TaxRate;
-    public int StarvationDeaths;
+    public Tile StartTile { get; set; }
+    public int MaxTiles { get; set; }
+    public float Money { get; set; }
+    public float TaxRate { get; set; }
+    public int StarvationDeaths {get; set; }
+    public List<Tile> OwnedTiles { get; set; }
+    public List<Person> People { get; set; }
+    public List<Person> Deceased { get; set; }
+    public Stockpile Treasury { get; set; }
 
     public Kingdom(Player owner, Tile startTile)
     {
@@ -30,12 +32,31 @@ public class Kingdom
         TaxRate = 0.1f;
         StarvationDeaths = 0;
 
-        // Start with 25 tiles centered around the start tile, which will contain a market
-        AcquireTilesAround(startTile, distance: 2);
-        Building city = Building.CreateBuilding(startTile, BuildingType.CITY);
-        Building market = Building.CreateBuilding(startTile.Neighbors[0], BuildingType.MARKET);
-        //market.Sprite.Scale = 0.5f;
+        Init();
+    }
 
+    public void Init()
+    {
+        // Start with 25 tiles centered around the start tile, which will contain a market
+        AcquireTilesAround(StartTile, distance: 2);
+        Building city = Building.CreateBuilding(StartTile, BuildingType.CITY);
+        Building market = Building.CreateBuilding(StartTile.Neighbors[0], BuildingType.MARKET);
+    }
+
+    public void Save(FileStream fileStream)
+    {
+        // Day
+        // Owner [Player ref]
+        // StartTile [Tile ref]
+        // MaxTiles
+        // OwnedTiles [List<Tile> ref]
+        // People [List<Person> ref]
+        // Deceased [List<Person> ref]
+        // Treasury 
+        // Money
+        // TaxRate;
+        // StarvationDeaths;
+        JsonSerializer.Serialize(fileStream, this, Globals.JsonOptions);
     }
 
     // Checks if tile is adjacent to one owned by the player

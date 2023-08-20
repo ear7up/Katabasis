@@ -36,18 +36,18 @@ public class Building : Drawable
     public static int IdCounter = 0;
 
     public int Id;
-    public Tile Location;
-    public BuildingType Type;
-    public BuildingSubType SubType;
-    public Sprite Sprite;
+    public Tile Location { get; set; }
+    public BuildingType Type { get; set; }
+    public BuildingSubType SubType { get; set; }
+    public Sprite Sprite { get; set; }
 
-    public int CurrentUsers;
+    public int CurrentUsers { get; set; }
     public int MaxUsers;
-    public bool Selected;
-    public TextSprite SelectedText;
+    public bool Selected { get; set; }
+    public TextSprite SelectedText { get; set; }
 
     // This is intended to be used for property in houses
-    public Stockpile Stockpile;
+    public Stockpile Stockpile { get; set; }
 
     public static Building Random(BuildingType type = BuildingType.NONE, bool temporary = false)
     {
@@ -247,8 +247,9 @@ public class Building : Drawable
             SelectedText.Text = $"Occupants: ({CurrentUsers}/{MaxUsers})";
 
             Rectangle bounds = Sprite.GetBounds();
-            SelectedText.Position.X = bounds.X + bounds.Width / 2 - SelectedText.Width() / 2; 
-            SelectedText.Position.Y = bounds.Y + bounds.Height * 0.8f;
+            SelectedText.Position = new Vector2(
+                bounds.X + bounds.Width / 2 - SelectedText.Width() / 2,
+                bounds.Y + bounds.Height * 0.8f);
         }
         else
         {

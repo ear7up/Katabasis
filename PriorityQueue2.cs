@@ -3,8 +3,8 @@ using System.Collections.Generic;
 // Priority queue wrapper that lets you maintain FIFO order for non-priority elements
 public class PriorityQueue2<TElement, TPriority>
 {
-    private PriorityQueue<TElement, TPriority> pq;
-    private Queue<TElement> q;
+    public PriorityQueue<TElement, TPriority> pq { get; set; }
+    public Queue<TElement> q { get; set; }
 
     public PriorityQueue2()
     {

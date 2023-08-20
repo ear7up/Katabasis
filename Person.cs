@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 public enum PersonType
 {
@@ -39,17 +40,20 @@ public class Person : Entity, Drawable
     public PersonType Type;
 
     public readonly int Id;
-    public readonly string Name;
-    public readonly GenderType Gender;
+    public string Name { get; set; }
+    public GenderType Gender { get; set; }
 
-    public float Age;
-    public int Hunger;
-    public float Money;
-    private float[,] Demand;
+    public float Age { get; set; }
+    public int Hunger { get; set; }
+    public float Money { get; set; }
+    private float[,] Demand { get; set; }
 
-    public Stockpile PersonalStockpile;
-    public PriorityQueue2<Task, int> Tasks;
-    public WeightedList<SkillLevel> Skills; // inherited by children Lamarck-style?
+    public Stockpile PersonalStockpile { get; set; }
+
+    // Tasks are being serialized with only the Task fields, not the proper subclass fields
+
+    public PriorityQueue2<object, int> Tasks { get; set; }
+    public WeightedList<SkillLevel> Skills { get; set; }
 
     private Person(Vector2 position, Tile home)
     {
@@ -108,7 +112,7 @@ public class Person : Entity, Drawable
 
         string task = "Idle";
         if (Task.Peek(Tasks) != null)
-            task  = Tasks.Peek().Describe();
+            task  = Task.Peek(Tasks).Describe();
 
         string house = "homeless";
         if (House != null)

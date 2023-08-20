@@ -12,13 +12,13 @@ public class UIElement
     public Vector2 Scale;
     public Sprite Image;
     public Sprite SelectedImage;
-    public Vector2 Position;
+    public Vector2 Position { get; set; }
     public Action<Object> OnClick;
     public Action<Object> OnHover;
     public string TooltipText;
-    public bool Hidden;
+    public bool Hidden { get; set; }
     public string Name;
-    public bool IsSelected;
+    public bool IsSelected { get; set; }
     
 
     public UIElement(

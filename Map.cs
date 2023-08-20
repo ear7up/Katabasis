@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 
 public class Map
 {
     private readonly Point _mapTileSize = new(128, 128);
-    public Tile[] tiles;
+    public Tile[] tiles { get; set; }
 
     private Building _editBuilding = null;
 
@@ -14,65 +16,91 @@ public class Map
     public Point MapSize { get; private set; }
     public Vector2 Origin { get; private set; }
 
+    public int VerticalOverlap;
+    public int HorizontalOverlap;
+
     private const float HEXAGON_HEIGHT_RATIO = 0.8660254f;
     private const float SCALE_CONSTANT = 0.1f;
+
+    List<Texture2D> desertTextures;
+    List<Texture2D> desertHillTextures;
+    List<Texture2D> desertVegetationTextures;
+    List<Texture2D> desertBedouinTextures;
 
     public Map()
     {
         tiles = new Tile[_mapTileSize.X *_mapTileSize.Y];
 
         // Load all of the tile textures
-        List<Texture2D> desertTextures = Sprites.LoadTextures("desert/flat", 18);
-        List<Texture2D> desertHillTextures = Sprites.LoadTextures("desert/hills", 7);
-        List<Texture2D> desertVegetationTextures = Sprites.LoadTextures("desert/vegetation", 12);
-        List<Texture2D> desertBedouinTextures = Sprites.LoadTextures("desert/bedouin_camps", 5);
+        desertTextures = Sprites.LoadTextures("desert/flat", 18);
+        desertHillTextures = Sprites.LoadTextures("desert/hills", 7);
+        desertVegetationTextures = Sprites.LoadTextures("desert/vegetation", 12);
+        desertBedouinTextures = Sprites.LoadTextures("desert/bedouin_camps", 5);
 
         // 500x345
         TileSize = new(desertTextures[0].Width, desertTextures[0].Height);
         MapSize = new(TileSize.X * _mapTileSize.X, TileSize.Y * _mapTileSize.Y);
 
-        _editBuilding = null;
-        
-        int VERTICAL_OVERLAP = 30;
-        int HORIZONTAL_OVERLAP = TileSize.X / 2;
         Origin = new(MapSize.X / 2, MapSize.Y / 2);
 
-        Random random = new();
+        VerticalOverlap = 30;
+        HorizontalOverlap = TileSize.X / 2;
 
+        _editBuilding = null;
+        
+        Generate();
+
+        // Fix the map origin to account for overlap and perspective
+        Origin = new(MapSize.X / 2 - HorizontalOverlap, MapSize.Y / 2 - VerticalOverlap * _mapTileSize.Y);
+    }
+
+    public void Save(FileStream fileStream)
+    {
+        JsonSerializer.Serialize(fileStream, this, Globals.JsonOptions);
+        //foreach (Tile tile in tiles)
+        //    JsonSerializer.Serialize(fileStream, tile, Globals.JsonOptions);
+    }
+
+    public void Load()
+    {
+
+    }
+
+    public void Generate()
+    {
         int row = 1;
         int tiles_per_row = 1;
         int tile_in_row = 0;
-
         for (int n = 0; n < _mapTileSize.Y * _mapTileSize.X; n++)
         {
             Texture2D texture = null;
             TileType tileType = TileType.DESERT;
             MineralType mineralType = MineralType.NONE;
-            double r = random.NextDouble();
+            double r = Globals.Rand.NextDouble();
 
             // Assign random tile textures
             if (r < 0.65)
             {
                 // 65% plain desert
-                texture = desertTextures[random.Next(0, desertTextures.Count)];
+                texture = desertTextures[Globals.Rand.Next(0, desertTextures.Count)];
             }
             else if (r < 0.8)
             {
                 // 15% desert with hills
-                texture = desertHillTextures[random.Next(0, desertHillTextures.Count)];
+                texture = desertHillTextures[Globals.Rand.Next(0, desertHillTextures.Count)];
                 tileType = TileType.HILLS;
                 mineralType = MineralInfo.Random();
             }
             else if (r < 0.98)
             {
                 // 18% desert with vegetation
-                texture = desertVegetationTextures[random.Next(0, desertVegetationTextures.Count)];
+                texture = desertVegetationTextures[Globals.Rand.Next(0, desertVegetationTextures.Count)];
                 tileType = TileType.VEGETATION;
             }
             else
             {
                 // 2% bedouin camps
-                texture = desertBedouinTextures[random.Next(0, desertBedouinTextures.Count)];
+                texture = desertBedouinTextures[Globals.Rand.Next(0, desertBedouinTextures.Count)];
                 tileType = TileType.CAMP;
             }
 
@@ -84,7 +112,7 @@ public class Map
                 xpos = Origin.X - ((TileSize.X / 2) * row) + (tile_in_row * TileSize.X);
 
             // Each row is half a tile size down, shave off a bit because each tile has a thick base
-            float ypos = (TileSize.Y / 2) * row - (VERTICAL_OVERLAP * row);
+            float ypos = (TileSize.Y / 2) * row - (VerticalOverlap * row);
 
             Texture2D feature = null;
             Tile tile = null;
@@ -176,9 +204,6 @@ public class Map
 
         GenerateForests();
         GenerateRivers();
-
-        // Fix the map origin to account for overlap and perspective
-        Origin = new(MapSize.X / 2 - HORIZONTAL_OVERLAP, MapSize.Y / 2 - VERTICAL_OVERLAP * _mapTileSize.Y);
     }
 
     public Tile GetOriginTile()

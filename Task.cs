@@ -4,10 +4,11 @@ using System.Linq;
 
 public class TaskStatus
 {
-    public bool Complete;
-    public bool Failed;
+    public bool Complete { get; set; }
+    public bool Failed { get; set; }
     public Object ReturnValue;
-    public Task Task;
+    public Task Task { get; set; }
+
     public TaskStatus(Task task)
     {
         Complete = false;
@@ -41,20 +42,18 @@ public class Task
     public const int LOW_PRIORITY = 3;
     public const int DEFAULT_PRIORITY = 3;
 
-    public string Description;
-    public List<SkillLevel> skillsNeeded;
-    public Queue<Task> subTasks;
-    public Vector2 location;
-    public TaskStatus Status;
-    public bool Initialized;
-    public Action<Object> OnSuccess;
-    public Action<Object> OnFailure;
+    public string Description { get; set; }
+    public List<SkillLevel> skillsNeeded { get; set; }
+    public Queue<Task> subTasks { get; set; }
+    public TaskStatus Status { get; set; }
+    public bool Initialized { get; set; }
+    public Action<Object> OnSuccess { get; set; }
+    public Action<Object> OnFailure { get; set; }
     
     public Task(string description, Action<Object> onComplete = null, Action<Object> onFailure = null)
     {
         skillsNeeded = new();
         subTasks = new();
-        location = new();
         Status = new(this);
         Initialized = false;
 
@@ -63,11 +62,11 @@ public class Task
         OnFailure = onFailure;
     }
 
-    public static Task Peek(PriorityQueue2<Task, int> tasks)
+    public static Task Peek(PriorityQueue2<object, int> tasks)
     {
         if (tasks.Empty())
             return null;
-        return tasks.Peek();
+        return (Task)tasks.Peek();
     }
 
     public static Task Peek(Queue<Task> tasks)
@@ -186,9 +185,9 @@ public class FindNewHomeTask : Task
 
 public class IdleAtHomeTask : Task
 {
-    private Vector2 destination;
-    private Vector2 direction;
-    private float Duration;
+    public Vector2 destination { get; set; }
+    public Vector2 direction { get; set; }
+    public float Duration { get; set; }
 
     public IdleAtHomeTask() : base("Going for a walk")
     {
@@ -236,7 +235,8 @@ public class IdleAtHomeTask : Task
 
 public class FindTileByTypeTask : Task
 {
-    public TileType TileType;
+    public TileType TileType { get; set; }
+
     public FindTileByTypeTask(TileType tileType) : base("Searching for a " + Globals.Title(tileType.ToString()))
     {
         TileType = tileType;
@@ -257,7 +257,7 @@ public class FindTileByTypeTask : Task
 // Tries to find goods and add to the person's invenctory
 public class SourceGoodsTask : Task
 {
-    public Goods GoodsRequest;
+    public Goods GoodsRequest { get; set; }
 
     public SourceGoodsTask(Goods goods) : base("Trying to find " + goods.ToString())
     {
@@ -334,9 +334,9 @@ public class SourceGoodsTask : Task
 
 public class FindBuildingTask : Task
 {
-    public BuildingType BuildingType;
-    public BuildingSubType BuildingSubType;
-    public TileType TileType;
+    public BuildingType BuildingType { get; set; }
+    public BuildingSubType BuildingSubType { get; set; }
+    public TileType TileType { get; set; }
 
     public FindBuildingTask(
         BuildingType buildingType, 
@@ -365,11 +365,11 @@ public class FindBuildingTask : Task
 public class TryToProduceTask : Task
 {
     public ProductionRequirements Requirements;
-    public List<Goods> RequiredGoods;
-    public float TimeToProduce;
-    public Building Building;
-    public float TimeSpent;
-    public Goods Goods;
+    public List<Goods> RequiredGoods { get; set; }
+    public float TimeToProduce { get; set; }
+    public Building Building { get; set; }
+    public float TimeSpent { get; set; }
+    public Goods Goods { get; set; }
 
     public TryToProduceTask(Goods goods) : base("Trying to produce " + goods.ToString())
     {
@@ -575,7 +575,8 @@ public class BuyFromMarketTask : Task
 // Attempts to buy as much of the order quantity as is available
 public class BuyTask : Task
 {
-    public MarketOrder Order;
+    public MarketOrder Order { get; set; }
+
     public BuyTask(MarketOrder order) : base("Buying " + order.goods.ToString())
     {
         Order = order;
@@ -591,7 +592,8 @@ public class BuyTask : Task
 
 public class SellTask : Task
 {
-    public List<Goods> Goods;
+    public List<Goods> Goods { get; set; }
+
     public SellTask(List<Goods> goods) : base("Selling ")
     {
         foreach (Goods g in goods)
@@ -609,8 +611,10 @@ public class SellTask : Task
 
 public class GoToTask : Task
 {
-    public Vector2 destination;
+    public Vector2 destination { get; set; }
     public Vector2 direction;
+    public Vector2 direction2 { get; set; }
+
     public GoToTask(string description, Vector2 position) : base(description)
     {
         destination = position;
@@ -622,6 +626,7 @@ public class GoToTask : Task
         {
             direction = destination - p.Position;
             direction.Normalize();
+            direction2 = direction;
         }
 
         // Move in the direction of the destination at default movespeed scaled by time elapsed

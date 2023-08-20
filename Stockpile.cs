@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Stockpile
 {
-    private Hashtable _stock;
+    public Hashtable _stock { get; set; }
 
     public Stockpile()
     {
