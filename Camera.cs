@@ -3,43 +3,27 @@ using System.Text.Json;
 
 public class Camera
 {
+    // Serialized content
     public float Zoom { get; set; }
     public Vector2 Position { get; set; }
-    public Rectangle Bounds { get; protected set; }
-    public Rectangle VisibleArea { get; protected set; }
-    public Matrix Transform { get; protected set; }
-    public Matrix InverseViewMatrix { get; protected set; }
-    public Person Following { get; protected set; }
+    public Rectangle Bounds { get; set; }
+    public Rectangle VisibleArea { get; set; }
+    public Matrix Transform { get; set; }
+    public Matrix InverseViewMatrix { get; set; }
+    public Person Following { get; set; }
     
     private Vector2 StartingPosition;
     private const float DEFAULT_ZOOM = 0.5f;
     private const float MIN_ZOOM = 0.14f;
     private const float MAX_ZOOM = 3.0f;
 
+    // TODO: remove constructor params
     public Camera(Viewport viewport, Vector2 position)
     {
         Bounds = viewport.Bounds;
         Zoom = DEFAULT_ZOOM;
         Position = position;
         StartingPosition = position;
-    }
-
-    public void Save(FileStream fileStream)
-    {
-        // Zoom
-        // Position
-        // Bounds?
-        // VisibleArea?
-        // Transform
-        // InverseViewMatrix
-        // Following [Person ref]
-        // StartingPosition
-        JsonSerializer.Serialize(fileStream, this, Globals.JsonOptions);
-    }
-
-    public void Load()
-    {
-
     }
 
     public Vector2 DeprojectScreenPosition(Vector2 position)

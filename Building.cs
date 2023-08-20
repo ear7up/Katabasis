@@ -33,21 +33,23 @@ public enum BuildingSubType
 
 public class Building : Drawable
 {
-    public static int IdCounter = 0;
+    public const int MAX_BUILDINGS_PER_TILE = 4;
 
+    public static int IdCounter = 0;
     public int Id;
+
+    // Serialized content
     public Tile Location { get; set; }
     public BuildingType Type { get; set; }
     public BuildingSubType SubType { get; set; }
     public Sprite Sprite { get; set; }
-
     public int CurrentUsers { get; set; }
-    public int MaxUsers;
     public bool Selected { get; set; }
-    public TextSprite SelectedText { get; set; }
-
-    // This is intended to be used for property in houses
     public Stockpile Stockpile { get; set; }
+
+    // No need to persist
+    public int MaxUsers;
+    public TextSprite SelectedText;
 
     public static Building Random(BuildingType type = BuildingType.NONE, bool temporary = false)
     {
@@ -62,7 +64,8 @@ public class Building : Drawable
         return b;
     }
 
-    protected Building(
+    // TODO: remove parameters from constructor
+    public Building(
         Tile location, 
         Sprite sprite,
         BuildingType buildingType = BuildingType.NONE)
@@ -135,8 +138,6 @@ public class Building : Drawable
             return true;
         return false;
     }
-
-    public const int MAX_BUILDINGS_PER_TILE = 4;
 
     public static bool ValidPlacement(Building building, Tile location)
     {

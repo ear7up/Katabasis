@@ -5,16 +5,18 @@ using System.Text.Json;
 
 public class Map
 {
-    private readonly Point _mapTileSize = new(128, 128);
+    // Serialzied content
     public Tile[] tiles { get; set; }
+    public Point MapSize { get; private set; }
+    public Vector2 Origin { get; private set; }
+
+    private readonly Point _mapTileSize = new(128, 128);
 
     private Building _editBuilding = null;
 
     public Tile HighlightedTile;
 
     public static Point TileSize { get; private set; }
-    public Point MapSize { get; private set; }
-    public Vector2 Origin { get; private set; }
 
     public int VerticalOverlap;
     public int HorizontalOverlap;
@@ -47,23 +49,12 @@ public class Map
         HorizontalOverlap = TileSize.X / 2;
 
         _editBuilding = null;
-        
-        Generate();
+
+        // If loading from a file, need to call ComputeNeighbors as it's not serialized
+        // ComputeNeighbors();
 
         // Fix the map origin to account for overlap and perspective
         Origin = new(MapSize.X / 2 - HorizontalOverlap, MapSize.Y / 2 - VerticalOverlap * _mapTileSize.Y);
-    }
-
-    public void Save(FileStream fileStream)
-    {
-        JsonSerializer.Serialize(fileStream, this, Globals.JsonOptions);
-        //foreach (Tile tile in tiles)
-        //    JsonSerializer.Serialize(fileStream, tile, Globals.JsonOptions);
-    }
-
-    public void Load()
-    {
-
     }
 
     public void Generate()
@@ -144,10 +135,17 @@ public class Map
             }
         }
 
+        ComputeNeighbors();
+        GenerateForests();
+        GenerateRivers();
+    }
+
+    public void ComputeNeighbors()
+    {
         // Second iteration to assign neighbors
-        row = 1;
-        tiles_per_row = 1;
-        tile_in_row = 0;
+        int row = 1;
+        int tiles_per_row = 1;
+        int tile_in_row = 0;
 
         for (int i = 0; i < _mapTileSize.X * _mapTileSize.Y; i++)
         {
@@ -184,7 +182,7 @@ public class Map
             {
                 sw = tiles[i + tiles_per_row - ((row >= _mapTileSize.Y) ? 1 : 0)];
             }
-            t.Neighbors = new Tile[]{ ne, se, sw, nw };
+            t.Neighbors = new(new Tile[]{ ne, se, sw, nw });
 
             tile_in_row++;
 
@@ -201,9 +199,6 @@ public class Map
                     tiles_per_row++;
             }
         }
-
-        GenerateForests();
-        GenerateRivers();
     }
 
     public Tile GetOriginTile()

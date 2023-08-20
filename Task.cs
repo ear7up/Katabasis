@@ -42,6 +42,7 @@ public class Task
     public const int LOW_PRIORITY = 3;
     public const int DEFAULT_PRIORITY = 3;
 
+    // Serialized content
     public string Description { get; set; }
     public List<SkillLevel> skillsNeeded { get; set; }
     public Queue<Task> subTasks { get; set; }
@@ -50,6 +51,7 @@ public class Task
     public Action<Object> OnSuccess { get; set; }
     public Action<Object> OnFailure { get; set; }
     
+    // TODO: remove parameters from constructor
     public Task(string description, Action<Object> onComplete = null, Action<Object> onFailure = null)
     {
         skillsNeeded = new();
@@ -62,11 +64,11 @@ public class Task
         OnFailure = onFailure;
     }
 
-    public static Task Peek(PriorityQueue2<object, int> tasks)
+    public static Task Peek(PriorityQueue2<Task, int> tasks)
     {
         if (tasks.Empty())
             return null;
-        return (Task)tasks.Peek();
+        return tasks.Peek();
     }
 
     public static Task Peek(Queue<Task> tasks)
@@ -185,6 +187,7 @@ public class FindNewHomeTask : Task
 
 public class IdleAtHomeTask : Task
 {
+    // Serialized content
     public Vector2 destination { get; set; }
     public Vector2 direction { get; set; }
     public float Duration { get; set; }
@@ -235,6 +238,7 @@ public class IdleAtHomeTask : Task
 
 public class FindTileByTypeTask : Task
 {
+    // Serialized content
     public TileType TileType { get; set; }
 
     public FindTileByTypeTask(TileType tileType) : base("Searching for a " + Globals.Title(tileType.ToString()))
@@ -257,6 +261,7 @@ public class FindTileByTypeTask : Task
 // Tries to find goods and add to the person's invenctory
 public class SourceGoodsTask : Task
 {
+    // Serialized content
     public Goods GoodsRequest { get; set; }
 
     public SourceGoodsTask(Goods goods) : base("Trying to find " + goods.ToString())
@@ -334,6 +339,7 @@ public class SourceGoodsTask : Task
 
 public class FindBuildingTask : Task
 {
+    // Serialized content
     public BuildingType BuildingType { get; set; }
     public BuildingSubType BuildingSubType { get; set; }
     public TileType TileType { get; set; }
@@ -364,13 +370,17 @@ public class FindBuildingTask : Task
 
 public class TryToProduceTask : Task
 {
-    public ProductionRequirements Requirements;
+    // Serialized content
     public List<Goods> RequiredGoods { get; set; }
     public float TimeToProduce { get; set; }
     public Building Building { get; set; }
     public float TimeSpent { get; set; }
     public Goods Goods { get; set; }
 
+    public ProductionRequirements Requirements;
+
+
+    // TODO: remove parameters from constructor
     public TryToProduceTask(Goods goods) : base("Trying to produce " + goods.ToString())
     {
         Requirements = (ProductionRequirements)GoodsProduction.Requirements[goods.GetId()];
@@ -546,6 +556,7 @@ public class TryToProduceTask : Task
 
 public class BuyFromMarketTask : Task
 {
+    // TODO: remove parameters from constructor
     public BuyFromMarketTask(Vector2 marketPosition, MarketOrder order)
         : base("")
     {
@@ -575,8 +586,10 @@ public class BuyFromMarketTask : Task
 // Attempts to buy as much of the order quantity as is available
 public class BuyTask : Task
 {
+    // Serialized content
     public MarketOrder Order { get; set; }
 
+    // TODO: remove parameters from constructor
     public BuyTask(MarketOrder order) : base("Buying " + order.goods.ToString())
     {
         Order = order;
@@ -592,8 +605,10 @@ public class BuyTask : Task
 
 public class SellTask : Task
 {
+    // Serialized content
     public List<Goods> Goods { get; set; }
 
+    // TODO: remove parameters from constructor
     public SellTask(List<Goods> goods) : base("Selling ")
     {
         foreach (Goods g in goods)
@@ -611,10 +626,14 @@ public class SellTask : Task
 
 public class GoToTask : Task
 {
+    // Serialized content
     public Vector2 destination { get; set; }
-    public Vector2 direction;
     public Vector2 direction2 { get; set; }
 
+    // TODO: this struct won't work properly when made serializable with getter/setter
+    public Vector2 direction;
+
+    // TODO: remove parameters from constructor
     public GoToTask(string description, Vector2 position) : base(description)
     {
         destination = position;
@@ -718,12 +737,14 @@ public class EatTask : Task
 
 public class TryToBuildTask : Task
 {
-    public Goods Tool;
-    public Tile DestTile;
-    public float TimeSpent;
-    public bool ToolBorrowed;
-    public BuildingType BuildingType;
+    // Serialized content
+    public Goods Tool { get; set; }
+    public Tile DestTile { get; set; }
+    public float TimeSpent { get; set; }
+    public bool ToolBorrowed { get; set; }
+    public BuildingType BuildingType { get; set; }
 
+    // TODO: remove parameters from constructor
     public TryToBuildTask(BuildingType buildingType) 
         : base("Trying to build " + Globals.Title(buildingType.ToString()))
     {
@@ -821,9 +842,10 @@ public class DepositInventoryTask : Task
 
 public class CookTask : Task
 {
-    public float TimeToProduce;
-    public float TimeSpent;
-    public Queue<Goods> ToCook;
+    // Serialized content
+    public float TimeToProduce { get; set; }
+    public float TimeSpent { get; set; }
+    public Queue<Goods> ToCook { get; set; }
 
     public CookTask() : base("Cooking")
     {

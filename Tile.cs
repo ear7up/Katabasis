@@ -29,52 +29,28 @@ public enum Cardinal
 
 public class Tile
 {
-    public TileType Type { get; set; }
-    public Player Owner { get; set; }
-
-    public const int HIGHLIGHT_HEIGHT = 30;
-    
     public const int MAX_POP = 32;
-    public int Population { get; set; }
-
-    public bool DrawBase { get; set; }
-    public Sprite BaseSprite { get; protected set; }
-    public Sprite BuildingSprite { get; set; }
-    
-    // TODO: infinite recursion when serializing tiles referencing other tiles
-    [JsonIgnore]
-    public Tile[] Neighbors { get; set; }
-    
     public const int MAX_BUILDINGS = 6;
-    public List<Building> Buildings { get; set; }
-
+    public const int HIGHLIGHT_HEIGHT = 30;
     public const float MIN_SOIL_QUALITY = 0.3f;
     public const float MAX_SOIL_QUALITY = 0.6f;
     public const float RIVER_SOIL_QUALITY_BONUS = 0.25f;
     public const float VEGETATION_SOIL_QUALITY_BONUS = 0.1f;
-    public float SoilQuality { get; set; }
 
+    // Serialized content
+    public TileType Type { get; set; }
+    public Player Owner { get; set; }
+    public int Population { get; set; }
+    public bool DrawBase { get; set; }
+    public Sprite BaseSprite { get; set; }
+    public Sprite BuildingSprite { get; set; }
+    public List<Building> Buildings { get; set; }
+    public float SoilQuality { get; set; }
     public MineralType Minerals { get; set; }
 
-    public void Save(FileStream fileStream)
-    {
-        // Type
-        // Owner [ref Person]
-        // Population
-        // DrawBase
-        // BaseSprite [ref Sprite]
-        // BuildingSprite [ref Sprite]
-        // Neighbors [ref Sprite[]]
-        // Buildings [ref List<Building>]
-        // SoilQuality
-        // Minerals
-        JsonSerializer.Serialize(fileStream, this, Globals.JsonOptions);
-    }
-
-    public void Load()
-    {
-
-    }
+    // Can't be saved due to cycle resolution error
+    [JsonIgnore]
+    public List<Tile> Neighbors { get; set; }
 
     public static Cardinal GetOppositeDirection(Cardinal direction)
     {
@@ -93,11 +69,12 @@ public class Tile
         return (direction + 1) % 4;
     }
 
+    // TODO: remove constructor params
     public Tile(TileType type, Vector2 position, Texture2D baseTexture, Texture2D buildingTexture)
     {
         Type = type;
         Owner = null;
-        Neighbors = new Tile[4];
+        Neighbors = new();
         Population = 0;
         Buildings = new();
         DrawBase = true;

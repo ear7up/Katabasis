@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class Stockpile
 {
+    // Serialized content
     public Hashtable _stock { get; set; }
 
     public Stockpile()

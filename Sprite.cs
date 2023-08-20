@@ -7,6 +7,7 @@ public class Sprite
     [JsonIgnore]
     public Texture2D Texture;
     
+    // Serialized content
     public Vector2 Position { get; set; }
     public bool DrawRelativeToOrigin { get; set; }
     public Vector2 Origin { get; protected set; }

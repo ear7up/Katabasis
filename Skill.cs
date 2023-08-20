@@ -19,6 +19,7 @@ public class SkillLevel
 {
     public const float INCREASE_CHANCE = 0.5f;
 
+    // Serialized content
     public Skill skill { get; set; }
     public int level { get; set; }
     public int startLevel { get; set; }

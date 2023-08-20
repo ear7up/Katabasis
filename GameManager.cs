@@ -8,49 +8,43 @@ namespace Katabasis;
 
 public class GameManager
 {
-    private readonly Sprite _sky;
-    private readonly Map _map;
-    private readonly Camera _camera;
-    private Player _player1;
-
     public const int SECONDS_PER_DAY = 60;
+
+    // Serialized content
+    public Map TileMap { get; set; }
+    public Camera GameCamera { get; set; }
+    public Player Player1 { get; set; }
     public float TimeOfDay { get; set; }
 
+    private readonly Sprite _sky;
     private TextSprite _coordinateDisplay;
     private static TextSprite _debugDisplay;
     private static TextSprite _logoDisplay;
     private static TextSprite _logoDisplay2;
     private static GridLayout _buttonPanel;
     private static GridLayout _bottomPanel;
-    public static GridLayout _inventoryPanel;
-    public static TabLayout _statsPanel;
-    public static TextSprite _statsOverviewText;
+    private static GridLayout _inventoryPanel;
+    private static TabLayout _statsPanel;
+    private static TextSprite _statsOverviewText;
     private static TextSprite _inventoryText1;
     private static TextSprite _inventoryText2;
-    private UIElement _clockHand;
-    private PersonPanel _personPanel;
+    private static UIElement _clockHand;
+    private static PersonPanel _personPanel;
+
     public static MarketPanel MarketPanel;
-    
-    public bool TEST = false;
 
     public GameManager()
     {
-        Goods.CalcGoodsTypecounts();
-        GoodsProduction.Init();
-        BuildingProduction.Init();
-        GoodsInfo.Init();
-        MineralInfo.Init();
-        BuildingInfo.Init();
-
         TimeOfDay = 0f;
 
         _sky = new Sprite(Globals.Content.Load<Texture2D>("sky"), Vector2.Zero);
         _sky.SetScale(2f);
-        _map = new();
-        _camera = new(KatabasisGame.Viewport, _map.Origin);
+        TileMap = new();
+        TileMap.Generate();
+        GameCamera = new(KatabasisGame.Viewport, TileMap.Origin);
 
-        _player1 = new(_map.GetOriginTile());
-        Market.Init(_player1.Kingdom);
+        Player1 = new(TileMap.GetOriginTile());
+        Market.Init(Player1.Kingdom);
 
         _coordinateDisplay = new(Sprites.Font, hasDropShadow: true);
         _coordinateDisplay.ScaleDown(0.2f);
@@ -155,14 +149,7 @@ public class GameManager
         _statsPanel.AddTab("Overview", manButton, _statsOverviewText);
         _statsPanel.Hide();
 
-        if (TEST)
-        {
-            RunTests();
-        }
-        else
-        {
-            Init();
-        }
+        Init();
     }
 
     public void Init()
@@ -170,28 +157,10 @@ public class GameManager
         const int NUM_PEOPLE = 100;
         for (int i = 0 ; i < NUM_PEOPLE; i++)
         {
-            Person person = Person.CreatePerson(_map.Origin, _map.GetOriginTile());
+            Person person = Person.CreatePerson(TileMap.Origin, TileMap.GetOriginTile());
             person.Money = Globals.Rand.Next(20, 50);
-            _player1.Kingdom.AddPerson(person);
+            Player1.Kingdom.AddPerson(person);
         }
-    }
-
-    public void Save()
-    {
-        FileStream fileStream = File.Create("save.json");
-
-        // TimeOfDay
-        JsonSerializer.Serialize(fileStream, this, Globals.JsonOptions);
-        //_map.Save(fileStream);
-        _camera.Save(fileStream);
-        _player1.Save(fileStream);
-
-        fileStream.Close();
-    }
-
-    public void Load()
-    {
-
     }
 
     public void BuildFarm(Object clicked) { Build(BuildingType.FARM); }
@@ -212,7 +181,7 @@ public class GameManager
         }
         else
         {
-            _map.CreateEditBuilding(buildingType);
+            TileMap.CreateEditBuilding(buildingType);
             InputManager.SwitchToMode(InputManager.BUILD_MODE);
         }
     }
@@ -226,7 +195,7 @@ public class GameManager
         else
         {
             InputManager.SwitchToMode(InputManager.CAMERA_MODE);
-            _map.ClearEditBuilding();
+            TileMap.ClearEditBuilding();
             _bottomPanel.Hide();
         }
     }
@@ -246,7 +215,7 @@ public class GameManager
     public void RunTests()
     {
         //MarketTests.RunTests();
-        TasksTest.RunTests(_map);
+        TasksTest.RunTests(TileMap);
     }
 
     public void SetPersonTracking(Person p)
@@ -294,7 +263,7 @@ public class GameManager
 
     public void ToggleStatistics(Object clicked)
     {
-        _statsOverviewText.Text = _player1.Kingdom.Statistics();
+        _statsOverviewText.Text = Player1.Kingdom.Statistics();
         if (_statsPanel.Hidden)
             _statsPanel.Unhide();
         else
@@ -311,7 +280,7 @@ public class GameManager
 
     public void HandleInventoryDisplay()
     {
-        string goods = _player1.Kingdom.PrivateGoods();
+        string goods = Player1.Kingdom.PrivateGoods();
         string[] lines = goods.Split('\n');
         
         // Currently supports showing up to 72 goods
@@ -331,7 +300,7 @@ public class GameManager
         Globals.Update(gameTime);
 
         InputManager.Update();
-        _camera.UpdateCamera(KatabasisGame.Viewport);
+        GameCamera.UpdateCamera(KatabasisGame.Viewport);
 
         if (InputManager.PlusPressed)
         {
@@ -343,9 +312,6 @@ public class GameManager
             UI.ScaleDown(0.05f);
             _buttonPanel.ScaleDown(0.05f);
         }
-
-        if (InputManager.SavePressed)
-            Save();
         
         if (InputManager.BPressed)
             BuildButton(null);
@@ -357,7 +323,7 @@ public class GameManager
             ToggleStatistics(null);
 
         // Calculate the real mouse position by inverting the camera transformations
-        InputManager.MousePos = Vector2.Transform(InputManager.MousePos, Matrix.Invert(_camera.Transform));
+        InputManager.MousePos = Vector2.Transform(InputManager.MousePos, Matrix.Invert(GameCamera.Transform));
 
         HandlePersonFollowing();
         _personPanel.Update();
@@ -370,8 +336,8 @@ public class GameManager
         if (InputManager.Paused)
             return;
 
-        _player1.Update();
-        _map.Update();
+        Player1.Update();
+        TileMap.Update();
         Market.Update();
 
         // TODO: Write code to support click and drag on UIElements
@@ -385,9 +351,9 @@ public class GameManager
         if (TimeOfDay > SECONDS_PER_DAY)
         {
             TimeOfDay = 0f;
-            _map.DailyUpdate();
-            _player1.DailyUpdate();
-            foreach (Person p in _player1.Kingdom.People)
+            TileMap.DailyUpdate();
+            Player1.DailyUpdate();
+            foreach (Person p in Player1.Kingdom.People)
                 p.DailyUpdate();
         }
 
@@ -398,7 +364,7 @@ public class GameManager
     {
         // Check is a person was clicked in this frame
         Person clickedPerson = null;
-        foreach (Person p in _player1.Kingdom.People)
+        foreach (Person p in Player1.Kingdom.People)
         {
             if (p.CheckIfClicked())
             {
@@ -411,18 +377,18 @@ public class GameManager
         if (InputManager.UnconsumedClick() && clickedPerson == null)
         {
             SetPersonTracking(null);
-            _camera.Unfollow();
+            GameCamera.Unfollow();
         }
         else if (clickedPerson != null)
         {
             SetPersonTracking(clickedPerson);
-            _camera.Follow(clickedPerson);
+            GameCamera.Follow(clickedPerson);
         }
 
         // Write statistics to debug
         _debugDisplay.Text = 
-            $"Public Wealth: {(int)_player1.Kingdom.PublicWealth()}\n" +
-            $"Private Wealth: {(int)_player1.Kingdom.PrivateWealth()}\n";
+            $"Public Wealth: {(int)Player1.Kingdom.PublicWealth()}\n" +
+            $"Private Wealth: {(int)Player1.Kingdom.PrivateWealth()}\n";
 
         // Write information about the currently selected person to the top left
         /*
@@ -443,18 +409,18 @@ public class GameManager
 
     public void HandleTileAcquisition()
     {
-        if (InputManager.UnconsumedClick() && _map.HighlightedTile != null)
+        if (InputManager.UnconsumedClick() && TileMap.HighlightedTile != null)
         {
             InputManager.ConsumeClick(this);
 
-            if (_player1.Kingdom.TryToAcquireTile(_map.HighlightedTile))
+            if (Player1.Kingdom.TryToAcquireTile(TileMap.HighlightedTile))
             {
-                _map.UnhighlightTile();
+                TileMap.UnhighlightTile();
                 InputManager.SwitchToMode(InputManager.CAMERA_MODE);
             }
             else
             {
-                _map.MakeHighlightTileRed();
+                TileMap.MakeHighlightTileRed();
             }
         }
     }
@@ -466,10 +432,10 @@ public class GameManager
         _sky.Draw();
         Globals.SpriteBatch.End();
 
-        Globals.SpriteBatch.Begin(transformMatrix: _camera.Transform);
+        Globals.SpriteBatch.Begin(transformMatrix: GameCamera.Transform);
         
         // Tiles belong on the bottom
-        _map.DrawTiles();
+        TileMap.DrawTiles();
 
         Globals.Ybuffer.Sort(CompareDrawable);
         
@@ -482,7 +448,7 @@ public class GameManager
             d.Draw();
 
         // Draw the UI on top
-        _map.DrawUI();
+        TileMap.DrawUI();
 
         Globals.SpriteBatch.End();
 

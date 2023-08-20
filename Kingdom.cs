@@ -6,8 +6,9 @@ public class Kingdom
 {
     public const int START_MAX_TILES = 25;
 
+    // Serialized content
     public int Day { get; set; }
-    public Player Owner;
+    public Player Owner { get; set; }
     public Tile StartTile { get; set; }
     public int MaxTiles { get; set; }
     public float Money { get; set; }
@@ -18,6 +19,7 @@ public class Kingdom
     public List<Person> Deceased { get; set; }
     public Stockpile Treasury { get; set; }
 
+    // TODO: remove constructor params
     public Kingdom(Player owner, Tile startTile)
     {
         Day = 1;
@@ -41,22 +43,6 @@ public class Kingdom
         AcquireTilesAround(StartTile, distance: 2);
         Building city = Building.CreateBuilding(StartTile, BuildingType.CITY);
         Building market = Building.CreateBuilding(StartTile.Neighbors[0], BuildingType.MARKET);
-    }
-
-    public void Save(FileStream fileStream)
-    {
-        // Day
-        // Owner [Player ref]
-        // StartTile [Tile ref]
-        // MaxTiles
-        // OwnedTiles [List<Tile> ref]
-        // People [List<Person> ref]
-        // Deceased [List<Person> ref]
-        // Treasury 
-        // Money
-        // TaxRate;
-        // StarvationDeaths;
-        JsonSerializer.Serialize(fileStream, this, Globals.JsonOptions);
     }
 
     // Checks if tile is adjacent to one owned by the player

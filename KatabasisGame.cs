@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Text.Json;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -69,6 +71,13 @@ public class KatabasisGame : Game
         MediaPlayer.Volume = 0.2f;
         MediaPlayer.MediaStateChanged += SongRestarted;
 
+        Goods.CalcGoodsTypecounts();
+        GoodsProduction.Init();
+        BuildingProduction.Init();
+        GoodsInfo.Init();
+        MineralInfo.Init();
+        BuildingInfo.Init();
+
         _gameManager = new();
     }
 
@@ -82,10 +91,26 @@ public class KatabasisGame : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
+        if (InputManager.SavePressed)
+            Save();
+
         Globals.Update(gameTime);
         _gameManager.Update(gameTime);
 
         base.Update(gameTime);
+    }
+
+    public void Save()
+    {
+        FileStream fileStream = File.Create("save.json");
+        JsonSerializer.Serialize(fileStream, _gameManager, Globals.JsonOptions);
+        fileStream.Close();
+    }
+
+    public void Load()
+    {
+        string jsonText = File.ReadAllText("save.json");
+        _gameManager = JsonSerializer.Deserialize<GameManager>(jsonText, Globals.JsonOptions);
     }
 
     protected override void Draw(GameTime gameTime)

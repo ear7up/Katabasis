@@ -20,41 +20,40 @@ public enum GenderType
 
 public class Person : Entity, Drawable
 {
-    public static int IdCounter = 0;
-
-    public const float MOVE_SPEED = 60f;
-    public const int DAILY_HUNGER = 35;
-    public const int STARVING = 210;
-    public const int STARVED_TO_DEATH = 350;
-
     // We will attempt to model real causes of death (hunger, disease, conflict)
     // that bring down the average age at death, this will be the age at which people
     // start to die due to age-related afflictions independent of these other causes
     public const int OLD_AGE = 70;
 
-    public Tile Home;
-    public Building House;
-    public bool SearchingForHouse;
-    public Building BuildingUsing;
-    public Player Owner;
-    public PersonType Type;
+    public const float MOVE_SPEED = 60f;
 
-    public readonly int Id;
+    public const int DAILY_HUNGER = 35;
+    public const int STARVING = 210;
+    public const int STARVED_TO_DEATH = 350;
+
+    public static int IdCounter = 0;
+    public readonly int Id;    
+
+    // Serialized content
+    public Tile Home { get; set; }
+    public Building House { get; set; }
+    public bool SearchingForHouse { get; set; }
+    public Building BuildingUsing { get; set; }
+    public Player Owner { get; set; }
+    public PersonType Type { get; set; }
     public string Name { get; set; }
     public GenderType Gender { get; set; }
-
     public float Age { get; set; }
     public int Hunger { get; set; }
     public float Money { get; set; }
     private float[,] Demand { get; set; }
-
     public Stockpile PersonalStockpile { get; set; }
-
     // Tasks are being serialized with only the Task fields, not the proper subclass fields
-
-    public PriorityQueue2<object, int> Tasks { get; set; }
+    // Needs a JSON converter attribute or something like that? 
+    public PriorityQueue2<Task, int> Tasks { get; set; }
     public WeightedList<SkillLevel> Skills { get; set; }
 
+    // TODO: remove constructor params
     private Person(Vector2 position, Tile home)
     {
         Id = IdCounter++;

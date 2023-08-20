@@ -14,10 +14,10 @@ public static class Globals
     public static List<Drawable> Ybuffer = new();
     public static List<Drawable> TextBuffer = new();
 
+    // Write JSON indented, and preserve references (don't duplicate objects, use $ref instead)
     public static JsonSerializerOptions JsonOptions = new() { 
         WriteIndented = true, 
-        
-        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles };
+        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve };
 
     public static void Update(GameTime gt)
     {
