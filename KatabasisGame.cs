@@ -103,14 +103,14 @@ public class KatabasisGame : Game
     public void Save()
     {
         FileStream fileStream = File.Create("save.json");
-        JsonSerializer.Serialize(fileStream, _gameManager, Globals.JsonOptions);
+        JsonSerializer.Serialize(fileStream, _gameManager, Globals.JsonOptionsS);
         fileStream.Close();
     }
 
     public void Load()
     {
         string jsonText = File.ReadAllText("save.json");
-        _gameManager = JsonSerializer.Deserialize<GameManager>(jsonText, Globals.JsonOptions);
+        _gameManager = JsonSerializer.Deserialize<GameManager>(jsonText, Globals.JsonOptionsS);
         _gameManager.TileMap.ComputeNeighbors();
     }
 

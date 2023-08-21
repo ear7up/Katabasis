@@ -20,14 +20,26 @@ public class JsonTest
 
         System.Console.WriteLine(f.ToString() + "\n");
 
-        string jsonText = JsonSerializer.Serialize(f, Globals.JsonOptions);
+        string jsonText = JsonSerializer.Serialize(f, Globals.JsonOptionsS);
         Console.WriteLine(jsonText + "\n");
 
-        MapExample f2 = JsonSerializer.Deserialize<MapExample>(jsonText, Globals.JsonOptions);
+        MapExample f2 = JsonSerializer.Deserialize<MapExample>(jsonText, Globals.JsonOptionsS);
         Console.WriteLine(f2.ToString());
 
         // P1 home is a reference to the second tile in the map
         Console.WriteLine("References honored? " + (f2.p1.Home == f2.tiles[1]).ToString());
+
+        Task task = new EatTask();
+        jsonText = JsonSerializer.Serialize(task, Globals.JsonOptionsS);
+        Console.WriteLine(jsonText + "\n");
+
+        Task task2 = JsonSerializer.Deserialize<Task>(jsonText, Globals.JsonOptionsD);
+        string jsonText2 = JsonSerializer.Serialize(task2, Globals.JsonOptionsS);
+
+        if (jsonText == jsonText2)
+            Console.WriteLine("Roundtrip serialization success!");
+        else
+            Console.WriteLine("Roundtrip serialization failure!\n" + jsonText2);
     }
 }
 

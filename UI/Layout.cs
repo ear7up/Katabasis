@@ -24,7 +24,6 @@ public abstract class Layout : UIElement
     public override void ScaleDown(float s)
     {
         base.ScaleDown(s);
-        Scale -= new Vector2(s, s);
         foreach (UIElement element in Elements)
             element.ScaleDown(s);
     }

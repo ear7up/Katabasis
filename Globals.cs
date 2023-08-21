@@ -15,8 +15,14 @@ public static class Globals
     public static List<Drawable> TextBuffer = new();
 
     // Write JSON indented, and preserve references (don't duplicate objects, use $ref instead)
-    public static JsonSerializerOptions JsonOptions = new() { 
+    public static JsonSerializerOptions JsonOptionsS = new() { 
         WriteIndented = true, 
+        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve };
+
+    // Deserialize based on derived types using converters
+    public static JsonSerializerOptions JsonOptionsD = new() { 
+        WriteIndented = true, 
+        Converters = { new TaskConverter() },
         ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve };
 
     public static void Update(GameTime gt)

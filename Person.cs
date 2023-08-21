@@ -50,7 +50,7 @@ public class Person : Entity, Drawable
     public Stockpile PersonalStockpile { get; set; }
     // Tasks are being serialized with only the Task fields, not the proper subclass fields
     // Needs a JSON converter attribute or something like that? 
-    public PriorityQueue2<Task, int> Tasks { get; set; }
+    public PriorityQueue2<object, int> Tasks { get; set; }
     public WeightedList<SkillLevel> Skills { get; set; }
 
     // TODO: remove constructor params

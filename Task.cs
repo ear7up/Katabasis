@@ -1,6 +1,27 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
+
+public enum TaskDiscriminator
+{
+    Task = 0,
+    FindNewHomeTask = 1,
+    IdleAtHomeTask = 2,
+    FindTileByTypeTask = 3,
+    SourceGoodsTask = 4,
+    FindBuildingTask = 5,
+    TryToProduceTask = 6,
+    BuyFromMarketTask = 7,
+    BuyTask = 8,
+    SellTask = 9,
+    GoToTask = 10,
+    SellAtMarketTask = 11,
+    EatTask = 12,
+    TryToBuildTask = 13,
+    DepositInventoryTask = 14,
+    CookTask = 15
+};
 
 public class TaskStatus
 {
@@ -9,12 +30,16 @@ public class TaskStatus
     public Object ReturnValue;
     public Task Task { get; set; }
 
-    public TaskStatus(Task task)
+    public TaskStatus()
     {
         Complete = false;
         ReturnValue = null;
-        Task = task;
         Failed = false;
+    }
+
+    public void SetAttributes(Task task)
+    {
+        Task = task;
     }
 
     public bool NothingToDo()
@@ -43,39 +68,45 @@ public class Task
     public const int DEFAULT_PRIORITY = 3;
 
     // Serialized content
+    [JsonPropertyOrder(-1)]
+    public TaskDiscriminator Discriminator { get; set; }
     public string Description { get; set; }
     public List<SkillLevel> skillsNeeded { get; set; }
-    public Queue<Task> subTasks { get; set; }
+    public Queue<object> subTasks { get; set; }
     public TaskStatus Status { get; set; }
     public bool Initialized { get; set; }
     public Action<Object> OnSuccess { get; set; }
     public Action<Object> OnFailure { get; set; }
-    
-    // TODO: remove parameters from constructor
-    public Task(string description, Action<Object> onComplete = null, Action<Object> onFailure = null)
+
+    public Task()
     {
+        Discriminator = TaskDiscriminator.Task;
         skillsNeeded = new();
         subTasks = new();
-        Status = new(this);
+        Status = new();
+        Status.SetAttributes(this);
         Initialized = false;
+    }
 
+    public void SetAttributes(string description, Action<Object> onComplete = null, Action<Object> onFailure = null)
+    {
         Description = description;
         OnSuccess = onComplete;
         OnFailure = onFailure;
     }
 
-    public static Task Peek(PriorityQueue2<Task, int> tasks)
+    public static Task Peek(PriorityQueue2<object, int> tasks)
     {
         if (tasks.Empty())
             return null;
-        return tasks.Peek();
+        return (Task)tasks.Peek();
     }
 
-    public static Task Peek(Queue<Task> tasks)
+    public static Task Peek(Queue<object> tasks)
     {
         if (tasks.Count == 0)
             return null;
-        return tasks.Peek();
+        return (Task)tasks.Peek();
     }
 
     public static void Debug(String s)
@@ -158,9 +189,10 @@ public class Task
 
 public class FindNewHomeTask : Task
 {
-    public FindNewHomeTask() : base("Searching for a new home")
+    public FindNewHomeTask()
     {
-
+        Discriminator = TaskDiscriminator.FindNewHomeTask;
+        SetAttributes("Searching for a new home");
     }
 
     public override TaskStatus Execute(Person p)
@@ -192,11 +224,13 @@ public class IdleAtHomeTask : Task
     public Vector2 direction { get; set; }
     public float Duration { get; set; }
 
-    public IdleAtHomeTask() : base("Going for a walk")
+    public IdleAtHomeTask()
     {
+        Discriminator = TaskDiscriminator.IdleAtHomeTask;
         destination = Vector2.Zero;
         direction = Vector2.Zero;
         Duration = 30;
+        SetAttributes("Going for a walk");
     }
 
     public override TaskStatus Execute(Person p)
@@ -241,9 +275,11 @@ public class FindTileByTypeTask : Task
     // Serialized content
     public TileType TileType { get; set; }
 
-    public FindTileByTypeTask(TileType tileType) : base("Searching for a " + Globals.Title(tileType.ToString()))
+    public FindTileByTypeTask(TileType tileType)
     {
+        Discriminator = TaskDiscriminator.FindTileByTypeTask;
         TileType = tileType;
+        SetAttributes("Searching for a " + Globals.Title(tileType.ToString()));
     }
 
     public override TaskStatus Execute(Person p)
@@ -264,9 +300,11 @@ public class SourceGoodsTask : Task
     // Serialized content
     public Goods GoodsRequest { get; set; }
 
-    public SourceGoodsTask(Goods goods) : base("Trying to find " + goods.ToString())
+    public SourceGoodsTask(Goods goods)
     {
+        Discriminator = TaskDiscriminator.SourceGoodsTask;
         GoodsRequest = new Goods(goods);
+        SetAttributes("Trying to find " + goods.ToString());
     }
 
     public override TaskStatus Execute(Person p)
@@ -347,11 +385,13 @@ public class FindBuildingTask : Task
     public FindBuildingTask(
         BuildingType buildingType, 
         BuildingSubType buildingSubType = BuildingSubType.NONE,
-        TileType tileType = TileType.NONE) : base("Looking for a " + Globals.Title(buildingType.ToString()))
+        TileType tileType = TileType.NONE)
     {
+        Discriminator = TaskDiscriminator.FindBuildingTask;
         BuildingType = buildingType;
         BuildingSubType = buildingSubType;
         TileType = tileType;
+        SetAttributes("Looking for a " + Globals.Title(buildingType.ToString()));
     }
 
     public override TaskStatus Execute(Person p)
@@ -381,8 +421,9 @@ public class TryToProduceTask : Task
 
 
     // TODO: remove parameters from constructor
-    public TryToProduceTask(Goods goods) : base("Trying to produce " + goods.ToString())
+    public TryToProduceTask(Goods goods)
     {
+        Discriminator = TaskDiscriminator.TryToProduceTask;
         Requirements = (ProductionRequirements)GoodsProduction.Requirements[goods.GetId()];
         RequiredGoods = null;
         TimeToProduce = 0f;
@@ -391,6 +432,7 @@ public class TryToProduceTask : Task
         Goods = new Goods(goods);
 
         RequiredGoods = new();
+        SetAttributes("Trying to produce " + goods.ToString());
     }
 
     public override TaskStatus Execute(Person p)
@@ -558,10 +600,11 @@ public class BuyFromMarketTask : Task
 {
     // TODO: remove parameters from constructor
     public BuyFromMarketTask(Vector2 marketPosition, MarketOrder order)
-        : base("")
     {
+        Discriminator = TaskDiscriminator.BuyFromMarketTask;
         subTasks.Enqueue(new GoToTask("Going to the market", marketPosition));
         subTasks.Enqueue(new BuyTask(order));
+        SetAttributes("");
     }
 
     public override TaskStatus Execute(Person p)
@@ -590,9 +633,11 @@ public class BuyTask : Task
     public MarketOrder Order { get; set; }
 
     // TODO: remove parameters from constructor
-    public BuyTask(MarketOrder order) : base("Buying " + order.goods.ToString())
+    public BuyTask(MarketOrder order)
     {
+        Discriminator = TaskDiscriminator.BuyTask;
         Order = order;
+        SetAttributes("Buying " + order.goods.ToString());
     }
     public override TaskStatus Execute(Person p)
     {
@@ -609,11 +654,15 @@ public class SellTask : Task
     public List<Goods> Goods { get; set; }
 
     // TODO: remove parameters from constructor
-    public SellTask(List<Goods> goods) : base("Selling ")
+    public SellTask(List<Goods> goods)
     {
-        foreach (Goods g in goods)
-            Description += g.ToString() + ", ";
+        Discriminator = TaskDiscriminator.SellTask;
+
         Goods = goods;
+        string description = "Selling ";
+        foreach (Goods g in goods)
+            description += g.ToString() + ", ";
+        SetAttributes(description);
     }
     public override TaskStatus Execute(Person p)
     {
@@ -634,10 +683,12 @@ public class GoToTask : Task
     public Vector2 direction;
 
     // TODO: remove parameters from constructor
-    public GoToTask(string description, Vector2 position) : base(description)
+    public GoToTask(string description, Vector2 position)
     {
+        Discriminator = TaskDiscriminator.GoToTask;
         destination = position;
         direction = Vector2.Zero;
+        SetAttributes(description);
     }
     public override TaskStatus Execute(Person p)
     {
@@ -665,9 +716,10 @@ public class GoToTask : Task
 
 public class SellAtMarketTask : Task
 {
-    public SellAtMarketTask() : base("Selling goods at the market")
+    public SellAtMarketTask()
     {
-      
+        Discriminator = TaskDiscriminator.SellAtMarketTask;
+        SetAttributes("Selling goods at the market");
     }
 
     public override TaskStatus Execute(Person p)
@@ -709,9 +761,10 @@ public class SellAtMarketTask : Task
 // Eat any food  you're holding until you're no longer hungry
 public class EatTask : Task
 {
-    public EatTask() : base("Eating food")
+    public EatTask()
     {
-
+        Discriminator = TaskDiscriminator.EatTask;
+        SetAttributes("Eating food");
     }
 
     public override TaskStatus Execute(Person p)
@@ -746,8 +799,8 @@ public class TryToBuildTask : Task
 
     // TODO: remove parameters from constructor
     public TryToBuildTask(BuildingType buildingType) 
-        : base("Trying to build " + Globals.Title(buildingType.ToString()))
     {
+        Discriminator = TaskDiscriminator.TryToBuildTask;
         Tool = null;
         DestTile = null;
         TimeSpent = 0f;
@@ -764,6 +817,8 @@ public class TryToBuildTask : Task
 
         if (reqs.TileRequirement != TileType.NONE)
             subTasks.Enqueue(new FindTileByTypeTask(reqs.TileRequirement));
+
+        SetAttributes("Trying to build " + Globals.Title(buildingType.ToString()));
     }
 
     public override TaskStatus Execute(Person p)
@@ -821,9 +876,10 @@ public class TryToBuildTask : Task
 
 public class DepositInventoryTask : Task
 {
-    public DepositInventoryTask() : base("Depositing inventory at home")
+    public DepositInventoryTask()
     {
-
+        Discriminator = TaskDiscriminator.DepositInventoryTask;
+        SetAttributes("Depositing inventory at home");
     }
 
     public override TaskStatus Execute(Person p)
@@ -847,11 +903,13 @@ public class CookTask : Task
     public float TimeSpent { get; set; }
     public Queue<Goods> ToCook { get; set; }
 
-    public CookTask() : base("Cooking")
+    public CookTask()
     {
+        Discriminator = TaskDiscriminator.CookTask;
         TimeSpent = 0f;
         TimeToProduce = 0f;
         ToCook = new();
+        SetAttributes("Cooking");
     }
 
     public override TaskStatus Execute(Person p)
