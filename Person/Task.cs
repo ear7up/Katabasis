@@ -75,8 +75,11 @@ public class Task
     public Queue<object> subTasks { get; set; }
     public TaskStatus Status { get; set; }
     public bool Initialized { get; set; }
-    public Action<Object> OnSuccess { get; set; }
-    public Action<Object> OnFailure { get; set; }
+
+    // Not serializable, callers need to be prepared to requeue tasks after loading a save
+    // if they depend on knowing whether a task succeeded or failed
+    public Action<Object> OnSuccess;
+    public Action<Object> OnFailure;
 
     public Task()
     {

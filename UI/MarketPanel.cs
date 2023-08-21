@@ -15,7 +15,7 @@ public class MarketPanel : UIElement
     public MarketPanel() : base(Sprites.TallPanel)
     {
         Layout = new();
-        Layout.TabBox.Image = new Sprite(Sprites.TabBackground, Vector2.Zero);
+        Layout.TabBox.Image = Sprite.Create(Sprites.TabBackground, Vector2.Zero);
         Layout.TabBox.Image.DrawRelativeToOrigin = false;
         Layout.SetMargin(top: 30, left: 35);
 

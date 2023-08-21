@@ -6,6 +6,18 @@ public abstract class Entity
 {
     [JsonIgnore]
     public Texture2D image { get; protected set; }
+
+    // Serialized content (restore texture using TexturePath at load time)
+    private string TexturePath;
+    public string TexturePathSerial { 
+        get { 
+            return TexturePath; 
+        }
+        set {
+            TexturePath = value;
+            image = Sprites.GetTexture(TexturePath);
+        }
+    }
     
     // The tint of the image. This will also allow us to change the transparency.
     protected Color color = Color.White;
@@ -25,13 +37,25 @@ public abstract class Entity
         }
     }
 
-    public void SetImage(Texture2D image)
+    public void SetImage(SpriteTexture spriteTexture)
     {
-        this.image = image;
+        image = spriteTexture.Texture;
+        TexturePath = spriteTexture.Path;
         Bounds = new Rectangle(
             image.Bounds.X, image.Bounds.Y,
             (int)(image.Bounds.Width * Scale), 
             (int)(image.Bounds.Height * Scale));
+    }
+
+    public SpriteTexture GetSpriteTexture()
+    {
+        return new SpriteTexture(TexturePath, image);
+    }
+
+    public void SetNewSpriteTexture(SpriteTexture spriteTexture)
+    {
+        image = spriteTexture.Texture;
+        TexturePath = spriteTexture.Path;
     }
 
     public Rectangle GetBounds()

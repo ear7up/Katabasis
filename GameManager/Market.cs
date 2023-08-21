@@ -26,10 +26,10 @@ public class Market
     // Serialized parameters
 
     // BuyOrders: Goods.ID -> List<MarketOrder>
-    public Hashtable BuyOrders { get; set; }
+    public Dictionary<int, List<MarketOrder>> BuyOrders { get; set; }
 
     // SellOrders: Goods.ID -> List<MarketOrder>
-    public Hashtable SellOrders { get; set; }
+    public Dictionary<int, List<MarketOrder>> SellOrders { get; set; }
 
     // Keep a tabulated list of market prices where each index is the id of a good
     public float[] Prices { get; set; }
@@ -52,6 +52,20 @@ public class Market
             Prices[g] = GoodsInfo.GetDefaultPrice(g);
 
         Demand = new float[num_goods];
+    }
+
+    public List<MarketOrder> GetBuyOrders(int goodsId)
+    {
+        if (BuyOrders.ContainsKey(goodsId))
+            return BuyOrders[goodsId];
+        return null;
+    }
+
+    public List<MarketOrder> GetSellOrders(int goodsId)
+    {
+        if (SellOrders.ContainsKey(goodsId))
+            return SellOrders[goodsId];
+        return null;
     }
 
     public void SetAttributes(Kingdom kingdom)
@@ -98,10 +112,6 @@ public class Market
     // automatically deducts money from requestor for purchases
     public bool AttemptTransact(MarketOrder o)
     {
-        Hashtable orders = SellOrders;
-        if (!o.buying)
-            orders = BuyOrders;
-
         if (o.buying)
             Demand[o.goods.GetId()]++;
         else
@@ -116,7 +126,11 @@ public class Market
         if (!o.buying && !o.requestor.PersonalStockpile.Has(o.goods))
             return false;
 
-        List<MarketOrder> trades = (List<MarketOrder>)orders[o.goods.GetId()];
+        List<MarketOrder> trades = null;
+        if (o.buying)
+            trades = GetSellOrders(o.goods.GetId());
+        else
+            trades = GetBuyOrders(o.goods.GetId());
 
         // Quit if no one is buying/selling the good being requested
         if (trades == null || trades.Count == 0)
@@ -190,7 +204,7 @@ public class Market
         
         if (!AttemptTransact(o))
         {
-            List<MarketOrder> orders = (List<MarketOrder>)BuyOrders[o.goods.GetId()];
+            List<MarketOrder> orders = GetBuyOrders(o.goods.GetId());
 
             // If there are no orders for the good, add it
             if (orders == null)
@@ -205,7 +219,7 @@ public class Market
 
     public void CancelBuyOrder(Person p, int goodsId)
     {
-        List<MarketOrder> orders = (List<MarketOrder>)BuyOrders[goodsId];
+        List<MarketOrder> orders = GetBuyOrders(goodsId);
         orders.RemoveAll(order => order.requestor == p);
     }
 
@@ -227,7 +241,7 @@ public class Market
     {
         if (!AttemptTransact(o))
         {
-            List<MarketOrder> orders = (List<MarketOrder>)SellOrders[o.goods.GetId()];
+            List<MarketOrder> orders = GetSellOrders(o.goods.GetId());
 
             // Remove the goods from the seller's inventory
             o.requestor.PersonalStockpile.Take(o.goods);
@@ -245,7 +259,9 @@ public class Market
 
     public void CancelSellOrder(Person p, int goodsId)
     {
-        List<MarketOrder> orders = (List<MarketOrder>)SellOrders[goodsId];
+        List<MarketOrder> orders = GetSellOrders(goodsId);
+        if (orders == null)
+            return;
         orders.RemoveAll(order => order.requestor == p);
     }
 }

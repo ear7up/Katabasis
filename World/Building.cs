@@ -97,7 +97,7 @@ public class Building : Drawable
         }
 
         // TODO: need sprites for all building types
-        Sprite sprite = new Sprite(Sprites.RandomBuilding(buildingType), position);
+        Sprite sprite = Sprite.Create(Sprites.RandomBuilding(buildingType), position);
         Building b = new Building();
         b.SetAttributes(location, sprite, buildingType);
 
@@ -174,7 +174,7 @@ public class Building : Drawable
         if (location.Type == TileType.RIVER && building.Type == BuildingType.FARM)
         {
             building.Type = BuildingType.FARM_RIVER;
-            building.Sprite.Texture = Sprites.GetRiverFarmSprite();
+            building.Sprite.SetNewSpriteTexture(Sprites.GetRiverFarmSprite());
         }
 
         if (ValidPlacement(building, location))

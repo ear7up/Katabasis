@@ -38,19 +38,8 @@ public class GameManager
     {
         TimeOfDay = 0f;
 
-        _sky = new Sprite(Globals.Content.Load<Texture2D>("sky"), Vector2.Zero);
+        _sky = Sprite.Create(Sprites.Sky, Vector2.Zero);
         _sky.SetScale(2f);
-        TileMap = new();
-        TileMap.Generate();
-        GameCamera = Camera.Create(KatabasisGame.Viewport, TileMap.Origin);
-
-        Player1 = Player.Create(TileMap.GetOriginTile());
-        Player1.Kingdom.Init();
-
-        // Only one market will exist at any time
-        Market = new();
-        Market.SetAttributes(Player1.Kingdom);
-        Globals.Market = Market;
 
         _coordinateDisplay = new(Sprites.Font, hasDropShadow: true);
         _coordinateDisplay.ScaleDown(0.2f);
@@ -149,7 +138,7 @@ public class GameManager
         manButton.SelectedImage.ScaleDown(0.9f);
 
         _statsPanel = new();
-        _statsPanel.Image = new Sprite(Sprites.TallPanel, Vector2.Zero);
+        _statsPanel.Image = Sprite.Create(Sprites.TallPanel, Vector2.Zero);
         _statsPanel.Image.DrawRelativeToOrigin = false;
         _statsPanel.SetMargin(top: 50, left: 30);
         _statsPanel.AddTab("Overview", manButton, _statsOverviewText);
@@ -159,6 +148,18 @@ public class GameManager
     // Called when creating a new game, adds people to the world
     public void InitNew()
     {
+        TileMap = new();
+        TileMap.Generate();
+        GameCamera = Camera.Create(KatabasisGame.Viewport, TileMap.Origin);
+
+        Player1 = Player.Create(TileMap.GetOriginTile());
+        Player1.Kingdom.Init();
+
+        // Only one market will exist at any time
+        Market = new();
+        Market.SetAttributes(Player1.Kingdom);
+        Globals.Market = Market;
+
         const int NUM_PEOPLE = 100;
         for (int i = 0 ; i < NUM_PEOPLE; i++)
         {

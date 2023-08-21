@@ -1,18 +1,25 @@
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public class Camera
 {
     // Serialized content
     public float Zoom { get; set; }
     public Vector2 Position { get; set; }
-    public Rectangle Bounds { get; set; }
-    public Rectangle VisibleArea { get; set; }
-    public Matrix Transform { get; set; }
-    public Matrix InverseViewMatrix { get; set; }
     public Person Following { get; set; }
+    public Vector2 StartingPosition { get; set; }
+
+    // Ignored calculated fields
+    [JsonIgnore]
+    public Rectangle Bounds { get; set; }
+    [JsonIgnore]
+    public Rectangle VisibleArea { get; set; }
+    [JsonIgnore]
+    public Matrix Transform { get; set; }
+    [JsonIgnore]
+    public Matrix InverseViewMatrix { get; set; }
     
-    private Vector2 StartingPosition;
     private const float DEFAULT_ZOOM = 0.5f;
     private const float MIN_ZOOM = 0.14f;
     private const float MAX_ZOOM = 3.0f;

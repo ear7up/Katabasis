@@ -6,6 +6,12 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+public enum TileDiscriminator
+{
+    Tile = 1,
+    TileAnimal = 2
+}
+
 public enum TileType
 {
     DESERT,
@@ -38,6 +44,8 @@ public class Tile
     public const float VEGETATION_SOIL_QUALITY_BONUS = 0.1f;
 
     // Serialized content
+    [JsonPropertyOrder(-1)]
+    public TileDiscriminator Discriminator { get; set; }
     public TileType Type { get; set; }
     public Player Owner { get; set; }
     public int Population { get; set; }
@@ -54,6 +62,7 @@ public class Tile
 
     public Tile()
     {
+        Discriminator = TileDiscriminator.Tile;
         Owner = null;
         Neighbors = new Tile[] { null, null, null, null};
         Population = 0;
@@ -82,20 +91,24 @@ public class Tile
     public static Tile Create(
         TileType type, 
         Vector2 position, 
-        Texture2D baseTexture, 
-        Texture2D buildingTexture)
+        SpriteTexture baseTexture, 
+        SpriteTexture buildingTexture)
     {
         Tile tile = new();
         tile.SetAttributes(type, position, baseTexture, buildingTexture);
         return tile;
     }
 
-    public virtual void SetAttributes(TileType type, Vector2 position, Texture2D baseTexture, Texture2D buildingTexture)
+    public virtual void SetAttributes(
+        TileType type, 
+        Vector2 position, 
+        SpriteTexture baseTexture, 
+        SpriteTexture buildingTexture)
     {
         Type = type;
-        BaseSprite = new Sprite(baseTexture, position);
+        BaseSprite = Sprite.Create(baseTexture, position);
         if (buildingTexture != null)
-            BuildingSprite = new Sprite(buildingTexture, position);
+            BuildingSprite = Sprite.Create(buildingTexture, position);
 
         SoilQuality = Globals.Rand.NextFloat(MIN_SOIL_QUALITY, MAX_SOIL_QUALITY);
 

@@ -5,17 +5,24 @@ using System.Collections.Generic;
 public class Stockpile
 {
     // Serialized content
-    public Hashtable _stock { get; set; }
+    public Dictionary<int, Goods> _stock { get; set; }
 
     public Stockpile()
     {
         _stock = new();
     }
 
+    private Goods Get(int id)
+    {
+        if (_stock.ContainsKey(id))
+            return _stock[id];
+        return null;
+    }
+
     // Add quantity to stockpile if the good already exists, otherwise adds the good in the specified quantity
     public void Add(Goods goods)
     {
-        Goods current = (Goods)_stock[goods.GetId()];
+        Goods current = Get(goods.GetId());
         if (current != null)
             current.Quantity += goods.Quantity;
         else
@@ -25,7 +32,7 @@ public class Stockpile
 
     public void Add(int goodsId, float quantity)
     {
-        Goods current = (Goods)_stock[goodsId];
+        Goods current = Get(goodsId);
         if (current != null)
             current.Quantity += quantity;
         else
@@ -37,7 +44,7 @@ public class Stockpile
     {
         foreach (Goods g in other.Values())
         {
-            Goods current = (Goods)_stock[g.GetId()];
+            Goods current = Get(g.GetId());
             if (current != null)
                 current.Quantity += g.Quantity;
             else
@@ -48,7 +55,7 @@ public class Stockpile
     // Takes goods from the stockpile, sets quantity to the amount taken (may be less than requested)
     public void Take(Goods goods)
     {
-        Goods available = (Goods)_stock[goods.GetId()];
+        Goods available = Get(goods.GetId());
         if (available != null)
             goods.Quantity = available.Take(goods.Quantity);
         else
@@ -57,7 +64,7 @@ public class Stockpile
 
     public float Take(int goodsId, float quantity)
     {
-        Goods available = (Goods)_stock[goodsId];
+        Goods available = Get(goodsId);
         if (available != null)
             return available.Take(quantity);
         return 0f;
@@ -82,7 +89,7 @@ public class Stockpile
     // Takes goods from the stockpile, sets quantity to the amount taken (may be less than requested)
     public void Borrow(Goods goods)
     {
-        Goods available = (Goods)_stock[goods.GetId()];
+        Goods available = Get(goods.GetId());
         if (available != null)
             goods.Quantity = available.Borrow(goods.Quantity);
         else
@@ -91,7 +98,7 @@ public class Stockpile
 
     public float Borrow(int goodsId, float quantity)
     {
-        Goods available = (Goods)_stock[goodsId];
+        Goods available = Get(goodsId);
         if (available != null)
             return available.Borrow(quantity);
         return 0f;
@@ -99,7 +106,7 @@ public class Stockpile
 
     public bool Has(Goods goods)
     {
-        Goods available = (Goods)_stock[goods.GetId()];
+        Goods available = Get(goods.GetId());
         if (available == null || available.Quantity < goods.Quantity)
             return false;
         return true;
@@ -107,7 +114,7 @@ public class Stockpile
 
     public bool HasSome(Goods goods)
     {
-        Goods available = (Goods)_stock[goods.GetId()];
+        Goods available = Get(goods.GetId());
         if (available == null || available.Quantity <= 0.01f)
             return false;
         return true;
@@ -115,19 +122,9 @@ public class Stockpile
 
     public void RemoveIfEmpty(Goods goods)
     {
-        Goods available = (Goods)_stock[goods.GetId()];
+        Goods available = Get(goods.GetId());
         if (available == null || available.Quantity <= 0)
             _stock.Remove(available.GetId());
-    }
-
-    public Goods Get(Goods g)
-    {
-        return (Goods)_stock[g.GetId()];
-    }
-
-    public void Set(Goods g)
-    {
-        _stock[g.GetId()] = g;
     }
 
     public ICollection Values()
@@ -189,7 +186,7 @@ public class Stockpile
 
     public void UseTool(Goods.Tool toolType)
     {
-        Goods g = (Goods)_stock[Goods.GetId(GoodsType.TOOL, (int)toolType)];
+        Goods g = Get(Goods.GetId(GoodsType.TOOL, (int)toolType));
         if (g != null)
             g.Use();
         else

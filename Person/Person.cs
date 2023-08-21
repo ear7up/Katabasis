@@ -37,7 +37,6 @@ public class Person : Entity, Drawable
     // Serialized content
     public Tile Home { get; set; }
     public Building House { get; set; }
-    public bool SearchingForHouse { get; set; }
     public Building BuildingUsing { get; set; }
     public Player Owner { get; set; }
     public PersonType Type { get; set; }
@@ -53,6 +52,9 @@ public class Person : Entity, Drawable
     public PriorityQueue2<object, int> Tasks { get; set; }
     public WeightedList<SkillLevel> Skills { get; set; }
 
+    // Don't serialize, we need to requeue this task if we saved and loaded in the middle
+    public bool SearchingForHouse;
+
     public Person()
     {
         Id = IdCounter++;
@@ -61,7 +63,7 @@ public class Person : Entity, Drawable
         Orientation = Globals.Rand.NextFloat(0.0f, MathHelper.TwoPi);
         Scale = 0.2f;
         
-        Texture2D image = null;
+        SpriteTexture image = null;
 
         Gender = (GenderType)Globals.Rand.Next(2);
         switch (Gender)
@@ -94,7 +96,7 @@ public class Person : Entity, Drawable
             if (skill == Skill.COOKING)
                 weight *= 4;
             
-            Skills.Add(new SkillLevel(skill, level), weight);
+            Skills.Add(SkillLevel.Create(skill, level), weight);
         }
     }
 

@@ -18,12 +18,18 @@ public static class Globals
     // Write JSON indented, and preserve references (don't duplicate objects, use $ref instead)
     public static JsonSerializerOptions JsonOptionsS = new() { 
         WriteIndented = true, 
+        Converters = { new Vector2Converter(), new PointConverter() },
         ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve };
 
     // Deserialize based on derived types using converters
     public static JsonSerializerOptions JsonOptionsD = new() { 
         WriteIndented = true, 
-        Converters = { new TaskConverter() },
+        Converters = { 
+            new TaskConverter(), 
+            new TileConverter(), 
+            new Vector2Converter(),
+            new PointConverter()
+        },
         ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve };
 
     public static void Update(GameTime gt)

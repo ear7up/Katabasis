@@ -6,19 +6,25 @@ public class Animal : Entity, Drawable
     public static int IdCounter = 0;
     public const float MOVE_SPEED = 10f;
 
-    private int Id;
-    public Tile Home;
-    private Vector2 Destination;
+    private int Id { get; set; }
+    public Tile Home { get; set; }
+    public Vector2 Destination { get; set; }
 
-    public Animal(Tile home, Texture2D texture) : base()
+    public Animal() : base()
     {
         Id = IdCounter++;
-        Home = home;
-        Position = home.GetPosition();
-        Destination = Position;
-        Scale = 0.04f;
-        image = texture;
         Globals.Ybuffer.Add(this);
+    }
+
+    public static Animal Create(Tile home, SpriteTexture spriteTexture)
+    {
+        Animal animal = new();
+        animal.Home = home;
+        animal.Position = home.GetPosition();
+        animal.Destination = animal.Position;
+        animal.SetNewSpriteTexture(spriteTexture);
+        animal.Scale = 0.04f;
+        return animal;
     }
 
     public float GetMaxY()
@@ -32,8 +38,10 @@ public class Animal : Entity, Drawable
         Rectangle bounds = Home.BaseSprite.GetBounds();
         if (Vector2.Distance(Position, Destination) < bounds.Width / 8f)
         {
-            Destination.X = bounds.X + bounds.Width * Globals.Rand.NextFloat(0.1f, 0.9f);
-            Destination.Y = bounds.Y + bounds.Height * Globals.Rand.NextFloat(0.1f, 0.9f);
+            Destination = new Vector2(0f, 0f);
+            Destination += new Vector2(
+                bounds.X + bounds.Width * Globals.Rand.NextFloat(0.1f, 0.9f),
+                bounds.Y + bounds.Height * Globals.Rand.NextFloat(0.1f, 0.9f));
         }
         Vector2 direction = Destination - Position;
         direction.Normalize();
@@ -43,17 +51,27 @@ public class Animal : Entity, Drawable
 
 public class TileAnimal : Tile
 {
-    private List<Entity> Animals { get; set; }
+    public List<Animal> Animals { get; set; }
     public TileType AnimalType { get; set; }
 
-    public static TileAnimal Create(Vector2 position, Texture2D baseTexture, Texture2D buildingTexture)
+    public TileAnimal() : base()
+    {
+        Discriminator = TileDiscriminator.TileAnimal;
+        Animals = new();
+    }
+
+    public static TileAnimal Create(Vector2 position, SpriteTexture baseTexture, SpriteTexture buildingTexture)
     {
         TileAnimal tile = new();
         tile.SetAttributes(TileType.WILD_ANIMAL, position, baseTexture, buildingTexture);
         return tile;
     }
 
-    public override void SetAttributes(TileType type, Vector2 position, Texture2D baseTexture, Texture2D buildingTexture)
+    public override void SetAttributes(
+        TileType type, 
+        Vector2 position, 
+        SpriteTexture baseTexture, 
+        SpriteTexture buildingTexture)
     {
         // TileAnimal will default to WILD_ANIMAL type, allowing hunting RawMeat.GAME
         base.SetAttributes(type, position, baseTexture, buildingTexture);
@@ -61,7 +79,7 @@ public class TileAnimal : Tile
         // AnimalType will replace tile type once a Ranch is built, allowing specific goods to be farmed
         AnimalType = (TileType)Globals.Rand.Next((int)TileType.ANIMAL + 1, (int)TileType.WILD_ANIMAL);
 
-        Texture2D animalTexture = null;
+        SpriteTexture animalTexture = null;
         switch (AnimalType)
         {
             // Elephants are a special case, can only be hunted for ivory, not farmed
@@ -83,19 +101,14 @@ public class TileAnimal : Tile
         // Add 2-5 animals to the tile
         int numAnimals = Globals.Rand.Next(2, 5);
         for (int i = 0; i < numAnimals; i++)
-            Animals.Add(new Animal(this, animalTexture));
-    }
-
-    public TileAnimal() : base()
-    {
-        Animals = new();
+            Animals.Add(Animal.Create(this, animalTexture));
     }
 
     // In addition to the base tile behavior, call Update on each animal in the tile
     public override void Update()
     {
         base.Update();
-        foreach (Entity animal in Animals)
+        foreach (Animal animal in Animals)
             animal.Update();
     }
 }

@@ -2,12 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public class Map
 {
     // Serialzied content
-    public Tile[] tiles { get; set; }
+    public object[] tiles { get; set; }
+
+    // Computed in constructor from texture
+    [JsonIgnore]
     public Point MapSize { get; private set; }
+
+    [JsonIgnore]
     public Vector2 Origin { get; private set; }
 
     private readonly Point _mapTileSize = new(128, 128);
@@ -24,23 +30,12 @@ public class Map
     private const float HEXAGON_HEIGHT_RATIO = 0.8660254f;
     private const float SCALE_CONSTANT = 0.1f;
 
-    List<Texture2D> desertTextures;
-    List<Texture2D> desertHillTextures;
-    List<Texture2D> desertVegetationTextures;
-    List<Texture2D> desertBedouinTextures;
-
     public Map()
     {
         tiles = new Tile[_mapTileSize.X *_mapTileSize.Y];
 
-        // Load all of the tile textures
-        desertTextures = Sprites.LoadTextures("desert/flat", 18);
-        desertHillTextures = Sprites.LoadTextures("desert/hills", 7);
-        desertVegetationTextures = Sprites.LoadTextures("desert/vegetation", 12);
-        desertBedouinTextures = Sprites.LoadTextures("desert/bedouin_camps", 5);
-
         // 500x345
-        TileSize = new(desertTextures[0].Width, desertTextures[0].Height);
+        TileSize = new(Sprites.desertTextures[0].Texture.Width, Sprites.desertTextures[0].Texture.Height);
         MapSize = new(TileSize.X * _mapTileSize.X, TileSize.Y * _mapTileSize.Y);
 
         Origin = new(MapSize.X / 2, MapSize.Y / 2);
@@ -50,11 +45,13 @@ public class Map
 
         _editBuilding = null;
 
-        // If loading from a file, need to call ComputeNeighbors as it's not serialized
-        // ComputeNeighbors();
-
         // Fix the map origin to account for overlap and perspective
         Origin = new(MapSize.X / 2 - HorizontalOverlap, MapSize.Y / 2 - VerticalOverlap * _mapTileSize.Y);
+    }
+
+    public Tile[] GetTiles()
+    {
+        return (Tile[])tiles;
     }
 
     public void Generate()
@@ -64,7 +61,7 @@ public class Map
         int tile_in_row = 0;
         for (int n = 0; n < _mapTileSize.Y * _mapTileSize.X; n++)
         {
-            Texture2D texture = null;
+            SpriteTexture texture = null;
             TileType tileType = TileType.DESERT;
             MineralType mineralType = MineralType.NONE;
             double r = Globals.Rand.NextDouble();
@@ -73,25 +70,25 @@ public class Map
             if (r < 0.65)
             {
                 // 65% plain desert
-                texture = desertTextures[Globals.Rand.Next(0, desertTextures.Count)];
+                texture = Sprites.RandomDesert();
             }
             else if (r < 0.8)
             {
                 // 15% desert with hills
-                texture = desertHillTextures[Globals.Rand.Next(0, desertHillTextures.Count)];
+                texture = Sprites.RandomHills();
                 tileType = TileType.HILLS;
                 mineralType = MineralInfo.Random();
             }
             else if (r < 0.98)
             {
                 // 18% desert with vegetation
-                texture = desertVegetationTextures[Globals.Rand.Next(0, desertVegetationTextures.Count)];
+                texture = Sprites.RandomVegetation();
                 tileType = TileType.VEGETATION;
             }
             else
             {
                 // 2% bedouin camps
-                texture = desertBedouinTextures[Globals.Rand.Next(0, desertBedouinTextures.Count)];
+                texture = Sprites.RandomCamp();
                 tileType = TileType.CAMP;
             }
 
@@ -105,7 +102,7 @@ public class Map
             // Each row is half a tile size down, shave off a bit because each tile has a thick base
             float ypos = (TileSize.Y / 2) * row - (VerticalOverlap * row);
 
-            Texture2D feature = null;
+            SpriteTexture feature = null;
             Tile tile = null;
 
             // 5% chance to add animals to plain desert tiles
@@ -149,7 +146,7 @@ public class Map
 
         for (int i = 0; i < _mapTileSize.X * _mapTileSize.Y; i++)
         {
-            Tile t = tiles[i];
+            Tile t = GetTiles()[i];
             Tile ne = null;
             Tile se = null;
             Tile nw = null;
@@ -165,7 +162,7 @@ public class Map
                 int offset = i - tiles_per_row + ((row <= _mapTileSize.Y) ? 1 : 0);
                 if (row == _mapTileSize.Y + 1)
                     offset++;
-                ne = tiles[offset];
+                ne = GetTiles()[offset];
             }
             // Top-half, all nodes have SE neighbor (except the last node in the middle row)
             // Bottom-half, last node has no SE neighbor
@@ -174,7 +171,7 @@ public class Map
                 int offset = i + tiles_per_row + ((row < _mapTileSize.Y) ? 1 : 0);
                 if (row == _mapTileSize.Y)
                     offset--;
-                se = tiles[offset];
+                se = GetTiles()[offset];
             }
             // Top-half, last node in row has no NW neighbor
             // Bottom-half, all nodes have NW neighbor
@@ -183,7 +180,7 @@ public class Map
                 int offset = i - tiles_per_row  - (halfway ? 1 : 0);
                 if (row == _mapTileSize.Y + 1)
                     offset++;
-                nw = tiles[offset];
+                nw = GetTiles()[offset];
             }
             // Top-half, all nodes have SW neighbor (except the first node in the middle row)
             // Bottom-half, first node has no SW Neighbor
@@ -192,7 +189,7 @@ public class Map
                 int offset = (row >= _mapTileSize.Y) ? 1 : 0;
                 if (row == _mapTileSize.Y)
                     offset++;
-                sw = tiles[i + tiles_per_row - offset];
+                sw = GetTiles()[i + tiles_per_row - offset];
             }
             t.Neighbors = new Tile[]{ ne, se, sw, nw };
 
@@ -217,24 +214,23 @@ public class Map
     {
         // Midpoint, rounded up wil be the origin for odd-sized maps,
         // even-sized mapps have no true origin, so this will give the tile SW of the center
-        return tiles[(int)(tiles.Length / 2f + 0.5)];
+        return GetTiles()[(int)(tiles.Length / 2f + 0.5)];
     }
 
     public void GenerateRivers()
     {
-        List<Texture2D> desertRiverTextures = Sprites.LoadTextures("desert/river", 16);
-        GenerateRiver(desertRiverTextures, true);
-        GenerateRiver(desertRiverTextures, true);
-        GenerateRiver(desertRiverTextures, true);
-        GenerateRiver(desertRiverTextures, false);
-        GenerateRiver(desertRiverTextures, false);
+        GenerateRiver(startingFromTop: true);
+        GenerateRiver(startingFromTop: true);
+        GenerateRiver(startingFromTop: true);
+        GenerateRiver(startingFromTop: false);
+        GenerateRiver(startingFromTop: false);
     }
 
-    public void GenerateRiver(List<Texture2D> desertRiverTextures, bool startingFromTop)
+    public void GenerateRiver(bool startingFromTop)
     {
         // Head a random number of steps south east from the starting tile
         int steps1 = Globals.Rand.Next(2, _mapTileSize.X);
-        Tile t = startingFromTop ? tiles[0] : tiles[tiles.Length - 1];
+        Tile t = startingFromTop ? GetTiles()[0] : GetTiles()[tiles.Length - 1];
 
         for (int i = 0; i < steps1; i++)
             t = t.Neighbors[startingFromTop ? (int)Cardinal.SE : (int)Cardinal.NW];
@@ -243,7 +239,7 @@ public class Map
         int length1 = Globals.Rand.Next(_mapTileSize.Y / 3, 3 * _mapTileSize.Y / 4);
         for (int i = 0; i < length1; i++)
         {
-            t.BaseSprite.Texture = desertRiverTextures[Globals.Rand.Next(0, desertRiverTextures.Count)];
+            t.BaseSprite.SetNewSpriteTexture(Sprites.RandomRiver());
             t.Type = TileType.RIVER;
             t.Minerals = MineralType.NONE;
 
@@ -257,18 +253,24 @@ public class Map
 
     public void GenerateForests()
     {
-        List<Texture2D> desertForestTextures = Sprites.LoadTextures("desert/forest", 5);
-
         // Make some forests, e.g. about 80 for a 128x128 map
         int NUM_FORESTS = (int)(0.005 * _mapTileSize.X * _mapTileSize.Y);
         for (int i = 0; i < NUM_FORESTS; i++)
-            GenerateForest(desertForestTextures);
+            GenerateForest();
     }
 
-    public void GenerateForest(List<Texture2D> desertForestTextures)
+    public void ConvertToForest(Tile tile)
+    {
+        if (tile.Type != TileType.WILD_ANIMAL)
+            tile.Type = TileType.FOREST;
+        tile.Minerals = MineralType.NONE;
+        tile.BaseSprite.SetNewSpriteTexture(Sprites.RandomForest());
+    }
+
+    public void GenerateForest()
     {
         int i = Globals.Rand.Next(tiles.Length);
-        Tile start = tiles[i];
+        Tile start = GetTiles()[i];
 
         int w = Globals.Rand.Next(3, 6);
 
@@ -282,9 +284,7 @@ public class Map
             if (row == null)
                 break;
 
-            row.Type = TileType.FOREST;
-            row.BaseSprite.Texture = desertForestTextures[Globals.Rand.Next(desertForestTextures.Count)];
-            row.Minerals = MineralType.NONE;
+            ConvertToForest(row);
 
             // Draw some number of tiles to the northeast for this row
             int h = w;
@@ -300,9 +300,7 @@ public class Map
                 column = column.Neighbors[(int)Cardinal.NE];
                 if (column == null)
                     break;
-                column.Type = TileType.FOREST;
-                column.Minerals = MineralType.NONE;
-                column.BaseSprite.Texture = desertForestTextures[Globals.Rand.Next(desertForestTextures.Count)];
+                ConvertToForest(column);
             }
 
             // Draw some number of tiles to the southwest for this row
@@ -313,9 +311,7 @@ public class Map
                 column = column.Neighbors[(int)Cardinal.SW];
                 if (column == null)
                     break;
-                column.Type = TileType.FOREST;
-                column.Minerals = MineralType.NONE;
-                column.BaseSprite.Texture = desertForestTextures[Globals.Rand.Next(desertForestTextures.Count)];
+                ConvertToForest(column);
             }
         }
     }
@@ -455,7 +451,7 @@ public class Map
         // Draw map tiles
         for (int n = 0; n < _mapTileSize.X * _mapTileSize.Y; n++)
         {
-            tiles[n].Draw(displayType);
+            GetTiles()[n].Draw(displayType);
 
             // Debuging - show where the sprite's position is (it's more or less in the center of the isometric shape)
             //Sprites.Circle.Position = _tiles[n].BaseSprite.Position;

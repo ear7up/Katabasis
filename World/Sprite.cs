@@ -2,12 +2,33 @@
 
 using System.Text.Json.Serialization;
 
+public class SpriteTexture
+{
+    public string Path;
+    public Texture2D Texture;
+    public SpriteTexture(string path, Texture2D texture)
+    {
+        Path = path;
+        Texture = texture;
+    }
+}
+
 public class Sprite
 {
     [JsonIgnore]
     public Texture2D Texture;
     
-    // Serialized content
+    // Serialized content (restore texture using TexturePath at load time)
+    private string TexturePath;
+    public string TexturePathSerial { 
+        get { 
+            return TexturePath; 
+        }
+        set {
+            TexturePath = value;
+            Texture = Sprites.GetTexture(TexturePath);
+        }
+    }
     public Vector2 Position { get; set; }
     public bool DrawRelativeToOrigin { get; set; }
     public Vector2 Origin { get; protected set; }
@@ -17,20 +38,33 @@ public class Sprite
     
     public Rectangle Bounds;
 
-    public Sprite(Texture2D texture, Vector2 position)
+    public Sprite()
     {
-        Texture = texture;
-        Position = position;
-        Origin = new(Texture.Width / 2, Texture.Height / 2);
         Scale = new Vector2(1f, 1f);
         SpriteColor = Color.White;
         Rotation = 0f;
         DrawRelativeToOrigin = true;
+    }
 
-        Bounds = new Rectangle(
-            texture.Bounds.X, texture.Bounds.Y,
-            (int)(texture.Bounds.Width * Scale.X), 
-            (int)(texture.Bounds.Height * Scale.Y));
+    public static Sprite Create(SpriteTexture spriteTexture, Vector2 position)
+    {
+        Sprite sprite = new();
+        sprite.Texture = spriteTexture.Texture;
+        sprite.TexturePath = spriteTexture.Path;
+        sprite.Position = position;
+        sprite.Origin = new(sprite.Texture.Width / 2, sprite.Texture.Height / 2);
+
+        sprite.Bounds = new Rectangle(
+            spriteTexture.Texture.Bounds.X, spriteTexture.Texture.Bounds.Y,
+            (int)(spriteTexture.Texture.Bounds.Width * sprite.Scale.X), 
+            (int)(spriteTexture.Texture.Bounds.Height * sprite.Scale.Y));
+        return sprite;
+    }
+
+    public void SetNewSpriteTexture(SpriteTexture spriteTexture)
+    {
+        Texture = spriteTexture.Texture;
+        TexturePath = spriteTexture.Path;
     }
 
     public void ScaleUp(float s)

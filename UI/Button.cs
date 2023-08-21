@@ -2,14 +2,14 @@ using System;
 
 public class Button : UIElement
 {
-    public Texture2D DefaultTexture;
-    public Texture2D HoverTexture;
-    public Texture2D PushedTexture;
+    public SpriteTexture DefaultTexture;
+    public SpriteTexture HoverTexture;
+    public SpriteTexture PushedTexture;
 
     public Button(
-        Texture2D texture,
-        Texture2D hoverTexture = null,
-        Texture2D pushedTexture = null,
+        SpriteTexture texture,
+        SpriteTexture hoverTexture = null,
+        SpriteTexture pushedTexture = null,
         float scale = 1f, 
         Action<Object> onClick = null, 
         Action<Object> onHover = null,
@@ -30,7 +30,7 @@ public class Button : UIElement
 
         if (!mouseOverImage)
         {
-            Image.Texture = DefaultTexture;
+            Image.SetNewSpriteTexture(DefaultTexture);
             return;
         }
 
@@ -44,17 +44,17 @@ public class Button : UIElement
         if (PushedTexture != null && InputManager.MouseDown)
         {
             // Set pushed texture while mouse is held down over the image
-            Image.Texture = PushedTexture;
+            Image.SetNewSpriteTexture(PushedTexture);
         }
         else if (OnHover != null)
         {
             OnHover(TooltipText);
             if (HoverTexture != null)
-                Image.Texture = HoverTexture;
+                Image.SetNewSpriteTexture(HoverTexture);
         }
         else
         {
-            Image.Texture = DefaultTexture;
+            Image.SetNewSpriteTexture(DefaultTexture);
         }
     }
 }

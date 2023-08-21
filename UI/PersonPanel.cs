@@ -73,7 +73,7 @@ public class PersonPanel : UIElement
         if (Hidden || PersonTracking == null)
             return;
 
-        PersonIcon.Image = new Sprite(PersonTracking.image, Vector2.Zero);
+        PersonIcon.Image = Sprite.Create(PersonTracking.GetSpriteTexture(), Vector2.Zero);
         PersonIcon.Image.SetScale(0.15f);
 
         PersonDescription.Text = PersonTracking.Describe();

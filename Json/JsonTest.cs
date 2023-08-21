@@ -37,9 +37,18 @@ public class JsonTest
         string jsonText2 = JsonSerializer.Serialize(task2, Globals.JsonOptionsS);
 
         if (jsonText == jsonText2)
-            Console.WriteLine("Roundtrip serialization success!");
+            Console.WriteLine("Task roundtrip serialization success!");
         else
-            Console.WriteLine("Roundtrip serialization failure!\n" + jsonText2);
+            Console.WriteLine("Task roundtrip serialization failure!\n" + jsonText2);
+
+        Vector2 v1 = new Vector2(2f, 3f);
+        jsonText = JsonSerializer.Serialize(v1, Globals.JsonOptionsS);
+        Console.WriteLine(jsonText + "\n");
+        Vector2 v2 = JsonSerializer.Deserialize<Vector2>(jsonText, Globals.JsonOptionsD);
+        if (v1 == v2)
+            Console.WriteLine("Vector2 round trip success!");
+        else
+            Console.WriteLine("Vector2 round trip failure!");
     }
 }
 

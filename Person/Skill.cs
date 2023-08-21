@@ -24,11 +24,23 @@ public class SkillLevel
     public int level { get; set; }
     public int startLevel { get; set; }
     
-    public SkillLevel(Skill skill, int level)
+    public SkillLevel()
+    {
+        
+    }
+
+    public void SetAttributes(Skill skill, int level)
     {
         this.skill = skill;
         this.level = level;
         this.startLevel = level;
+    }
+
+    public static SkillLevel Create(Skill skill, int level)
+    {
+        SkillLevel s = new();
+        s.SetAttributes(skill, level);
+        return s;
     }
 
     public override string ToString()

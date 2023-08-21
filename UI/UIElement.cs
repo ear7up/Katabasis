@@ -22,7 +22,7 @@ public class UIElement
     
 
     public UIElement(
-        Texture2D texture = null,
+        SpriteTexture texture = null,
         float scale = 1f, 
         Action<Object> onClick = null, 
         Action<Object> onHover = null,
@@ -30,7 +30,7 @@ public class UIElement
     {
         if (texture != null)
         {
-            Image = new Sprite(texture, Vector2.Zero);
+            Image = Sprite.Create(texture, Vector2.Zero);
             Image.DrawRelativeToOrigin = false;
             Image.SetScale(scale);
         }
@@ -214,9 +214,9 @@ public class UIElement
             Image.ScaleDown(s);
     }
 
-    public void AddSelectedImage(Texture2D texture)
+    public void AddSelectedImage(SpriteTexture texture)
     {
-        Sprite selected = new Sprite(texture, Vector2.Zero);
+        Sprite selected = Sprite.Create(texture, Vector2.Zero);
         selected.DrawRelativeToOrigin = false;
         SelectedImage = selected;
     }

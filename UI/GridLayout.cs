@@ -6,7 +6,7 @@ public class GridLayout : Layout
 {
     public List<List<UIElement>> GridContent;
 
-    public GridLayout(Texture2D texture = null) : base(texture)
+    public GridLayout(SpriteTexture texture = null) : base(texture)
     {
         GridContent = new();
     }
