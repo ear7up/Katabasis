@@ -79,6 +79,7 @@ public class KatabasisGame : Game
         BuildingInfo.Init();
 
         _gameManager = new();
+        _gameManager.InitNew();
     }
 
     void SongRestarted(object sender, System.EventArgs e)
@@ -111,7 +112,7 @@ public class KatabasisGame : Game
     {
         string jsonText = File.ReadAllText("save.json");
         _gameManager = JsonSerializer.Deserialize<GameManager>(jsonText, Globals.JsonOptionsS);
-        _gameManager.TileMap.ComputeNeighbors();
+        _gameManager.InitLoaded();
     }
 
     protected override void Draw(GameTime gameTime)

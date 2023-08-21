@@ -237,7 +237,7 @@ public class Goods
             case GoodsType.RAW_MEAT: subTypeName = Enum.GetName(typeof(RawMeat), SubType); break;
         }
         subTypeName = Globals.Title(subTypeName);
-        float value = Market.GetPrice(GetId()) * Quantity;
+        float value = Globals.Market.GetPrice(GetId()) * Quantity;
         //return $"{typeName}.{subTypeName} x{(int)Quantity} (${value}";
         return $"{subTypeName} x{Quantity:0.0} (${value:0.0})";
     }
@@ -328,6 +328,6 @@ public class Goods
 
     public float Value()
     {
-        return Quantity * Market.GetPrice(GetId());
+        return Quantity * Globals.Market.GetPrice(GetId());
     }
 }

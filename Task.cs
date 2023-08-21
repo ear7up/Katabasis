@@ -370,7 +370,7 @@ public class SourceGoodsTask : Task
 
         // Try to buy the goods from the market
         Building market = (Building)Tile.Find(p.Home, new TileFilter(TileType.NONE, BuildingType.MARKET));
-        if (market != null && Market.AttemptTransact(new MarketOrder(p, true, new Goods(GoodsRequest))))
+        if (market != null && Globals.Market.AttemptTransact(new MarketOrder(p, true, new Goods(GoodsRequest))))
         {
             GoToTask go = new();
             go.SetAttributes("Buying from market", market.Sprite.Position);
@@ -701,7 +701,7 @@ public class BuyTask : Task
     public override TaskStatus Execute(Person p)
     {
         Status.Complete = true;
-        if (Market.AttemptTransact(Order))
+        if (Globals.Market.AttemptTransact(Order))
             Status.ReturnValue = Order.goods;
         return Status;
     }
@@ -729,7 +729,7 @@ public class SellTask : Task
     public override TaskStatus Execute(Person p)
     {
         foreach (Goods g in Goods)
-            Market.PlaceSellOrder(new MarketOrder(p, false, g));
+            Globals.Market.PlaceSellOrder(new MarketOrder(p, false, g));
         Status.Complete = true;
         return Status;
     }

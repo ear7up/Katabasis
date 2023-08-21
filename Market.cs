@@ -21,25 +21,26 @@ public class MarketOrder
     }
 }
 
-static class Market
+public class Market
 {
+    // Serialized parameters
+
     // BuyOrders: Goods.ID -> List<MarketOrder>
-    private static Hashtable BuyOrders;
+    public Hashtable BuyOrders { get; set; }
 
     // SellOrders: Goods.ID -> List<MarketOrder>
-    private static Hashtable SellOrders;
+    public Hashtable SellOrders { get; set; }
 
     // Keep a tabulated list of market prices where each index is the id of a good
-    public static float[] Prices;
+    public float[] Prices { get; set; }
 
     // Net quantity attempted to purchase vs amount being sold
-    public static float[] Demand;
+    public float[] Demand { get; set; }
 
-    public static Kingdom Kingdom;
+    public Kingdom Kingdom { get; set; }
 
-    public static void Init(Kingdom kingdom)
+    public Market()
     {
-        Kingdom = kingdom;
         BuyOrders = new();
         SellOrders = new();
 
@@ -53,7 +54,12 @@ static class Market
         Demand = new float[num_goods];
     }
 
-    public static void Update()
+    public void SetAttributes(Kingdom kingdom)
+    {
+        Kingdom = kingdom;
+    }
+
+    public void Update()
     {
         // Increase or decrease prices proportiontely to supply and demand
         for (int i = 0; i < Prices.Length; i++)
@@ -71,7 +77,7 @@ static class Market
         }
     }
 
-    public static string Describe()
+    public string Describe()
     {
         string buyOrders = "";
         foreach (List<MarketOrder> list in BuyOrders.Values)
@@ -90,7 +96,7 @@ static class Market
     // o.goods.Quantity reflects the amount sold if partially completed
     // automatically adds quantity purchased to the requestor's stockpile
     // automatically deducts money from requestor for purchases
-    public static bool AttemptTransact(MarketOrder o)
+    public bool AttemptTransact(MarketOrder o)
     {
         Hashtable orders = SellOrders;
         if (!o.buying)
@@ -174,7 +180,7 @@ static class Market
     }
 
     // Returns false if the order could not be placed (e.g. not enough money)
-    public static bool PlaceBuyOrder(MarketOrder o)
+    public bool PlaceBuyOrder(MarketOrder o)
     {
         float unitPrice = GetPrice(o.goods.GetId());
 
@@ -197,27 +203,27 @@ static class Market
         return true;
     }
 
-    public static void CancelBuyOrder(Person p, int goodsId)
+    public void CancelBuyOrder(Person p, int goodsId)
     {
         List<MarketOrder> orders = (List<MarketOrder>)BuyOrders[goodsId];
         orders.RemoveAll(order => order.requestor == p);
     }
 
     // Get the price of one unit of the given good, plus taxes
-    public static float GetPrice(int goodsId)
+    public float GetPrice(int goodsId)
     {
         return Prices[goodsId] * (1 + Kingdom.TaxRate);
     }
 
     // Get just the tax amount from the total price including tax
-    public static float GetTax(float price)
+    public float GetTax(float price)
     {
         return price * (1f / (1f + Kingdom.TaxRate));
     }
 
     // Tries to execute the order first, then adds it if note complete
     // Returns false if the order could not be added (currently always added)
-    public static bool PlaceSellOrder(MarketOrder o)
+    public bool PlaceSellOrder(MarketOrder o)
     {
         if (!AttemptTransact(o))
         {
@@ -237,7 +243,7 @@ static class Market
         return true;
     }
 
-    public static void CancelSellOrder(Person p, int goodsId)
+    public void CancelSellOrder(Person p, int goodsId)
     {
         List<MarketOrder> orders = (List<MarketOrder>)SellOrders[goodsId];
         orders.RemoveAll(order => order.requestor == p);

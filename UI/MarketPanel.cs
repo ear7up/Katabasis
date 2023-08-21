@@ -97,7 +97,7 @@ public class MarketPanel : UIElement
 
                 // Write the current price and draw a bar indicating how its
                 // current price relates to the baseline price
-                float price = Market.Prices[id];
+                float price = Globals.Market.Prices[id];
                 float defaultPrice = GoodsInfo.GetDefaultPrice(id);
                 priceText.Text = $"{price:0.0}";
 

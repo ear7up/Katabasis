@@ -53,12 +53,10 @@ public class Person : Entity, Drawable
     public PriorityQueue2<object, int> Tasks { get; set; }
     public WeightedList<SkillLevel> Skills { get; set; }
 
-    // TODO: remove constructor params
-    private Person(Vector2 position, Tile home)
+    public Person()
     {
         Id = IdCounter++;
         Owner = null;
-        Position = position;
         Velocity = new Vector2(20f, 20f);
         Orientation = Globals.Rand.NextFloat(0.0f, MathHelper.TwoPi);
         Scale = 0.2f;
@@ -75,7 +73,6 @@ public class Person : Entity, Drawable
         SetImage(image);
         Name = NameGenerator.Random(Gender);
         Age = Globals.Rand.Next(10, 50);
-        Home = home;
         House = null;
         SearchingForHouse = false;
         BuildingUsing = null;
@@ -99,6 +96,12 @@ public class Person : Entity, Drawable
             
             Skills.Add(new SkillLevel(skill, level), weight);
         }
+    }
+
+    public void SetAttributes(Vector2 position, Tile home)
+    {
+        Position = position;
+        Home = home;
     }
 
     public override string ToString()
@@ -145,7 +148,8 @@ public class Person : Entity, Drawable
 
     public static Person CreatePerson(Vector2 position, Tile home)
     {
-        Person person = new Person(position, home);
+        Person person = new();
+        person.SetAttributes(position, home);
         person.Scale = 0.05f;
         home.Population += 1;
         Globals.Ybuffer.Add(person);

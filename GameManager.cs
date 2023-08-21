@@ -14,6 +14,7 @@ public class GameManager
     public Map TileMap { get; set; }
     public Camera GameCamera { get; set; }
     public Player Player1 { get; set; }
+    public Market Market { get; set; }
     public float TimeOfDay { get; set; }
 
     private readonly Sprite _sky;
@@ -45,7 +46,11 @@ public class GameManager
 
         Player1 = Player.Create(TileMap.GetOriginTile());
         Player1.Kingdom.Init();
-        Market.Init(Player1.Kingdom);
+
+        // Only one market will exist at any time
+        Market = new();
+        Market.SetAttributes(Player1.Kingdom);
+        Globals.Market = Market;
 
         _coordinateDisplay = new(Sprites.Font, hasDropShadow: true);
         _coordinateDisplay.ScaleDown(0.2f);
@@ -149,11 +154,10 @@ public class GameManager
         _statsPanel.SetMargin(top: 50, left: 30);
         _statsPanel.AddTab("Overview", manButton, _statsOverviewText);
         _statsPanel.Hide();
-
-        Init();
     }
 
-    public void Init()
+    // Called when creating a new game, adds people to the world
+    public void InitNew()
     {
         const int NUM_PEOPLE = 100;
         for (int i = 0 ; i < NUM_PEOPLE; i++)
@@ -162,6 +166,13 @@ public class GameManager
             person.Money = Globals.Rand.Next(20, 50);
             Player1.Kingdom.AddPerson(person);
         }
+    }
+
+    // If loading from a save file, set static variables and calculate unserialized content
+    public void InitLoaded()
+    {
+        Globals.Market = Market;
+        TileMap.ComputeNeighbors();
     }
 
     public void BuildFarm(Object clicked) { Build(BuildingType.FARM); }

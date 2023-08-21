@@ -19,7 +19,6 @@ public class Kingdom
     public List<Person> Deceased { get; set; }
     public Stockpile Treasury { get; set; }
 
-    // TODO: remove constructor params
     public Kingdom()
     {
         Day = 1;
