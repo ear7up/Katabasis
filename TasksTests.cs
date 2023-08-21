@@ -18,8 +18,9 @@ public class TasksTest
         p1.Home = map.tiles[0];
 
         // Try to make 20 clay bricks...
-        p1.AssignPriorityTask(new TryToProduceTask(
-            new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.BRICKS, 20)), 2);
+        TryToProduceTask task = new();
+        task.SetAttributes(new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.BRICKS, 20));
+        p1.AssignPriorityTask(task, 2);
 
         for (int i = 0; i < 10; i++)
         {

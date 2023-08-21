@@ -262,7 +262,9 @@ public class Person : Entity, Drawable
 
     public void DailyHomeTasks()
     {
-        Tasks.Enqueue(new GoToTask("Going home for the day", House.Sprite.Position));
+        GoToTask go = new();
+        go.SetAttributes("Going home for the day", House.Sprite.Position);
+        Tasks.Enqueue(go);
         Tasks.Enqueue(new DepositInventoryTask());
         Tasks.Enqueue(new CookTask());
         Tasks.Enqueue(new SellAtMarketTask());
@@ -270,7 +272,8 @@ public class Person : Entity, Drawable
 
     public void FindHouse()
     {
-        FindBuildingTask find = new(BuildingType.HOUSE);
+        FindBuildingTask find = new();
+        find.SetAttributes(BuildingType.HOUSE);
         find.OnSuccess = SetHouse;
         find.OnFailure = NoHouseFound;
         Tasks.Enqueue(find);

@@ -27,7 +27,7 @@ public class TaskStatus
 {
     public bool Complete { get; set; }
     public bool Failed { get; set; }
-    public Object ReturnValue;
+    public Object ReturnValue { get; set; }
     public Task Task { get; set; }
 
     public TaskStatus()
@@ -88,7 +88,10 @@ public class Task
         Initialized = false;
     }
 
-    public void SetAttributes(string description, Action<Object> onComplete = null, Action<Object> onFailure = null)
+    public virtual void SetAttributes(
+        string description, 
+        Action<Object> onComplete = null, 
+        Action<Object> onFailure = null)
     {
         Description = description;
         OnSuccess = onComplete;
@@ -155,7 +158,10 @@ public class Task
         int id = goodsIds[index];
         Goods goods = Goods.FromId(id);
         goods.Quantity = GoodsInfo.GetDefaultProductionQuantity(goods);
-        return new TryToProduceTask(goods);
+
+        TryToProduceTask task = new();
+        task.SetAttributes(goods);
+        return task;
     }
 
     public virtual string Describe(string extra = "", bool debug = true, string depth = "")
@@ -275,11 +281,18 @@ public class FindTileByTypeTask : Task
     // Serialized content
     public TileType TileType { get; set; }
 
-    public FindTileByTypeTask(TileType tileType)
+    public FindTileByTypeTask()
     {
         Discriminator = TaskDiscriminator.FindTileByTypeTask;
+    }
+
+    public void SetAttributes(
+        TileType tileType,
+        Action<object> onComplete = null, 
+        Action<object> onFailure = null)
+    {
+        base.SetAttributes("Searching for a " + Globals.Title(tileType.ToString()), onComplete, onFailure);
         TileType = tileType;
-        SetAttributes("Searching for a " + Globals.Title(tileType.ToString()));
     }
 
     public override TaskStatus Execute(Person p)
@@ -300,11 +313,15 @@ public class SourceGoodsTask : Task
     // Serialized content
     public Goods GoodsRequest { get; set; }
 
-    public SourceGoodsTask(Goods goods)
+    public SourceGoodsTask()
     {
         Discriminator = TaskDiscriminator.SourceGoodsTask;
-        GoodsRequest = new Goods(goods);
-        SetAttributes("Trying to find " + goods.ToString());
+    }
+
+    public void SetAttributes(Goods goods)
+    {
+        base.SetAttributes("Trying to find " + goods.ToString());
+        GoodsRequest = new(goods);
     }
 
     public override TaskStatus Execute(Person p)
@@ -344,7 +361,10 @@ public class SourceGoodsTask : Task
             // Take the goods immediately so that they aren't taken before the villager arrives
             p.House.Stockpile.Take(id, GoodsRequest.Quantity);
             p.PersonalStockpile.Add(id, GoodsRequest.Quantity);
-            subTasks.Enqueue(new GoToTask("Going home to pick up item", p.House.Sprite.Position));
+
+            GoToTask go = new();
+            go.SetAttributes("Going home to pick up item", p.House.Sprite.Position);
+            subTasks.Enqueue(go);
             return Status;
         }
 
@@ -352,7 +372,9 @@ public class SourceGoodsTask : Task
         Building market = (Building)Tile.Find(p.Home, new TileFilter(TileType.NONE, BuildingType.MARKET));
         if (market != null && Market.AttemptTransact(new MarketOrder(p, true, new Goods(GoodsRequest))))
         {
-            subTasks.Enqueue(new GoToTask("Buying from market", market.Sprite.Position));
+            GoToTask go = new();
+            go.SetAttributes("Buying from market", market.Sprite.Position);
+            subTasks.Enqueue(go);
             return Status;
         }
 
@@ -367,9 +389,15 @@ public class SourceGoodsTask : Task
         // null indicates no skill requirement to check
         SkillLevel req = rule.SkillRequirement;
         if (req == null || p.Skills[(int)req.skill].level >= req.level)
-            subTasks.Enqueue(new TryToProduceTask(new Goods(GoodsRequest)));
+        {
+            TryToProduceTask task = new();
+            task.SetAttributes(new Goods(GoodsRequest));
+            subTasks.Enqueue(task);
+        }
         else
+        {
             Status.Failed = true;
+        }
 
         return Status;
     }
@@ -382,16 +410,20 @@ public class FindBuildingTask : Task
     public BuildingSubType BuildingSubType { get; set; }
     public TileType TileType { get; set; }
 
-    public FindBuildingTask(
+    public FindBuildingTask()
+    {
+        Discriminator = TaskDiscriminator.FindBuildingTask;
+    }
+
+    public void SetAttributes(
         BuildingType buildingType, 
         BuildingSubType buildingSubType = BuildingSubType.NONE,
         TileType tileType = TileType.NONE)
     {
-        Discriminator = TaskDiscriminator.FindBuildingTask;
+        base.SetAttributes("Looking for a " + Globals.Title(buildingType.ToString()));
         BuildingType = buildingType;
         BuildingSubType = buildingSubType;
         TileType = tileType;
-        SetAttributes("Looking for a " + Globals.Title(buildingType.ToString()));
     }
 
     public override TaskStatus Execute(Person p)
@@ -419,20 +451,23 @@ public class TryToProduceTask : Task
 
     public ProductionRequirements Requirements;
 
-
-    // TODO: remove parameters from constructor
-    public TryToProduceTask(Goods goods)
+    public TryToProduceTask()
     {
         Discriminator = TaskDiscriminator.TryToProduceTask;
-        Requirements = (ProductionRequirements)GoodsProduction.Requirements[goods.GetId()];
+        
         RequiredGoods = null;
         TimeToProduce = 0f;
         Building = null;
         TimeSpent = 0f;
-        Goods = new Goods(goods);
-
         RequiredGoods = new();
-        SetAttributes("Trying to produce " + goods.ToString());
+    }
+
+    public void SetAttributes(Goods goods)
+    {
+        base.SetAttributes("Trying to produce " + goods.ToString());
+
+        Goods = new Goods(goods);
+        Requirements = (ProductionRequirements)GoodsProduction.Requirements[goods.GetId()];
     }
 
     public override TaskStatus Execute(Person p)
@@ -512,8 +547,9 @@ public class TryToProduceTask : Task
         // Queue up subtasks to find all the necessary prerequisites to produce the good
         if (Requirements.ToolRequirement != Goods.Tool.NONE)
         {
-            subTasks.Enqueue(new SourceGoodsTask(
-                new Goods(GoodsType.TOOL, (int)Requirements.ToolRequirement, 1)));
+            SourceGoodsTask task = new SourceGoodsTask();
+            task.SetAttributes(new Goods(GoodsType.TOOL, (int)Requirements.ToolRequirement, 1));
+            subTasks.Enqueue(task);
         }
 
         // Fail if building or tile requirement cannot be satisfied
@@ -546,7 +582,9 @@ public class TryToProduceTask : Task
                 foreach (Goods g in Requirements.GoodsRequirement.Options.Values)
                 {
                     Goods req = Goods.FromId(g.GetId(), Goods.Quantity);
-                    subTasks.Enqueue(new SourceGoodsTask(req));
+                    SourceGoodsTask task = new SourceGoodsTask();
+                    task.SetAttributes(req);
+                    subTasks.Enqueue(task);
                     RequiredGoods.Add(new Goods(req));
                 }
             }
@@ -556,7 +594,10 @@ public class TryToProduceTask : Task
                 List<Goods> reqs = Requirements.GoodsRequirement.ToList();
                 Goods req = new Goods(reqs[Globals.Rand.Next(reqs.Count)]);
                 req.Quantity = Goods.Quantity;
-                subTasks.Enqueue(new SourceGoodsTask(req));
+
+                SourceGoodsTask task = new();
+                task.SetAttributes(req);
+                subTasks.Enqueue(task);
                 RequiredGoods.Add(new Goods(req));
             }
         }
@@ -570,12 +611,17 @@ public class TryToProduceTask : Task
         {
             Building b = (Building)found;
             Building = b;
-            subTasks.Enqueue(new GoToTask("Going to " + Globals.Title(b.Type.ToString()), b.Sprite.Position));
+
+            GoToTask go = new();
+            go.SetAttributes("Going to " + Globals.Title(b.Type.ToString()), b.Sprite.Position);
+            subTasks.Enqueue(go);
         }
         else if (found is Tile)
         {
             Tile t = (Tile)found;
-            subTasks.Enqueue(new GoToTask("Going to " + Globals.Title(t.Type.ToString()), t.GetPosition()));
+            GoToTask go = new();
+            go.SetAttributes("Going to " + Globals.Title(t.Type.ToString()), t.GetPosition());
+            subTasks.Enqueue(go);
         }
 
         // Calculate how long it will take to produce the goods
@@ -598,13 +644,22 @@ public class TryToProduceTask : Task
 
 public class BuyFromMarketTask : Task
 {
-    // TODO: remove parameters from constructor
-    public BuyFromMarketTask(Vector2 marketPosition, MarketOrder order)
+    public BuyFromMarketTask()
     {
         Discriminator = TaskDiscriminator.BuyFromMarketTask;
-        subTasks.Enqueue(new GoToTask("Going to the market", marketPosition));
-        subTasks.Enqueue(new BuyTask(order));
-        SetAttributes("");
+    }
+
+    public void SetAttributes(Vector2 marketPosition, MarketOrder order)
+    {
+        base.SetAttributes("");
+
+        GoToTask go = new();
+        go.SetAttributes("Going to the market", marketPosition);
+        subTasks.Enqueue(go);
+
+        BuyTask buy = new();
+        buy.SetAttributes(order);
+        subTasks.Enqueue(buy);
     }
 
     public override TaskStatus Execute(Person p)
@@ -632,13 +687,17 @@ public class BuyTask : Task
     // Serialized content
     public MarketOrder Order { get; set; }
 
-    // TODO: remove parameters from constructor
-    public BuyTask(MarketOrder order)
+    public BuyTask()
     {
         Discriminator = TaskDiscriminator.BuyTask;
-        Order = order;
-        SetAttributes("Buying " + order.goods.ToString());
     }
+
+    public void SetAttributes(MarketOrder order)
+    {
+        base.SetAttributes("Buying " + order.goods.ToString());
+        Order = order;
+    }
+
     public override TaskStatus Execute(Person p)
     {
         Status.Complete = true;
@@ -653,17 +712,20 @@ public class SellTask : Task
     // Serialized content
     public List<Goods> Goods { get; set; }
 
-    // TODO: remove parameters from constructor
-    public SellTask(List<Goods> goods)
+    public SellTask()
     {
         Discriminator = TaskDiscriminator.SellTask;
+    }
 
+    public void SetAttributes(List<Goods> goods)
+    {
         Goods = goods;
         string description = "Selling ";
         foreach (Goods g in goods)
             description += g.ToString() + ", ";
-        SetAttributes(description);
+        base.SetAttributes(description);
     }
+
     public override TaskStatus Execute(Person p)
     {
         foreach (Goods g in Goods)
@@ -676,35 +738,39 @@ public class SellTask : Task
 public class GoToTask : Task
 {
     // Serialized content
-    public Vector2 destination { get; set; }
+    public Vector2 Destination { get; set; }
     public Vector2 direction2 { get; set; }
 
     // TODO: this struct won't work properly when made serializable with getter/setter
-    public Vector2 direction;
+    public Vector2 Direction;
 
-    // TODO: remove parameters from constructor
-    public GoToTask(string description, Vector2 position)
+    public GoToTask()
     {
         Discriminator = TaskDiscriminator.GoToTask;
-        destination = position;
-        direction = Vector2.Zero;
-        SetAttributes(description);
+        Direction = Vector2.Zero;
     }
+
+    public void SetAttributes(string description, Vector2 destination)
+    {
+        base.SetAttributes(description);
+        Destination = destination;
+    }
+
     public override TaskStatus Execute(Person p)
     {
-        if (direction == Vector2.Zero)
+        if (Direction == Vector2.Zero)
         {
-            direction = destination - p.Position;
-            direction.Normalize();
-            direction2 = direction;
+            Direction = Destination - p.Position;
+            Direction.Normalize();
+            direction2 = Direction;
         }
 
         // Move in the direction of the destination at default movespeed scaled by time elapsed
-        p.Position += direction * (Person.MOVE_SPEED * Globals.Time);
+        p.Position += Direction * (Person.MOVE_SPEED * Globals.Time);
 
         // If we're within 1/8th of the tile's height from the destination, 
         // choose a new one as the home tile's origin plus or minus half the width/height
-        float distance = Vector2.Distance(p.Position, destination);
+        float distance = Vector2.Distance(p.Position, Destination);
 
         if (distance < Map.TileSize.Y / 8.0f)
         {
@@ -750,8 +816,13 @@ public class SellAtMarketTask : Task
             List<Goods> toSell = p.FigureOutWhatToSell();
             if (toSell.Count > 0)
             {
-                subTasks.Enqueue(new GoToTask("Going to the market", market.Sprite.Position));
-                subTasks.Enqueue(new SellTask(toSell));
+                GoToTask go = new();
+                go.SetAttributes("Going to the market", market.Sprite.Position);
+                subTasks.Enqueue(go);
+
+                SellTask sell = new();
+                sell.SetAttributes(toSell);
+                subTasks.Enqueue(sell);
             }
         }
         Initialized = true;
@@ -797,28 +868,45 @@ public class TryToBuildTask : Task
     public bool ToolBorrowed { get; set; }
     public BuildingType BuildingType { get; set; }
 
-    // TODO: remove parameters from constructor
-    public TryToBuildTask(BuildingType buildingType) 
+    public TryToBuildTask() 
     {
         Discriminator = TaskDiscriminator.TryToBuildTask;
         Tool = null;
         DestTile = null;
         TimeSpent = 0f;
-        ToolBorrowed = false;
+        ToolBorrowed = false;        
+    }
+
+    public void SetAttributes(BuildingType buildingType)
+    {
+        base.SetAttributes("Trying to build " + Globals.Title(buildingType.ToString()));
+
         BuildingType = buildingType;
         ProductionRequirements reqs = (ProductionRequirements)BuildingProduction.Requirements[BuildingType];
 
         if (reqs.ToolRequirement != Goods.Tool.NONE)
-            subTasks.Enqueue(new SourceGoodsTask(new Goods(GoodsType.TOOL, (int)reqs.ToolRequirement)));
+        {
+            SourceGoodsTask task = new();
+            task.SetAttributes(new Goods(GoodsType.TOOL, (int)reqs.ToolRequirement));
+            subTasks.Enqueue(task);
+        }
 
         if (reqs.GoodsRequirement != null)
+        {
             foreach (Goods g in reqs.GoodsRequirement.ToList())
-                subTasks.Enqueue(new SourceGoodsTask(g));
+            {
+                SourceGoodsTask task = new SourceGoodsTask();
+                task.SetAttributes(g);
+                subTasks.Enqueue(task);
+            }
+        }
 
         if (reqs.TileRequirement != TileType.NONE)
-            subTasks.Enqueue(new FindTileByTypeTask(reqs.TileRequirement));
-
-        SetAttributes("Trying to build " + Globals.Title(buildingType.ToString()));
+        {
+            FindTileByTypeTask task = new();
+            task.SetAttributes(reqs.TileRequirement);
+            subTasks.Enqueue(task);
+        }
     }
 
     public override TaskStatus Execute(Person p)
@@ -845,7 +933,9 @@ public class TryToBuildTask : Task
         else if (subStatus.Task is FindTileByTypeTask)
         {
             DestTile = (Tile)subStatus.ReturnValue;
-            subTasks.Enqueue(new GoToTask("Going to build site", DestTile.GetPosition()));
+            GoToTask go = new();
+            go.SetAttributes("Going to build site", DestTile.GetPosition());
+            subTasks.Enqueue(go);
         }
 
         // All queued tasks complete, add build time
