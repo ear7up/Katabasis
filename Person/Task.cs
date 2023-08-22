@@ -463,7 +463,8 @@ public class TryToProduceTask : Task
     // Serialized content
     public List<Goods> RequiredGoods { get; set; }
     public float TimeToProduce { get; set; }
-    public Building Building { get; set; }
+    public Building ReqBuilding { get; set; }
+    public Tile ReqTile { get; set; }
     public float TimeSpent { get; set; }
 
     private Goods _Goods;
@@ -483,7 +484,7 @@ public class TryToProduceTask : Task
         
         RequiredGoods = null;
         TimeToProduce = 0f;
-        Building = null;
+        ReqBuilding = null;
         TimeSpent = 0f;
         RequiredGoods = new();
     }
@@ -510,8 +511,8 @@ public class TryToProduceTask : Task
             return Status;
 
         // Mark the building as in-use
-        if (TimeSpent == 0f && Building != null)
-            Building.StartUsing();
+        if (TimeSpent == 0f && ReqBuilding != null)
+            ReqBuilding.StartUsing();
 
         // Add progress
         TimeSpent += Globals.Time;
@@ -536,6 +537,26 @@ public class TryToProduceTask : Task
             p.Skills[skill].GainExperience(experience);
         }
 
+        // Reduce the quantity of minerals by mining
+        // Reduce soil quality by farming
+        if (ReqBuilding != null)
+        {
+            if (ReqBuilding.Type == BuildingType.MINE)
+                ReqBuilding.Location.TakeResource();
+            else if (ReqBuilding.Type == BuildingType.FARM)
+                ReqBuilding.Location.Farm();
+        }
+
+        // Reduce the number of trees when cutting wood (but not when farming honey)
+        // Reduce the number of wild animals when hunting
+        if (ReqTile != null)
+        {
+            if (ReqTile.Type == TileType.FOREST && Requirements.ToolRequirement == Goods.Tool.AXE)
+                ReqTile.TakeResource();
+            else if (ReqTile.Type == TileType.WILD_ANIMAL || ReqTile.Type == TileType.ELEPHANT)
+                ReqTile.TakeResource();
+        }
+
         // Remove the goods used to produce the item
         float minQty = Goods.Quantity;
         foreach (Goods g in RequiredGoods)
@@ -557,8 +578,8 @@ public class TryToProduceTask : Task
 
         // Finish by adding the completed goods to the person's stockpile
         p.PersonalStockpile.Add(Goods);
-        if (Building != null)
-            Building.StopUsing();
+        if (ReqBuilding != null)
+            ReqBuilding.StopUsing();
         return true;
     }
 
@@ -580,6 +601,7 @@ public class TryToProduceTask : Task
 
         // Fail if building or tile requirement cannot be satisfied
         TileFilter filter = new();
+        filter.FindResource = Tile.CanHaveResource(tReq);
 
         if (tReq != TileType.NONE)
             filter.FilterTileType = tReq;
@@ -593,11 +615,6 @@ public class TryToProduceTask : Task
         if (tReq != TileType.NONE || bReq != BuildingType.NONE)
         {
             found = Tile.Find(p.Home, filter);
-            if (found == null)
-            {
-                Status.Failed = true;
-                return Status;
-            }
         }
 
         if (Requirements.GoodsRequirement != null)
@@ -636,7 +653,7 @@ public class TryToProduceTask : Task
         else if (found is Building)
         {
             Building b = (Building)found;
-            Building = b;
+            ReqBuilding = b;
 
             GoToTask go = new();
             go.SetAttributes("Going to " + Globals.Title(b.Type.ToString()), b.Sprite.Position);
@@ -645,6 +662,8 @@ public class TryToProduceTask : Task
         else if (found is Tile)
         {
             Tile t = (Tile)found;
+            ReqTile = t;
+
             GoToTask go = new();
             go.SetAttributes("Going to " + Globals.Title(t.Type.ToString()), t.GetPosition());
             subTasks.Enqueue(go);

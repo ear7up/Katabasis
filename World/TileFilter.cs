@@ -5,15 +5,18 @@ public class TileFilter
     public TileType FilterTileType;
     public BuildingType FilterBuildingType;
     public BuildingSubType FilterBuildingSubType;
+    public bool FindResource;
 
     public TileFilter(
         TileType tileType = TileType.NONE,
         BuildingType buildingType = BuildingType.NONE,
-        BuildingSubType buildingSubType = BuildingSubType.NONE)
+        BuildingSubType buildingSubType = BuildingSubType.NONE,
+        bool findResource = false)
     {
         FilterTileType = tileType;
         FilterBuildingType = buildingType;
         FilterBuildingSubType = buildingSubType;
+        FindResource = findResource;
     }
 
     // Returns a tile if searching by tile type and one matches
@@ -23,8 +26,15 @@ public class TileFilter
     {
         if (t == null)
             return null;
-        if (FilterTileType != TileType.NONE && t.Type != FilterTileType)
-            return null;
+
+        if (FilterTileType != TileType.NONE)
+        {
+            if (t.Type != FilterTileType)
+               return null;
+            if (FindResource && !t.HasResource())
+                return null;
+        }
+
         if (FilterBuildingType == BuildingType.NONE) 
             return t;
 

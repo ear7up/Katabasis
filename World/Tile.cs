@@ -53,8 +53,11 @@ public class Tile
     public Sprite BaseSprite { get; set; }
     public Sprite BuildingSprite { get; set; }
     public List<Building> Buildings { get; set; }
+    public float BaseSoilQuality { get; set; }
     public float SoilQuality { get; set; }
     public MineralType Minerals { get; set; }
+    public float BaseResourceQuantity { get; set; }
+    public float CurrentResourceQuantity { get; set; }
 
     // Can't be saved due to cycle resolution error
     [JsonIgnore]
@@ -69,6 +72,8 @@ public class Tile
         Buildings = new();
         DrawBase = true;
         Minerals = MineralType.NONE;
+        BaseResourceQuantity = 0f;
+        CurrentResourceQuantity = 0f;
     }
 
     public static Cardinal GetOppositeDirection(Cardinal direction)
@@ -105,15 +110,76 @@ public class Tile
         SpriteTexture baseTexture, 
         SpriteTexture buildingTexture)
     {
-        Type = type;
+        SetTileType(type);
         BaseSprite = Sprite.Create(baseTexture, position);
         if (buildingTexture != null)
             BuildingSprite = Sprite.Create(buildingTexture, position);
 
-        SoilQuality = Globals.Rand.NextFloat(MIN_SOIL_QUALITY, MAX_SOIL_QUALITY);
+        BaseSoilQuality = Globals.Rand.NextFloat(MIN_SOIL_QUALITY, MAX_SOIL_QUALITY);
 
         if (type == TileType.VEGETATION)
-            SoilQuality += VEGETATION_SOIL_QUALITY_BONUS;
+            BaseSoilQuality += VEGETATION_SOIL_QUALITY_BONUS;
+
+        SoilQuality = BaseSoilQuality;
+    }
+
+    public static bool CanHaveResource(TileType type)
+    {
+        return 
+            type == TileType.WILD_ANIMAL ||
+            type == TileType.ELEPHANT ||
+            type == TileType.HILLS ||
+            type == TileType.FOREST;
+    }
+
+    public static bool IsAnimal(TileType type)
+    {
+        return
+            type == TileType.WILD_ANIMAL || 
+            type == TileType.COW || 
+            type == TileType.DONKEY ||
+            type == TileType.DUCK ||
+            type == TileType.ELEPHANT ||
+            type == TileType.FOWL ||
+            type == TileType.GOAT || 
+            type == TileType.GAZELLE ||
+            type == TileType.GOOSE ||
+            type == TileType.PIG ||
+            type == TileType.QUAIL ||
+            type == TileType.SHEEP;
+    }
+
+    public void SetTileType(TileType type)
+    {
+        BaseResourceQuantity = 0f;
+        CurrentResourceQuantity = 0f;
+
+        if (CanHaveResource(type))
+        {
+            BaseResourceQuantity = 1f;
+            CurrentResourceQuantity = 1f;
+        }
+        
+        if (type != TileType.HILLS)
+            Minerals = MineralType.NONE;
+        Type = type;
+    }
+
+    public bool HasResource()
+    {
+        return CurrentResourceQuantity > 0f;
+    }
+
+    // For now, just allow resource tiles to be used 1000 times before exhausting
+    public void TakeResource()
+    {
+        CurrentResourceQuantity = Math.Max(0f, CurrentResourceQuantity - 0.001f); 
+    }
+
+    // Reduce soil quality after completing a farming task on this tile
+    public void Farm()
+    {
+        SoilQuality = Math.Max(0.1f, SoilQuality - 0.001f);
     }
 
     public Vector2 GetPosition()
@@ -278,6 +344,16 @@ public class Tile
     {
         foreach (Building b in Buildings)
             b.Update();
+
+        if (Type == TileType.WILD_ANIMAL || Type == TileType.ELEPHANT)
+        {
+            // Replenish by 1% every 100 seconds
+            CurrentResourceQuantity = Math.Min(
+                CurrentResourceQuantity + (0.01f / 100f) * Globals.Time, BaseResourceQuantity);
+        }
+
+        // Replenish soil quality by 1% every 100 seconds
+        SoilQuality = Math.Min(SoilQuality + (0.01f / 100f) * Globals.Time, BaseSoilQuality);
     }
 
     public void DailyUpdate()

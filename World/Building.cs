@@ -46,6 +46,7 @@ public class Building : Drawable
     public int CurrentUsers { get; set; }
     public bool Selected { get; set; }
     public Stockpile Stockpile { get; set; }
+    public int MaxUsers { get; set; }
 
     // Hack to make the JSON deserializer populate the ybuffer
     public bool Unused {
@@ -54,7 +55,6 @@ public class Building : Drawable
     }
 
     // No need to persist
-    public int MaxUsers;
     public TextSprite SelectedText;
 
     public static Building Random(BuildingType type = BuildingType.NONE, bool temporary = false)
