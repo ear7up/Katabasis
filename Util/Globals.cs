@@ -26,7 +26,7 @@ public static class Globals
         WriteIndented = true, 
         Converters = { 
             //new TaskConverter(), 
-            new TileConverter(), 
+            //new TileConverter(), 
             new Vector2Converter(),
             new PointConverter()
         },

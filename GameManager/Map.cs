@@ -8,12 +8,6 @@ public class Map
 {
     public Tile[] tiles { get; set; }
 
-    // Serialzied content
-    //public object[] tiles { 
-    //    get { return tiles; }
-    //    set { tiles = Array.ConvertAll(tiles, t => (Tile)t); }
-    //}
-
     // Computed in constructor from texture
     [JsonIgnore]
     public Point MapSize { get; private set; }

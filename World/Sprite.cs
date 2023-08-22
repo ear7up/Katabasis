@@ -31,7 +31,7 @@ public class Sprite
     }
     public Vector2 Position { get; set; }
     public bool DrawRelativeToOrigin { get; set; }
-    public Vector2 Origin { get; protected set; }
+    public Vector2 Origin { get; set; }
     public Vector2 Scale { get; set; }
     public Color SpriteColor { get; set; }
     public float Rotation { get; set; }
