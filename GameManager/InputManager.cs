@@ -29,6 +29,7 @@ public static class InputManager
     public static bool MinusPressed;
     public static bool ShiftHeld;
     public static bool SavePressed;
+    public static bool LoadPressed;
 
     // Camera movement
     private static Vector2 _dragStart;
@@ -180,8 +181,9 @@ public static class InputManager
         ShiftHeld = (keyboardState.IsKeyDown(Keys.LeftShift) && lastKeyboardState.IsKeyDown(Keys.LeftShift)) ||
                     (keyboardState.IsKeyDown(Keys.RightShift) && lastKeyboardState.IsKeyDown(Keys.RightShift));
 
-        SavePressed = (keyboardState.IsKeyDown(Keys.LeftControl) &&
-            keyboardState.IsKeyUp(Keys.S) && lastKeyboardState.IsKeyDown(Keys.S));
+        
+        SavePressed = (keyboardState.IsKeyUp(Keys.F4) && lastKeyboardState.IsKeyDown(Keys.F4));
+        LoadPressed = (keyboardState.IsKeyUp(Keys.F5) && lastKeyboardState.IsKeyDown(Keys.F5));
 
         // Toggle show borders with the 'H' key
         if (keyboardState.IsKeyUp(Keys.H) && lastKeyboardState.IsKeyDown(Keys.H))

@@ -49,7 +49,7 @@ public class Person : Entity, Drawable
     public Stockpile PersonalStockpile { get; set; }
     // Tasks are being serialized with only the Task fields, not the proper subclass fields
     // Needs a JSON converter attribute or something like that? 
-    public PriorityQueue2<object, int> Tasks { get; set; }
+    public PriorityQueue2<Task, int> Tasks { get; set; }
     public WeightedList<SkillLevel> Skills { get; set; }
 
     // Don't serialize, we need to requeue this task if we saved and loaded in the middle
@@ -84,7 +84,7 @@ public class Person : Entity, Drawable
         Demand = new float[Goods.NUM_GOODS_TYPES, Goods.GOODS_PER_TYPE];
 
         // New person starts with each skill assigned randomly between 1-20 (they go up to 100 with experience)
-        Skills = new(Globals.Rand);
+        Skills = new();
         
         foreach (Skill skill in Enum.GetValues(typeof(Skill)))
         {
@@ -98,6 +98,8 @@ public class Person : Entity, Drawable
             
             Skills.Add(SkillLevel.Create(skill, level), weight);
         }
+
+        Globals.Ybuffer.Add(this);
     }
 
     public void SetAttributes(Vector2 position, Tile home)
@@ -109,7 +111,7 @@ public class Person : Entity, Drawable
     public override string ToString()
     {
         string skills = "[";
-        foreach (SkillLevel s in Skills)
+        foreach (SkillLevel s in Skills._list)
             skills += s.ToString() + ", ";
         skills = skills.Substring(0, skills.Length - 1);
         skills += "]";
@@ -154,7 +156,6 @@ public class Person : Entity, Drawable
         person.SetAttributes(position, home);
         person.Scale = 0.05f;
         home.Population += 1;
-        Globals.Ybuffer.Add(person);
         return person;
     }
 
@@ -309,7 +310,7 @@ public class Person : Entity, Drawable
     public void TotalLevelCheck()
     {
         int sum = 0;
-        foreach (SkillLevel skill in Skills)
+        foreach (SkillLevel skill in Skills._list)
             sum += skill.level;
 
         if (sum >= 350)
@@ -385,14 +386,17 @@ public class Person : Entity, Drawable
         {
             TaskStatus currentStatus = current.Execute(this);
 
-            // This happens often if the task prerequisites cannot be fulfilled
-            if (currentStatus.Complete || currentStatus.Failed)
-                Tasks.Dequeue();
+            if (currentStatus != null)
+            {
+                // This happens often if the task prerequisites cannot be fulfilled
+                if (currentStatus.Complete || currentStatus.Failed)
+                    Tasks.Dequeue();
 
-            if (currentStatus.Complete && !currentStatus.Failed && current.OnSuccess != null)
-                current.OnSuccess(currentStatus.ReturnValue);
-            else if (currentStatus.Complete && currentStatus.Failed && current.OnFailure != null)
-                current.OnFailure(currentStatus.ReturnValue);
+                if (currentStatus.Complete && !currentStatus.Failed && current.OnSuccess != null)
+                    current.OnSuccess(currentStatus.ReturnValue);
+                else if (currentStatus.Complete && currentStatus.Failed && current.OnFailure != null)
+                    current.OnFailure(currentStatus.ReturnValue);
+            }
         }
     }
 

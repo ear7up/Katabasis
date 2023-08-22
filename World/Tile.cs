@@ -44,7 +44,7 @@ public class Tile
     public const float VEGETATION_SOIL_QUALITY_BONUS = 0.1f;
 
     // Serialized content
-    [JsonPropertyOrder(-1)]
+    //[JsonPropertyOrder(-1)]
     public TileDiscriminator Discriminator { get; set; }
     public TileType Type { get; set; }
     public Player Owner { get; set; }

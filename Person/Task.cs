@@ -48,6 +48,21 @@ public class TaskStatus
     }
 }
 
+[JsonDerivedType(derivedType: typeof(BuyTask), typeDiscriminator: "BuyTask")]
+[JsonDerivedType(derivedType: typeof(EatTask), typeDiscriminator: "EatTask")]
+[JsonDerivedType(derivedType: typeof(GoToTask), typeDiscriminator: "GoToTask")]
+[JsonDerivedType(derivedType: typeof(CookTask), typeDiscriminator: "CookTask")]
+[JsonDerivedType(derivedType: typeof(SellTask), typeDiscriminator: "SellTask")]
+[JsonDerivedType(derivedType: typeof(TryToBuildTask), typeDiscriminator: "TryToBuildTask")]
+[JsonDerivedType(derivedType: typeof(IdleAtHomeTask), typeDiscriminator: "IdleAtHomeTask")]
+[JsonDerivedType(derivedType: typeof(FindNewHomeTask), typeDiscriminator: "FindNewHomeTask")]
+[JsonDerivedType(derivedType: typeof(SourceGoodsTask), typeDiscriminator: "SourceGoodsTask")]
+[JsonDerivedType(derivedType: typeof(TryToProduceTask), typeDiscriminator: "TryToProduceTask")]
+[JsonDerivedType(derivedType: typeof(FindBuildingTask), typeDiscriminator: "FindBuildingTask")]
+[JsonDerivedType(derivedType: typeof(SellAtMarketTask), typeDiscriminator: "SellAtMarketTask")]
+[JsonDerivedType(derivedType: typeof(BuyFromMarketTask), typeDiscriminator: "BuyFromMarketTask")]
+[JsonDerivedType(derivedType: typeof(FindTileByTypeTask), typeDiscriminator: "FindTileByTypeTask")]
+[JsonDerivedType(derivedType: typeof(DepositInventoryTask), typeDiscriminator: "DepositInventoryTask")]
 public class Task
 {
     // Move: go to a location
@@ -68,11 +83,11 @@ public class Task
     public const int DEFAULT_PRIORITY = 3;
 
     // Serialized content
-    [JsonPropertyOrder(-1)]
+    //[JsonPropertyOrder(-1)]
     public TaskDiscriminator Discriminator { get; set; }
     public string Description { get; set; }
     public List<SkillLevel> skillsNeeded { get; set; }
-    public Queue<object> subTasks { get; set; }
+    public Queue<Task> subTasks { get; set; }
     public TaskStatus Status { get; set; }
     public bool Initialized { get; set; }
 
@@ -101,14 +116,14 @@ public class Task
         OnFailure = onFailure;
     }
 
-    public static Task Peek(PriorityQueue2<object, int> tasks)
+    public static Task Peek(PriorityQueue2<Task, int> tasks)
     {
         if (tasks.Empty())
             return null;
         return (Task)tasks.Peek();
     }
 
-    public static Task Peek(Queue<object> tasks)
+    public static Task Peek(Queue<Task> tasks)
     {
         if (tasks.Count == 0)
             return null;
@@ -450,7 +465,15 @@ public class TryToProduceTask : Task
     public float TimeToProduce { get; set; }
     public Building Building { get; set; }
     public float TimeSpent { get; set; }
-    public Goods Goods { get; set; }
+
+    private Goods _Goods;
+    public Goods Goods { 
+        get { return _Goods; }
+        set { 
+            _Goods = value;
+            Requirements = (ProductionRequirements)GoodsProduction.Requirements[value.GetId()];
+        }
+    }
 
     public ProductionRequirements Requirements;
 

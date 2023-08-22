@@ -6,8 +6,13 @@ using System.Text.Json.Serialization;
 
 public class Map
 {
+    public Tile[] tiles { get; set; }
+
     // Serialzied content
-    public object[] tiles { get; set; }
+    //public object[] tiles { 
+    //    get { return tiles; }
+    //    set { tiles = Array.ConvertAll(tiles, t => (Tile)t); }
+    //}
 
     // Computed in constructor from texture
     [JsonIgnore]
@@ -47,11 +52,6 @@ public class Map
 
         // Fix the map origin to account for overlap and perspective
         Origin = new(MapSize.X / 2 - HorizontalOverlap, MapSize.Y / 2 - VerticalOverlap * _mapTileSize.Y);
-    }
-
-    public Tile[] GetTiles()
-    {
-        return (Tile[])tiles;
     }
 
     public void Generate()
@@ -146,7 +146,7 @@ public class Map
 
         for (int i = 0; i < _mapTileSize.X * _mapTileSize.Y; i++)
         {
-            Tile t = GetTiles()[i];
+            Tile t = tiles[i];
             Tile ne = null;
             Tile se = null;
             Tile nw = null;
@@ -162,7 +162,7 @@ public class Map
                 int offset = i - tiles_per_row + ((row <= _mapTileSize.Y) ? 1 : 0);
                 if (row == _mapTileSize.Y + 1)
                     offset++;
-                ne = GetTiles()[offset];
+                ne = tiles[offset];
             }
             // Top-half, all nodes have SE neighbor (except the last node in the middle row)
             // Bottom-half, last node has no SE neighbor
@@ -171,7 +171,7 @@ public class Map
                 int offset = i + tiles_per_row + ((row < _mapTileSize.Y) ? 1 : 0);
                 if (row == _mapTileSize.Y)
                     offset--;
-                se = GetTiles()[offset];
+                se = tiles[offset];
             }
             // Top-half, last node in row has no NW neighbor
             // Bottom-half, all nodes have NW neighbor
@@ -180,7 +180,7 @@ public class Map
                 int offset = i - tiles_per_row  - (halfway ? 1 : 0);
                 if (row == _mapTileSize.Y + 1)
                     offset++;
-                nw = GetTiles()[offset];
+                nw = tiles[offset];
             }
             // Top-half, all nodes have SW neighbor (except the first node in the middle row)
             // Bottom-half, first node has no SW Neighbor
@@ -189,7 +189,7 @@ public class Map
                 int offset = (row >= _mapTileSize.Y) ? 1 : 0;
                 if (row == _mapTileSize.Y)
                     offset++;
-                sw = GetTiles()[i + tiles_per_row - offset];
+                sw = tiles[i + tiles_per_row - offset];
             }
             t.Neighbors = new Tile[]{ ne, se, sw, nw };
 
@@ -214,7 +214,7 @@ public class Map
     {
         // Midpoint, rounded up wil be the origin for odd-sized maps,
         // even-sized mapps have no true origin, so this will give the tile SW of the center
-        return GetTiles()[(int)(tiles.Length / 2f + 0.5)];
+        return tiles[(int)(tiles.Length / 2f + 0.5)];
     }
 
     public void GenerateRivers()
@@ -230,7 +230,7 @@ public class Map
     {
         // Head a random number of steps south east from the starting tile
         int steps1 = Globals.Rand.Next(2, _mapTileSize.X);
-        Tile t = startingFromTop ? GetTiles()[0] : GetTiles()[tiles.Length - 1];
+        Tile t = startingFromTop ? tiles[0] : tiles[tiles.Length - 1];
 
         for (int i = 0; i < steps1; i++)
             t = t.Neighbors[startingFromTop ? (int)Cardinal.SE : (int)Cardinal.NW];
@@ -270,7 +270,7 @@ public class Map
     public void GenerateForest()
     {
         int i = Globals.Rand.Next(tiles.Length);
-        Tile start = GetTiles()[i];
+        Tile start = tiles[i];
 
         int w = Globals.Rand.Next(3, 6);
 
@@ -451,10 +451,10 @@ public class Map
         // Draw map tiles
         for (int n = 0; n < _mapTileSize.X * _mapTileSize.Y; n++)
         {
-            GetTiles()[n].Draw(displayType);
+            tiles[n].Draw(displayType);
 
             // Debuging - show where the sprite's position is (it's more or less in the center of the isometric shape)
-            //Sprites.Circle.Position = _tiles[n].BaseSprite.Position;
+            //Sprites.Circle.Position = tiles[n].BaseSprite.Position;
             //Sprites.Circle.Draw();
         }
     }

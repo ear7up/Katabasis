@@ -16,6 +16,8 @@ public class KatabasisGame : Game
     public static Vector2 ScreenSize { get { return new Vector2(Viewport.Width, Viewport.Height); } }
     
     private Song _defaultBGM;
+
+    public GameModel _gameModel;
     public GameManager _gameManager;
 
     private GraphicsDeviceManager _graphics;
@@ -78,8 +80,11 @@ public class KatabasisGame : Game
         MineralInfo.Init();
         BuildingInfo.Init();
 
+        _gameModel = new();
+        _gameModel.InitNew();
+
         _gameManager = new();
-        _gameManager.InitNew();
+        _gameManager.SetGameModel(_gameModel);
     }
 
     void SongRestarted(object sender, System.EventArgs e)
@@ -89,11 +94,16 @@ public class KatabasisGame : Game
 
     protected override void Update(GameTime gameTime)
     {
+        InputManager.Update();
+
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
         if (InputManager.SavePressed)
             Save();
+
+        if (InputManager.LoadPressed)
+            Load();
 
         Globals.Update(gameTime);
         _gameManager.Update(gameTime);
@@ -104,15 +114,21 @@ public class KatabasisGame : Game
     public void Save()
     {
         FileStream fileStream = File.Create("save.json");
-        JsonSerializer.Serialize(fileStream, _gameManager, Globals.JsonOptionsS);
+        JsonSerializer.Serialize(fileStream, _gameModel, Globals.JsonOptionsS);
         fileStream.Close();
     }
 
     public void Load()
     {
+        // Clear out the old objects being drawn from the global buffers
+        Globals.Ybuffer.Clear();
+        Globals.TextBuffer.Clear();
+        
         string jsonText = File.ReadAllText("save.json");
-        _gameManager = JsonSerializer.Deserialize<GameManager>(jsonText, Globals.JsonOptionsS);
-        _gameManager.InitLoaded();
+        _gameModel = JsonSerializer.Deserialize<GameModel>(jsonText, Globals.JsonOptionsS);
+        _gameModel.InitLoaded();
+
+        _gameManager.SetGameModel(_gameModel);
     }
 
     protected override void Draw(GameTime gameTime)

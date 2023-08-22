@@ -78,7 +78,7 @@ public class PersonPanel : UIElement
 
         PersonDescription.Text = PersonTracking.Describe();
 
-        foreach (SkillLevel s in PersonTracking.Skills)
+        foreach (SkillLevel s in PersonTracking.Skills._list)
         {
             OverlapLayout levelDisplay = (OverlapLayout)SkillsLayout.GridContent[(int)s.skill][1];
             levelDisplay.Elements[0].Image.SetScaleX(200f * (s.level / 100f));

@@ -10,12 +10,7 @@ public class GameManager
 {
     public const int SECONDS_PER_DAY = 60;
 
-    // Serialized content
-    public Map TileMap { get; set; }
-    public Camera GameCamera { get; set; }
-    public Player Player1 { get; set; }
-    public Market Market { get; set; }
-    public float TimeOfDay { get; set; }
+    public GameModel Model;
 
     private readonly Sprite _sky;
     private TextSprite _coordinateDisplay;
@@ -36,8 +31,6 @@ public class GameManager
 
     public GameManager()
     {
-        TimeOfDay = 0f;
-
         _sky = Sprite.Create(Sprites.Sky, Vector2.Zero);
         _sky.SetScale(2f);
 
@@ -145,35 +138,9 @@ public class GameManager
         _statsPanel.Hide();
     }
 
-    // Called when creating a new game, adds people to the world
-    public void InitNew()
+    public void SetGameModel(GameModel gameModel)
     {
-        TileMap = new();
-        TileMap.Generate();
-        GameCamera = Camera.Create(KatabasisGame.Viewport, TileMap.Origin);
-
-        Player1 = Player.Create(TileMap.GetOriginTile());
-        Player1.Kingdom.Init();
-
-        // Only one market will exist at any time
-        Market = new();
-        Market.SetAttributes(Player1.Kingdom);
-        Globals.Market = Market;
-
-        const int NUM_PEOPLE = 100;
-        for (int i = 0 ; i < NUM_PEOPLE; i++)
-        {
-            Person person = Person.CreatePerson(TileMap.Origin, TileMap.GetOriginTile());
-            person.Money = Globals.Rand.Next(20, 50);
-            Player1.Kingdom.AddPerson(person);
-        }
-    }
-
-    // If loading from a save file, set static variables and calculate unserialized content
-    public void InitLoaded()
-    {
-        Globals.Market = Market;
-        TileMap.ComputeNeighbors();
+        Model = gameModel;
     }
 
     public void BuildFarm(Object clicked) { Build(BuildingType.FARM); }
@@ -194,7 +161,7 @@ public class GameManager
         }
         else
         {
-            TileMap.CreateEditBuilding(buildingType);
+            Model.TileMap.CreateEditBuilding(buildingType);
             InputManager.SwitchToMode(InputManager.BUILD_MODE);
         }
     }
@@ -208,7 +175,7 @@ public class GameManager
         else
         {
             InputManager.SwitchToMode(InputManager.CAMERA_MODE);
-            TileMap.ClearEditBuilding();
+            Model.TileMap.ClearEditBuilding();
             _bottomPanel.Hide();
         }
     }
@@ -228,7 +195,7 @@ public class GameManager
     public void RunTests()
     {
         //MarketTests.RunTests();
-        TasksTest.RunTests(TileMap);
+        TasksTest.RunTests(Model.TileMap);
     }
 
     public void SetPersonTracking(Person p)
@@ -276,7 +243,7 @@ public class GameManager
 
     public void ToggleStatistics(Object clicked)
     {
-        _statsOverviewText.Text = Player1.Kingdom.Statistics();
+        _statsOverviewText.Text = Model.Player1.Kingdom.Statistics();
         if (_statsPanel.Hidden)
             _statsPanel.Unhide();
         else
@@ -293,7 +260,7 @@ public class GameManager
 
     public void HandleInventoryDisplay()
     {
-        string goods = Player1.Kingdom.PrivateGoods();
+        string goods = Model.Player1.Kingdom.PrivateGoods();
         string[] lines = goods.Split('\n');
         
         // Currently supports showing up to 72 goods
@@ -311,9 +278,7 @@ public class GameManager
     public void Update(GameTime gameTime)
     {
         Globals.Update(gameTime);
-
-        InputManager.Update();
-        GameCamera.UpdateCamera(KatabasisGame.Viewport);
+        Model.GameCamera.UpdateCamera(KatabasisGame.Viewport);
 
         if (InputManager.PlusPressed)
         {
@@ -336,7 +301,8 @@ public class GameManager
             ToggleStatistics(null);
 
         // Calculate the real mouse position by inverting the camera transformations
-        InputManager.MousePos = Vector2.Transform(InputManager.MousePos, Matrix.Invert(GameCamera.Transform));
+        InputManager.MousePos = Vector2.Transform(
+            InputManager.MousePos, Matrix.Invert(Model.GameCamera.Transform));
 
         HandlePersonFollowing();
         _personPanel.Update();
@@ -349,9 +315,9 @@ public class GameManager
         if (InputManager.Paused)
             return;
 
-        Player1.Update();
-        TileMap.Update();
-        Market.Update();
+        Model.Player1.Update();
+        Model.TileMap.Update();
+        Model.Market.Update();
 
         // TODO: Write code to support click and drag on UIElements
         _inventoryPanel.Update();
@@ -360,24 +326,24 @@ public class GameManager
         HandleTileAcquisition();
 
         // Give a "daily" update for tasks that don't need to be constantly checked
-        TimeOfDay += Globals.Time;
-        if (TimeOfDay > SECONDS_PER_DAY)
+        Model.TimeOfDay += Globals.Time;
+        if (Model.TimeOfDay > SECONDS_PER_DAY)
         {
-            TimeOfDay = 0f;
-            TileMap.DailyUpdate();
-            Player1.DailyUpdate();
-            foreach (Person p in Player1.Kingdom.People)
+            Model.TimeOfDay = 0f;
+            Model.TileMap.DailyUpdate();
+            Model.Player1.DailyUpdate();
+            foreach (Person p in Model.Player1.Kingdom.People)
                 p.DailyUpdate();
         }
 
-        _clockHand.Image.Rotation = MathHelper.TwoPi * (TimeOfDay / SECONDS_PER_DAY);
+        _clockHand.Image.Rotation = MathHelper.TwoPi * (Model.TimeOfDay / SECONDS_PER_DAY);
     }
 
     public void HandlePersonFollowing()
     {
         // Check is a person was clicked in this frame
         Person clickedPerson = null;
-        foreach (Person p in Player1.Kingdom.People)
+        foreach (Person p in Model.Player1.Kingdom.People)
         {
             if (p.CheckIfClicked())
             {
@@ -390,18 +356,18 @@ public class GameManager
         if (InputManager.UnconsumedClick() && clickedPerson == null)
         {
             SetPersonTracking(null);
-            GameCamera.Unfollow();
+            Model.GameCamera.Unfollow();
         }
         else if (clickedPerson != null)
         {
             SetPersonTracking(clickedPerson);
-            GameCamera.Follow(clickedPerson);
+            Model.GameCamera.Follow(clickedPerson);
         }
 
         // Write statistics to debug
         _debugDisplay.Text = 
-            $"Public Wealth: {(int)Player1.Kingdom.PublicWealth()}\n" +
-            $"Private Wealth: {(int)Player1.Kingdom.PrivateWealth()}\n";
+            $"Public Wealth: {(int)Model.Player1.Kingdom.PublicWealth()}\n" +
+            $"Private Wealth: {(int)Model.Player1.Kingdom.PrivateWealth()}\n";
 
         // Write information about the currently selected person to the top left
         /*
@@ -422,18 +388,18 @@ public class GameManager
 
     public void HandleTileAcquisition()
     {
-        if (InputManager.UnconsumedClick() && TileMap.HighlightedTile != null)
+        if (InputManager.UnconsumedClick() && Model.TileMap.HighlightedTile != null)
         {
             InputManager.ConsumeClick(this);
 
-            if (Player1.Kingdom.TryToAcquireTile(TileMap.HighlightedTile))
+            if (Model.Player1.Kingdom.TryToAcquireTile(Model.TileMap.HighlightedTile))
             {
-                TileMap.UnhighlightTile();
+                Model.TileMap.UnhighlightTile();
                 InputManager.SwitchToMode(InputManager.CAMERA_MODE);
             }
             else
             {
-                TileMap.MakeHighlightTileRed();
+                Model.TileMap.MakeHighlightTileRed();
             }
         }
     }
@@ -445,10 +411,10 @@ public class GameManager
         _sky.Draw();
         Globals.SpriteBatch.End();
 
-        Globals.SpriteBatch.Begin(transformMatrix: GameCamera.Transform);
+        Globals.SpriteBatch.Begin(transformMatrix: Model.GameCamera.Transform);
         
         // Tiles belong on the bottom
-        TileMap.DrawTiles();
+        Model.TileMap.DrawTiles();
 
         Globals.Ybuffer.Sort(CompareDrawable);
         
@@ -461,7 +427,7 @@ public class GameManager
             d.Draw();
 
         // Draw the UI on top
-        TileMap.DrawUI();
+        Model.TileMap.DrawUI();
 
         Globals.SpriteBatch.End();
 

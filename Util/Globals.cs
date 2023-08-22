@@ -25,7 +25,7 @@ public static class Globals
     public static JsonSerializerOptions JsonOptionsD = new() { 
         WriteIndented = true, 
         Converters = { 
-            new TaskConverter(), 
+            //new TaskConverter(), 
             new TileConverter(), 
             new Vector2Converter(),
             new PointConverter()

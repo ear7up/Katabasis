@@ -47,6 +47,12 @@ public class Building : Drawable
     public bool Selected { get; set; }
     public Stockpile Stockpile { get; set; }
 
+    // Hack to make the JSON deserializer populate the ybuffer
+    public bool Unused {
+        get { return false; }
+        set { if (!IsWholeTile()) Globals.Ybuffer.Add(this); }
+    }
+
     // No need to persist
     public int MaxUsers;
     public TextSprite SelectedText;

@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 //using static KaimiraGames.WeightErrorHandlingType;
 
-public enum WeightErrorHandlingType
+public enum WeightErrorHandlingType // Can't serialize as IEnumerable
 {
     SetWeightToOne, // Default
     ThrowExceptionOnAdd, // Throw exception for adding non-positive weight.
@@ -19,15 +19,31 @@ public enum WeightErrorHandlingType
 /// O(n) CRUD complexity. In other words, you can add any item of type T to a List with an integer weight,
 /// and get a random item from the list with probability ( weight / sum-weights ).
 /// </summary>
-public class WeightedList<T> : IEnumerable<T>
+public class WeightedList<T>
 {
+    public List<T> _list { get; set; }
+    public List<int> _weights { get; set; }
+    public List<int> _probabilities { get; set; }
+    public List<int> _alias { get; set; }
+    public int _totalWeight { get; set; }
+    public bool _areAllProbabilitiesIdentical { get; set; }
+    public int _minWeight { get; set; }
+    public int _maxWeight { get; set; }
+
+    private readonly Random _rand;
+
     /// <summary>
     /// Create a new WeightedList with an optional System.Random.
     /// </summary>
     /// <param name="rand"></param>
-    public WeightedList(Random rand = null)
+    public WeightedList()
     {
-        _rand = rand ?? new Random();
+        _list = new List<T>();
+        _weights = new List<int>();
+        _rand = new Random();
+        _probabilities = new List<int>();
+        _alias = new List<int>();
+        _areAllProbabilitiesIdentical = false;
     }
 
     /// <summary>
@@ -48,8 +64,8 @@ public class WeightedList<T> : IEnumerable<T>
 
     public T Next()
     {
-        if (Count == 0) return default;
-        int nextInt = _rand.Next(Count);
+        if (_list.Count == 0) return default;
+        int nextInt = _rand.Next(_list.Count);
         if (_areAllProbabilitiesIdentical) return _list[nextInt];
         int nextProbability = _rand.Next(_totalWeight);
         return (nextProbability < _probabilities[nextInt]) ? _list[nextInt] : _list[_alias[nextInt]];
@@ -59,7 +75,7 @@ public class WeightedList<T> : IEnumerable<T>
     {
         if (weight + _minWeight <= 0 && BadWeightErrorHandling == WeightErrorHandlingType.ThrowExceptionOnAdd)
             throw new ArgumentException($"Subtracting {-1 * weight} from all items would set weight to non-positive for at least one element.");
-        for (int i = 0; i < Count; i++)
+        for (int i = 0; i < _list.Count; i++)
         {
             _weights[i] = FixWeight(_weights[i] + weight);
         }
@@ -72,27 +88,11 @@ public class WeightedList<T> : IEnumerable<T>
     {
         if (weight <= 0 && BadWeightErrorHandling == WeightErrorHandlingType.ThrowExceptionOnAdd) 
             throw new ArgumentException("Weight cannot be non-positive.");
-        for (int i = 0; i < Count; i++) _weights[i] = FixWeight(weight);
+        for (int i = 0; i < _list.Count; i++) _weights[i] = FixWeight(weight);
         Recalculate();
     }
 
-    public int TotalWeight => _totalWeight;
-
-    /// <summary>
-    /// Minimum weight in the structure. 0 if Count == 0.
-    /// </summary>
-    public int MinWeight => _minWeight;
-
-    /// <summary>
-    /// Maximum weight in the structure. 0 if Count == 0.
-    /// </summary>
-    public int MaxWeight => _maxWeight;
-
-    public IReadOnlyList<T> Items => _list.AsReadOnly();
-
-    public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
-
-    IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
+    //IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
 
     public void Add(T item, int weight)
     {
@@ -145,8 +145,6 @@ public class WeightedList<T> : IEnumerable<T>
 
     public T this[int index] => _list[index];
 
-    public int Count => _list.Count;
-
     public void SetWeight(T item, int newWeight) => SetWeightAtIndex(IndexOf(item), FixWeight(newWeight));
 
     public int GetWeightOf(T item) => GetWeightAtIndex(IndexOf(item));
@@ -165,13 +163,13 @@ public class WeightedList<T> : IEnumerable<T>
         sb.Append("WeightedList<");
         sb.Append(typeof(T).Name);
         sb.Append(">: TotalWeight:");
-        sb.Append(TotalWeight);
+        sb.Append(_totalWeight);
         sb.Append(", Min:");
         sb.Append(_minWeight);
         sb.Append(", Max:");
         sb.Append(_maxWeight);
         sb.Append(", Count:");
-        sb.Append(Count);
+        sb.Append(_list.Count);
         sb.Append(", {");
         for (int i = 0; i < _list.Count; i++)
         {
@@ -182,17 +180,7 @@ public class WeightedList<T> : IEnumerable<T>
         }
         sb.Append("}");
         return sb.ToString();
-    }
-
-    private readonly List<T> _list = new List<T>();
-    private readonly List<int> _weights = new List<int>();
-    private readonly List<int> _probabilities = new List<int>();
-    private readonly List<int> _alias = new List<int>();
-    private readonly Random _rand;
-    private int _totalWeight;
-    private bool _areAllProbabilitiesIdentical = false;
-    private int _minWeight;
-    private int _maxWeight;
+    }  
 
     /// <summary>
     /// https://www.keithschwarz.com/darts-dice-coins/
@@ -208,9 +196,9 @@ public class WeightedList<T> : IEnumerable<T>
         _alias.Clear(); // STEP 1
         _probabilities.Clear(); // STEP 1
 
-        List<int> scaledProbabilityNumerator = new List<int>(Count);
-        List<int> small = new List<int>(Count); // STEP 2
-        List<int> large = new List<int>(Count); // STEP 2
+        List<int> scaledProbabilityNumerator = new List<int>(_list.Count);
+        List<int> small = new List<int>(_list.Count); // STEP 2
+        List<int> large = new List<int>(_list.Count); // STEP 2
         foreach (int weight in _weights)
         {
             if (isFirst)
@@ -221,7 +209,7 @@ public class WeightedList<T> : IEnumerable<T>
             _minWeight = (weight < _minWeight) ? weight : _minWeight;
             _maxWeight = (_maxWeight < weight) ? weight : _maxWeight;
             _totalWeight += weight;
-            scaledProbabilityNumerator.Add(weight * Count); // STEP 3 
+            scaledProbabilityNumerator.Add(weight * _list.Count); // STEP 3 
             _alias.Add(0);
             _probabilities.Add(0);
         }
@@ -234,7 +222,7 @@ public class WeightedList<T> : IEnumerable<T>
         }
 
         // STEP 4
-        for (int i = 0; i < Count; i++)
+        for (int i = 0; i < _list.Count; i++)
         {
             if (scaledProbabilityNumerator[i] < _totalWeight)
                 small.Add(i);

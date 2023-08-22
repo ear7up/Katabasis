@@ -198,7 +198,7 @@ public class Kingdom
                 totalWealth += p.House.Wealth() / p.House.CurrentUsers;
             totalHunger += p.Hunger;
             totalAge +=  p.Age;
-            foreach (SkillLevel s in p.Skills)
+            foreach (SkillLevel s in p.Skills._list)
                 totalLevel += s.level;
         }
 
