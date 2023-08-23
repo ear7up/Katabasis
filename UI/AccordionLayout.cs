@@ -16,12 +16,13 @@ public class AccordionLayout : VBox
     {
         // Make a container with a 
         VBox container = new();
+        container.SetMargin(left: 1);
         TextSprite label = new(Sprites.Font, text: name);
         label.ScaleDown(0.2f);
         label.OnClick = ToggleSection;
         container.Add(label);
         container.Add(layout);
-        container.SetPadding(bottom: 15);
+        container.SetPadding(bottom: 8);
         layout.Hide();
 
         Sections[name] = container;

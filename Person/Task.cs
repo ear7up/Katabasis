@@ -574,7 +574,7 @@ public class TryToProduceTask : Task
 
         // If a tool was used, decrement its durability
         if (Requirements.ToolRequirement != Goods.Tool.NONE)
-            p.PersonalStockpile.UseTool(Requirements.ToolRequirement);
+            p.PersonalStockpile.UseTool(Requirements.ToolRequirement, Requirements.ToolTypeRequirement);
 
         // Finish by adding the completed goods to the person's stockpile
         p.PersonalStockpile.Add(Goods);
@@ -615,6 +615,11 @@ public class TryToProduceTask : Task
         if (tReq != TileType.NONE || bReq != BuildingType.NONE)
         {
             found = Tile.Find(p.Home, filter);
+            if (found == null)
+            {
+                Status.Failed = true;
+                return Status;
+            }
         }
 
         if (Requirements.GoodsRequirement != null)

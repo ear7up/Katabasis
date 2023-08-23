@@ -184,9 +184,9 @@ public class Stockpile
         return _stock.Values.GetEnumerator();
     }
 
-    public void UseTool(Goods.Tool toolType)
+    public void UseTool(Goods.Tool toolType, ToolMaterial materialType)
     {
-        Goods g = Get(Goods.GetId(GoodsType.TOOL, (int)toolType));
+        Goods g = Get(Goods.GetId(GoodsType.TOOL, (int)toolType, (int)materialType));
         if (g != null)
             g.Use();
         else

@@ -3,7 +3,7 @@ using System;
 
 public class GoodsInfo
 {
-    private static GoodsInfo[][] Data;
+    private static GoodsInfo[] Data;
 
     // Qualities of each type of good
     public float TimeToProduce { get; protected set; }
@@ -13,10 +13,11 @@ public class GoodsInfo
     public int Satiation { get; protected set; }
     public int Experience { get; protected set; }
     public float DefaultPrice { get; protected set; }
+    public bool HasMaterial { get; protected set; }
 
-    public GoodsInfo(Goods g) : this(g.Type, g.SubType) { }
+    public GoodsInfo(Goods g) : this(g.Type, g.SubType, g.Material) { }
 
-    public GoodsInfo(GoodsType type, int subType)
+    public GoodsInfo(GoodsType type, int subType, int materialType)
     {
         // How many seconds to produce 1 unit of this in a task
         TimeToProduce = 1f;
@@ -38,6 +39,9 @@ public class GoodsInfo
 
         // How much does it cost
         DefaultPrice = 1.5f;
+
+        // Whether the good has a material type
+        HasMaterial = false;
 
         // Set broad defaults by type (can be overriden later in Init function)
         switch (type)
@@ -89,6 +93,14 @@ public class GoodsInfo
             {
                 UseRate = 0.001f; 
                 DefaultPrice = 2f; // need to distinguish stone tools from metal
+                if (subType == (int)Goods.Tool.AXE || subType == (int)Goods.Tool.CHISEL ||
+                    subType == (int)Goods.Tool.HAMMER || subType == (int)Goods.Tool.HOE ||
+                    subType == (int)Goods.Tool.KNIFE || subType == (int)Goods.Tool.PICKAXE ||
+                    subType == (int)Goods.Tool.SAW || subType == (int)Goods.Tool.SHOVEL || 
+                    subType == (int)Goods.Tool.SPEAR)
+                {
+                    HasMaterial = true;
+                }
                 break;
             }
             case GoodsType.CRAFT_GOODS: 
@@ -167,8 +179,7 @@ public class GoodsInfo
             {
                 switch ((Goods.MaterialPlant)subType)
                 {
-                    case Goods.MaterialPlant.CEDAR: DefaultPrice = 1.8f; break;
-                    case Goods.MaterialPlant.EBONY: DefaultPrice = 2.3f; break;
+                    case Goods.MaterialPlant.WOOD: DefaultPrice = 1.8f; break;
                     case Goods.MaterialPlant.FLAX: DefaultPrice = 2f; break;
                     case Goods.MaterialPlant.PAPYRUS: DefaultPrice = 1.6f; break;
                 }
@@ -194,13 +205,31 @@ public class GoodsInfo
                 DefaultProductionQuanity = 4;
             Experience = 5;
         }
+
+        if (type == GoodsType.TOOL)
+        {
+            // Stone worth 30% more than wood, copper 30% more than stone, etc.
+            DefaultPrice = 1f * (float)Math.Pow(1.3f, materialType); 
+
+            // Each tool tier reduces use rate by 5%
+            UseRate = 0.07f * (float)Math.Pow(0.95f, materialType);
+        }
     }
 
     public static void Init()
     {
         Array goodsTypes = Enum.GetValues(typeof(GoodsType));
-        Data = new GoodsInfo[goodsTypes.Length][];
-
+        Data = new GoodsInfo[goodsTypes.Length * Goods.MAX_GOODS_PER_CATEGORY];
+        for (int id = 0; id < Data.Length; id++) 
+        {
+            Data[id] = new GoodsInfo(
+                (GoodsType)Goods.TypeFromId(id), 
+                Goods.SubTypeFromid(id),
+                Goods.MaterialFromId(id));
+        }
+        /*
+        Array goodsTypes = Enum.GetValues(typeof(GoodsType));
+        
         foreach (int type in goodsTypes)
         {
             Type x = typeof(Goods.ProcessedFood);
@@ -218,61 +247,66 @@ public class GoodsInfo
                 case GoodsType.SMITHED: x = typeof(Goods.Smithed); break;
                 case GoodsType.RAW_MEAT: x = typeof(Goods.RawMeat); break;
             }
-
-            Data[type] = new GoodsInfo[Enum.GetValues(x).Length];
             
             foreach (int subType in Enum.GetValues(x))
             {
-                Data[type][subType] = new GoodsInfo((GoodsType)type, subType);
+                foreach (int materialType in Goods.GetMaterials(type))
+                {
+                    int id = Goods.GetId((GoodsType)type, subType, materialType);
+                    Data[id] = new GoodsInfo((GoodsType)type, subType);
+                }
             }
         }
+        */
     }
 
     // Get the time it takes to produce 1f unit of the good
     public static float GetTime(Goods g)
     {
-        return Data[(int)g.Type][g.SubType].TimeToProduce;
+        return Data[g.GetId()].TimeToProduce;
     }
 
     public static float GetDecayRate(Goods g)
     {
-        return Data[(int)g.Type][g.SubType].DecayRate;
+        return Data[g.GetId()].DecayRate;
     }
 
     public static float GetDefaultProductionQuantity(Goods g)
     {
-        return Data[(int)g.Type][g.SubType].DefaultProductionQuanity;
+        return Data[g.GetId()].DefaultProductionQuanity;
     }
 
     public static float GetUseRate(Goods g)
     {
-        return Data[(int)g.Type][g.SubType].UseRate;
+        return Data[g.GetId()].UseRate;
     }
 
     public static int GetSatiation(Goods g)
     {
-        return Data[(int)g.Type][g.SubType].Satiation;
+        return Data[g.GetId()].Satiation;
     }
 
     public static int GetExperience(Goods g)
     {
-        return Data[(int)g.Type][g.SubType].Experience;
+        return Data[g.GetId()].Experience;
     }
 
     public static float GetDefaultPrice(Goods g)
     {
-        return Data[(int)g.Type][g.SubType].DefaultPrice;
+        return Data[g.GetId()].DefaultPrice;
     }
 
     public static float GetDefaultPrice(int goodsId)
     {
-        int type = Goods.TypeFromId(goodsId);
-        int subType = Goods.SubTypeFromid(goodsId);
-        GoodsInfo[] goods = Data[type];
-        if (subType < goods.Length)
-            return goods[subType].DefaultPrice;
+        if (goodsId < Data.Length)
+            return Data[goodsId].DefaultPrice;
         return 0f;
     }
 
-    // Skill modifiers?
+    public static bool GetHasMaterial(int goodsId)
+    {
+        if (goodsId < Data.Length)
+            return Data[goodsId].HasMaterial;
+        return false;
+    }
 }

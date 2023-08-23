@@ -233,14 +233,7 @@ public class Map
         int length1 = Globals.Rand.Next(_mapTileSize.Y / 3, 3 * _mapTileSize.Y / 4);
         for (int i = 0; i < length1; i++)
         {
-            t.BaseSprite.SetNewSpriteTexture(Sprites.RandomRiver());
-            t.Type = TileType.RIVER;
-            t.Minerals = MineralType.NONE;
-
-            // Rivers improve the soil quality of neighboring tiles, overlap is intentional (river itself gets 2x bonus)
-            foreach (Tile neighbor in t.Neighbors)
-                if (neighbor != null)
-                    neighbor.SoilQuality += Tile.RIVER_SOIL_QUALITY_BONUS;
+            t.MakeRiver();
             t = t.Neighbors[startingFromTop ? (int)Cardinal.SW : (int)Cardinal.NE];
         }
     }

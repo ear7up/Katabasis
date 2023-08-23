@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 public enum GoodsType
 {
@@ -17,17 +18,34 @@ public enum GoodsType
     NONE = 11
 }
 
+// In order based on quality; 
+// There can be max 10 values for any material enum (including NONE = 0)
+// A task requiring stone tools can be done with copper or bronze, for example
+public enum ToolMaterial
+{
+    NONE = 0,
+    STONE = 1,
+    COPPER = 2,
+    BRONZE = 3,
+    IRON = 4
+}
+
 public class Goods
 {
     public const float MEAT_SPOIL_RATE = 0.01f;
 
     // If for some reason in the future there are more than 1000 goods in a single category,
     // bump this to 10000 to make each good type have a unique integer identifier
+    // Digits 4+ are the category
+    // Digit 3 is the material
+    // Digits 1-2 are the subtype (max 100)
     public const int MAX_GOODS_PER_CATEGORY = 1000;
+    public const int MAX_GOODS_PER_MATERIAL = 100;
 
     public GoodsType Type { get; set; }
     public int SubType { get; set; }
     public float Quantity { get; set; }
+    public int Material { get; set; }
 
     public static Type[] GoodsEnums = 
     {
@@ -98,7 +116,7 @@ public class Goods
 
     public enum MaterialPlant
     {
-        FLAX, CEDAR, EBONY, PAPYRUS
+        FLAX, WOOD, PAPYRUS
     }
 
     public enum MaterialNatural
@@ -121,7 +139,7 @@ public class Goods
 
     public enum Smithed
     {
-        IRON, SILVER, GOLD, COPPER, TIN, BRONZE, LEAD
+        IRON, SILVER, GOLD, COPPER, TIN, BRONZE, LEAD, NONE
     }
 
     public enum RawMeat
@@ -152,24 +170,26 @@ public class Goods
     // Return a unique identifier for each good
     public int GetId()
     {
-        return GetId(Type, SubType);
+        return GetId(Type, SubType, Material);
     }
 
-    public static int GetId(GoodsType type, int subType)
+    public static int GetId(GoodsType type, int subType, int materialType)
     {
-        return GetId((int)type, subType);
+        return GetId((int)type, subType, materialType);
     }
 
-    public static int GetId(int type, int subType)
+    public static int GetId(int type, int subType, int materialType)
     {
-        return type * MAX_GOODS_PER_CATEGORY + subType;
+        return (type * MAX_GOODS_PER_CATEGORY) + (materialType * MAX_GOODS_PER_MATERIAL) + subType;
     }
 
     // Reverse of GetId, assumes there are max 1000 goods per type category
     public static Goods FromId(int id, float quantity = 1)
     {
-        return new Goods((GoodsType)(id / MAX_GOODS_PER_CATEGORY), 
-            id % MAX_GOODS_PER_CATEGORY, quantity);
+        int type = id / MAX_GOODS_PER_CATEGORY;
+        int materialType = (type % MAX_GOODS_PER_CATEGORY) / MAX_GOODS_PER_MATERIAL;
+        int subType = (id % MAX_GOODS_PER_CATEGORY) % MAX_GOODS_PER_MATERIAL;
+        return new Goods((GoodsType)type, subType, quantity, materialType);
     }
 
     public static int TypeFromId(int id)
@@ -177,15 +197,26 @@ public class Goods
         return id / MAX_GOODS_PER_CATEGORY;
     }
 
-    public static int SubTypeFromid(int id)
+    public static int MaterialFromId(int id)
     {
-        return id % MAX_GOODS_PER_CATEGORY;
+        int type = id / MAX_GOODS_PER_CATEGORY;
+        int material = (type % MAX_GOODS_PER_CATEGORY) / MAX_GOODS_PER_MATERIAL;
+        return material;
     }
 
-    public Goods(GoodsType goodsType, int subType, float quantity = 1)
+    public static int SubTypeFromid(int id)
+    {
+        int type = id / MAX_GOODS_PER_CATEGORY;
+        int materialType = (type % MAX_GOODS_PER_CATEGORY) / MAX_GOODS_PER_MATERIAL;
+        int subType = (id % MAX_GOODS_PER_CATEGORY) % MAX_GOODS_PER_MATERIAL;
+        return subType;
+    }
+
+    public Goods(GoodsType goodsType, int subType, float quantity = 1, int materialType = 0)
     {
         Type = goodsType;
         SubType = subType;
+        Material = materialType;
         Quantity = quantity;
     }
 
@@ -193,6 +224,7 @@ public class Goods
     {
         Type = orig.Type;
         SubType = orig.SubType;
+        Material = orig.Material;
         Quantity = orig.Quantity;
     }
 
@@ -200,12 +232,13 @@ public class Goods
     {
         Type = orig.Type;
         SubType = orig.SubType;
+        Material = orig.Material;
         Quantity = quantity;
     }
 
     public Goods()
     {
-
+        Material = 0;
     }
 
     public static Goods Create(GoodsType type, int subType, float quantity)
@@ -216,6 +249,33 @@ public class Goods
             Quantity = quantity
         };
         return goods;
+    }
+
+    public List<int> GetMaterials()
+    {
+        return GetMaterials((int)Type, SubType);
+    }
+
+    public static List<int> GetMaterials(int type, int subType)
+    {
+        List<int> materials = new();
+        if (type == (int)GoodsType.TOOL)
+        {
+            Tool tool = (Tool)subType;
+            if (tool == Tool.AXE || tool == Tool.CHISEL || tool == Tool.HAMMER || 
+                tool == Tool.HOE || tool == Tool.KNIFE || tool == Tool.PICKAXE ||
+                tool == Tool.SAW || tool == Tool.SHOVEL || tool == Tool.SPEAR)
+            {        
+                foreach (int materialType in Enum.GetValues(typeof(ToolMaterial)))
+                    materials.Add(materialType);
+                materials.RemoveAt(0);
+                return materials;
+            }
+        }
+
+        // Default Goods.Material is 0
+        materials.Add(0);
+        return materials;
     }
 
     public override string ToString()
@@ -238,7 +298,14 @@ public class Goods
         }
         subTypeName = Globals.Title(subTypeName);
         float value = Globals.Market.GetPrice(GetId()) * Quantity;
-        //return $"{typeName}.{subTypeName} x{(int)Quantity} (${value}";
+        
+        if (Type == GoodsType.TOOL)
+        {
+            string materialName = "";
+            if (Material != (int)ToolMaterial.NONE)
+                materialName = Globals.Title(((ToolMaterial)Material).ToString()) + " ";
+            return $"{materialName}{subTypeName} x{Quantity:0.0} (${value:0.0})";
+        }
         return $"{subTypeName} x{Quantity:0.0} (${value:0.0})";
     }
 

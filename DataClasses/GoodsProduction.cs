@@ -116,8 +116,7 @@ public class GoodsProduction
         g.SubType = (int)Goods.Crafted.INSTRUMENTS;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.CEDAR),
-                new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.EBONY),
+                new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD),
                 new Goods(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.BONE),
                 new Goods(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.IVORY)),
             toolRequirement: Goods.Tool.KNIFE,
@@ -157,23 +156,29 @@ public class GoodsProduction
                 new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.CLAY)),
             levelRequirement: SkillLevel.Create(Skill.CRAFTING, 10)));
 
-        // Statues are made of sandstone, clay, copper, or bronze with a chisel
         // TODO: Should a workshop building be required?
         g.SubType = (int)Goods.Crafted.STATUES;
+
+        GoodsRequirement statueMaterials = new(new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.STONE));
+        statueMaterials.Add(new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.SANDSTONE));
+        statueMaterials.Add(new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.CLAY));
+        statueMaterials.Add(new Goods(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.IVORY));
+        statueMaterials.Add(new Goods(GoodsType.SMITHED, (int)Goods.Smithed.COPPER));
+        statueMaterials.Add(new Goods(GoodsType.SMITHED, (int)Goods.Smithed.GOLD));
+        statueMaterials.Add(new Goods(GoodsType.SMITHED, (int)Goods.Smithed.SILVER));
+        statueMaterials.Add(new Goods(GoodsType.SMITHED, (int)Goods.Smithed.LEAD));
+
         Requirements.Add(g.GetId(), new ProductionRequirements(
-            goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.SANDSTONE),
-                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.CLAY),
-                new Goods(GoodsType.SMITHED, (int)Goods.Smithed.COPPER),
-                new Goods(GoodsType.SMITHED, (int)Goods.Smithed.BRONZE)),
+            goodsRequirement: statueMaterials,
             toolRequirement: Goods.Tool.CHISEL,
             levelRequirement: SkillLevel.Create(Skill.CRAFTING, 50)));
 
-        // Wool is made from yarn, easy
+        // Wool + loom -> yarn
         g.SubType = (int)Goods.Crafted.YARN;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.WOOL)),
+            toolRequirement: Goods.Tool.LOOM,
             levelRequirement: SkillLevel.Create(Skill.CRAFTING, 10)));
 
         g.Type = GoodsType.FOOD_ANIMAL;
@@ -451,15 +456,8 @@ public class GoodsProduction
 
         g.Type = GoodsType.MATERIAL_PLANT;
 
-        // forestry: forest + axe -> cedar
-        g.SubType = (int)Goods.MaterialPlant.CEDAR;
-        Requirements.Add(g.GetId(), new ProductionRequirements(
-            tileRequirement: TileType.FOREST,
-            toolRequirement: Goods.Tool.AXE,
-            levelRequirement: SkillLevel.Create(Skill.FORESTRY, 10)));
-
-        // forestry: forest + axe -> ebony
-        g.SubType = (int)Goods.MaterialPlant.EBONY;
+        // forestry: forest + axe -> wood
+        g.SubType = (int)Goods.MaterialPlant.WOOD;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             tileRequirement: TileType.FOREST,
             toolRequirement: Goods.Tool.AXE,
@@ -647,12 +645,11 @@ public class GoodsProduction
         r.ToolRequirement = Goods.Tool.NONE;
         r.SkillRequirement = SkillLevel.Create(Skill.CRAFTING, 30);
 
-        // crafting: [cedar OR ebony] -> loom
+        // crafting: wood -> loom
         g.SubType = (int)Goods.Tool.LOOM;
         r = (ProductionRequirements)Requirements[g.GetId()];
         r.GoodsRequirement = new GoodsRequirement(
-            new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialPlant.CEDAR),
-            new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialPlant.EBONY));
+            new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialPlant.WOOD));
         r.BuildingRequirement = BuildingType.NONE;
         r.ToolRequirement = Goods.Tool.SAW;
         r.SkillRequirement = SkillLevel.Create(Skill.CRAFTING, 30);
@@ -684,8 +681,7 @@ public class GoodsProduction
         // shields may also be wood
         g.SubType = (int)Goods.War.SHIELD;
         r = (ProductionRequirements)Requirements[g.GetId()];
-        r.GoodsRequirement.Add(new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.CEDAR));
-        r.GoodsRequirement.Add(new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.EBONY));
+        r.GoodsRequirement.Add(new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD));
 
         // Map skill enum values -> list of goods ids
         foreach (int goodsId in Requirements.Keys)

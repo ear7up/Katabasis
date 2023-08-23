@@ -35,7 +35,7 @@ public class MarketPanel : UIElement
 
         PriceDisplayHash = new();
 
-        const int GOODS_ROWS = 8;
+        const int GOODS_ROWS = 14;
 
         AccordionLayout categoryAccordion = new();
         categoryAccordion.SetMargin(top: 1, left: 1);
@@ -44,33 +44,44 @@ public class MarketPanel : UIElement
         int i = 0;
         foreach (Type goodsType in Goods.GoodsEnums)
         {
-            if (goodsType == null)
-                break;
-
             int j = 0;
+            int k = 0;
             GridLayout categoryLayout = new();
+            categoryLayout.SetMargin(top: 5, left: 1);
             foreach (Object subType in Enum.GetValues(goodsType))
             {
-                TextSprite nameText = new TextSprite(Sprites.Font, text: Globals.Title(subType.ToString()));
-                nameText.SetPadding(right: 20);
-                nameText.ScaleDown(0.4f);
+                if (goodsType == typeof(Goods.Tool) && j == (int)Goods.Tool.NONE)
+                    continue;
 
-                UIElement priceBar = new(Sprites.VerticalBar);
-                priceBar.Image.SpriteColor = Color.Green;
-                priceBar.SetPadding(right: 15);
+                foreach (int materialType in Goods.GetMaterials(i, j))
+                {
+                    string materialName = "";
+                    if (materialType != (int)ToolMaterial.NONE)
+                        materialName = Globals.Title(((ToolMaterial)materialType).ToString()) + " ";
+                    string name = $"{materialName}{subType.ToString()}";
 
-                TextSprite priceText = new TextSprite(Sprites.Font, text: "0.0");
-                priceText.ScaleDown(0.4f);
+                    TextSprite nameText = new TextSprite(Sprites.Font, text: Globals.Title(name));
+                    nameText.SetPadding(right: 10);
+                    nameText.ScaleDown(0.45f);
 
-                OverlapLayout priceDisplay = new();
-                priceDisplay.Add(priceBar);
-                priceDisplay.Add(priceText);
-                PriceDisplayHash[Goods.GetId(i, j)] = priceDisplay;
+                    UIElement priceBar = new(Sprites.VerticalBar);
+                    priceBar.Image.SpriteColor = Color.Green;
+                    priceBar.SetPadding(right: 10);
 
-                int row = j % GOODS_ROWS;
-                int col = j / GOODS_ROWS * 2;
-                categoryLayout.SetContent(col, row, nameText);
-                categoryLayout.SetContent(col + 1, row, priceDisplay);
+                    TextSprite priceText = new TextSprite(Sprites.Font, text: "0.0");
+                    priceText.ScaleDown(0.45f);
+
+                    OverlapLayout priceDisplay = new();
+                    priceDisplay.Add(priceBar);
+                    priceDisplay.Add(priceText);
+                    PriceDisplayHash[Goods.GetId(i, j, materialType)] = priceDisplay;
+
+                    int row = k % GOODS_ROWS;
+                    int col = k / GOODS_ROWS * 2;
+                    categoryLayout.SetContent(col, row, nameText);
+                    categoryLayout.SetContent(col + 1, row, priceDisplay);
+                    k++;
+                }
                 j++;
             }
 
@@ -90,28 +101,31 @@ public class MarketPanel : UIElement
             int j = 0;
             foreach (Object subType in Enum.GetValues(goodsType))
             {
-                int id = Goods.GetId(i, j);
-                OverlapLayout priceDisplay = (OverlapLayout)PriceDisplayHash[id];
-                UIElement priceBar = priceDisplay.Elements[0];
-                TextSprite priceText = (TextSprite)priceDisplay.Elements[1];
+                if (goodsType == typeof(Goods.Tool) && j == (int)Goods.Tool.NONE)
+                    continue;
 
-                // Write the current price and draw a bar indicating how its
-                // current price relates to the baseline price
-                float price = Globals.Market.Prices[id];
-                float defaultPrice = GoodsInfo.GetDefaultPrice(id);
-                priceText.Text = $"{price:0.0}";
+                foreach (int materialType in Goods.GetMaterials(i, j))
+                {
+                    int id = Goods.GetId(i, j, materialType);
+                    OverlapLayout priceDisplay = (OverlapLayout)PriceDisplayHash[id];
 
-                if (price > defaultPrice)
-                    priceBar.Image.SetScaleX(25f + 3f * price/defaultPrice);
-                else
-                    priceBar.Image.SetScaleX(25f - 3f * defaultPrice/price);
+                    UIElement priceBar = priceDisplay.Elements[0];
+                    TextSprite priceText = (TextSprite)priceDisplay.Elements[1];
 
-                if (price == defaultPrice)
-                    priceBar.Image.SpriteColor = Color.Green;
-                else if (price > defaultPrice)
-                    priceBar.Image.SpriteColor = Color.Blue;
-                else
-                    priceBar.Image.SpriteColor = Color.Red;
+                    // Write the current price and draw a bar indicating how its
+                    // current price relates to the baseline price
+                    float price = Globals.Market.Prices[id];
+                    float defaultPrice = GoodsInfo.GetDefaultPrice(id);
+                    priceText.Text = $"{price:0.0}";
+                    priceBar.Image.SetScaleX(25f);
+
+                    if (price == defaultPrice)
+                        priceBar.Image.SpriteColor = Color.Goldenrod;
+                    else if (price > defaultPrice)
+                        priceBar.Image.SpriteColor = Color.Green;
+                    else
+                        priceBar.Image.SpriteColor = Color.Red;
+                }
                 j++;
             }
             i++;

@@ -165,6 +165,22 @@ public class Tile
         Type = type;
     }
 
+    public void MakeRiver()
+    {
+        SetTileType(TileType.RIVER);
+        BaseSprite.SetNewSpriteTexture(Sprites.RandomRiver());
+
+        // Rivers improve the soil quality of neighboring tiles, overlap is intentional (river itself gets 2x bonus)
+        foreach (Tile neighbor in Neighbors)
+        {
+            if (neighbor != null)
+            {
+                neighbor.BaseSoilQuality += Tile.RIVER_SOIL_QUALITY_BONUS;
+                neighbor.SoilQuality = neighbor.BaseSoilQuality;
+            }
+        }
+    }
+
     public bool HasResource()
     {
         return CurrentResourceQuantity > 0f;
