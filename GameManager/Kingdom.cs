@@ -164,9 +164,8 @@ public class Kingdom
 
     // Add up all the goods in all citizen's stockpiles, plus the tile stockpiles
     // and return a detailed list of goods, quantities, and values
-    public string PrivateGoods()
+    public Stockpile PrivateGoods()
     {
-        string s = "Privately Owned Goods\n====================\n";
         Stockpile total = new();
 
         // Sum all goods stored in villager inventories
@@ -178,8 +177,7 @@ public class Kingdom
             foreach (Building b in t.Buildings)
                 total.Sum(b.Stockpile);
 
-        s += total.ToString();
-        return s;
+        return total;
     }
 
     public string Statistics()

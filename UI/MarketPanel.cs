@@ -156,7 +156,7 @@ public class MarketPanel : UIElement
             i++;
         }
 
-        const int GOODS_ROWS = 14;
+        // const int GOODS_ROWS = 14;
 
         i = 0;
         foreach (KeyValuePair<int,List<MarketOrder>> kv in Globals.Market.SellOrders)

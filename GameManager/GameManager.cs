@@ -19,11 +19,9 @@ public class GameManager
     private static TextSprite _logoDisplay2;
     private static GridLayout _buttonPanel;
     private static GridLayout _bottomPanel;
-    private static GridLayout _inventoryPanel;
+    private static InventoryPanel inventoryPanel;
     private static TabLayout _statsPanel;
     private static TextSprite _statsOverviewText;
-    private static TextSprite _inventoryText1;
-    private static TextSprite _inventoryText2;
     private static UIElement _clockHand;
     private static PersonPanel _personPanel;
 
@@ -112,15 +110,8 @@ public class GameManager
 
         UI.AddElement(_bottomPanel, UI.Position.BOTTOM_LEFT);
 
-        _inventoryPanel = new(Sprites.TallPanel);
-        _inventoryPanel.SetMargin(top: 80, left: 40);
-        _inventoryText1 = new(Sprites.Font);
-        _inventoryText1.ScaleDown(0.4f);
-        _inventoryText2 = new(Sprites.Font);
-        _inventoryText2.ScaleDown(0.4f);
-        _inventoryPanel.SetContent(0, 0, _inventoryText1);
-        _inventoryPanel.SetContent(1, 0, _inventoryText2);
-        _inventoryPanel.Hide();
+        inventoryPanel = new();
+        inventoryPanel.Hide();
 
         _statsOverviewText = new TextSprite(Sprites.Font);
         _statsOverviewText.ScaleDown(0.4f);
@@ -252,27 +243,10 @@ public class GameManager
 
     public void ToggleGoodsDisplay(Object clicked)
     {
-        if (_inventoryPanel.Hidden)
-            _inventoryPanel.Unhide();
+        if (inventoryPanel.Hidden)
+            inventoryPanel.Unhide();
         else
-            _inventoryPanel.Hide();
-    }
-
-    public void HandleInventoryDisplay()
-    {
-        string goods = Model.Player1.Kingdom.PrivateGoods();
-        string[] lines = goods.Split('\n');
-        
-        // Currently supports showing up to 72 goods
-        string goods1 = "";
-        string goods2 = "";
-        for (int i = 0; i < lines.Length; i++)
-            if (i < 35)
-                goods1 += lines[i] + "\n";
-            else if (i < 73)
-                goods2 += lines[i] + "\n";
-        _inventoryText1.Text = goods1;
-        _inventoryText2.Text = goods2;
+            inventoryPanel.Hide();
     }
 
     public void Update(GameTime gameTime)
@@ -320,8 +294,9 @@ public class GameManager
         Model.Market.Update();
 
         // TODO: Write code to support click and drag on UIElements
-        _inventoryPanel.Update();
-        HandleInventoryDisplay();
+        inventoryPanel.UpdatePrivate(Model.Player1.Kingdom.PrivateGoods());
+        inventoryPanel.UpdatePublic(Model.Player1.Kingdom.Treasury);
+        inventoryPanel.Update();
 
         HandleTileAcquisition();
 
@@ -445,8 +420,8 @@ public class GameManager
         UI.Draw();
 
         // Draw the popup interface
-        _inventoryPanel.Draw(new Vector2(
-            Globals.WindowSize.X / 2 - _inventoryPanel.Width() / 2, 50f));
+        inventoryPanel.Draw(new Vector2(
+            Globals.WindowSize.X / 2 - inventoryPanel.Width() / 2, 50f));
 
         _statsPanel.Draw(new Vector2(
             Globals.WindowSize.X / 2 - _statsPanel.Width() / 2, 50f));
