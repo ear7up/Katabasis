@@ -39,6 +39,9 @@ public abstract class Layout : UIElement
 
     public override void Update()
     {
+        if (Hidden)
+            return;
+
         foreach (UIElement element in Elements)
             element.Update();
 

@@ -23,6 +23,10 @@ public class AccordionLayout : VBox
         container.Add(label);
         container.Add(layout);
         container.SetPadding(bottom: 8);
+
+        container.Name = name;
+        container.OnClick = ToggleSection;
+
         layout.Hide();
 
         Sections[name] = container;
@@ -39,7 +43,10 @@ public class AccordionLayout : VBox
     public void ToggleSection(object clicked)
     {
         InputManager.ConsumeClick(this);
-        ToggleSection(((TextSprite)clicked).Text);
+        if (clicked is TextSprite)
+            ToggleSection(((TextSprite)clicked).Text);
+        else
+            ToggleSection(((UIElement)clicked).Name);
     }
 
     public void ToggleSection(string name)

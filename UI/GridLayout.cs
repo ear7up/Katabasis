@@ -6,6 +6,8 @@ public class GridLayout : Layout
 {
     public List<List<UIElement>> GridContent;
 
+    public int Columns;
+
     public GridLayout(SpriteTexture texture = null) : base(texture)
     {
         GridContent = new();
@@ -21,6 +23,13 @@ public class GridLayout : Layout
         List<UIElement> row = GridContent[y];
         while (x >= row.Count)
             row.Add(null);
+        Columns = Math.Max(Columns, x + 1);
+    }
+
+    public void Clear()
+    {
+        GridContent.Clear();
+        Columns = 0;
     }
 
     public override void Hide()
@@ -58,14 +67,16 @@ public class GridLayout : Layout
         // Draw the background content
         base.Draw(offset);
 
+        if (Hidden)
+            return;
+
         Vector2 margin = new(GetLeftMargin(), GetTopMargin());
 
         List<int> columnWidths = new();
         if (GridContent.Count > 0)
         {
-            int col = 0;
-            foreach (UIElement _ in GridContent[0])
-                columnWidths.Add(ColumnWidth(col++));
+            for (int col = 0; col < Columns; col++)
+                columnWidths.Add(ColumnWidth(col));
         }
 
         // Draw each item in the grid
@@ -96,7 +107,7 @@ public class GridLayout : Layout
 
         float maxWidth = 0f;
         foreach (List<UIElement> row in GridContent)
-            if (col < row.Count)
+            if (col < row.Count && row[col] != null)
                 maxWidth = Math.Max(maxWidth, row[col].Width());
 
         return (int)maxWidth;

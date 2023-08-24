@@ -192,6 +192,20 @@ public class Goods
         return new Goods((GoodsType)type, subType, quantity, materialType);
     }
 
+    public static string NameFromid(int id)
+    {
+        Goods temp = FromId(id);
+        string name = GetGoodsName(temp.Type, temp.SubType);
+        if (temp.Type == GoodsType.TOOL)
+        {
+            string materialName = "";
+            if (temp.Material != (int)ToolMaterial.NONE)
+                materialName = Globals.Title(((ToolMaterial)temp.Material).ToString()) + " ";
+            return $"{materialName}{name}";
+        }
+        return name;
+    }
+
     public static int TypeFromId(int id)
     {
         return id / MAX_GOODS_PER_CATEGORY;
@@ -278,25 +292,31 @@ public class Goods
         return materials;
     }
 
+    public static string GetGoodsName(GoodsType type, int subType)
+    {
+        string subTypeName = "UNDEFINED";
+        switch (type)
+        {
+            case GoodsType.FOOD_PROCESSED: subTypeName = Enum.GetName(typeof(ProcessedFood), subType); break;
+            case GoodsType.FOOD_ANIMAL: subTypeName = Enum.GetName(typeof(FoodAnimal), subType); break;
+            case GoodsType.FOOD_PLANT: subTypeName = Enum.GetName(typeof(FoodPlant), subType); break;
+            case GoodsType.TOOL: subTypeName = Enum.GetName(typeof(Tool), subType); break;
+            case GoodsType.MATERIAL_ANIMAL: subTypeName = Enum.GetName(typeof(MaterialAnimal), subType); break;
+            case GoodsType.MATERIAL_PLANT: subTypeName = Enum.GetName(typeof(MaterialPlant), subType); break;
+            case GoodsType.MATERIAL_NATURAL: subTypeName = Enum.GetName(typeof(MaterialNatural), subType); break;
+            case GoodsType.CRAFT_GOODS: subTypeName = Enum.GetName(typeof(Crafted), subType); break;
+            case GoodsType.WAR_GOODS: subTypeName = Enum.GetName(typeof(War), subType); break;
+            case GoodsType.SMITHED: subTypeName = Enum.GetName(typeof(Smithed), subType); break;
+            case GoodsType.RAW_MEAT: subTypeName = Enum.GetName(typeof(RawMeat), subType); break;
+        }
+        subTypeName = Globals.Title(subTypeName);
+        return subTypeName;
+    }
+
     public override string ToString()
     {
         string typeName = Globals.Title(Enum.GetName(typeof(GoodsType), Type));
-        string subTypeName = "UNDEFINED";
-        switch (Type)
-        {
-            case GoodsType.FOOD_PROCESSED: subTypeName = Enum.GetName(typeof(ProcessedFood), SubType); break;
-            case GoodsType.FOOD_ANIMAL: subTypeName = Enum.GetName(typeof(FoodAnimal), SubType); break;
-            case GoodsType.FOOD_PLANT: subTypeName = Enum.GetName(typeof(FoodPlant), SubType); break;
-            case GoodsType.TOOL: subTypeName = Enum.GetName(typeof(Tool), SubType); break;
-            case GoodsType.MATERIAL_ANIMAL: subTypeName = Enum.GetName(typeof(MaterialAnimal), SubType); break;
-            case GoodsType.MATERIAL_PLANT: subTypeName = Enum.GetName(typeof(MaterialPlant), SubType); break;
-            case GoodsType.MATERIAL_NATURAL: subTypeName = Enum.GetName(typeof(MaterialNatural), SubType); break;
-            case GoodsType.CRAFT_GOODS: subTypeName = Enum.GetName(typeof(Crafted), SubType); break;
-            case GoodsType.WAR_GOODS: subTypeName = Enum.GetName(typeof(War), SubType); break;
-            case GoodsType.SMITHED: subTypeName = Enum.GetName(typeof(Smithed), SubType); break;
-            case GoodsType.RAW_MEAT: subTypeName = Enum.GetName(typeof(RawMeat), SubType); break;
-        }
-        subTypeName = Globals.Title(subTypeName);
+        string subTypeName = GetGoodsName(Type, SubType);
         float value = Globals.Market.GetPrice(GetId()) * Quantity;
         
         if (Type == GoodsType.TOOL)

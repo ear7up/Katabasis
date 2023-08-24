@@ -12,6 +12,8 @@ public class MarketPanel : UIElement
     public VBox PriceLayout;
     public VBox SellingLayout;
 
+    AccordionLayout SellingAccordion;
+
     public MarketPanel() : base(Sprites.TallPanel)
     {
         Layout = new();
@@ -88,6 +90,20 @@ public class MarketPanel : UIElement
             categoryAccordion.AddSection(Goods.Categories[i], categoryLayout);
             i++;
         }
+
+        // Build the layout for sell orders grouped by GoodsType category
+        SellingAccordion = new();
+        SellingAccordion.SetMargin(top: 1, left: 1);
+        SellingLayout.Add(SellingAccordion);
+
+        i = 0;
+        foreach (Type goodsType in Goods.GoodsEnums)
+        {
+            GridLayout categoryLayout = new();
+            categoryLayout.SetMargin(top: 5, left: 1);
+            SellingAccordion.AddSection(Goods.Categories[i], categoryLayout);
+            i++;
+        }
     }
 
     public override void Update()
@@ -130,6 +146,60 @@ public class MarketPanel : UIElement
             }
             i++;
         }
+
+        i = 0;
+        foreach (Type goodsType in Goods.GoodsEnums)
+        {
+            VBox container = (VBox)SellingAccordion.Sections[Goods.Categories[i]];
+            GridLayout categoryLayout = (GridLayout)container.Elements[1];
+            categoryLayout.Clear();
+            i++;
+        }
+
+        const int GOODS_ROWS = 14;
+
+        i = 0;
+        foreach (KeyValuePair<int,List<MarketOrder>> kv in Globals.Market.SellOrders)
+        {
+            int category = Goods.TypeFromId(kv.Key);
+            VBox container = (VBox)SellingAccordion.Sections[Goods.Categories[category]];
+            GridLayout categoryLayout = (GridLayout)container.Elements[1];
+
+            float quantity = 0f;
+            List<MarketOrder> selling = kv.Value;
+            foreach (MarketOrder order in selling)
+                quantity += order.Goods.Quantity;
+
+            string name = Goods.GetGoodsName((GoodsType)category, Goods.SubTypeFromid(kv.Key));
+            int row = categoryLayout.GridContent.Count;
+            //int col = i / GOODS_ROWS * 2;
+            
+            TextSprite nameText = new(Sprites.Font, text: name);
+            nameText.ScaleDown(0.45f);
+            nameText.SetPadding(right: 10);
+            
+            TextSprite quantityText = new(Sprites.Font, text: $"{quantity:0.0}");
+            quantityText.ScaleDown(0.45f);
+
+            categoryLayout.SetContent(0, row, nameText);
+            categoryLayout.SetContent(1, row, quantityText);
+            i++;
+        }
+
+        i = 0;
+        foreach (Type goodsType in Goods.GoodsEnums)
+        {
+            VBox container = (VBox)SellingAccordion.Sections[Goods.Categories[i]];
+            GridLayout categoryLayout = (GridLayout)container.Elements[1];
+            if (categoryLayout.GridContent.Count == 0)
+            {
+                TextSprite noSellOrders = new(Sprites.Font, text: "No sell orders");
+                noSellOrders.ScaleDown(0.45f);
+                categoryLayout.SetContent(0, 0, noSellOrders);
+            }
+            i++;
+        }
+
         Layout.Update();
         base.Update();
     }

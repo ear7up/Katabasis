@@ -4,20 +4,29 @@ using System.Collections.Generic;
 
 public class MarketOrder
 {
-    public Person requestor { get; set; }
-    public bool buying { get; set; }
-    public Goods goods { get; set; }
+    public Person Requestor { get; set; }
+    public bool Buying { get; set; }
+    public Goods Goods { get; set; }
 
-    public MarketOrder(Person requestor, bool buying, Goods goods)
+    public MarketOrder()
     {
-        this.requestor = requestor;
-        this.buying = buying;
-        this.goods = goods;
+        
+    }
+
+    public static MarketOrder Create(Person requestor, bool buying, Goods goods)
+    {
+        MarketOrder order = new()
+        {
+            Requestor = requestor,
+            Buying = buying,
+            Goods = goods
+        };
+        return order;
     }
 
     public override string ToString()
     {
-        return $"MarketOrder(requestor={requestor.Name}, buying={buying}, goods={goods})";
+        return $"MarketOrder(requestor={Requestor.Name}, buying={Buying}, goods={Goods})";
     }
 }
 
@@ -112,25 +121,25 @@ public class Market
     // automatically deducts money from requestor for purchases
     public bool AttemptTransact(MarketOrder o)
     {
-        if (o.buying)
-            Demand[o.goods.GetId()]++;
+        if (o.Buying)
+            Demand[o.Goods.GetId()]++;
         else
-            Demand[o.goods.GetId()]--;
+            Demand[o.Goods.GetId()]--;
 
         // Trying to buy, can't afford it
-        float cost = GetPrice(o.goods.GetId()) * o.goods.Quantity;
-        if (o.buying && o.requestor.Money < cost)
+        float cost = GetPrice(o.Goods.GetId()) * o.Goods.Quantity;
+        if (o.Buying && o.Requestor.Money < cost)
             return false;
         
         // Trying to sell, don't have it
-        if (!o.buying && !o.requestor.PersonalStockpile.Has(o.goods))
+        if (!o.Buying && !o.Requestor.PersonalStockpile.Has(o.Goods))
             return false;
 
         List<MarketOrder> trades = null;
-        if (o.buying)
-            trades = GetSellOrders(o.goods.GetId());
+        if (o.Buying)
+            trades = GetSellOrders(o.Goods.GetId());
         else
-            trades = GetBuyOrders(o.goods.GetId());
+            trades = GetBuyOrders(o.Goods.GetId());
 
         // Quit if no one is buying/selling the good being requested
         if (trades == null || trades.Count == 0)
@@ -138,57 +147,57 @@ public class Market
         
         // Try to buy as much of the order as possible
         float amountBoughtOrSold = 0f;
-        for (int i = 0; o.goods.Quantity > 0 && i < trades.Count; i++)
+        for (int i = 0; o.Goods.Quantity > 0 && i < trades.Count; i++)
         {
             MarketOrder trade = trades[i];
 
             // Can't buy or sell more than each individual trader is offering
-            float sale_quantity = MathHelper.Min(o.goods.Quantity, trade.goods.Quantity);
-            cost = sale_quantity * GetPrice(o.goods.GetId());
+            float sale_quantity = MathHelper.Min(o.Goods.Quantity, trade.Goods.Quantity);
+            cost = sale_quantity * GetPrice(o.Goods.GetId());
 
             float tax = GetTax(cost);
 
             // Trying to buy, can't afford it (price probably went up, defer until later)
-            if (o.buying && o.requestor.Money < cost)
+            if (o.Buying && o.Requestor.Money < cost)
                 break;
 
             // Trying to sell, buyer can't afford it (skip to next one)
-            if (!o.buying && trade.requestor.Money < cost)
+            if (!o.Buying && trade.Requestor.Money < cost)
                 continue;
 
-            if (o.buying)
+            if (o.Buying)
             {    
-                o.requestor.Money -= cost;
-                trade.requestor.Money += (cost - tax);
+                o.Requestor.Money -= cost;
+                trade.Requestor.Money += (cost - tax);
                 Kingdom.Money += tax;
 
-                Goods purchased = new Goods(o.goods);
+                Goods purchased = new Goods(o.Goods);
                 purchased.Quantity = sale_quantity;
-                o.requestor.PersonalStockpile.Add(purchased);
+                o.Requestor.PersonalStockpile.Add(purchased);
             }
-            else if (!o.buying)
+            else if (!o.Buying)
             {
-                o.requestor.Money += (cost - tax);
-                trade.requestor.Money -= cost;
+                o.Requestor.Money += (cost - tax);
+                trade.Requestor.Money -= cost;
                 Kingdom.Money += tax;
 
-                Goods sold = new Goods(o.goods);
+                Goods sold = new Goods(o.Goods);
                 sold.Quantity = sale_quantity;
-                o.requestor.PersonalStockpile.Take(sold);
+                o.Requestor.PersonalStockpile.Take(sold);
             }
 
             amountBoughtOrSold += sale_quantity;
 
             // E.g. reduce buying(5) to buying(3) if 2 were bought
             // it's the same for selling(5) to selling(3) if 2 were sold
-            trade.goods.Quantity -= sale_quantity;
-            o.goods.Quantity -= sale_quantity;
+            trade.Goods.Quantity -= sale_quantity;
+            o.Goods.Quantity -= sale_quantity;
         }
 
         // Remove all fulfilled orders
-        trades.RemoveAll(s => s.goods.Quantity <= 0.001f);
+        trades.RemoveAll(s => s.Goods.Quantity <= 0.001f);
         
-        if (amountBoughtOrSold < o.goods.Quantity)
+        if (amountBoughtOrSold < o.Goods.Quantity)
             return false;
         return true;
     }
@@ -196,21 +205,21 @@ public class Market
     // Returns false if the order could not be placed (e.g. not enough money)
     public bool PlaceBuyOrder(MarketOrder o)
     {
-        float unitPrice = GetPrice(o.goods.GetId());
+        float unitPrice = GetPrice(o.Goods.GetId());
 
         // Requestor cannot afford his order
-        if (o.requestor.Money < o.goods.Quantity * unitPrice)
+        if (o.Requestor.Money < o.Goods.Quantity * unitPrice)
             return false;
         
         if (!AttemptTransact(o))
         {
-            List<MarketOrder> orders = GetBuyOrders(o.goods.GetId());
+            List<MarketOrder> orders = GetBuyOrders(o.Goods.GetId());
 
             // If there are no orders for the good, add it
             if (orders == null)
             {
                 orders = new();
-                BuyOrders[o.goods.GetId()] = orders;
+                BuyOrders[o.Goods.GetId()] = orders;
             }
             orders.Add(o);
         }
@@ -220,7 +229,7 @@ public class Market
     public void CancelBuyOrder(Person p, int goodsId)
     {
         List<MarketOrder> orders = GetBuyOrders(goodsId);
-        orders.RemoveAll(order => order.requestor == p);
+        orders.RemoveAll(order => order.Requestor == p);
     }
 
     // Get the price of one unit of the given good, plus taxes
@@ -241,16 +250,16 @@ public class Market
     {
         if (!AttemptTransact(o))
         {
-            List<MarketOrder> orders = GetSellOrders(o.goods.GetId());
+            List<MarketOrder> orders = GetSellOrders(o.Goods.GetId());
 
             // Remove the goods from the seller's inventory
-            o.requestor.PersonalStockpile.Take(o.goods);
+            o.Requestor.PersonalStockpile.Take(o.Goods);
 
             // If there are no orders for the good, add it
             if (orders == null)
             {
                 orders = new();
-                SellOrders[o.goods.GetId()] = orders;
+                SellOrders[o.Goods.GetId()] = orders;
             }
             orders.Add(o);
         }
@@ -262,6 +271,6 @@ public class Market
         List<MarketOrder> orders = GetSellOrders(goodsId);
         if (orders == null)
             return;
-        orders.RemoveAll(order => order.requestor == p);
+        orders.RemoveAll(order => order.Requestor == p);
     }
 }
