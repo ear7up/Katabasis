@@ -181,7 +181,7 @@ public class GoodsInfo
                 {
                     case Goods.MaterialPlant.WOOD: DefaultPrice = 1.8f; break;
                     case Goods.MaterialPlant.FLAX: DefaultPrice = 2f; break;
-                    case Goods.MaterialPlant.PAPYRUS: DefaultPrice = 1.6f; break;
+                    case Goods.MaterialPlant.REEDS: DefaultPrice = 1.6f; break;
                 }
                 break;
             }

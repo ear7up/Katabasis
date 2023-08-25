@@ -1,5 +1,7 @@
+using Microsoft.VisualBasic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ProfessionExtension;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -45,6 +47,7 @@ public class Person : Entity, Drawable
     public float Age { get; set; }
     public int Hunger { get; set; }
     public float Money { get; set; }
+    public ProfessionType Profession { get; set; }
     private float[,] Demand { get; set; }
     public Stockpile PersonalStockpile { get; set; }
     // Tasks are being serialized with only the Task fields, not the proper subclass fields
@@ -75,6 +78,7 @@ public class Person : Entity, Drawable
         SetImage(image);
         Name = NameGenerator.Random(Gender);
         Age = Globals.Rand.Next(10, 50);
+        Profession = ProfessionType.NONE;
         House = null;
         SearchingForHouse = false;
         BuildingUsing = null;
@@ -136,8 +140,9 @@ public class Person : Entity, Drawable
     {
         string description = 
             $"Name: {Name}\n" + 
-            $"Age: {Age}\n" + 
-            $"Money: ${Money}\n" + 
+            $"Age: {Age:0.0}\n" + 
+            $"Profession: {Profession.Describe()}\n" + 
+            $"Money: ${Money:0.0}\n" + 
             $"Hunger: {Hunger}";
         return description;
     }
@@ -184,16 +189,9 @@ public class Person : Entity, Drawable
 
         if (r < 1f)
         {
-            // TODO: Perhaps try random using inventory?
-
-            // TODO: cook food at home if there are raw ingredients
-
             // Pick a skill, biased toward high-level skills, then pick a task that uses that skill
+            AdjustSkillWeights();
             SkillLevel weightedRandomChoice = Skills.Next();
-            
-            // When a person starts starving, they will only think about producing food
-            if (Hunger >= STARVING)
-                weightedRandomChoice = Skills[(int)Skill.COOKING];
 
             Task task = Task.RandomUsingSkill(weightedRandomChoice);
             Tasks.Enqueue(task);
@@ -202,6 +200,31 @@ public class Person : Entity, Drawable
         {
             Tasks.Enqueue(new IdleAtHomeTask());
         }
+    }
+
+    public void AdjustSkillWeights()
+    {
+        // Increase chance to pick a cooking task according to Hunger
+        // scales from 1x to 4x cooking level based on hunger
+        SkillLevel cooking = Skills[(int)Skill.COOKING];
+        Skills.SetWeightAtIndex((int)Skill.COOKING, cooking.level * (1 + (3 * Hunger / STARVED_TO_DEATH)));
+
+        // 2x likelihood of choosing a task related to the skill used by your profession
+        if ((int)Profession <= (int)Skill.NONE)
+        {
+            SkillLevel profession = Skills[(int)Profession];
+            Skills.SetWeightAtIndex((int)profession.skill, 3 * profession.level);
+        }
+
+        // Recalculate after adjusting weights, including from level-ups
+        Skills.Recalculate();
+    }
+
+    public void GainExperience(int skillId, float exp)
+    {
+        // If skill leveled up, update weights but do not Recalculate (unnecessary)
+        if (Skills[skillId].GainExperience(exp) > 0)
+            Skills.SetWeightAtIndex(skillId, Skills[skillId].level);
     }
 
     public void AssignPriorityTask(Task task, int priority)
@@ -253,6 +276,9 @@ public class Person : Entity, Drawable
         // Change sprites based on total level (simply cosmetic)
         TotalLevelCheck();
 
+        // Change profession based on skills
+        ProfessionCheck();
+
         // If you have a house, go there, desposit your inventory, then try to cook
         if (House != null && Home != null)
             DailyHomeTasks();
@@ -274,6 +300,7 @@ public class Person : Entity, Drawable
         Tasks.Enqueue(go);
         Tasks.Enqueue(new DepositInventoryTask());
         Tasks.Enqueue(new CookTask());
+        Tasks.Enqueue(new EatTask());
         Tasks.Enqueue(new SellAtMarketTask());
     }
 
@@ -317,6 +344,17 @@ public class Person : Entity, Drawable
             SetImage((Gender == GenderType.MALE) ? Sprites.ManG : Sprites.WomanG);
         else if (sum >= 300)
             SetImage((Gender == GenderType.MALE) ? Sprites.ManS : Sprites.WomanS);
+    }
+
+    // Pick the highest skill as the person's profession
+    public void ProfessionCheck()
+    {
+        SkillLevel max = Skills[0];
+        foreach (SkillLevel skillLevel in Skills._list)
+            if (skillLevel.level > max.level)
+                max = skillLevel;
+        
+        Profession = (ProfessionType)max.skill;
     }
 
     // Takes excess goods from person's home and adds to their personal stockpile

@@ -1,7 +1,7 @@
 public class ProductionRequirements
 {
     public SkillLevel SkillRequirement;
-    public Goods.Tool ToolRequirement;
+    public ToolRequirement ToolRequirement;
     public ToolMaterial ToolTypeRequirement;
     public TileType TileRequirement;
     public BuildingType BuildingRequirement;
@@ -10,8 +10,7 @@ public class ProductionRequirements
 
     public ProductionRequirements(
         SkillLevel levelRequirement = null, 
-        Goods.Tool toolRequirement = Goods.Tool.NONE,
-        ToolMaterial toolTypeRequirement = ToolMaterial.NONE,
+        ToolRequirement toolRequirement = null,
         TileType tileRequirement = TileType.NONE,
         BuildingType buildingRequirement = BuildingType.NONE,
         BuildingSubType buildingSubTypeRequirement = BuildingSubType.NONE,
@@ -19,7 +18,6 @@ public class ProductionRequirements
     {
         SkillRequirement = levelRequirement;
         ToolRequirement = toolRequirement;
-        ToolTypeRequirement = toolTypeRequirement;
         TileRequirement = tileRequirement;
         BuildingRequirement = buildingRequirement;
         BuildingSubTypeRequirement = buildingSubTypeRequirement;

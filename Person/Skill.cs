@@ -41,19 +41,23 @@ public class SkillLevel
         SkillLevel s = new();
         s.SetAttributes(skill, level);
         return s;
-    }
+    }   
 
     public override string ToString()
     {
         return $"{skill}:{level}";
     }
 
-    public void GainExperience(float xp)
+    public int GainExperience(float xp)
     {
         float r = Globals.Rand.NextFloat(0f, 1f);
 
         // E.g. if making 20 units of 1xp goods, chance is 10% + 20% = 30% to gain a level
         if (r < SkillLevel.INCREASE_CHANCE + (xp / 100))
+        {
             level = Math.Min(level + 1, 100);
+            return 1;
+        }
+        return 0;
     }
 }

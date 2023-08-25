@@ -116,7 +116,7 @@ public class Goods
 
     public enum MaterialPlant
     {
-        FLAX, WOOD, PAPYRUS
+        FLAX, WOOD, REEDS
     }
 
     public enum MaterialNatural
@@ -129,7 +129,7 @@ public class Goods
     public enum Crafted
     {
         CLOTHING, BRICKS, LINEN, COMBS, JEWELRY, POTTERY, STATUES, 
-        INSTRUMENTS, YARN, LEATHER
+        INSTRUMENTS, YARN, LEATHER, PAPYRUS
     }
 
     public enum War
@@ -187,8 +187,8 @@ public class Goods
     public static Goods FromId(int id, float quantity = 1)
     {
         int type = id / MAX_GOODS_PER_CATEGORY;
-        int materialType = (type % MAX_GOODS_PER_CATEGORY) / MAX_GOODS_PER_MATERIAL;
-        int subType = (id % MAX_GOODS_PER_CATEGORY) % MAX_GOODS_PER_MATERIAL;
+        int materialType = id % MAX_GOODS_PER_CATEGORY / MAX_GOODS_PER_MATERIAL;
+        int subType = id % MAX_GOODS_PER_CATEGORY % MAX_GOODS_PER_MATERIAL;
         return new Goods((GoodsType)type, subType, quantity, materialType);
     }
 

@@ -152,7 +152,7 @@ public class WeightedList<T>
     public void SetWeightAtIndex(int index, int newWeight)
     {
         _weights[index] = FixWeight(newWeight);
-        Recalculate();
+        //Recalculate();
     }
 
     public int GetWeightAtIndex(int index) => _weights[index];
@@ -185,7 +185,7 @@ public class WeightedList<T>
     /// <summary>
     /// https://www.keithschwarz.com/darts-dice-coins/
     /// </summary>
-    private void Recalculate()
+    public void Recalculate()
     {
         _totalWeight = 0;
         _areAllProbabilitiesIdentical = false;

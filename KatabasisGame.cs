@@ -74,9 +74,11 @@ public class KatabasisGame : Game
         MediaPlayer.MediaStateChanged += SongRestarted;
 
         Goods.CalcGoodsTypecounts();
+        GoodsInfo.Init();
+
+        // GoodsProduction relies on GoodsInfo.Init
         GoodsProduction.Init();
         BuildingProduction.Init();
-        GoodsInfo.Init();
         MineralInfo.Init();
         BuildingInfo.Init();
 

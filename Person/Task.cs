@@ -366,12 +366,22 @@ public class SourceGoodsTask : Task
         int id = GoodsRequest.GetId();
         
         // Goods already in the person's inventory (accept partial for tools)
-        if ((GoodsRequest.IsTool() && p.PersonalStockpile.HasSome(GoodsRequest)) || 
-            p.PersonalStockpile.Has(GoodsRequest))
+        if (GoodsRequest.IsTool())
+        {
+            ToolMaterial material = p.PersonalStockpile.HasToolOrBetter(GoodsRequest);
+            if (material != ToolMaterial.NONE)
+            {
+                Status.Complete = true;
+                return Status;
+            }
+        }
+        else if (p.PersonalStockpile.Has(GoodsRequest))
         {
             Status.Complete = true;
             return Status;
         }
+
+        // TODO: support taking tool or better version from house or market
 
         // Remove goods from house and add to personal inventory
         if (p.House != null && p.House.Stockpile.Has(GoodsRequest))
@@ -528,13 +538,19 @@ public class TryToProduceTask : Task
     // adds goods to the person's stockpile, always returns true
     public override bool Complete(Person p)
     {
+        if (Requirements == null)
+        {
+            Console.Write("Failed to complete production task, requirements lookup null for " + Goods.ToString());
+            return true;
+        }
+
         // If the task required a skill, give it a chance to increase the skill by 1
         if (Requirements.SkillRequirement != null)
         {
             float r = Globals.Rand.NextFloat(0f, 1f);
             int skill = (int)Requirements.SkillRequirement.skill;
             float experience = GoodsInfo.GetExperience(Goods) * Goods.Quantity;
-            p.Skills[skill].GainExperience(experience);
+            p.GainExperience(skill, experience);
         }
 
         // Reduce the quantity of minerals by mining
@@ -551,7 +567,7 @@ public class TryToProduceTask : Task
         // Reduce the number of wild animals when hunting
         if (ReqTile != null)
         {
-            if (ReqTile.Type == TileType.FOREST && Requirements.ToolRequirement == Goods.Tool.AXE)
+            if (ReqTile.Type == TileType.FOREST && Requirements.ToolRequirement.Tool == Goods.Tool.AXE)
                 ReqTile.TakeResource();
             else if (ReqTile.Type == TileType.WILD_ANIMAL || ReqTile.Type == TileType.ELEPHANT)
                 ReqTile.TakeResource();
@@ -573,8 +589,8 @@ public class TryToProduceTask : Task
         Goods.Quantity = minQty;
 
         // If a tool was used, decrement its durability
-        if (Requirements.ToolRequirement != Goods.Tool.NONE)
-            p.PersonalStockpile.UseTool(Requirements.ToolRequirement, Requirements.ToolTypeRequirement);
+        if (Requirements.ToolRequirement != null)
+            p.PersonalStockpile.UseTool(Requirements.ToolRequirement.Tool, Requirements.ToolRequirement.Material);
 
         // Finish by adding the completed goods to the person's stockpile
         p.PersonalStockpile.Add(Goods);
@@ -585,6 +601,13 @@ public class TryToProduceTask : Task
 
     public TaskStatus Init(Person p)
     {
+        if (Requirements == null)
+        {
+            Console.Write("Requirements lookup failed for " + Goods.ToString());
+            Status.Failed = true;
+            return Status;
+        }
+
         Initialized = true;
 
         BuildingType bReq = Requirements.BuildingRequirement;
@@ -592,10 +615,10 @@ public class TryToProduceTask : Task
         TileType tReq = Requirements.TileRequirement;
 
         // Queue up subtasks to find all the necessary prerequisites to produce the good
-        if (Requirements.ToolRequirement != Goods.Tool.NONE)
+        if (Requirements.ToolRequirement != null)
         {
             SourceGoodsTask task = new SourceGoodsTask();
-            task.SetAttributes(new Goods(GoodsType.TOOL, (int)Requirements.ToolRequirement, 1));
+            task.SetAttributes(new Goods(GoodsType.TOOL, (int)Requirements.ToolRequirement.Tool, 1, (int)Requirements.ToolRequirement.Material));
             subTasks.Enqueue(task);
         }
 
@@ -934,10 +957,10 @@ public class TryToBuildTask : Task
         BuildingType = buildingType;
         ProductionRequirements reqs = (ProductionRequirements)BuildingProduction.Requirements[BuildingType];
 
-        if (reqs.ToolRequirement != Goods.Tool.NONE)
+        if (reqs.ToolRequirement != null)
         {
             SourceGoodsTask task = new();
-            task.SetAttributes(new Goods(GoodsType.TOOL, (int)reqs.ToolRequirement));
+            task.SetAttributes(new Goods(GoodsType.TOOL, (int)reqs.ToolRequirement.Tool, (int)reqs.ToolRequirement.Material));
             subTasks.Enqueue(task);
         }
 

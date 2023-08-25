@@ -55,6 +55,24 @@ public class GoodsRequirement
     }
 }
 
+public class ToolRequirement
+{
+    public Goods.Tool Tool;
+    public ToolMaterial Material;
+
+    public ToolRequirement(Goods.Tool tool = Goods.Tool.NONE, ToolMaterial material = ToolMaterial.NONE)
+    {
+        Tool = tool;
+        Material = material;
+
+        // No such thing as a "none" pickaxe, for example, so convert these to stone
+        if (GoodsInfo.GetHasMaterial(Goods.GetId(GoodsType.TOOL, (int)tool, (int)material)) & material == ToolMaterial.NONE)
+        {
+            Material = ToolMaterial.STONE;
+        }
+    }
+}
+
 public class GoodsProduction
 {
     public static Hashtable Requirements;
@@ -102,7 +120,7 @@ public class GoodsProduction
                 new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.LINEN),
                 new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.YARN),
                 new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.LEATHER)),
-            toolRequirement: Goods.Tool.SEWING_KIT,
+            toolRequirement: new ToolRequirement(Goods.Tool.SEWING_KIT),
             levelRequirement: SkillLevel.Create(Skill.CRAFTING, 30)));
 
         // Ivory combs? I'm guessing they're hard to make, so high crafting skill
@@ -110,7 +128,7 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(new Goods(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.IVORY)),
             levelRequirement: SkillLevel.Create(Skill.CRAFTING, 60),
-            toolRequirement: Goods.Tool.KNIFE));
+            toolRequirement: new ToolRequirement(Goods.Tool.KNIFE)));
 
         // Instruments are VERY hard to make, made from wood, bone, or ivory
         g.SubType = (int)Goods.Crafted.INSTRUMENTS;
@@ -119,7 +137,7 @@ public class GoodsProduction
                 new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD),
                 new Goods(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.BONE),
                 new Goods(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.IVORY)),
-            toolRequirement: Goods.Tool.KNIFE,
+            toolRequirement: new ToolRequirement(Goods.Tool.KNIFE),
             levelRequirement: SkillLevel.Create(Skill.CRAFTING, 80)));
 
         // Hard to make, requieres hammer, possibly also a chisel?
@@ -130,7 +148,7 @@ public class GoodsProduction
                 new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.LAPIS_LAZULI),
                 new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.MALACHITE),
                 new Goods(GoodsType.SMITHED, (int)Goods.Smithed.SILVER)),
-            toolRequirement: Goods.Tool.HAMMER,
+            toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
             levelRequirement: SkillLevel.Create(Skill.CRAFTING, 70)));
 
         // Leather requires animal hides, should it require a tannery building?
@@ -138,7 +156,7 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.HIDE)),
-            toolRequirement: Goods.Tool.HAMMER,
+            toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
             levelRequirement: SkillLevel.Create(Skill.CRAFTING, 40)));
 
         // Linen is crafted from flax using a loom, pretty easy
@@ -146,7 +164,7 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.FLAX)),
-            toolRequirement: Goods.Tool.LOOM,
+            toolRequirement: new ToolRequirement(Goods.Tool.LOOM),
             levelRequirement: SkillLevel.Create(Skill.CRAFTING, 20)));
         
         // Pottery is made from clay, very easy
@@ -170,7 +188,7 @@ public class GoodsProduction
 
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: statueMaterials,
-            toolRequirement: Goods.Tool.CHISEL,
+            toolRequirement: new ToolRequirement(Goods.Tool.CHISEL),
             levelRequirement: SkillLevel.Create(Skill.CRAFTING, 50)));
 
         // Wool + loom -> yarn
@@ -178,8 +196,15 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.WOOL)),
-            toolRequirement: Goods.Tool.LOOM,
+            toolRequirement: new ToolRequirement(Goods.Tool.LOOM),
             levelRequirement: SkillLevel.Create(Skill.CRAFTING, 10)));
+
+        // crafting: reeds + knife -> papyrus
+        g.SubType = (int)Goods.Crafted.PAPYRUS;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.REEDS)),
+            toolRequirement: new ToolRequirement(Goods.Tool.KNIFE)));
 
         g.Type = GoodsType.FOOD_ANIMAL;
 
@@ -275,7 +300,7 @@ public class GoodsProduction
             g.SubType = (int)type;
             Requirements.Add(g.GetId(), new ProductionRequirements(
                 buildingRequirement: BuildingType.FARM,
-                toolRequirement: Goods.Tool.HOE,
+                toolRequirement: new ToolRequirement(Goods.Tool.HOE),
                 levelRequirement: SkillLevel.Create(Skill.FARMING, 20)));
         }
 
@@ -286,7 +311,7 @@ public class GoodsProduction
         r.BuildingRequirement = BuildingType.NONE;
         r.SkillRequirement = SkillLevel.Create(Skill.COOKING, 1);
         r.TileRequirement = TileType.VEGETATION;
-        r.ToolRequirement = Goods.Tool.NONE;
+        r.ToolRequirement = null;
 
         g.Type = GoodsType.FOOD_PROCESSED;
 
@@ -339,7 +364,7 @@ public class GoodsProduction
         // hunting: spear + elephant -> ivory
         g.SubType = (int)Goods.MaterialAnimal.IVORY;
         Requirements.Add(g.GetId(), new ProductionRequirements(
-            toolRequirement: Goods.Tool.SPEAR,
+            toolRequirement: new ToolRequirement(Goods.Tool.SPEAR),
             tileRequirement: TileType.ELEPHANT,
             levelRequirement: SkillLevel.Create(Skill.HUNTING, 40)));
 
@@ -367,7 +392,7 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
             buildingSubTypeRequirement: BuildingSubType.LAPIS_LAZULI_MINE,
-            toolRequirement: Goods.Tool.PICKAXE,
+            toolRequirement: new ToolRequirement(Goods.Tool.PICKAXE, ToolMaterial.COPPER),
             levelRequirement: SkillLevel.Create(Skill.MINING, 60)));
 
         // mining: hills + pickaxe + mine -> malachite
@@ -375,14 +400,14 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
             buildingSubTypeRequirement: BuildingSubType.MALACHITE_MINE,
-            toolRequirement: Goods.Tool.PICKAXE,
+            toolRequirement: new ToolRequirement(Goods.Tool.PICKAXE, ToolMaterial.COPPER),
             levelRequirement: SkillLevel.Create(Skill.MINING, 50)));
 
         // mining: volcano + pickaxe -> obsidian (extremely rare in Egypt)
         g.SubType = (int)Goods.MaterialNatural.OBSIDIAN;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             tileRequirement: TileType.DORMANT_VOLCANO,
-            toolRequirement: Goods.Tool.PICKAXE,
+            toolRequirement: new ToolRequirement(Goods.Tool.PICKAXE),
             levelRequirement: SkillLevel.Create(Skill.MINING, 10)));
 
         // mining: hills + pickaxe + mine -> raw copper
@@ -390,7 +415,7 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
             buildingSubTypeRequirement: BuildingSubType.COPPER_MINE,
-            toolRequirement: Goods.Tool.PICKAXE,
+            toolRequirement: new ToolRequirement(Goods.Tool.PICKAXE),
             levelRequirement: SkillLevel.Create(Skill.MINING, 20)));
 
         // mining: hills + pickaxe + mine -> raw gold
@@ -398,7 +423,7 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
             buildingSubTypeRequirement: BuildingSubType.GOLD_MINE,
-            toolRequirement: Goods.Tool.PICKAXE,
+            toolRequirement: new ToolRequirement(Goods.Tool.PICKAXE, ToolMaterial.COPPER),
             levelRequirement: SkillLevel.Create(Skill.MINING, 60)));
 
         // mining: hills + pickaxe + mine -> raw iron
@@ -406,7 +431,7 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
             buildingSubTypeRequirement: BuildingSubType.IRON_MINE,
-            toolRequirement: Goods.Tool.PICKAXE,
+            toolRequirement: new ToolRequirement(Goods.Tool.PICKAXE, ToolMaterial.COPPER),
             levelRequirement: SkillLevel.Create(Skill.MINING, 30)));
 
         // mining: hills + pickaxe + mine -> raw lead
@@ -414,7 +439,7 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
             buildingSubTypeRequirement: BuildingSubType.LEAD_MINE,
-            toolRequirement: Goods.Tool.PICKAXE,
+            toolRequirement: new ToolRequirement(Goods.Tool.PICKAXE, ToolMaterial.COPPER),
             levelRequirement: SkillLevel.Create(Skill.MINING, 20)));
 
         // mining: hills + pickaxe + mine -> raw silver
@@ -422,7 +447,7 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
             buildingSubTypeRequirement: BuildingSubType.SILVER_MINE,
-            toolRequirement: Goods.Tool.PICKAXE,
+            toolRequirement: new ToolRequirement(Goods.Tool.PICKAXE, ToolMaterial.COPPER),
             levelRequirement: SkillLevel.Create(Skill.MINING, 50)));
 
         // mining: hills + pickaxe + mine -> raw tin
@@ -430,7 +455,7 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
             buildingSubTypeRequirement: BuildingSubType.TIN_MINE,
-            toolRequirement: Goods.Tool.PICKAXE,
+            toolRequirement: new ToolRequirement(Goods.Tool.PICKAXE),
             levelRequirement: SkillLevel.Create(Skill.MINING, 10)));
 
         // mining: hills + pickaxe + mine -> salt
@@ -438,14 +463,14 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
             buildingSubTypeRequirement: BuildingSubType.SALT_MINE,
-            toolRequirement: Goods.Tool.PICKAXE,
+            toolRequirement: new ToolRequirement(Goods.Tool.PICKAXE),
             levelRequirement: SkillLevel.Create(Skill.MINING, 10)));
 
         // mining: hills + pickaxe + mine -> sandstone
         g.SubType = (int)Goods.MaterialNatural.SANDSTONE;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.MINE,
-            toolRequirement: Goods.Tool.PICKAXE,
+            toolRequirement: new ToolRequirement(Goods.Tool.PICKAXE),
             levelRequirement: SkillLevel.Create(Skill.MINING, 10)));
 
         // (simple gathering) hills -> stone
@@ -460,7 +485,7 @@ public class GoodsProduction
         g.SubType = (int)Goods.MaterialPlant.WOOD;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             tileRequirement: TileType.FOREST,
-            toolRequirement: Goods.Tool.AXE,
+            toolRequirement: new ToolRequirement(Goods.Tool.AXE),
             levelRequirement: SkillLevel.Create(Skill.FORESTRY, 10)));
 
         // farming: farm -> flax
@@ -469,8 +494,8 @@ public class GoodsProduction
             buildingRequirement: BuildingType.FARM,
             levelRequirement: SkillLevel.Create(Skill.FARMING, 20)));
 
-        // gathering: river -> papyrus
-        g.SubType = (int)Goods.MaterialPlant.PAPYRUS;
+        // gathering: river -> reeds
+        g.SubType = (int)Goods.MaterialPlant.REEDS;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             tileRequirement: TileType.RIVER));
 
@@ -494,14 +519,14 @@ public class GoodsProduction
         g.SubType = (int)Goods.RawMeat.RAW_FISH;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             tileRequirement: TileType.RIVER,
-            toolRequirement: Goods.Tool.FISHING_NET,
+            toolRequirement: new ToolRequirement(Goods.Tool.FISHING_NET),
             levelRequirement: SkillLevel.Create(Skill.FISHING, 10)));
 
         // hunting: wild animals + spear -> raw game
         g.SubType = (int)Goods.RawMeat.RAW_GAME;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             tileRequirement: TileType.WILD_ANIMAL,
-            toolRequirement: Goods.Tool.SPEAR,
+            toolRequirement: new ToolRequirement(Goods.Tool.SPEAR),
             levelRequirement: SkillLevel.Create(Skill.HUNTING, 10)));
 
         // farming: RANCH + goose -> raw goose
@@ -601,21 +626,55 @@ public class GoodsProduction
 
         g.Type = GoodsType.TOOL;
 
-        // For now, allow tools to be made of stone only with no tools required
-        // smithing: [iron OR bronze OR copper] + smithy + hammer -> tool
+        // smithing: stone -> stone tool
+        // smithing: [iron OR bronze OR copper] + smithy + hammer -> metal tool
         foreach (Goods.Tool type in Enum.GetValues(typeof(Goods.Tool)))
         {
             g.SubType = (int)type;
-            Requirements.Add(g.GetId(), new ProductionRequirements(
-                goodsRequirement: new GoodsRequirement(
-                    new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.STONE)),
-                    //new Goods(GoodsType.SMITHED, (int)Goods.Smithed.IRON),
-                    //new Goods(GoodsType.SMITHED, (int)Goods.Smithed.BRONZE),
-                    //new Goods(GoodsType.SMITHED, (int)Goods.Smithed.COPPER)),
-                //buildingRequirement: BuildingType.SMITHY,
-                //toolRequirement: Goods.Tool.HAMMER,
-                levelRequirement: SkillLevel.Create(Skill.SMITHING, 10)));
+
+            List<int> materials = Goods.GetMaterials((int)g.Type, g.SubType);
+
+            // Note: GetMaterials will return materialType = 0 for non-metal tools
+            foreach (int materialType in materials)
+            {
+                g.Material = materialType;
+                int madeFromSubType = 0;
+                switch ((ToolMaterial)materialType)
+                {
+                    case ToolMaterial.COPPER: madeFromSubType = (int)Goods.Smithed.COPPER; break;
+                    case ToolMaterial.BRONZE: madeFromSubType = (int)Goods.Smithed.BRONZE; break;
+                    case ToolMaterial.IRON: madeFromSubType = (int)Goods.Smithed.IRON; break;
+                    default: madeFromSubType = (int)Goods.MaterialNatural.STONE; break;
+                }
+
+                BuildingType buildingReq = BuildingType.NONE;
+                ToolRequirement toolReq = null;
+                int levelReq = 10;
+
+                // Stone tools require no building or tool to make
+                // Metal tools require a smithy and hammer
+                GoodsType madeFromType = GoodsType.MATERIAL_NATURAL;
+                if ((ToolMaterial)materialType != ToolMaterial.STONE)
+                {
+                    madeFromType = GoodsType.SMITHED;
+                    buildingReq = BuildingType.SMITHY;
+                    toolReq = new ToolRequirement(Goods.Tool.HAMMER);
+                    levelReq = 15 * (int)materialType;
+                }
+
+                ToolRequirement tReq = null;
+
+                Requirements.Add(g.GetId(), new ProductionRequirements(
+                    goodsRequirement: new GoodsRequirement(
+                        new Goods((GoodsType)madeFromType, madeFromSubType)),
+                    buildingRequirement: buildingReq,
+                    toolRequirement: toolReq,
+                    levelRequirement: SkillLevel.Create(Skill.SMITHING, levelReq)));
+            }
         }
+
+        // Reset material type
+        g.Material = 0;
 
         // Don't let people build the "NONE" tool
         g.SubType = (int)Goods.Tool.NONE;
@@ -633,7 +692,7 @@ public class GoodsProduction
         r.GoodsRequirement = new GoodsRequirement(
             new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.Crafted.LINEN));
         r.BuildingRequirement = BuildingType.NONE;
-        r.ToolRequirement = Goods.Tool.SEWING_KIT;
+        r.ToolRequirement = new ToolRequirement(Goods.Tool.SEWING_KIT);
         r.SkillRequirement = SkillLevel.Create(Skill.CRAFTING, 30);
 
         // crafting: bricks -> furnace
@@ -642,7 +701,7 @@ public class GoodsProduction
         r.GoodsRequirement = new GoodsRequirement(
             new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.Crafted.BRICKS));
         r.BuildingRequirement = BuildingType.NONE;
-        r.ToolRequirement = Goods.Tool.NONE;
+        r.ToolRequirement = null;
         r.SkillRequirement = SkillLevel.Create(Skill.CRAFTING, 30);
 
         // crafting: wood -> loom
@@ -651,7 +710,7 @@ public class GoodsProduction
         r.GoodsRequirement = new GoodsRequirement(
             new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialPlant.WOOD));
         r.BuildingRequirement = BuildingType.NONE;
-        r.ToolRequirement = Goods.Tool.SAW;
+        r.ToolRequirement = new ToolRequirement(Goods.Tool.SAW);
         r.SkillRequirement = SkillLevel.Create(Skill.CRAFTING, 30);
 
         g.Type = GoodsType.WAR_GOODS;
@@ -666,7 +725,7 @@ public class GoodsProduction
                     new Goods(GoodsType.SMITHED, (int)Goods.Smithed.BRONZE),
                     new Goods(GoodsType.SMITHED, (int)Goods.Smithed.COPPER)),
                 buildingRequirement: BuildingType.SMITHY,
-                toolRequirement: Goods.Tool.HAMMER,
+                toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
                 levelRequirement: SkillLevel.Create(Skill.SMITHING, 30)));
         }
 
@@ -676,7 +735,7 @@ public class GoodsProduction
         r.GoodsRequirement = new GoodsRequirement(
             new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.LEATHER));
         r.BuildingRequirement = BuildingType.NONE;
-        r.ToolRequirement = Goods.Tool.KNIFE;
+        r.ToolRequirement = new ToolRequirement(Goods.Tool.KNIFE);
 
         // shields may also be wood
         g.SubType = (int)Goods.War.SHIELD;

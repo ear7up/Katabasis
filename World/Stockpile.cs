@@ -120,6 +120,18 @@ public class Stockpile
         return true;
     }
 
+    public ToolMaterial HasToolOrBetter(Goods goods)
+    {
+        Goods search = new(goods);
+        foreach (int material in Enum.GetValues(typeof(ToolMaterial)))
+        {
+            search.Material = material;
+            if (material >= goods.Material && HasSome(search))
+                return (ToolMaterial)material;
+        }
+        return ToolMaterial.NONE;
+    }
+
     public void RemoveIfEmpty(Goods goods)
     {
         Goods available = Get(goods.GetId());
@@ -186,10 +198,21 @@ public class Stockpile
 
     public void UseTool(Goods.Tool toolType, ToolMaterial materialType)
     {
-        Goods g = Get(Goods.GetId(GoodsType.TOOL, (int)toolType, (int)materialType));
-        if (g != null)
-            g.Use();
-        else
+        bool used = false;
+        foreach (ToolMaterial material in Enum.GetValues(typeof(ToolMaterial)))
+        {
+            if ((int)material < (int)materialType)
+                continue;
+
+            Goods g = Get(Goods.GetId(GoodsType.TOOL, (int)toolType, (int)material));
+            if (g != null)
+            {
+                g.Use();
+                used = true;
+            }
+        }
+
+        if (!used)
             Console.WriteLine("Failed to use tool " + toolType.ToString());
     }
 }
