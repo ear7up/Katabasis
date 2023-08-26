@@ -266,6 +266,11 @@ public class GoodsInfo
         return Data[g.GetId()].TimeToProduce;
     }
 
+    public static float GetTime(int goodsId)
+    {
+        return Data[goodsId].TimeToProduce;
+    }
+
     public static float GetDecayRate(Goods g)
     {
         return Data[g.GetId()].DecayRate;

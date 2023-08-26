@@ -289,6 +289,9 @@ public class GameManager
         if (InputManager.Paused)
             return;
 
+        // Calculate which tasks are the most profitable
+        GoodsProduction.UpdateProfitability();
+
         Model.Player1.Update();
         Model.TileMap.Update();
         Model.Market.Update();

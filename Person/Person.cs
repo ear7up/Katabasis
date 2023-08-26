@@ -193,7 +193,16 @@ public class Person : Entity, Drawable
             AdjustSkillWeights();
             SkillLevel weightedRandomChoice = Skills.Next();
 
-            Task task = Task.RandomUsingSkill(weightedRandomChoice);
+            Task task = null;
+            
+            const float PROFIT_SEEKING_CHANCE = 0.3f;
+            if (r < PROFIT_SEEKING_CHANCE)
+                task = Task.MostProfitableUsingSkill(weightedRandomChoice);
+
+            // Some skills may have no completable tasks, so have a chance to not get stuck in a loop
+            if (task == null || r >= PROFIT_SEEKING_CHANCE)
+                task = Task.RandomUsingSkill(weightedRandomChoice);
+
             Tasks.Enqueue(task);
         }
         else

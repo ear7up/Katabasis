@@ -172,6 +172,9 @@ public class Task
 
         // Production tasks (e.g. use farming at a farm building to make food or animal products)
         List<int> goodsIds = GoodsProduction.GetGoodsMadeUsingSkill(s);
+        if (goodsIds.Count == 0)
+            goodsIds = GoodsProduction.GetGoodsMadeUsingSkill(new SkillLevel() { skill = Skill.NONE, level = 100 });
+
         int index = Globals.Rand.Next(goodsIds.Count);
         int id = goodsIds[index];
         Goods goods = Goods.FromId(id);
@@ -180,6 +183,22 @@ public class Task
         TryToProduceTask task = new();
         task.SetAttributes(goods);
         return task;
+    }
+
+    public static Task MostProfitableUsingSkill(SkillLevel s)
+    {
+        int id = GoodsProduction.MostProfitableUsing(s);
+
+        if (id < 0)
+            return null;
+
+        Goods goods = Goods.FromId(id);
+        goods.Quantity = GoodsInfo.GetDefaultProductionQuantity(goods);
+
+        TryToProduceTask task = new();
+        task.SetAttributes(goods);
+        return task;
+
     }
 
     public virtual string Describe(string extra = "", bool debug = true, string depth = "")
@@ -704,7 +723,8 @@ public class TryToProduceTask : Task
         if (Requirements.SkillRequirement != null)
         {
             int skill = (int)Requirements.SkillRequirement.skill;
-            TimeToProduce *= (200 - p.Skills[skill].level) / 200f;
+            //TimeToProduce *= (200 - p.Skills[skill].level) / 200f;
+            TimeToProduce = GoodsProduction.CalculateTimeToProduce(Goods.GetId(), Goods.Quantity, p.Skills[skill].level);
         }
 
         // Modify harvest yield time by soil quality (better near rivers)

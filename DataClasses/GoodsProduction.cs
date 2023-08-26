@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+
 public class GoodsRequirement
 {
     public Hashtable Options;
@@ -77,6 +78,7 @@ public class GoodsProduction
 {
     public static Hashtable Requirements;
     public static Hashtable GoodsBySkill;
+    public static List<List<int>> MostProfitable;
 
     public static string Print()
     {
@@ -89,7 +91,8 @@ public class GoodsProduction
         List<int> produceable = new();
         List<int> goods = (List<int>)GoodsBySkill[skill.skill];
         if (goods == null)
-            goods = (List<int>)GoodsBySkill[Skill.NONE];
+            return produceable;
+
         foreach (int g in goods)
         {
             ProductionRequirements req = (ProductionRequirements)Requirements[g];
@@ -99,10 +102,73 @@ public class GoodsProduction
         return produceable;
     }
 
+    public static int MostProfitableUsing(SkillLevel s)
+    {
+        if ((int)s.skill > MostProfitable.Count)
+            return -1;
+
+        // Ordered by most profitable, so pick the first one allowed by skill level
+        foreach (int goodsId in MostProfitable[(int)s.skill])
+        {
+            SkillLevel req = ((ProductionRequirements)Requirements[goodsId]).SkillRequirement;
+            if (req == null || req.level <= s.level)
+                return goodsId;
+        }
+        return -1;
+    }
+
+    public static float CalculateTimeToProduce(int goodsId, float quantity, int level)
+    {
+        float timeToProduce = GoodsInfo.GetTime(goodsId) * quantity;
+        timeToProduce *= (200 - level) / 200f;
+        return timeToProduce;
+    }
+
+    public static float CalculateProfitability(int goodsId, int level)
+    {
+        float profit = Globals.Market.Prices[goodsId];
+        GoodsRequirement req = ((ProductionRequirements)Requirements[goodsId]).GoodsRequirement;
+
+        float timeToProduce = CalculateTimeToProduce(goodsId, 1f, level);
+
+        // No goods required, pure profit
+        if (req == null)
+            return profit / timeToProduce;
+
+        float cheapestMaterialCost = 99999999f;
+        float materialCost = 0f;
+        foreach (Goods good in req.Options)
+        {
+            float reqPrice = Globals.Market.Prices[good.GetId()];
+            cheapestMaterialCost = Math.Min(cheapestMaterialCost, reqPrice);
+            materialCost += reqPrice;
+        }
+
+        if (req.And)
+            profit -= materialCost;
+        else
+            profit -= cheapestMaterialCost;
+
+        return profit / timeToProduce;
+    }
+
+    public static void UpdateProfitability()
+    {
+        MostProfitable.Clear();
+        for (int skillId = 0; skillId < Enum.GetValues(typeof(Skill)).Length; skillId++)
+        {
+            SkillLevel slevel = new() { skill = (Skill)skillId, level = 100 };
+            List<int> goodsIds = GetGoodsMadeUsingSkill(slevel);
+            goodsIds.OrderBy(x => CalculateProfitability(x, level: 100));
+            MostProfitable.Add(goodsIds);
+        }
+    }
+
     public static void Init()
     {
         Requirements = new();
         GoodsBySkill = new();
+        MostProfitable = new();
 
         // TODO: Set quantity on goods in GoodsRequirement for non 1:1 conversions
 
@@ -661,8 +727,6 @@ public class GoodsProduction
                     toolReq = new ToolRequirement(Goods.Tool.HAMMER);
                     levelReq = 15 * (int)materialType;
                 }
-
-                ToolRequirement tReq = null;
 
                 Requirements.Add(g.GetId(), new ProductionRequirements(
                     goodsRequirement: new GoodsRequirement(
