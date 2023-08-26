@@ -436,7 +436,8 @@ public class Map
             displayType = Tile.DisplayType.BUYING_TILE;
 
         // Draw map tiles
-        for (int n = 0; n < _mapTileSize.X * _mapTileSize.Y; n++)
+        int numTiles = _mapTileSize.X * _mapTileSize.Y;
+        for (int n = 0; n < numTiles; n++)
         {
             tiles[n].Draw(displayType);
 
@@ -444,6 +445,13 @@ public class Map
             //Sprites.Circle.Position = tiles[n].BaseSprite.Position;
             //Sprites.Circle.Draw();
         }
+
+        // Draw fog on top
+        if (!Config.ShowFog)
+            return;
+
+        for (int n = 0; n < numTiles; n++)
+            tiles[n].DrawFog();
     }
 
     public void DrawUI()

@@ -70,6 +70,7 @@ static class Sprites
 	public static List<SpriteTexture> desertBedouinTextures;
 	public static List<SpriteTexture> desertForestTextures;
 	public static List<SpriteTexture> desertRiverTextures;
+	public static List<SpriteTexture> fogTextures;
 
 	public static void Load(ContentManager content)
 	{
@@ -95,6 +96,7 @@ static class Sprites
         desertBedouinTextures = Sprites.LoadTextures("desert/bedouin_camps", 5);
 		desertForestTextures = Sprites.LoadTextures("desert/forest", 5);
 		desertRiverTextures = Sprites.LoadTextures("desert/river", 16);
+		fogTextures = Sprites.LoadTextures("fog", 13);
 
 		// Buildings
 		buildings = LoadTextures("buildings", 48);
@@ -199,6 +201,11 @@ static class Sprites
 	public static SpriteTexture RandomRiver()
 	{
 		return Random(desertRiverTextures);
+	}
+
+	public static SpriteTexture RandomFog()
+	{
+		return Random(fogTextures);	
 	}
 
 	public static SpriteTexture Random(List<SpriteTexture> textures)

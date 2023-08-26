@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -49,6 +50,7 @@ public class Kingdom
     {
         // Start with 25 tiles centered around the start tile, which will contain a market
         AcquireTilesAround(StartTile, distance: 2);
+        ExploreTilesAround(StartTile, distance: 7);
         Building city = Building.CreateBuilding(StartTile, BuildingType.CITY);
         Building market = Building.CreateBuilding(StartTile.Neighbors[0], BuildingType.MARKET);
     }
@@ -77,13 +79,34 @@ public class Kingdom
         return true;
     }
 
+    public void ExploreTilesAround(Tile tile, int distance = 1, bool circular = true)
+    {
+        ActOnTilesAround(ExploreTile, tile, distance, circular);
+    }
+
+    public void ExploreTile(Tile tile)
+    {
+        tile.Explore();
+    }
+
+    public void AcquireTileVoid(Tile tile)
+    {
+        AcquireTile(tile);
+    }
+
     // Be careful not to add the same tile twice to the OwnedTiles list
     public bool AcquireTilesAround(Tile tile, int distance = 1)
     {
-        AcquireTile(tile);
+        return ActOnTilesAround(AcquireTileVoid, tile, distance);
+    }
+
+    public bool ActOnTilesAround(Action<Tile> action, Tile tile, int distance = 1, bool circular = false)
+    {
+        action(tile);
         int num_tiles = (2 * distance + 1) * (2 * distance + 1);
 
         Tile current = tile;
+        Rectangle bounds = tile.BaseSprite.GetBounds();
 
         // Take 1 step NE, then 1 step SE, then 2 steps SW, 2 steps NW, and so on
         // to complete a ring around the starting tile. Keep making larger rings
@@ -96,7 +119,24 @@ public class Kingdom
             for (int j = 0; j < (int)steps && current != null; j++)
             {
                 current = current.Neighbors[direction];
-                AcquireTile(current);
+
+                if (!circular)
+                {
+                    action(current);
+                } 
+                else
+                {
+                    Vector2 tileOrigin = tile.GetPosition() + tile.GetOrigin();
+                    Vector2 currentOrigin = current.GetPosition() + tile.GetOrigin();
+
+                    if (Math.Abs(tileOrigin.X - currentOrigin.X) < bounds.Width * (distance - 1.5) &&
+                        Math.Abs(tileOrigin.Y - currentOrigin.Y) < bounds.Height * (distance - 2.4))
+                    {
+                        action(current);
+                    }
+                }
+                    
+
                 if (++i >= num_tiles)
                     break;
             }

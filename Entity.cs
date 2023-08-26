@@ -26,6 +26,7 @@ public abstract class Entity
     public Vector2 Velocity { get; set; }
     public float Orientation { get; set; }
     public float Scale { get; set; }
+    public bool Hidden { get; set; }
 
     private Rectangle Bounds;
 
@@ -71,6 +72,7 @@ public abstract class Entity
 
     public virtual void Draw()
     {
-        Globals.SpriteBatch.Draw(image, Position, null, color, Orientation, Size / 2f, Scale, 0, 0);
+        if (!Hidden)
+            Globals.SpriteBatch.Draw(image, Position, null, color, Orientation, Size / 2f, Scale, 0, 0);
     }
 }

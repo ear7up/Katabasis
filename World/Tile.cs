@@ -58,6 +58,8 @@ public class Tile
     public MineralType Minerals { get; set; }
     public float BaseResourceQuantity { get; set; }
     public float CurrentResourceQuantity { get; set; }
+    public bool Explored { get; set; }
+    public Sprite FogSprite { get; set; }
 
     // Can't be saved due to cycle resolution error
     [JsonIgnore]
@@ -74,6 +76,7 @@ public class Tile
         Minerals = MineralType.NONE;
         BaseResourceQuantity = 0f;
         CurrentResourceQuantity = 0f;
+        Explored = false;
     }
 
     public static Cardinal GetOppositeDirection(Cardinal direction)
@@ -121,6 +124,9 @@ public class Tile
             BaseSoilQuality += VEGETATION_SOIL_QUALITY_BONUS;
 
         SoilQuality = BaseSoilQuality;
+
+        FogSprite = Sprite.Create(Sprites.RandomFog(), position);
+        FogSprite.SpriteColor = new Color(255f, 255f, 255f, 0.85f);
     }
 
     public static bool CanHaveResource(TileType type)
@@ -318,6 +324,14 @@ public class Tile
             BuildingSprite.Draw();
     }
 
+    public void DrawFog()
+    {
+        if (!Explored && FogSprite != null && Config.ShowFog)
+        {
+            FogSprite.Draw();
+        }
+    }
+
     public void Highlight()
     {
         Vector2 pos = BaseSprite.Position;
@@ -413,7 +427,7 @@ public class Tile
             {
                 current = current.Neighbors[direction];
                 match = f.Match(current);
-                if (match != null)
+                if (match != null && (!Config.ShowFog || current.Explored))
                     return match;
 
                 if (++i >= num_tiles)
@@ -426,5 +440,10 @@ public class Tile
                 break;
         }
         return null;
+    }
+
+    public virtual void Explore()
+    {
+        Explored = true;
     }
 }

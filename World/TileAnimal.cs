@@ -102,6 +102,10 @@ public class TileAnimal : Tile
         int numAnimals = Globals.Rand.Next(2, 5);
         for (int i = 0; i < numAnimals; i++)
             Animals.Add(Animal.Create(this, animalTexture));
+
+        if (Config.ShowFog)
+            foreach (Animal animal in Animals)
+                animal.Hidden = true;
     }
 
     // In addition to the base tile behavior, call Update on each animal in the tile
@@ -109,6 +113,17 @@ public class TileAnimal : Tile
     {
         base.Update();
         foreach (Animal animal in Animals)
+        {
+            if (Config.ShowFog && !Explored)
+                animal.Hidden = true;
             animal.Update();
+        }
+    }
+
+    public override void Explore()
+    {
+        base.Explore();
+        foreach (Animal animal in Animals)
+            animal.Hidden = false;
     }
 }

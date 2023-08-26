@@ -91,7 +91,7 @@ public class Sprite
     {
         Globals.SpriteBatch.Draw(
             Texture, Position, null, 
-            SpriteColor, Rotation, 
+            SpriteColor, Rotation,
             (DrawRelativeToOrigin) ? Origin : Vector2.Zero, 
             Scale, SpriteEffects.None, 0f);
     }

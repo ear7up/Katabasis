@@ -274,6 +274,9 @@ public class GameManager
         if (InputManager.XPressed)
             ToggleStatistics(null);
 
+        if (InputManager.FPressed)
+            Config.ShowFog = !Config.ShowFog;
+
         // Calculate the real mouse position by inverting the camera transformations
         InputManager.MousePos = Vector2.Transform(
             InputManager.MousePos, Matrix.Invert(Model.GameCamera.Transform));

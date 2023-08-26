@@ -25,6 +25,7 @@ public static class InputManager
     public static bool BPressed;
     public static bool IPressed;
     public static bool XPressed;
+    public static bool FPressed;
     public static bool PlusPressed;
     public static bool MinusPressed;
     public static bool ShiftHeld;
@@ -175,6 +176,7 @@ public static class InputManager
         BPressed = keyboardState.IsKeyUp(Keys.B) && lastKeyboardState.IsKeyDown(Keys.B);
         IPressed = keyboardState.IsKeyUp(Keys.I) && lastKeyboardState.IsKeyDown(Keys.I);
         XPressed = keyboardState.IsKeyUp(Keys.X) && lastKeyboardState.IsKeyDown(Keys.X);
+        FPressed = keyboardState.IsKeyUp(Keys.F) && lastKeyboardState.IsKeyDown(Keys.F);
         PlusPressed = keyboardState.IsKeyUp(Keys.OemPlus) && lastKeyboardState.IsKeyDown(Keys.OemPlus);
         MinusPressed = keyboardState.IsKeyUp(Keys.OemMinus) && lastKeyboardState.IsKeyDown(Keys.OemMinus);
         
