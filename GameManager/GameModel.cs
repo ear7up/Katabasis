@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Katabasis;
 
 public class GameModel

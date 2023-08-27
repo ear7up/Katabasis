@@ -35,6 +35,8 @@ static class Sprites
 	public static List<SpriteTexture> markets;
 	public static List<SpriteTexture> smithies;
 
+	public static List<SpriteTexture> decorations;
+
 	// Animals
 	public static SpriteTexture Cow;
 	public static SpriteTexture Cat;
@@ -110,6 +112,8 @@ static class Sprites
 		cities = LoadTextures("buildings/city", 2);
 		markets = LoadTextures("buildings/market", 7);
 		smithies = LoadTextures("buildings/smithy", 4);
+
+		decorations = LoadTextures("decorations", 10);
 
 		// Animals
 		Cow = LoadTexture("animals/bull_copper");
@@ -206,6 +210,11 @@ static class Sprites
 	public static SpriteTexture RandomFog()
 	{
 		return Random(fogTextures);	
+	}
+
+	public static SpriteTexture RandomDecoration()
+	{
+		return Random(decorations);
 	}
 
 	public static SpriteTexture Random(List<SpriteTexture> textures)

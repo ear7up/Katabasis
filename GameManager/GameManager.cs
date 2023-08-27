@@ -14,6 +14,7 @@ public class GameManager
 
     private readonly Sprite _sky;
     private TextSprite _coordinateDisplay;
+    private DecorationManager _decorationManager;
     private static TextSprite _debugDisplay;
     private static TextSprite _logoDisplay;
     private static TextSprite _logoDisplay2;
@@ -24,7 +25,6 @@ public class GameManager
     private static TextSprite _statsOverviewText;
     private static UIElement _clockHand;
     private static PersonPanel _personPanel;
-
     public static MarketPanel MarketPanel;
 
     public GameManager()
@@ -34,6 +34,8 @@ public class GameManager
 
         _coordinateDisplay = new(Sprites.Font, hasDropShadow: true);
         _coordinateDisplay.ScaleDown(0.2f);
+
+        _decorationManager = new();
 
         _debugDisplay = new(Sprites.Font);
         _debugDisplay.Position = new Vector2(30f, 30f);
@@ -92,6 +94,9 @@ public class GameManager
         _bottomPanel.SetContent(3, 0, new UIElement(Sprites.markets[0], scale: 0.3f, 
             onClick: BuildMarket, onHover: UI.SetTooltipText, tooltip: "Market"));
 
+        _bottomPanel.SetContent(4, 0, new UIElement(Sprites.decorations[0], scale: 0.5f, 
+            onClick: BuildDecoration, onHover: UI.SetTooltipText, tooltip: "Decoration"));
+
         _bottomPanel.SetContent(0, 1, new UIElement(Sprites.houses[0], scale: 0.3f, 
             onClick: BuildHouse, onHover: UI.SetTooltipText, tooltip: "House"));
         _bottomPanel.SetContent(1, 1, new UIElement(Sprites.barracks[0], scale: 0.3f, 
@@ -143,6 +148,11 @@ public class GameManager
     public void BuildHouse(Object clicked) { Build(BuildingType.HOUSE); }
     public void BuildGranary(Object clicked) { Build(BuildingType.GRANARY); }
     public void BuildSmithy(Object clicked) { Build(BuildingType.SMITHY); }
+
+    public void BuildDecoration(Object clicked)
+    {
+        _decorationManager.NewDecoration();
+    }
 
     public void Build(BuildingType buildingType)
     {
@@ -252,6 +262,7 @@ public class GameManager
     public void Update(GameTime gameTime)
     {
         Globals.Update(gameTime);
+
         Model.GameCamera.UpdateCamera(KatabasisGame.Viewport);
 
         if (InputManager.PlusPressed)
@@ -280,6 +291,11 @@ public class GameManager
         // Calculate the real mouse position by inverting the camera transformations
         InputManager.MousePos = Vector2.Transform(
             InputManager.MousePos, Matrix.Invert(Model.GameCamera.Transform));
+
+        InputManager.WorldMousePos = Vector2.Transform(
+            InputManager.MousePos, Matrix.Invert(Model.GameCamera.Transform));
+
+        _decorationManager.Update(Model.TileMap);
 
         HandlePersonFollowing();
         _personPanel.Update();
@@ -406,6 +422,8 @@ public class GameManager
         // Draw text on top
         foreach (Drawable d in Globals.TextBuffer)
             d.Draw();
+
+        _decorationManager.Draw();
 
         // Draw the UI on top
         Model.TileMap.DrawUI();

@@ -7,6 +7,15 @@ using System.Text.Json.Serialization;
 public class Map
 {
     public Tile[] tiles { get; set; }
+    public List<Sprite> Decorations { get; set; }
+
+    public bool Unused {
+        get { return false; }
+        set { 
+            foreach (Sprite decoration in Decorations)
+                Globals.Ybuffer.Add(decoration);
+        }
+    }
 
     // Computed in constructor from texture
     [JsonIgnore]
@@ -32,6 +41,7 @@ public class Map
     public Map()
     {
         tiles = new Tile[_mapTileSize.X *_mapTileSize.Y];
+        Decorations = new();
 
         // 500x345
         TileSize = new(Sprites.desertTextures[0].Texture.Width, Sprites.desertTextures[0].Texture.Height);
@@ -474,5 +484,11 @@ public class Map
             Console.WriteLine("Failed to find tile at position " + b.Sprite.Position.ToString());
         else if (!Building.ConfirmBuilding(b, t))
             Console.WriteLine("Failed to add building at tile " + t.ToString());
+    }
+
+    public void AddDecoration(Sprite decoration)
+    {
+        Decorations.Add(decoration);
+        Globals.Ybuffer.Add(decoration);
     }
 }

@@ -70,7 +70,7 @@ public class KatabasisGame : Game
         _defaultBGM = Globals.Content.Load<Song>("Desert-City");
         MediaPlayer.Play(_defaultBGM);
         MediaPlayer.IsRepeating = true;
-        MediaPlayer.Volume = 0.2f;
+        MediaPlayer.Volume = Config.MusicVolume;
         MediaPlayer.MediaStateChanged += SongRestarted;
 
         Goods.CalcGoodsTypecounts();

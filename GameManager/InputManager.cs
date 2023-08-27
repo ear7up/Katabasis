@@ -19,6 +19,7 @@ public static class InputManager
     public static object ClickConsumer;
     public static bool ClickAndHold;
     public static bool MouseDown;
+    public static bool RClicked;
 
     // Pressing B no longer toggles build mode, it just toggles the build ui
     // clicking on a building type in the UI is what enables build mode
@@ -46,6 +47,7 @@ public static class InputManager
 
     // Current mouse position, will be corrected for camera transformations by GameManager
     public static Vector2 MousePos = Vector2.Zero;
+    public static Vector2 WorldMousePos = Vector2.Zero;
     public static Vector2 ScreenMousePos = Vector2.Zero;
 
     private static void DetermineMode()
@@ -160,6 +162,9 @@ public static class InputManager
         ClickConsumed = false;
         ClickConsumer = null;
 
+        RClicked = lastMouseState.RightButton == ButtonState.Released && 
+            mouseState.RightButton == ButtonState.Pressed;
+
         ClickAndHold = 
             (mouseState.LeftButton == ButtonState.Pressed && 
             lastMouseState.LeftButton != ButtonState.Pressed);
@@ -200,9 +205,7 @@ public static class InputManager
         }
         
         // Cancel tile mode with right click
-        if (Mode == TILE_MODE && 
-            lastMouseState.RightButton == ButtonState.Released && 
-            mouseState.RightButton == ButtonState.Pressed)
+        if (Mode == TILE_MODE && RClicked)
         {
             SwitchToMode(CAMERA_MODE);
         }

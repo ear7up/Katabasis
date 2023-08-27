@@ -13,7 +13,7 @@ public class SpriteTexture
     }
 }
 
-public class Sprite
+public class Sprite : Drawable
 {
     [JsonIgnore]
     public Texture2D Texture;
