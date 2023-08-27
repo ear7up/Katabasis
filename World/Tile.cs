@@ -224,6 +224,62 @@ public class Tile
         return $"Tile(pos={BaseSprite.Position})";
     }
 
+    public string Describe()
+    {
+        string resource = "";
+        switch (Type)
+        {
+            case TileType.DESERT: resource = "Clay"; break;
+            case TileType.RIVER: resource = "Reeds"; break;
+            case TileType.COW: resource = "Cows"; break;
+            case TileType.DONKEY: resource = "Donkeys"; break;
+            case TileType.DORMANT_VOLCANO: resource = "Obisdian"; break;
+            case TileType.DUCK: resource = "Ducks"; break;
+            case TileType.ELEPHANT: resource = "Elephant"; break;
+            case TileType.FOREST: resource = "Trees"; break;
+            case TileType.FOWL: resource = "Fowl"; break;
+            case TileType.GAZELLE: resource = "Gazelle"; break;
+            case TileType.GOAT: resource = "Goats"; break;
+            case TileType.GOOSE: resource = "Geese"; break;
+            case TileType.HILLS: resource = "Stone"; break;
+            case TileType.PIG: resource = "Pigs"; break;
+            case TileType.QUAIL: resource = "Quail"; break;
+            case TileType.SHEEP: resource = "Sheep"; break;
+            case TileType.VEGETATION: resource = "Edible plants"; break;
+            case TileType.WILD_ANIMAL: resource = "Wild game"; break;
+        }
+
+        if (Minerals != MineralType.NONE)
+            resource = Globals.Title(Minerals.ToString());
+
+        string buildingsDesc = "";
+        Dictionary<string, int> buildingCounts = new();
+        foreach (Building building in Buildings)
+        {
+            string key = Globals.Title(building.Type.ToString());
+            if (buildingCounts.ContainsKey(key))
+                buildingCounts[key]++;
+            else
+                buildingCounts[key] = 1;
+        }
+
+        if (Buildings.Count == 0)
+            buildingsDesc = "None";
+        else
+            buildingsDesc = "\n";
+
+        foreach (KeyValuePair<string, int> keyValuePair in buildingCounts)
+            buildingsDesc += $"  {keyValuePair.Key} x{keyValuePair.Value}" + "\n";
+        buildingsDesc.TrimEnd();
+
+        string description = 
+            $"Type: {Globals.Title(Type.ToString())}\n" + 
+            $"Resources: {resource}\n" + 
+            $"Population: {Population}\n" + 
+            $"Buildings: {buildingsDesc}";
+        return description;
+    }
+
     public bool NeighborHasDifferentOwner(Cardinal direction)
     {
         return Neighbors[(int)direction] == null || Neighbors[(int)direction].Owner != Owner;
@@ -277,7 +333,7 @@ public class Tile
     {
         if (displayType == DisplayType.SOIL_QUALITY)
         {
-            float max = MAX_SOIL_QUALITY + (2 * RIVER_SOIL_QUALITY_BONUS) + VEGETATION_SOIL_QUALITY_BONUS;
+            float max = GetMaxSoilQuality();
             Color c = new Color(0.25f, MathHelper.Clamp((SoilQuality / max) + 0.2f, 0.5f, 1.0f), 0.25f);
             BaseSprite.SpriteColor = c;
             if (BuildingSprite != null)
@@ -322,6 +378,11 @@ public class Tile
             BaseSprite.Draw();
         if (BuildingSprite != null)
             BuildingSprite.Draw();
+    }
+
+    public static float GetMaxSoilQuality()
+    {
+        return MAX_SOIL_QUALITY + (2 * RIVER_SOIL_QUALITY_BONUS) + VEGETATION_SOIL_QUALITY_BONUS;
     }
 
     public void DrawFog()

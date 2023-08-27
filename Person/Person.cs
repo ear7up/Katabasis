@@ -168,7 +168,10 @@ public class Person : Entity, Drawable
     {
         House = (Building)x;
         House.StartUsing();
+
+        Home.Population -= 1;
         Home = House.Location;
+        Home.Population += 1;
     }
 
     public void NoHouseFound(Object x)

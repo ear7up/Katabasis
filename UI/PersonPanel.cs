@@ -32,7 +32,10 @@ public class PersonPanel : UIElement
         int y = 0;
         foreach (Skill skill in Enum.GetValues(typeof(Skill)))
         {
-            TextSprite skillText = new TextSprite(Sprites.Font, text: Globals.Title(skill.ToString()));
+            string skillName = Globals.Title(skill.ToString());
+            if (skillName == "None")
+                skillName = "General";
+            TextSprite skillText = new TextSprite(Sprites.Font, text: skillName);
             skillText.SetPadding(right: 20);
             skillText.ScaleDown(0.4f);
             SkillsLayout.SetContent(0, y, skillText);

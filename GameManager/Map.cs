@@ -259,7 +259,7 @@ public class Map
     public void ConvertToForest(Tile tile)
     {
         if (tile.Type != TileType.WILD_ANIMAL)
-            tile.Type = TileType.FOREST;
+            tile.SetTileType(TileType.FOREST);
         tile.Minerals = MineralType.NONE;
         tile.BaseSprite.SetNewSpriteTexture(Sprites.RandomForest());
     }

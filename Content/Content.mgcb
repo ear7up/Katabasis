@@ -3729,6 +3729,18 @@
 /processorParam:TextureFormat=Color
 /build:UI_maybe/pause_button.png
 
+#begin UI_maybe/small_panel.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI_maybe/small_panel.png
+
 #begin UI_maybe/tab_background.png
 /importer:TextureImporter
 /processor:TextureProcessor

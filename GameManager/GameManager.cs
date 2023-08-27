@@ -25,6 +25,7 @@ public class GameManager
     private static TextSprite _statsOverviewText;
     private static UIElement _clockHand;
     private static PersonPanel _personPanel;
+    private static TileInfoPanel _tileInfoPanel;
     public static MarketPanel MarketPanel;
 
     public GameManager()
@@ -110,6 +111,8 @@ public class GameManager
         _personPanel = new(null);
         _personPanel.Hide();
 
+        _tileInfoPanel = new();
+
         MarketPanel = new();
         MarketPanel.Hide();
 
@@ -127,7 +130,7 @@ public class GameManager
         manButton.SelectedImage.ScaleDown(0.9f);
 
         _statsPanel = new();
-        _statsPanel.Image = Sprite.Create(Sprites.TallPanel, Vector2.Zero);
+        _statsPanel.Image = Sprite.Create(Sprites.SmallPanel, Vector2.Zero);
         _statsPanel.Image.DrawRelativeToOrigin = false;
         _statsPanel.SetMargin(top: 50, left: 30);
         _statsPanel.AddTab("Overview", manButton, _statsOverviewText);
@@ -320,6 +323,8 @@ public class GameManager
         inventoryPanel.UpdatePublic(Model.Player1.Kingdom.Treasury);
         inventoryPanel.Update();
 
+        _tileInfoPanel.UpdateTileData(Model.TileMap.HighlightedTile);
+
         HandleTileAcquisition();
 
         // Give a "daily" update for tasks that don't need to be constantly checked
@@ -452,6 +457,9 @@ public class GameManager
 
         _personPanel.Draw(new Vector2(
             Globals.WindowSize.X - _personPanel.Width(), 50f));
+
+        _tileInfoPanel.Draw(new Vector2(
+            Globals.WindowSize.X - _tileInfoPanel.Width(), 260f));
 
         MarketPanel.Draw(new Vector2(
             Globals.WindowSize.X - MarketPanel.Width(), 50f));

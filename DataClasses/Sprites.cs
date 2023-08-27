@@ -57,6 +57,7 @@ static class Sprites
 	public static SpriteTexture BottomLeftPanel;
 	public static SpriteTexture BottomPanel;
 	public static SpriteTexture TallPanel;
+	public static SpriteTexture SmallPanel;
 	public static List<SpriteTexture> BottomLeftButtons;
 	public static SpriteTexture Tooltip;
 	public static SpriteTexture VerticalGreenBar;
@@ -135,6 +136,7 @@ static class Sprites
 		BottomLeftPanel = LoadTexture("UI_maybe/panel1");
 		BottomPanel = LoadTexture("UI_maybe/bottom_panel");
 		TallPanel = LoadTexture("UI_maybe/tall_panel");
+		SmallPanel = LoadTexture("UI_maybe/small_panel");
 		BottomLeftButtons = LoadTextures("UI_maybe/buttons", 8);
 		Tooltip = LoadTexture("UI_maybe/tooltip");
 		VerticalGreenBar = LoadTexture("UI_maybe/vertical_green_bar");
