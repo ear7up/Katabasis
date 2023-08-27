@@ -363,6 +363,9 @@ public class GoodsProduction
         // FARMING: FARM -> plants
         foreach (Goods.FoodPlant type in Enum.GetValues(typeof(Goods.FoodPlant)))
         {
+            if (type == Goods.FoodPlant.NONE)
+                continue;
+
             g.SubType = (int)type;
             Requirements.Add(g.GetId(), new ProductionRequirements(
                 buildingRequirement: BuildingType.FARM,

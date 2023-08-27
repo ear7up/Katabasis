@@ -60,6 +60,8 @@ public class Map
 
     public void Generate()
     {
+        Array plantTypes = Enum.GetValues(typeof(Goods.FoodPlant));
+
         int row = 1;
         int tiles_per_row = 1;
         int tile_in_row = 0;
@@ -68,6 +70,7 @@ public class Map
             SpriteTexture texture = null;
             TileType tileType = TileType.DESERT;
             MineralType mineralType = MineralType.NONE;
+            Goods.FoodPlant plantType = Goods.FoodPlant.NONE;
             double r = Globals.Rand.NextDouble();
 
             // Assign random tile textures
@@ -88,6 +91,9 @@ public class Map
                 // 18% desert with vegetation
                 texture = Sprites.RandomVegetation();
                 tileType = TileType.VEGETATION;
+
+                if (Globals.Rand.NextFloat(0.0f, 1.0f) <= 0.1f)
+                    plantType = (Goods.FoodPlant)plantTypes.GetValue(Globals.Rand.Next(plantTypes.Length));
             }
             else
             {
@@ -117,6 +123,9 @@ public class Map
 
             if (mineralType != MineralType.NONE)
                 tile.Minerals = mineralType;
+
+            if (plantType != Goods.FoodPlant.NONE)
+                tile.SetPlantType(plantType);
 
             tiles[n] = tile;
 
@@ -461,7 +470,7 @@ public class Map
             return;
 
         for (int n = 0; n < numTiles; n++)
-            tiles[n].DrawFog();
+            tiles[n].DrawTopLayer();
     }
 
     public void DrawUI()

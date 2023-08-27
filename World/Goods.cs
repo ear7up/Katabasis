@@ -96,7 +96,7 @@ public class Goods
         GARLIC, SCALLIONS, ONION, LEEK, LETTUCE, CELERY, 
         CUCUMBER, RADISH, TURNIP, GRAPES, GOURD, MELON, 
         PEAS, LENTILS, CHICKPEAS, NUTS, OLIVE_OIL, BARLEY,
-        WHEAT, WILD_EDIBLE
+        WHEAT, WILD_EDIBLE, NONE
     }
 
     // Consider making a separate enum for stone tools

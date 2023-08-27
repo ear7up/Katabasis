@@ -56,6 +56,9 @@ public class Tile
     public float BaseSoilQuality { get; set; }
     public float SoilQuality { get; set; }
     public MineralType Minerals { get; set; }
+    public Goods.FoodPlant Plants { get; set; }
+    public Sprite PlantIcon { get; set; }
+    public TextSprite PlantText { get; set; }
     public float BaseResourceQuantity { get; set; }
     public float CurrentResourceQuantity { get; set; }
     public bool Explored { get; set; }
@@ -74,6 +77,7 @@ public class Tile
         Buildings = new();
         DrawBase = true;
         Minerals = MineralType.NONE;
+        Plants = Goods.FoodPlant.NONE;
         BaseResourceQuantity = 0f;
         CurrentResourceQuantity = 0f;
         Explored = false;
@@ -136,6 +140,53 @@ public class Tile
             type == TileType.ELEPHANT ||
             type == TileType.HILLS ||
             type == TileType.FOREST;
+    }
+
+    public void SetPlantType(Goods.FoodPlant plantType)
+    {
+        Plants = plantType;
+        SpriteTexture texture = null;
+        switch (Plants)
+        {
+            case Goods.FoodPlant.GARLIC: texture = Sprites.Garlic; break;
+            case Goods.FoodPlant.SCALLIONS: texture = Sprites.Scallions; break;
+            case Goods.FoodPlant.ONION: texture = Sprites.Onion; break;
+            case Goods.FoodPlant.LEEK: texture = Sprites.Leeks; break;
+            case Goods.FoodPlant.LETTUCE: texture = Sprites.Lettuce; break;
+            case Goods.FoodPlant.CELERY: texture = Sprites.Celery; break;
+            case Goods.FoodPlant.CUCUMBER: texture = Sprites.Cucumber; break;
+            case Goods.FoodPlant.TURNIP: texture = Sprites.Turnips; break;
+            case Goods.FoodPlant.GRAPES: texture = Sprites.Grapes; break;
+            case Goods.FoodPlant.GOURD: texture = Sprites.Gourd; break;
+            case Goods.FoodPlant.MELON: texture = Sprites.Melon; break;
+            case Goods.FoodPlant.PEAS: texture = Sprites.Peas; break;
+            case Goods.FoodPlant.LENTILS: texture = Sprites.Lentils; break;
+            case Goods.FoodPlant.CHICKPEAS: texture = Sprites.Chickpeas; break;
+            //case Goods.FoodPlant.NUTS
+            case Goods.FoodPlant.OLIVE_OIL: texture = Sprites.OliveOil; break;
+            case Goods.FoodPlant.BARLEY: texture = Sprites.Barley; break;
+            case Goods.FoodPlant.WHEAT: texture = Sprites.Wheat; break;
+        }
+
+        if (texture != null)
+        {
+            PlantIcon = Sprite.Create(texture, Vector2.Zero);
+            PlantIcon.ScaleDown(0.8f);
+
+            Rectangle iconBounds = PlantIcon.GetBounds();
+            Rectangle tileBounds = BaseSprite.GetBounds();
+
+            float x = tileBounds.X + tileBounds.Width / 2 + 10;
+            float y = tileBounds.Y + tileBounds.Height / 2 - iconBounds.Height / 2;
+            PlantIcon.Position = new Vector2(x, y);
+
+            PlantText = new TextSprite(Sprites.Font, text: Globals.Title(Plants.ToString()));
+            PlantText.ScaleUp(0.3f);
+            x = tileBounds.X + tileBounds.Width / 2 - PlantText.Width() / 2 + 10;
+            y += 40f;
+            PlantText.Position = new Vector2(x, y);
+            PlantText.Hidden = true;
+        }
     }
 
     public static bool IsAnimal(TileType type)
@@ -251,6 +302,8 @@ public class Tile
 
         if (Minerals != MineralType.NONE)
             resource = Globals.Title(Minerals.ToString());
+        else if (Plants != Goods.FoodPlant.NONE)
+            resource = Globals.Title(Plants.ToString());
 
         string buildingsDesc = "";
         Dictionary<string, int> buildingCounts = new();
@@ -371,13 +424,24 @@ public class Tile
         if (Owner != null && Config.ShowBorders)
         {
             DrawOwnedTile();
-            return;
+        }
+        else
+        {
+            if (DrawBase)
+                BaseSprite.Draw();
+            if (BuildingSprite != null)
+                BuildingSprite.Draw();
         }
 
-        if (DrawBase)
-            BaseSprite.Draw();
-        if (BuildingSprite != null)
-            BuildingSprite.Draw();
+        if (displayType == DisplayType.SOIL_QUALITY && PlantIcon != null)
+        {
+            PlantIcon.Draw();
+            PlantText.Unhide();
+        }
+        else if (PlantText != null)
+        {
+            PlantText.Hide();
+        }
     }
 
     public static float GetMaxSoilQuality()
@@ -385,12 +449,13 @@ public class Tile
         return MAX_SOIL_QUALITY + (2 * RIVER_SOIL_QUALITY_BONUS) + VEGETATION_SOIL_QUALITY_BONUS;
     }
 
-    public void DrawFog()
+    public void DrawTopLayer()
     {
         if (!Explored && FogSprite != null && Config.ShowFog)
-        {
             FogSprite.Draw();
-        }
+
+        if (PlantText != null)
+            PlantText.Draw(PlantText.Position);
     }
 
     public void Highlight()

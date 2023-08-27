@@ -51,6 +51,26 @@ static class Sprites
 	public static SpriteTexture Sheep;
 	public static SpriteTexture Goose;
 
+	// Plants
+	public static SpriteTexture Barley;
+	public static SpriteTexture Celery;
+	public static SpriteTexture Chickpeas;
+	public static SpriteTexture Cucumber;
+	public static SpriteTexture Garlic;
+	public static SpriteTexture Gourd;
+	public static SpriteTexture Grapes;
+	public static SpriteTexture Leeks;
+	public static SpriteTexture Lentils;
+	public static SpriteTexture Lettuce;
+	public static SpriteTexture Melon;
+	public static SpriteTexture OliveOil;
+	public static SpriteTexture Onion;
+	public static SpriteTexture Peas;
+	public static SpriteTexture Radishes;
+	public static SpriteTexture Scallions;
+	public static SpriteTexture Turnips;
+	public static SpriteTexture Wheat;
+
 	// UI
 	public static SpriteTexture Clock;
 	public static SpriteTexture ClockHand;
@@ -129,6 +149,26 @@ static class Sprites
 		Goat = LoadTexture("animals/goat_copper");
 		Sheep = LoadTexture("animals/sheep_copper");
 		Goose = LoadTexture("animals/goose_copper");
+
+		// Plants
+		Barley = LoadTexture("plant_icons/barley");
+		Celery = LoadTexture("plant_icons/celery");
+		Chickpeas = LoadTexture("plant_icons/chickpeas");
+		Cucumber = LoadTexture("plant_icons/cucumber");
+		Garlic = LoadTexture("plant_icons/garlic");
+		Gourd = LoadTexture("plant_icons/gourd");
+		Grapes = LoadTexture("plant_icons/grapes");
+		Leeks = LoadTexture("plant_icons/leeks");
+		Lentils = LoadTexture("plant_icons/lentils");
+		Lettuce = LoadTexture("plant_icons/lettuce");
+		Melon = LoadTexture("plant_icons/watermelon");
+		OliveOil = LoadTexture("plant_icons/olive_oil");
+		Onion = LoadTexture("plant_icons/onion");
+		Peas = LoadTexture("plant_icons/peas");
+		Radishes = LoadTexture("plant_icons/radishes");
+		Scallions = LoadTexture("plant_icons/scallions");
+		Turnips = LoadTexture("plant_icons/turnips");
+		Wheat = LoadTexture("plant_icons/wheat");
 
 		// UI
 		Clock = LoadTexture("UI_maybe/clock");
