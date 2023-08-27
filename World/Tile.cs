@@ -56,13 +56,13 @@ public class Tile
     public float BaseSoilQuality { get; set; }
     public float SoilQuality { get; set; }
     public MineralType Minerals { get; set; }
-    public Goods.FoodPlant Plants { get; set; }
-    public Sprite PlantIcon { get; set; }
-    public TextSprite PlantText { get; set; }
     public float BaseResourceQuantity { get; set; }
     public float CurrentResourceQuantity { get; set; }
     public bool Explored { get; set; }
     public Sprite FogSprite { get; set; }
+    public Goods.FoodPlant Plants { get; set; }
+    public Sprite PlantIcon { get; set; }
+    public TextSprite PlantText { get; set; }
 
     // Can't be saved due to cycle resolution error
     [JsonIgnore]
@@ -172,21 +172,25 @@ public class Tile
         {
             PlantIcon = Sprite.Create(texture, Vector2.Zero);
             PlantIcon.ScaleDown(0.8f);
-
-            Rectangle iconBounds = PlantIcon.GetBounds();
-            Rectangle tileBounds = BaseSprite.GetBounds();
-
-            float x = tileBounds.X + tileBounds.Width / 2 + 10;
-            float y = tileBounds.Y + tileBounds.Height / 2 - iconBounds.Height / 2;
-            PlantIcon.Position = new Vector2(x, y);
-
-            PlantText = new TextSprite(Sprites.Font, text: Globals.Title(Plants.ToString()));
-            PlantText.ScaleUp(0.3f);
-            x = tileBounds.X + tileBounds.Width / 2 - PlantText.Width() / 2 + 10;
-            y += 40f;
-            PlantText.Position = new Vector2(x, y);
-            PlantText.Hidden = true;
+            InitPlantText();
         }
+    }
+
+    public void InitPlantText()
+    {
+        Rectangle iconBounds = PlantIcon.GetBounds();
+        Rectangle tileBounds = BaseSprite.GetBounds();
+
+        float x = tileBounds.X + tileBounds.Width / 2 + 10;
+        float y = tileBounds.Y + tileBounds.Height / 2 - iconBounds.Height / 2;
+        PlantIcon.Position = new Vector2(x, y);
+
+        PlantText = new TextSprite(Sprites.Font, text: Globals.Title(Plants.ToString()));
+        PlantText.ScaleUp(0.3f);
+        x = tileBounds.X + tileBounds.Width / 2 - PlantText.Width() / 2 + 10;
+        y += 40f;
+        PlantText.Position = new Vector2(x, y);
+        PlantText.Hidden = true;
     }
 
     public static bool IsAnimal(TileType type)

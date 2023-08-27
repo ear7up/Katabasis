@@ -76,6 +76,10 @@ public class Kingdom
         OwnedTiles.Add(tile);
         tile.Highlight();
         tile.Owner = Owner;
+
+        if (tile.Plants != Goods.FoodPlant.NONE)
+            Owner.UnlockPlant(tile.Plants);
+
         return true;
     }
 

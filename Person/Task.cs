@@ -166,7 +166,7 @@ public class Task
     }
 
     // Pick a random task a person swith skill level `s` can perform
-    public static Task RandomUsingSkill(SkillLevel s)
+    public static Task RandomUsingSkill(Person p, SkillLevel s)
     {
         // TODO: Are there non-production tasks that use skills?
 
@@ -174,6 +174,12 @@ public class Task
         List<int> goodsIds = GoodsProduction.GetGoodsMadeUsingSkill(s);
         if (goodsIds.Count == 0)
             goodsIds = GoodsProduction.GetGoodsMadeUsingSkill(new SkillLevel() { skill = Skill.NONE, level = 100 });
+
+        // Remove all plants that aren't unlcoked from consideration
+        goodsIds.RemoveAll(id => 
+            (GoodsType)Goods.TypeFromId(id) == GoodsType.FOOD_PLANT &&
+            !p.Owner.IsPlantUnlocked((Goods.FoodPlant)Goods.SubTypeFromid(id))
+        );
 
         int index = Globals.Rand.Next(goodsIds.Count);
         int id = goodsIds[index];
@@ -623,6 +629,12 @@ public class TryToProduceTask : Task
         if (Requirements == null)
         {
             Console.Write("Requirements lookup failed for " + Goods.ToString());
+            Status.Failed = true;
+            return Status;
+        }
+
+        if (!p.Owner.CanProduce(Goods))
+        {
             Status.Failed = true;
             return Status;
         }

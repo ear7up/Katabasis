@@ -13,6 +13,16 @@ public class TextSprite : UIElement, Drawable
     public Color FontColor { get; set; }
     public bool HasDropShadow { get; set; }
 
+    public TextSprite()
+    {
+        Font = Sprites.Font;
+        Shadow = Sprites.Font;
+        HasDropShadow = true;
+        Position = Vector2.Zero;
+        Text = "";
+        FontColor = Color.White;
+    }
+
     public TextSprite(SpriteFont font, bool hasDropShadow = true, string text = "") : base()
     {
         Font = font;

@@ -14,6 +14,7 @@ public class TileInfoPanel : UIElement
     public TextSprite SoilQualityPercent;
 
     public VBox ResourceLayout;
+    public UIElement PlantImage;
     public UIElement ResourceQuantityBar;
     public UIElement ResourceQuantityBaseBar;
     public TextSprite ResourceQuantityPercent;
@@ -56,6 +57,11 @@ public class TileInfoPanel : UIElement
 
         Container.Add(topRow);
         topRow.SetPadding(bottom: 10);
+
+        PlantImage = new();
+        PlantImage.Hidden = true;
+        Container.Add(PlantImage);
+
         Container.Add(new TextSprite(Sprites.Font, text: "Soil Quality"));
         Container.Add(soilQualityLayout);
 
@@ -133,6 +139,9 @@ public class TileInfoPanel : UIElement
         {
             ResourceLayout.Hide();
         }
+
+        PlantImage.Image = tile.PlantIcon;
+        PlantImage.Hidden = (tile.PlantIcon == null);
 
         MyTile = tile;
 

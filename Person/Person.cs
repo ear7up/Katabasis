@@ -204,7 +204,7 @@ public class Person : Entity, Drawable
 
             // Some skills may have no completable tasks, so have a chance to not get stuck in a loop
             if (task == null || r >= PROFIT_SEEKING_CHANCE)
-                task = Task.RandomUsingSkill(weightedRandomChoice);
+                task = Task.RandomUsingSkill(this, weightedRandomChoice);
 
             Tasks.Enqueue(task);
         }

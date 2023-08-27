@@ -545,8 +545,7 @@ public class GoodsProduction
         // (simple gathering) hills -> stone
         g.SubType = (int)Goods.MaterialNatural.STONE;
         Requirements.Add(g.GetId(), new ProductionRequirements(
-            tileRequirement: TileType.HILLS,
-            levelRequirement: SkillLevel.Create(Skill.MINING, 1)));
+            tileRequirement: TileType.HILLS));
 
         g.Type = GoodsType.MATERIAL_PLANT;
 

@@ -9,7 +9,7 @@ public class UIElement
 
     private int[] _padding;
     private int[] _margin;
-    public Vector2 Scale;
+    public Vector2 Scale { get; set; }
     public Sprite Image;
     public Sprite SelectedImage;
     public Vector2 Position { get; set; }
