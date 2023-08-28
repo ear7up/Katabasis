@@ -142,7 +142,7 @@ public class GridLayout : Layout
                 sumWidth += element.Width();
             maxWidth = Math.Max(maxWidth, sumWidth);
         }
-        maxWidth += GetLeftPadding() + GetRightPadding();
+        maxWidth += GetLeftPadding() + GetRightPadding() + GetLeftMargin() + GetRightMargin();
         return (int)Math.Max(maxWidth, base.Width());
     }
 

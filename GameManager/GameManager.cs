@@ -21,8 +21,7 @@ public class GameManager
     private static GridLayout _buttonPanel;
     private static GridLayout _bottomPanel;
     private static InventoryPanel inventoryPanel;
-    private static TabLayout _statsPanel;
-    private static TextSprite _statsOverviewText;
+    private static StatsPanel _statsPanel;
     private static UIElement _clockHand;
     private static PersonPanel _personPanel;
     private static TileInfoPanel _tileInfoPanel;
@@ -120,9 +119,6 @@ public class GameManager
 
         inventoryPanel = new();
         inventoryPanel.Hide();
-
-        _statsOverviewText = new TextSprite(Sprites.Font);
-        _statsOverviewText.ScaleDown(0.4f);
         
         UIElement manButton = new UIElement(Sprites.ManS);
         manButton.ScaleDown(0.9f);
@@ -130,11 +126,6 @@ public class GameManager
         manButton.SelectedImage.ScaleDown(0.9f);
 
         _statsPanel = new();
-        _statsPanel.Image = Sprite.Create(Sprites.SmallPanel, Vector2.Zero);
-        _statsPanel.Image.DrawRelativeToOrigin = false;
-        _statsPanel.SetMargin(top: 50, left: 30);
-        _statsPanel.AddTab("Overview", manButton, _statsOverviewText);
-        _statsPanel.Hide();
     }
 
     public void SetGameModel(GameModel gameModel)
@@ -247,11 +238,16 @@ public class GameManager
 
     public void ToggleStatistics(Object clicked)
     {
-        _statsOverviewText.Text = Model.Player1.Kingdom.Statistics();
+        // Update once on un-hide
         if (_statsPanel.Hidden)
+        {
             _statsPanel.Unhide();
+            _statsPanel.Update(Model.Player1.Kingdom.Statistics(), Model.Player1.Kingdom.People);
+        }
         else
+        {
             _statsPanel.Hide();
+        }
     }
 
     public void ToggleGoodsDisplay(Object clicked)
@@ -302,6 +298,7 @@ public class GameManager
 
         HandlePersonFollowing();
         _personPanel.Update();
+        _statsPanel.Update();
         MarketPanel.Update();
 
         // Update UI last (pop-up panels are on top, they should get clicks first)
