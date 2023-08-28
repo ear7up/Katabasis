@@ -111,6 +111,14 @@ public class TileInfoPanel : UIElement
             TileImage.Image.SetNewSpriteTexture(new SpriteTexture(
                 tile.BaseSprite.TexturePathSerial, tile.BaseSprite.Texture));
             TileImage.Image.ScaleDown(0.6f);
+
+            if (tile.PlantIcon != null)
+            {
+                PlantImage.Image = new Sprite();
+                PlantImage.Image.SetNewSpriteTexture(new SpriteTexture(
+                    tile.PlantIcon.TexturePathSerial, tile.PlantIcon.Texture));
+                PlantImage.ScaleDown(0.8f);
+            }
         }
 
         // Update tile text description
@@ -140,7 +148,6 @@ public class TileInfoPanel : UIElement
             ResourceLayout.Hide();
         }
 
-        PlantImage.Image = tile.PlantIcon;
         PlantImage.Hidden = (tile.PlantIcon == null);
 
         MyTile = tile;

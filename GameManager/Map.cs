@@ -457,18 +457,9 @@ public class Map
         // Draw map tiles
         int numTiles = _mapTileSize.X * _mapTileSize.Y;
         for (int n = 0; n < numTiles; n++)
-        {
             tiles[n].Draw(displayType);
 
-            // Debuging - show where the sprite's position is (it's more or less in the center of the isometric shape)
-            //Sprites.Circle.Position = tiles[n].BaseSprite.Position;
-            //Sprites.Circle.Draw();
-        }
-
-        // Draw fog on top
-        if (!Config.ShowFog)
-            return;
-
+        // Draw extra data on top (e.g. fog of war or UI icons associated with tiles)
         for (int n = 0; n < numTiles; n++)
             tiles[n].DrawTopLayer();
     }

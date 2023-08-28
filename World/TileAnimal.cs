@@ -126,4 +126,9 @@ public class TileAnimal : Tile
         foreach (Animal animal in Animals)
             animal.Hidden = false;
     }
+
+    public override string GetResource()
+    {
+        return Globals.Title(AnimalType.ToString());
+    }
 }

@@ -223,6 +223,14 @@ public class Tile
         
         if (type != TileType.HILLS)
             Minerals = MineralType.NONE;
+
+        if (type != TileType.VEGETATION)
+        {
+            Plants = Goods.FoodPlant.NONE;
+            PlantIcon = null;
+            PlantText = null;
+        }
+
         Type = type;
     }
 
@@ -279,7 +287,7 @@ public class Tile
         return $"Tile(pos={BaseSprite.Position})";
     }
 
-    public string Describe()
+    public virtual string GetResource()
     {
         string resource = "";
         switch (Type)
@@ -308,6 +316,13 @@ public class Tile
             resource = Globals.Title(Minerals.ToString());
         else if (Plants != Goods.FoodPlant.NONE)
             resource = Globals.Title(Plants.ToString());
+
+        return resource;
+    }
+
+    public string Describe()
+    {
+        string resource = GetResource();
 
         string buildingsDesc = "";
         Dictionary<string, int> buildingCounts = new();
