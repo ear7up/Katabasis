@@ -331,6 +331,7 @@ public class GameManager
             Model.TimeOfDay = 0f;
             Model.TileMap.DailyUpdate();
             Model.Player1.DailyUpdate();
+            Model.Market.DailyUpdate();
             foreach (Person p in Model.Player1.Kingdom.People)
                 p.DailyUpdate();
         }

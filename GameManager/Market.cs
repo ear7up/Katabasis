@@ -10,7 +10,7 @@ public class MarketOrder
 
     public MarketOrder()
     {
-        
+
     }
 
     public static MarketOrder Create(Person requestor, bool buying, Goods goods)
@@ -47,11 +47,13 @@ public class Market
     public float[] Demand { get; set; }
 
     public Kingdom Kingdom { get; set; }
+    public int CheapestFoodId { get; set; }
 
     public Market()
     {
         BuyOrders = new();
         SellOrders = new();
+        CheapestFoodId = 0;
 
         Array goodsTypes = Enum.GetValues(typeof(GoodsType));
         int num_goods = goodsTypes.Length * Goods.MAX_GOODS_PER_CATEGORY;
@@ -98,6 +100,12 @@ public class Market
             float defaultPrice = GoodsInfo.GetDefaultPrice(i);
             Prices[i] = MathHelper.Clamp(Prices[i], defaultPrice * 0.25f, defaultPrice * 4f);
         }
+    }
+
+    public void DailyUpdate()
+    {
+        // Calculate the current cheapest food
+        CheapestFoodUncached(Person.DAILY_HUNGER);
     }
 
     public string Describe()
@@ -286,9 +294,31 @@ public class Market
         return sum;
     }
 
+    public MarketOrder CheapestFood(int hunger)
+    {
+        // First time lookup
+        if (CheapestFoodId == 0)
+            return CheapestFoodUncached(hunger);
+
+        // Cheapest food out of stock
+        float quantity = GetQuantitySold(CheapestFoodId);
+        if (quantity == 0)
+            return CheapestFoodUncached(hunger);
+
+        // Buy enough to satisfy hunger, or whatever is available if there's not enough
+        MarketOrder order = new();
+        order.Buying = true;
+        order.Goods = Goods.FromId(CheapestFoodId);
+
+        int satiation = GoodsInfo.GetSatiation(order.Goods);
+        order.Goods.Quantity = Math.Min(hunger / satiation, quantity);
+
+        return order;
+    }
+
     // Returns the cheapest food being sold in sufficient quantity to fulfill hunger
     // Will also buy raw meat by checking the price of the raw version against the satiation of the cooked version
-    public MarketOrder CheapestFood(int hunger)
+    public MarketOrder CheapestFoodUncached(int hunger)
     {
         int minId = -1;
         float reqQuantity = 0f;
@@ -333,6 +363,9 @@ public class Market
 
         if (minId == -1)
             return null;
+
+        // Cache the id of the cheapest food
+        CheapestFoodId = minId;
 
         MarketOrder buyOrder = new();
         buyOrder.Goods = Goods.FromId(minId, reqQuantity);

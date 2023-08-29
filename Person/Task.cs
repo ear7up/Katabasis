@@ -978,9 +978,9 @@ public class BuyFoodFromMarketTask : Task
             {
                 foodOrder.Requestor = p;
 
-                // Don't order more than you can afford
+                // Don't order more than you can afford (max 80% of money)
                 float price = Globals.Market.GetPrice(foodOrder.Goods.GetId());
-                foodOrder.Goods.Quantity = Math.Min(p.Money / price, foodOrder.Goods.Quantity);
+                foodOrder.Goods.Quantity = Math.Min(p.Money * 0.8f / price, foodOrder.Goods.Quantity);
                 buyTask.SetAttributes(market.Sprite.Position, foodOrder);
                 
                 // Eat right after buying
