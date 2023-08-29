@@ -86,6 +86,11 @@ static class Sprites
 	public static SpriteTexture TabSelected;
 	public static SpriteTexture TabUnselected;
 
+	// Market UI
+	public static SpriteTexture Buy1;
+	public static SpriteTexture Buy10;
+	public static SpriteTexture Buy100;
+
 	// Map
 	public static List<SpriteTexture> desertTextures;
 	public static List<SpriteTexture> desertHillTextures;
@@ -184,6 +189,11 @@ static class Sprites
 		TabBackground = LoadTexture("UI_maybe/tab_background");
 		TabSelected = LoadTexture("UI_maybe/tab_selected");
 		TabUnselected = LoadTexture("UI_maybe/tab_unselected");
+
+		// UI - Market
+		Buy1 = LoadTexture("UI_maybe/buttons/buy1");
+		Buy10 = LoadTexture("UI_maybe/buttons/buy10");
+		Buy100 = LoadTexture("UI_maybe/buttons/buy100");
 	}
 
 	public static SpriteTexture RandomBuilding()

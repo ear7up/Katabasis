@@ -7,6 +7,7 @@ public abstract class Layout : UIElement
     protected Layout(SpriteTexture texture = null) : base(texture)
     {
         Elements = new();
+        OnClick = null;
     }
 
     public virtual void Add(UIElement element)

@@ -12,7 +12,6 @@ public class Kingdom
     public Player Owner { get; set; }
     public Tile StartTile { get; set; }
     public int MaxTiles { get; set; }
-    public float Money { get; set; }
     public float TaxRate { get; set; }
     public int StarvationDeaths {get; set; }
     public List<Tile> OwnedTiles { get; set; }
@@ -28,7 +27,6 @@ public class Kingdom
         People = new();
         Deceased = new();
         Treasury = new();
-        Money = 1000f;
         TaxRate = 0.1f;
         StarvationDeaths = 0;
     }
@@ -195,7 +193,7 @@ public class Kingdom
 
     public float PublicWealth()
     {
-        return Treasury.Wealth() + Money;
+        return Treasury.Wealth();
     }
 
     public float PrivateWealth()

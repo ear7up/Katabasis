@@ -25,7 +25,8 @@ public class AccordionLayout : VBox
         container.SetPadding(bottom: 8);
 
         container.Name = name;
-        container.OnClick = ToggleSection;
+        layout.Name = name;
+        label.OnClick = ToggleSection;
 
         layout.Hide();
 

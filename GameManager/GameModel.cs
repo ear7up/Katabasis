@@ -29,6 +29,7 @@ public class GameModel
         Market = new();
         Market.SetAttributes(Player1.Kingdom);
         Globals.Market = Market;
+        Globals.Player1 = Player1;
 
         const int NUM_PEOPLE = 100;
         for (int i = 0 ; i < NUM_PEOPLE; i++)
@@ -43,6 +44,7 @@ public class GameModel
     public void InitLoaded()
     {
         Globals.Market = Market;
+        Globals.Player1 = Player1;
         TileMap.ComputeNeighbors();
     }
 }

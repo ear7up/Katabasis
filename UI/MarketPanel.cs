@@ -4,6 +4,22 @@ using System.Collections.Generic;
 
 public class MarketPanel : UIElement
 {
+    public class ThreeBuyButtons
+    {
+        public UIElement Buy1Button;
+        public UIElement Buy10Button;
+        public UIElement Buy100Button;
+        public ThreeBuyButtons(UIElement buy1Button, UIElement buy10Button, UIElement buy100Button)
+        {
+            Buy100Button = buy100Button;
+            Buy10Button = buy10Button;
+            Buy1Button = buy1Button;
+        }
+    }
+
+    // Goods id -> buy buttons
+    public Dictionary<int, ThreeBuyButtons> BuyButtons;
+
     public TabLayout Layout;
     
     // Map goods ids to OverlapLayouts containig price information
@@ -16,6 +32,7 @@ public class MarketPanel : UIElement
 
     public MarketPanel() : base(Sprites.TallPanel)
     {
+        BuyButtons = new();
         Layout = new();
         Layout.TabBox.Image = Sprite.Create(Sprites.TabBackground, Vector2.Zero);
         Layout.TabBox.Image.DrawRelativeToOrigin = false;
@@ -180,9 +197,38 @@ public class MarketPanel : UIElement
             
             TextSprite quantityText = new(Sprites.Font, text: $"{quantity:0.0}");
             quantityText.ScaleDown(0.45f);
+            quantityText.SetPadding(right: 10);
+
+            float price = Globals.Market.GetPrice(kv.Key);
+            TextSprite priceText = new(Sprites.Font, text: $"${price:0.0}");
+            priceText.ScaleDown(0.45f);
+            priceText.SetPadding(right: 10);
+
+            string idText = $"{kv.Key}";
+            if (!BuyButtons.ContainsKey(kv.Key))
+            {
+                UIElement buy1Button = new(Sprites.Buy1, 1f, Buy1);
+                buy1Button.Name = idText;
+                buy1Button.SetPadding(right: 5);
+
+                UIElement buy10Button = new(Sprites.Buy10, 1f, Buy10);
+                buy10Button.Name = idText;
+                buy10Button.SetPadding(right: 5);
+
+                UIElement buy100Button = new(Sprites.Buy100, 1f, Buy100);
+                buy100Button.Name = idText;
+
+                BuyButtons[kv.Key] = new ThreeBuyButtons(buy1Button, buy10Button, buy100Button);
+            }
+
+            ThreeBuyButtons buttons = BuyButtons[kv.Key];
 
             categoryLayout.SetContent(0, row, nameText);
             categoryLayout.SetContent(1, row, quantityText);
+            categoryLayout.SetContent(2, row, priceText);
+            categoryLayout.SetContent(3, row, buttons.Buy1Button);
+            categoryLayout.SetContent(4, row, buttons.Buy10Button);
+            categoryLayout.SetContent(5, row, buttons.Buy100Button);
             i++;
         }
 
@@ -202,6 +248,30 @@ public class MarketPanel : UIElement
 
         Layout.Update();
         base.Update();
+    }
+
+    public void Buy1(Object clicked)
+    {
+        Buy(clicked, 1);
+    }
+
+    public void Buy10(Object clicked)
+    {
+        Buy(clicked, 10);
+    }
+
+    public void Buy100(Object clicked)
+    {
+        Buy(clicked, 100);
+    }
+
+    public void Buy(Object clicked, int n)
+    {
+        UIElement button = (UIElement)clicked;
+        int id = Int32.Parse(button.Name);
+
+        MarketOrder order = MarketOrder.Create(Globals.Player1.Person, true, Goods.FromId(id, n));
+        Globals.Market.PlaceBuyOrder(order);
     }
 
     public override void Draw(Vector2 offset)

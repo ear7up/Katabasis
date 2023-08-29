@@ -94,7 +94,7 @@ public class UIElement
 
     public virtual void Draw(Vector2 offset)
     {
-        Position = offset;
+        Position = new Vector2(offset.X, offset.Y);
 
         if (Hidden)
             return;

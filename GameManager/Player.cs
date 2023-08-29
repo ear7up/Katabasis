@@ -5,11 +5,15 @@ using System.Text.Json;
 public class Player
 {
     // Serialized content
+    public Person Person { get; set; }
     public Kingdom Kingdom { get; set; }
     public bool[] UnlockedPlants { get; set; }
     
     public Player()
     {
+        Person = new();
+        Person.Money = 1000f;
+
         int num_plants = Enum.GetValues(typeof(Goods.FoodPlant)).Length;
         UnlockedPlants = new bool[num_plants];
         UnlockPlant(Goods.FoodPlant.WHEAT);
@@ -27,6 +31,8 @@ public class Player
     public void SetAttributes(Tile startTile)
     {
         Kingdom = Kingdom.Create(this, startTile);
+
+        Person.PersonalStockpile = Kingdom.Treasury;
     }
 
     public void UnlockPlant(Goods.FoodPlant plant)
@@ -50,6 +56,7 @@ public class Player
     public void Update()
     {
         Kingdom.Update();
+        Person.PersonalStockpile.DepositInto(Kingdom.Treasury);
     }
 
     public void DailyUpdate()

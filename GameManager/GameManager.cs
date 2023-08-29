@@ -366,7 +366,7 @@ public class GameManager
 
         // Write statistics to debug
         _debugDisplay.Text = 
-            $"Public Wealth: {(int)Model.Player1.Kingdom.PublicWealth()}\n" +
+            $"Public Wealth: {(int)(Model.Player1.Person.Money + Model.Player1.Kingdom.PublicWealth())}\n" +
             $"Private Wealth: {(int)Model.Player1.Kingdom.PrivateWealth()}\n";
 
         // Write information about the currently selected person to the top left

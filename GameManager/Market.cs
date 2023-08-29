@@ -177,7 +177,7 @@ public class Market
             {    
                 o.Requestor.Money -= cost;
                 trade.Requestor.Money += (cost - tax);
-                Kingdom.Money += tax;
+                Kingdom.Owner.Person.Money += tax;
 
                 Goods purchased = new Goods(o.Goods);
                 purchased.Quantity = sale_quantity;
@@ -187,7 +187,7 @@ public class Market
             {
                 o.Requestor.Money += (cost - tax);
                 trade.Requestor.Money -= cost;
-                Kingdom.Money += tax;
+                Kingdom.Owner.Person.Money += tax;
 
                 Goods sold = new Goods(o.Goods);
                 sold.Quantity = sale_quantity;
@@ -249,7 +249,7 @@ public class Market
     // Get just the tax amount from the total price including tax
     public float GetTax(float price)
     {
-        return price * (1f / (1f + Kingdom.TaxRate));
+        return price - (price / (1f + Kingdom.TaxRate));
     }
 
     // Tries to execute the order first, then adds it if note complete
@@ -311,6 +311,12 @@ public class Market
         order.Goods = Goods.FromId(CheapestFoodId);
 
         int satiation = GoodsInfo.GetSatiation(order.Goods);
+        if (satiation == 0f)
+        {
+            Goods uncooked = new Goods(order.Goods);
+            satiation = GoodsInfo.GetSatiation(uncooked.Cook());
+        }
+
         order.Goods.Quantity = Math.Min(hunger / satiation, quantity);
 
         return order;
