@@ -45,8 +45,11 @@ public class Building : Drawable
     public Sprite Sprite { get; set; }
     public int CurrentUsers { get; set; }
     public bool Selected { get; set; }
-    public Stockpile Stockpile { get; set; }
     public int MaxUsers { get; set; }
+
+    // Only used for houses
+    public Stockpile Stockpile { get; set; }
+    public float Money { get; set; }
 
     // Hack to make the JSON deserializer populate the ybuffer
     public bool Unused {
@@ -89,6 +92,7 @@ public class Building : Drawable
         SelectedText.Hide();
         Globals.TextBuffer.Add(SelectedText);
         Stockpile = new();
+        Money = 0f;
     }
 
     public static Building CreateBuilding(Tile location, BuildingType buildingType = BuildingType.NONE)

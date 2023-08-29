@@ -273,4 +273,71 @@ public class Market
             return;
         orders.RemoveAll(order => order.Requestor == p);
     }
+
+    public float GetQuantitySold(int id)
+    {
+        if (!SellOrders.ContainsKey(id))
+            return 0f;
+
+        float sum = 0f;
+        List<MarketOrder> orders = SellOrders[id];
+        foreach (MarketOrder order in orders)
+            sum += order.Goods.Quantity;
+        return sum;
+    }
+
+    // Returns the cheapest food being sold in sufficient quantity to fulfill hunger
+    // Will also buy raw meat by checking the price of the raw version against the satiation of the cooked version
+    public MarketOrder CheapestFood(int hunger)
+    {
+        int minId = -1;
+        float reqQuantity = 0f;
+        float min = 9999f;
+        Goods lookup = new();
+        lookup.Type = GoodsType.FOOD_PROCESSED;
+
+        GoodsType[] goodsTypes = { 
+            GoodsType.FOOD_PROCESSED, GoodsType.FOOD_ANIMAL, GoodsType.FOOD_PLANT, GoodsType.RAW_MEAT };
+        Type[] subTypeEnums = new Type[] { 
+            typeof(Goods.ProcessedFood), typeof(Goods.FoodAnimal), typeof(Goods.FoodPlant), typeof(Goods.RawMeat) };
+
+        for (int i = 0; i < goodsTypes.Length; i++)
+        {
+            foreach (int subType in Enum.GetValues(subTypeEnums[i]))
+            {
+                lookup.Type = goodsTypes[i];
+                lookup.SubType = subType;
+                int id = lookup.GetId();
+
+                if (lookup.IsCookable())
+                    lookup.Cook();
+
+                // Skip goods not being sold
+                float quantity = GetQuantitySold(id);
+                int satiation = GoodsInfo.GetSatiation(lookup);
+
+                // Not enough, skip this one
+                if (quantity * satiation < hunger)
+                    continue;
+
+                // Check if most efficient satiation per cost
+                float price = Prices[id];
+                if (satiation / price < min)
+                {
+                    min = satiation / price;
+                    minId = id;
+                    reqQuantity = hunger / satiation;
+                }
+            }
+        }
+
+        if (minId == -1)
+            return null;
+
+        MarketOrder buyOrder = new();
+        buyOrder.Goods = Goods.FromId(minId, reqQuantity);
+        buyOrder.Buying = true;
+
+        return buyOrder;
+    }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.Json.Serialization;
 
 public enum TaskDiscriminator
@@ -20,7 +21,8 @@ public enum TaskDiscriminator
     EatTask = 12,
     TryToBuildTask = 13,
     DepositInventoryTask = 14,
-    CookTask = 15
+    CookTask = 15,
+    BuyFoodFromMarketTask = 16
 };
 
 public class TaskStatus
@@ -63,6 +65,7 @@ public class TaskStatus
 [JsonDerivedType(derivedType: typeof(BuyFromMarketTask), typeDiscriminator: "BuyFromMarketTask")]
 [JsonDerivedType(derivedType: typeof(FindTileByTypeTask), typeDiscriminator: "FindTileByTypeTask")]
 [JsonDerivedType(derivedType: typeof(DepositInventoryTask), typeDiscriminator: "DepositInventoryTask")]
+[JsonDerivedType(derivedType: typeof(BuyFoodFromMarketTask), typeDiscriminator: "BuyFoodFromMarketTask")]
 public class Task
 {
     // Move: go to a location
@@ -934,6 +937,61 @@ public class SellAtMarketTask : Task
     }
 }
 
+public class BuyFoodFromMarketTask : Task
+{
+    public BuyFoodFromMarketTask()
+    {
+        SetAttributes("Buying food from the market");
+    }
+
+    public override TaskStatus Execute(Person p)
+    {
+        if (!Initialized)
+            return Init(p);
+
+        // Try to complete subtasks first
+        TaskStatus subStatus = base.Execute(p);
+        if (subStatus != null && !subStatus.Complete)
+            return Status;
+
+        // But only when all subtasks are done
+        if (subTasks.Count == 0)
+            Status.Complete = true;
+
+        return Status;
+    }
+
+    public TaskStatus Init(Person p)
+    {
+        Initialized = true;
+
+        // Try to buy the cheapest, most filling food from the market if hungry
+        Building market = (Building)Tile.Find(p.Home, 
+            new TileFilter(buildingType: BuildingType.MARKET));
+
+        if (market != null && p.Hunger > Person.DAILY_HUNGER)
+        {
+            BuyFromMarketTask buyTask = new();
+            MarketOrder foodOrder = Globals.Market.CheapestFood(p.Hunger);
+
+            if (foodOrder != null)
+            {
+                foodOrder.Requestor = p;
+
+                // Don't order more than you can afford
+                float price = Globals.Market.GetPrice(foodOrder.Goods.GetId());
+                foodOrder.Goods.Quantity = Math.Min(p.Money / price, foodOrder.Goods.Quantity);
+                buyTask.SetAttributes(market.Sprite.Position, foodOrder);
+                
+                // Eat right after buying
+                subTasks.Enqueue(buyTask);
+                subTasks.Enqueue(new EatTask());
+            }
+        }
+        return Status;
+    }
+}
+
 // Eat any food  you're holding until you're no longer hungry
 public class EatTask : Task
 {
@@ -1085,7 +1143,14 @@ public class DepositInventoryTask : Task
             Status.Failed = true;
             return Status;
         }
-        p.PersonalStockpile.DepositIntoExcludingFoodAndTools(p.House.Stockpile);
+
+        p.PersonalStockpile.DepositInto(p.House.Stockpile);
+
+        // Share household money
+        p.House.Money += p.Money;
+        p.Money = p.House.Money / p.House.CurrentUsers;
+        p.House.Money -= p.Money;
+
         Status.Complete = true;
         return Status;
     }
@@ -1150,14 +1215,24 @@ public class CookTask : Task
         float limit = Math.Max(p.Hunger, Person.DAILY_HUNGER * 2f);
         foreach (Goods g in p.House.Stockpile)
         {
-            if (g.IsCookable())
+            // No need to cook if food is already available, this food will be used by EatTask that follows
+            if (g.IsEdible())
+            {
+                int satiation = GoodsInfo.GetSatiation(g);
+
+                Goods req = new(g);
+                req.Quantity = (limit - current) / satiation;
+                p.House.Stockpile.Take(req);
+                current += req.Quantity * satiation;
+            }
+            else if (g.IsCookable())
             {
                 // Try to take as much as needed to reach limit
-                Goods cooked = new Goods(g);
+                Goods cooked = new(g);
                 cooked.Cook();
                 int satiation = GoodsInfo.GetSatiation(cooked);
 
-                Goods req = new Goods(g);
+                Goods req = new(g);
                 req.Quantity = (limit - current) / satiation;
                 p.House.Stockpile.Take(req);
                 current += req.Quantity * satiation;

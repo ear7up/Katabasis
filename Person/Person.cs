@@ -29,9 +29,9 @@ public class Person : Entity, Drawable
 
     public const float MOVE_SPEED = 60f;
 
-    public const int DAILY_HUNGER = 35;
-    public const int STARVING = 210;
-    public const int STARVED_TO_DEATH = 350;
+    public const int DAILY_HUNGER = 15;
+    public const int STARVING = 70;
+    public const int STARVED_TO_DEATH = 120;
 
     public static int IdCounter = 0;
     public readonly int Id;    
@@ -314,6 +314,7 @@ public class Person : Entity, Drawable
         Tasks.Enqueue(new CookTask());
         Tasks.Enqueue(new EatTask());
         Tasks.Enqueue(new SellAtMarketTask());
+        Tasks.Enqueue(new BuyFoodFromMarketTask());
     }
 
     public void FindHouse()
@@ -374,9 +375,9 @@ public class Person : Entity, Drawable
     {
         List<Goods> extras = new();
 
-        // Try to keep enough food to feed everyone in the household for 3 days
+        // Try to keep enough food to feed everyone in the household
         float totalSatiation = House.Stockpile.TotalSatiation();
-        float keepSatiation = House.CurrentUsers * Person.DAILY_HUNGER * 3;
+        float keepSatiation = House.CurrentUsers * Person.DAILY_HUNGER;
 
         foreach (Goods g in House.Stockpile)
         {
