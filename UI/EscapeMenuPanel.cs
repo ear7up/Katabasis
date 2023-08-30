@@ -1,4 +1,5 @@
 using System;
+using Katabasis;
 
 public class EscapeMenuPanel : UIElement
 {
@@ -13,8 +14,8 @@ public class EscapeMenuPanel : UIElement
 
         Container.Add(new TextSprite(Sprites.Font, text: "Options"));
 
-        string[] text = new string[]{ "Options", "", "", "Exit Game", "Return to Game" };
-        Action<Object>[] buttons = new Action<Object>[] { OptionsButton, Button2, Button3, ExitButton, ReturnToGameButton };
+        string[] text = new string[]{ "Options", "Save", "Load", "Exit Game", "Return to Game" };
+        Action<Object>[] buttons = new Action<Object>[] { OptionsButton, SaveButton, LoadButton, ExitButton, ReturnToGameButton };
 
         for (int i = 0; i < buttons.Length; i++)
         {
@@ -36,21 +37,25 @@ public class EscapeMenuPanel : UIElement
 
     public void OptionsButton(Object clicked)
     {
-        // TODO
+        // TODO: close this menu and unhide the options menu
+        // do not unpause the game
     }
 
-    public void Button2(Object clicked)
+    public void SaveButton(Object clicked)
     {
-        
+        // TODO: save menu (name the save, choose to overwrite, etc.)
+        Katabasis.KatabasisGame.Instance.Save(KatabasisGame.CurrentSaveName);
     }
 
-    public void Button3(Object clicked)
+    public void LoadButton(Object clicked)
     {
-        
+        // TODO: load menu (choose which save to load, display last modified time, etc.)
+        Katabasis.KatabasisGame.Instance.Load(KatabasisGame.CurrentSaveName);
     }
 
     public void ExitButton(Object clicked)
     {
+        // TODO: should we always exit without saving?
         Katabasis.KatabasisGame.Instance.Exit();
     }
 

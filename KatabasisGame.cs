@@ -14,6 +14,7 @@ public class KatabasisGame : Game
     public static KatabasisGame Instance { get; private set; }
     public static Viewport Viewport { get { return Instance.GraphicsDevice.Viewport; } }
     public static Vector2 ScreenSize { get { return new Vector2(Viewport.Width, Viewport.Height); } }
+    public static string CurrentSaveName { get; set; }
     
     private Song _defaultBGM;
 
@@ -23,6 +24,7 @@ public class KatabasisGame : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private bool _fullscreen;
+    private double _secondsSinceLastSave;
 
     public KatabasisGame()
     {
@@ -36,6 +38,7 @@ public class KatabasisGame : Game
         _fullscreen = false;
 
         IsMouseVisible = true;
+        CurrentSaveName = "save";
     }
 
     public void ToggleFullscreen()
@@ -98,14 +101,19 @@ public class KatabasisGame : Game
     {
         InputManager.Update();
 
-        //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-        //    Exit();
+        // Auto-save (if enabled)
+        _secondsSinceLastSave += gameTime.ElapsedGameTime.TotalSeconds;
+        if (_secondsSinceLastSave >= Config.AutoSaveFrequencySeconds && Config.AutoSaveFrequencySeconds > 0)
+        {
+            _secondsSinceLastSave = 0;
+            Save("autosave");
+        }
 
         if (InputManager.SavePressed)
-            Save();
+            Save(CurrentSaveName);
 
         if (InputManager.LoadPressed)
-            Load();
+            Load(CurrentSaveName);
 
         Globals.Update(gameTime);
         _gameManager.Update(gameTime);
@@ -113,20 +121,20 @@ public class KatabasisGame : Game
         base.Update(gameTime);
     }
 
-    public void Save()
+    public void Save(string filename)
     {
-        FileStream fileStream = File.Create("save.json");
+        FileStream fileStream = File.Create($"{filename}.json");
         JsonSerializer.Serialize(fileStream, _gameModel, Globals.JsonOptionsS);
         fileStream.Close();
     }
 
-    public void Load()
+    public void Load(string filename)
     {
         // Clear out the old objects being drawn from the global buffers
         Globals.Ybuffer.Clear();
         Globals.TextBuffer.Clear();
         
-        string jsonText = File.ReadAllText("save.json");
+        string jsonText = File.ReadAllText($"{filename}.json");
         _gameModel = JsonSerializer.Deserialize<GameModel>(jsonText, Globals.JsonOptionsS);
         _gameModel.InitLoaded();
 
