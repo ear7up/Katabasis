@@ -28,8 +28,6 @@ public class GameModel
         // Only one market will exist at any time
         Market = new();
         Market.SetAttributes(Player1.Kingdom);
-        Globals.Market = Market;
-        Globals.Player1 = Player1;
 
         const int NUM_PEOPLE = 100;
         for (int i = 0 ; i < NUM_PEOPLE; i++)
@@ -38,13 +36,14 @@ public class GameModel
             person.Money = Globals.Rand.Next(20, 50);
             Player1.Kingdom.AddPerson(person);
         }
+
+        Globals.Model = this;
     }
 
     // If loading from a save file, set static variables and calculate unserialized content
     public void InitLoaded()
     {
-        Globals.Market = Market;
-        Globals.Player1 = Player1;
         TileMap.ComputeNeighbors();
+        Globals.Model = this;
     }
 }

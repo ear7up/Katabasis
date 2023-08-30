@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public class MarketPanel : UIElement
+public class MarketPanel : CloseablePanel
 {
     public class ThreeBuyButtons
     {
@@ -147,7 +147,7 @@ public class MarketPanel : UIElement
 
                     // Write the current price and draw a bar indicating how its
                     // current price relates to the baseline price
-                    float price = Globals.Market.Prices[id];
+                    float price = Globals.Model.Market.Prices[id];
                     float defaultPrice = GoodsInfo.GetDefaultPrice(id);
                     priceText.Text = $"{price:0.0}";
                     priceBar.Image.SetScaleX(25f);
@@ -176,7 +176,7 @@ public class MarketPanel : UIElement
         // const int GOODS_ROWS = 14;
 
         i = 0;
-        foreach (KeyValuePair<int,List<MarketOrder>> kv in Globals.Market.SellOrders)
+        foreach (KeyValuePair<int,List<MarketOrder>> kv in Globals.Model.Market.SellOrders)
         {
             int category = Goods.TypeFromId(kv.Key);
             VBox container = (VBox)SellingAccordion.Sections[Goods.Categories[category]];
@@ -199,7 +199,7 @@ public class MarketPanel : UIElement
             quantityText.ScaleDown(0.45f);
             quantityText.SetPadding(right: 10);
 
-            float price = Globals.Market.GetPrice(kv.Key);
+            float price = Globals.Model.Market.GetPrice(kv.Key);
             TextSprite priceText = new(Sprites.Font, text: $"${price:0.0}");
             priceText.ScaleDown(0.45f);
             priceText.SetPadding(right: 10);
@@ -270,8 +270,8 @@ public class MarketPanel : UIElement
         UIElement button = (UIElement)clicked;
         int id = Int32.Parse(button.Name);
 
-        MarketOrder order = MarketOrder.Create(Globals.Player1.Person, true, Goods.FromId(id, n));
-        Globals.Market.PlaceBuyOrder(order);
+        MarketOrder order = MarketOrder.Create(Globals.Model.Player1.Person, true, Goods.FromId(id, n));
+        Globals.Model.Market.PlaceBuyOrder(order);
     }
 
     public override void Draw(Vector2 offset)

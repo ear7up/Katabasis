@@ -1,6 +1,4 @@
-using System.Security.Cryptography.X509Certificates;
-
-public class TileInfoPanel : UIElement
+public class TileInfoPanel : CloseablePanel
 {
     public const float MAX_BAR_SIZE = 100f;
 
@@ -153,6 +151,12 @@ public class TileInfoPanel : UIElement
         MyTile = tile;
 
         Update();
+    }
+
+    public override void ClosePanel(object clicked)
+    {
+        InputManager.SwitchToMode(InputManager.CAMERA_MODE);
+        base.ClosePanel(clicked);
     }
 
     public override void Draw(Vector2 offset)

@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public class StatsPanel : UIElement
+public class StatsPanel : CloseablePanel
 {
     public TabLayout Layout;
     public VBox OverviewLayout;

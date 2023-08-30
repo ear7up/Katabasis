@@ -426,7 +426,7 @@ public class SourceGoodsTask : Task
 
         // Try to buy the goods from the market
         Building market = (Building)Tile.Find(p.Home, new TileFilter(TileType.NONE, BuildingType.MARKET));
-        if (market != null && Globals.Market.AttemptTransact(MarketOrder.Create(p, true, new Goods(GoodsRequest))))
+        if (market != null && Globals.Model.Market.AttemptTransact(MarketOrder.Create(p, true, new Goods(GoodsRequest))))
         {
             GoToTask go = new();
             go.SetAttributes("Buying from market", market.Sprite.Position);
@@ -809,7 +809,7 @@ public class BuyTask : Task
     public override TaskStatus Execute(Person p)
     {
         Status.Complete = true;
-        if (Globals.Market.AttemptTransact(Order))
+        if (Globals.Model.Market.AttemptTransact(Order))
             Status.ReturnValue = Order.Goods;
         return Status;
     }
@@ -837,7 +837,7 @@ public class SellTask : Task
     public override TaskStatus Execute(Person p)
     {
         foreach (Goods g in Goods)
-            Globals.Market.PlaceSellOrder(MarketOrder.Create(p, false, g));
+            Globals.Model.Market.PlaceSellOrder(MarketOrder.Create(p, false, g));
         Status.Complete = true;
         return Status;
     }
@@ -972,14 +972,14 @@ public class BuyFoodFromMarketTask : Task
         if (market != null && p.Hunger > Person.DAILY_HUNGER)
         {
             BuyFromMarketTask buyTask = new();
-            MarketOrder foodOrder = Globals.Market.CheapestFood(p.Hunger);
+            MarketOrder foodOrder = Globals.Model.Market.CheapestFood(p.Hunger);
 
             if (foodOrder != null)
             {
                 foodOrder.Requestor = p;
 
                 // Don't order more than you can afford (max 80% of money)
-                float price = Globals.Market.GetPrice(foodOrder.Goods.GetId());
+                float price = Globals.Model.Market.GetPrice(foodOrder.Goods.GetId());
                 foodOrder.Goods.Quantity = Math.Min(p.Money * 0.8f / price, foodOrder.Goods.Quantity);
                 buyTask.SetAttributes(market.Sprite.Position, foodOrder);
                 

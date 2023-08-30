@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public class InventoryPanel : UIElement
+public class InventoryPanel : CloseablePanel
 {
     public const int MAX_ROWS = 12;
 

@@ -88,6 +88,8 @@ static class Sprites
 	public static SpriteTexture EscapeMenu;
 	public static SpriteTexture MenuButton;
 	public static SpriteTexture MenuButtonHover;
+	public static SpriteTexture XButton;
+	public static SpriteTexture XButtonHover;
 
 	// Market UI
 	public static SpriteTexture Buy1;
@@ -195,6 +197,8 @@ static class Sprites
 		EscapeMenu = LoadTexture("UI_maybe/escapeMenuPanel");
 		MenuButton = LoadTexture("UI_maybe/buttons/menuButton");
 		MenuButtonHover = LoadTexture("UI_maybe/buttons/menuButtonHover");
+		XButton = LoadTexture("UI_maybe/buttons/xbutton");
+		XButtonHover = LoadTexture("UI_maybe/buttons/xbuttonHover");
 
 		// UI - Market
 		Buy1 = LoadTexture("UI_maybe/buttons/buy1");

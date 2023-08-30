@@ -1,7 +1,7 @@
 using System;
 using Katabasis;
 
-public class EscapeMenuPanel : UIElement
+public class EscapeMenuPanel : CloseablePanel
 {
     public VBox Container;
 
@@ -12,10 +12,12 @@ public class EscapeMenuPanel : UIElement
         Container = new();
         Container.SetMargin(top: 25, left: 25);
 
-        Container.Add(new TextSprite(Sprites.Font, text: "Options"));
+        ScaleDownCloseButton(0.5f);
 
-        string[] text = new string[]{ "Options", "Save", "Load", "Exit Game", "Return to Game" };
-        Action<Object>[] buttons = new Action<Object>[] { OptionsButton, SaveButton, LoadButton, ExitButton, ReturnToGameButton };
+        string[] text = new string[]{ 
+            "Options", "Save", "Load", "Exit Game", "Save and Exit", "Return to Game" };
+        Action<Object>[] buttons = new Action<Object>[] { 
+            OptionsButton, SaveButton, LoadButton, ExitButton, SaveAndExitButton, ReturnToGameButton };
 
         for (int i = 0; i < buttons.Length; i++)
         {
@@ -59,10 +61,22 @@ public class EscapeMenuPanel : UIElement
         Katabasis.KatabasisGame.Instance.Exit();
     }
 
+    public void SaveAndExitButton(Object clicked)
+    {
+        Katabasis.KatabasisGame.Instance.Save();
+        Katabasis.KatabasisGame.Instance.Exit();
+    }
+
     public void ReturnToGameButton(Object clicked)
     {
         InputManager.Paused = false;
         Hide();
+    }
+
+    public override void ClosePanel(Object clicked)
+    {
+        InputManager.Paused = false;
+        base.ClosePanel(clicked);
     }
 
     public override void Draw(Vector2 offset)

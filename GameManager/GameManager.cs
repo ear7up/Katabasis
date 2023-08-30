@@ -308,9 +308,10 @@ public class GameManager
             InputManager.MousePos, Matrix.Invert(Model.GameCamera.Transform));
 
         _decorationManager.Update(Model.TileMap);
-
-        HandlePersonFollowing();
+        
         _personPanel.Update();
+        HandlePersonFollowing();
+
         _statsPanel.Update();
         MarketPanel.Update();
 
@@ -379,7 +380,7 @@ public class GameManager
 
         // Write statistics to debug
         _debugDisplay.Text = 
-            $"Public Wealth: {(int)(Model.Player1.Person.Money + Model.Player1.Kingdom.PublicWealth())}\n" +
+            $"Public Wealth: {(int)Model.Player1.Kingdom.PublicWealth()}\n" +
             $"Private Wealth: {(int)Model.Player1.Kingdom.PrivateWealth()}\n";
 
         _logoDisplay.Position = new Vector2(

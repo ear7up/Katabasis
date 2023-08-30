@@ -126,7 +126,7 @@ public class GoodsProduction
 
     public static float CalculateProfitability(int goodsId, int level)
     {
-        float profit = Globals.Market.Prices[goodsId];
+        float profit = Globals.Model.Market.Prices[goodsId];
         GoodsRequirement req = ((ProductionRequirements)Requirements[goodsId]).GoodsRequirement;
 
         float timeToProduce = CalculateTimeToProduce(goodsId, 1f, level);
@@ -139,7 +139,7 @@ public class GoodsProduction
         float materialCost = 0f;
         foreach (Goods good in req.Options)
         {
-            float reqPrice = Globals.Market.Prices[good.GetId()];
+            float reqPrice = Globals.Model.Market.Prices[good.GetId()];
             cheapestMaterialCost = Math.Min(cheapestMaterialCost, reqPrice);
             materialCost += reqPrice;
         }

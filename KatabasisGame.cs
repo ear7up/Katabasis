@@ -121,8 +121,11 @@ public class KatabasisGame : Game
         base.Update(gameTime);
     }
 
-    public void Save(string filename)
+    public void Save(string filename = "")
     {
+        if (filename.Length == 0)
+            filename = CurrentSaveName;
+
         FileStream fileStream = File.Create($"{filename}.json");
         JsonSerializer.Serialize(fileStream, _gameModel, Globals.JsonOptionsS);
         fileStream.Close();

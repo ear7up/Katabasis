@@ -317,7 +317,7 @@ public class Goods
     {
         string typeName = Globals.Title(Enum.GetName(typeof(GoodsType), Type));
         string subTypeName = GetGoodsName(Type, SubType);
-        float value = Globals.Market.GetPrice(GetId()) * Quantity;
+        float value = Globals.Model.Market.GetPrice(GetId()) * Quantity;
         
         if (Type == GoodsType.TOOL)
         {
@@ -415,6 +415,6 @@ public class Goods
 
     public float Value()
     {
-        return Quantity * Globals.Market.GetPrice(GetId());
+        return Quantity * Globals.Model.Market.GetPrice(GetId());
     }
 }

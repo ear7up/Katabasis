@@ -16,6 +16,8 @@ public static class Globals
     public static List<Drawable> Ybuffer = new();
     public static List<Drawable> TextBuffer = new();
 
+    public static GameModel Model { get; set; }
+
     // Write JSON indented, and preserve references (don't duplicate objects, use $ref instead)
     public static JsonSerializerOptions JsonOptionsS = new() { 
         WriteIndented = true, 

@@ -193,7 +193,7 @@ public class Kingdom
 
     public float PublicWealth()
     {
-        return Treasury.Wealth();
+        return Owner.Person.Money + Treasury.Wealth();
     }
 
     public float PrivateWealth()

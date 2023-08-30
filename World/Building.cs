@@ -219,21 +219,17 @@ public class Building : Drawable
             if (InputManager.UnconsumedClick() && Sprite.Contains(InputManager.MousePos))
             {
                 InputManager.ConsumeClick(this);
-                Selected = true;
+                Selected = !Selected;
 
                 if (Type == BuildingType.MARKET)
-                {
-                    Console.WriteLine(Globals.Market.Describe());
                     Katabasis.GameManager.ToggleMarketPanel();
-                }
+
                 else if (Type == BuildingType.HOUSE)
                     Console.WriteLine("House contents:\n" + Stockpile.ToString());
             }
             else if (Selected && InputManager.Clicked && 
                 (InputManager.ClickConsumer == null || !(InputManager.ClickConsumer is UIElement))) 
             {
-                if (Type == BuildingType.MARKET)
-                    Katabasis.GameManager.ToggleMarketPanel();
                 Selected = false;
             }
         }

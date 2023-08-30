@@ -1,6 +1,6 @@
 using System;
 
-public class PersonPanel : UIElement
+public class PersonPanel : CloseablePanel
 {
     Person PersonTracking;
 
@@ -94,6 +94,7 @@ public class PersonPanel : UIElement
         InventoryDescription.Text = "[ Inventory ]\n" + PersonTracking.PersonalStockpile.ToString();
 
         Layout.Update();
+        base.Update();
     }
 
     public override void Draw(Vector2 offset)
@@ -103,5 +104,13 @@ public class PersonPanel : UIElement
 
         base.Draw(offset);
         Layout.Draw(offset);
+    }
+
+    // Override to disable camera following when the panel closes
+    public override void ClosePanel(object clicked)
+    {
+        PersonTracking = null;
+        Globals.Model.GameCamera.Unfollow();
+        base.ClosePanel(clicked);
     }
 }

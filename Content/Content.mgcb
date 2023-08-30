@@ -3945,6 +3945,30 @@
 /processorParam:TextureFormat=Color
 /build:UI_maybe/buttons/menuButtonHover.png
 
+#begin UI_maybe/buttons/xbutton.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI_maybe/buttons/xbutton.png
+
+#begin UI_maybe/buttons/xbuttonHover.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI_maybe/buttons/xbuttonHover.png
+
 #begin UI_maybe/choice.png
 /importer:TextureImporter
 /processor:TextureProcessor
