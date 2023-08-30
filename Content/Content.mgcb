@@ -3921,6 +3921,30 @@
 /processorParam:TextureFormat=Color
 /build:UI_maybe/buttons/buy100.png
 
+#begin UI_maybe/buttons/menuButton.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI_maybe/buttons/menuButton.png
+
+#begin UI_maybe/buttons/menuButtonHover.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI_maybe/buttons/menuButtonHover.png
+
 #begin UI_maybe/choice.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -3956,6 +3980,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:UI_maybe/clock.png
+
+#begin UI_maybe/escapeMenuPanel.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI_maybe/escapeMenuPanel.png
 
 #begin UI_maybe/panel1.png
 /importer:TextureImporter

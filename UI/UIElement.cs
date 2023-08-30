@@ -11,6 +11,8 @@ public class UIElement
     private int[] _margin;
     public Vector2 Scale { get; set; }
     public Sprite Image;
+    public bool Hovering;
+    public Sprite HoverImage;
     public Sprite SelectedImage;
     public Vector2 Position { get; set; }
     public Action<Object> OnClick;
@@ -48,6 +50,10 @@ public class UIElement
         Name = "";
         Hidden = false;
         SelectedImage = null;
+
+        HoverImage = null;
+        Hovering = false;
+
         IsSelected = false;
         Position = Vector2.Zero;
         
@@ -66,11 +72,21 @@ public class UIElement
         Hidden = false;
     }
 
+    public virtual void ToggleHidden()
+    {
+        if (Hidden)
+            Unhide();
+        else
+            Hide();
+    }
+
     public virtual void Update()
     {
         // Don't process clicks or hovers on hidden elements
         if (Hidden)
             return;
+
+        Hovering = false;
 
         if (OnClick != null && InputManager.UnconsumedClick() && 
             GetBounds().Contains(InputManager.ScreenMousePos))
@@ -79,17 +95,30 @@ public class UIElement
             InputManager.ConsumeClick(this);
             OnClick(this);
         }
-        else if (OnHover != null && GetBounds().Contains(InputManager.ScreenMousePos))
+        else if (GetBounds().Contains(InputManager.ScreenMousePos))
         {
-            OnHover(TooltipText);
+            if (OnHover != null)
+                OnHover(TooltipText);
+            Hovering = true;
         }
     }
 
     public virtual Rectangle GetBounds()
     {
+        Vector2 pos = GetRealPosition();
         if (Image == null)
-            return new Rectangle((int)Position.X, (int)Position.Y, Width(), Height());
+            return new Rectangle((int)pos.X, (int)pos.Y, Width(), Height());
         return Image.GetBounds();
+    }
+
+    public Vector2 GetPadding()
+    {
+        return new Vector2(GetLeftPadding(), GetTopPadding());
+    }
+
+    public Vector2 GetRealPosition()
+    {
+        return Position + GetPadding();
     }
 
     public virtual void Draw(Vector2 offset)
@@ -107,11 +136,15 @@ public class UIElement
         Sprite draw = Image;
         if (IsSelected && SelectedImage != null)
             draw = SelectedImage;
+        else if (Hovering && HoverImage != null)
+            draw = HoverImage;
+
+        Vector2 padding = new Vector2(GetLeftPadding(), GetTopPadding());
 
         // Assume all UIElement images inherit their position from their UI container
         if (draw != null)
         {
-            draw.Position = offset;
+            draw.Position = offset + padding;
             if (draw.DrawRelativeToOrigin)
                 draw.Position += draw.Origin * draw.Scale;
             draw.Draw();

@@ -25,6 +25,7 @@ public class GameManager
     private static UIElement _clockHand;
     private static PersonPanel _personPanel;
     private static TileInfoPanel _tileInfoPanel;
+    private static EscapeMenuPanel escMenuPanel;
     public static MarketPanel MarketPanel;
 
     public GameManager()
@@ -111,6 +112,7 @@ public class GameManager
         _personPanel.Hide();
 
         _tileInfoPanel = new();
+        escMenuPanel = new();
 
         MarketPanel = new();
         MarketPanel.Hide();
@@ -250,6 +252,12 @@ public class GameManager
         }
     }
 
+    public void ToggleEscMenu()
+    {
+        InputManager.Paused = !InputManager.Paused;
+        escMenuPanel.ToggleHidden();
+    }
+
     public void ToggleGoodsDisplay(Object clicked)
     {
         if (inventoryPanel.Hidden)
@@ -286,6 +294,11 @@ public class GameManager
 
         if (InputManager.FPressed)
             Config.ShowFog = !Config.ShowFog;
+
+        escMenuPanel.Update();
+
+        if (InputManager.WasPressed(Keys.Escape))
+            ToggleEscMenu();
 
         // Calculate the real mouse position by inverting the camera transformations
         InputManager.MousePos = Vector2.Transform(
@@ -368,14 +381,6 @@ public class GameManager
         _debugDisplay.Text = 
             $"Public Wealth: {(int)(Model.Player1.Person.Money + Model.Player1.Kingdom.PublicWealth())}\n" +
             $"Private Wealth: {(int)Model.Player1.Kingdom.PrivateWealth()}\n";
-
-        // Write information about the currently selected person to the top left
-        /*
-        if (_camera.Following != null)
-            _debugDisplay.Text += _camera.Following.ToString();
-        else
-            _debugDisplay.Text += "";
-        */
 
         _logoDisplay.Position = new Vector2(
             Globals.WindowSize.X - _logoDisplay.Width() - 30,
@@ -461,6 +466,10 @@ public class GameManager
 
         MarketPanel.Draw(new Vector2(
             Globals.WindowSize.X - MarketPanel.Width(), 50f));
+
+        escMenuPanel.Draw(new Vector2(
+            Globals.WindowSize.X / 2 - escMenuPanel.Width() / 2,
+            Globals.WindowSize.Y / 2 - escMenuPanel.Height() / 2));
 
         // Draw the current coordinates at the cursor location
         _coordinateDisplay.Text = $"({InputManager.ScreenMousePos.X:0.0}, {InputManager.ScreenMousePos.Y:0.0})";

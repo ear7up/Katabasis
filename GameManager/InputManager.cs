@@ -33,6 +33,9 @@ public static class InputManager
     public static bool SavePressed;
     public static bool LoadPressed;
 
+    public static Keys KeyConsumed;
+    public static Object KeyConsumer;
+
     // Camera movement
     private static Vector2 _dragStart;
     public static Vector2 MouseDrag = Vector2.Zero;
@@ -72,6 +75,20 @@ public static class InputManager
         _dragStart = Vector2.Zero;
         MouseDrag = Vector2.Zero;
         ConfirmBuilding = false;
+    }
+
+    public static bool WasPressed(Keys key)
+    {
+        return 
+            lastKeyboardState.IsKeyDown(key) && 
+            keyboardState.IsKeyUp(key) &&
+            KeyConsumed != key;
+    }
+
+    public static void ConsumeKeypress(Keys key, object consumer)
+    {
+        KeyConsumed = key;
+        KeyConsumer = consumer;
     }
 
     private static void ProcessCameraInputs()
@@ -161,6 +178,9 @@ public static class InputManager
                   lastMouseState.LeftButton == ButtonState.Pressed);
         ClickConsumed = false;
         ClickConsumer = null;
+
+        KeyConsumed = Keys.None;
+        KeyConsumer = null;
 
         RClicked = lastMouseState.RightButton == ButtonState.Released && 
             mouseState.RightButton == ButtonState.Pressed;

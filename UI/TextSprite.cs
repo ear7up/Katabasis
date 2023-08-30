@@ -55,12 +55,13 @@ public class TextSprite : UIElement, Drawable
 
     public override Rectangle GetBounds()
     {
-        return new Rectangle((int)Position.X, (int)Position.Y, Width(), Height());
+        Vector2 pos = Position + GetPadding();
+        return new Rectangle((int)pos.X, (int)pos.Y, Width(), Height());
     }
 
     public override void Draw(Vector2 offset)
     {
-        base.Draw(offset);
+        base.Draw(offset + GetPadding());
 
         if (Hidden)
             return;
@@ -70,17 +71,17 @@ public class TextSprite : UIElement, Drawable
         // Draw using layerDepth = 1f, draw text above everything else on layer 0 (default)
         if (HasDropShadow)
         {
-            Globals.SpriteBatch.DrawString(Font, Text, offset + new Vector2(2f, 2f), 
+            Globals.SpriteBatch.DrawString(Font, Text, offset + GetPadding() + new Vector2(2f, 2f), 
                 Color.Black, 0f, Vector2.Zero, Scale, SpriteEffects.None, 1f);
         }
 
-        Globals.SpriteBatch.DrawString(Font, Text, offset, 
+        Globals.SpriteBatch.DrawString(Font, Text, offset + GetPadding(), 
             FontColor, 0f, Vector2.Zero, Scale, SpriteEffects.None, 1f);
     }
 
     public void Draw()
     {
-        Draw(Position);
+        Draw(Position + GetPadding());
     }
 
     public float GetMaxY()

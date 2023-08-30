@@ -4,13 +4,15 @@ public class OverlapLayout : Layout
 {
     public override void Draw(Vector2 offset)
     {
-        base.Draw(offset);
-
         if (Hidden)
             return;
 
+        base.Draw(offset);
+
+        Vector2 margin = new Vector2(GetLeftMargin(), GetTopMargin());
+
         foreach (UIElement element in Elements)
-            element.Draw(offset);
+            element.Draw(offset + margin);
     }
 
     public override int Width()

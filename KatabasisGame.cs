@@ -98,8 +98,8 @@ public class KatabasisGame : Game
     {
         InputManager.Update();
 
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            Exit();
+        //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+        //    Exit();
 
         if (InputManager.SavePressed)
             Save();

@@ -85,6 +85,9 @@ static class Sprites
 	public static SpriteTexture TabBackground;
 	public static SpriteTexture TabSelected;
 	public static SpriteTexture TabUnselected;
+	public static SpriteTexture EscapeMenu;
+	public static SpriteTexture MenuButton;
+	public static SpriteTexture MenuButtonHover;
 
 	// Market UI
 	public static SpriteTexture Buy1;
@@ -189,6 +192,9 @@ static class Sprites
 		TabBackground = LoadTexture("UI_maybe/tab_background");
 		TabSelected = LoadTexture("UI_maybe/tab_selected");
 		TabUnselected = LoadTexture("UI_maybe/tab_unselected");
+		EscapeMenu = LoadTexture("UI_maybe/escapeMenuPanel");
+		MenuButton = LoadTexture("UI_maybe/buttons/menuButton");
+		MenuButtonHover = LoadTexture("UI_maybe/buttons/menuButtonHover");
 
 		// UI - Market
 		Buy1 = LoadTexture("UI_maybe/buttons/buy1");
