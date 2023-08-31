@@ -19,7 +19,7 @@ public enum TaskDiscriminator
     GoToTask = 10,
     SellAtMarketTask = 11,
     EatTask = 12,
-    TryToBuildTask = 13,
+    BuildTask = 13,
     DepositInventoryTask = 14,
     CookTask = 15,
     BuyFoodFromMarketTask = 16
@@ -55,7 +55,8 @@ public class TaskStatus
 [JsonDerivedType(derivedType: typeof(GoToTask), typeDiscriminator: "GoToTask")]
 [JsonDerivedType(derivedType: typeof(CookTask), typeDiscriminator: "CookTask")]
 [JsonDerivedType(derivedType: typeof(SellTask), typeDiscriminator: "SellTask")]
-[JsonDerivedType(derivedType: typeof(TryToBuildTask), typeDiscriminator: "TryToBuildTask")]
+[JsonDerivedType(derivedType: typeof(BuildTask), typeDiscriminator: "BuildTask")]
+[JsonDerivedType(derivedType: typeof(HaulGoodsTask), typeDiscriminator: "HaulGoodsTask")]
 [JsonDerivedType(derivedType: typeof(IdleAtHomeTask), typeDiscriminator: "IdleAtHomeTask")]
 [JsonDerivedType(derivedType: typeof(FindNewHomeTask), typeDiscriminator: "FindNewHomeTask")]
 [JsonDerivedType(derivedType: typeof(SourceGoodsTask), typeDiscriminator: "SourceGoodsTask")]
@@ -815,6 +816,69 @@ public class BuyTask : Task
     }
 }
 
+public class HaulGoodsTask : Task
+{
+    public List<Goods> Hauling { get; set; }
+    public Vector2 From { get; set; }
+    public Vector2 To { get; set; }
+    public Stockpile ToStockpile { get; set; }
+    public float Salary { get; set; }
+
+    public HaulGoodsTask() : base()
+    {
+        Hauling = new();
+    }
+
+    public void SetAttributes(string description, List<Goods> hauling, Vector2 from, Vector2 to, Stockpile toStockpile, float salary)
+    {
+        Description = description;
+        ToStockpile = toStockpile;
+        foreach (Goods goods in hauling)
+            Hauling.Add(new Goods(goods));
+        From = from;
+        To = to;
+        Salary = salary;
+    }
+
+    public override TaskStatus Execute(Person p)
+    {
+        if (!Initialized)
+            Init(p);
+
+        // Try to complete subtasks first
+        TaskStatus subStatus = base.Execute(p);
+        if (subStatus != null && !subStatus.Complete)
+            return Status;
+
+        // But only when all subtasks are done
+        if (subTasks.Count == 0)
+            Status.Complete = Complete(p);
+
+        return Status;
+    }
+
+    public void Init(Person p)
+    {
+        Initialized = true;
+
+        GoToTask goFrom = new();
+        goFrom.SetAttributes("Going to pickup materials", From);
+        subTasks.Enqueue(goFrom);
+
+        GoToTask goTo = new();
+        goTo.SetAttributes("Delivering materials", To);
+        subTasks.Enqueue(goTo);
+    }
+
+    public override bool Complete(Person p)
+    {
+        foreach (Goods goods in Hauling)
+            ToStockpile.Add(goods);
+        p.Money += Salary;
+        return true;
+    }
+}
+
 public class SellTask : Task
 {
     // Serialized content
@@ -1022,108 +1086,67 @@ public class EatTask : Task
     }
 }
 
-public class TryToBuildTask : Task
+public class BuildTask : Task
 {
     // Serialized content
-    public Goods Tool { get; set; }
-    public Tile DestTile { get; set; }
-    public float TimeSpent { get; set; }
-    public bool ToolBorrowed { get; set; }
-    public BuildingType BuildingType { get; set; }
+    public ConstructionRequest Request { get; set; }
 
-    public TryToBuildTask() 
+    public BuildTask() 
     {
-        Discriminator = TaskDiscriminator.TryToBuildTask;
-        Tool = null;
-        DestTile = null;
-        TimeSpent = 0f;
-        ToolBorrowed = false;        
+           
     }
 
-    public void SetAttributes(BuildingType buildingType)
+    public static BuildTask Create(ConstructionRequest request, string description)
     {
-        base.SetAttributes("Trying to build " + Globals.Title(buildingType.ToString()));
-
-        BuildingType = buildingType;
-        ProductionRequirements reqs = (ProductionRequirements)BuildingProduction.Requirements[BuildingType];
-
-        if (reqs.ToolRequirement != null)
-        {
-            SourceGoodsTask task = new();
-            task.SetAttributes(new Goods(GoodsType.TOOL, (int)reqs.ToolRequirement.Tool, (int)reqs.ToolRequirement.Material));
-            subTasks.Enqueue(task);
-        }
-
-        if (reqs.GoodsRequirement != null)
-        {
-            foreach (Goods g in reqs.GoodsRequirement.ToList())
-            {
-                SourceGoodsTask task = new SourceGoodsTask();
-                task.SetAttributes(g);
-                subTasks.Enqueue(task);
-            }
-        }
-
-        if (reqs.TileRequirement != TileType.NONE)
-        {
-            FindTileByTypeTask task = new();
-            task.SetAttributes(reqs.TileRequirement);
-            subTasks.Enqueue(task);
-        }
+        BuildTask task = new() { 
+            Description = description,
+            Request = request 
+        };
+        return task;
     }
 
     public override TaskStatus Execute(Person p)
     {
-        // Wait for subtasks to complete, use their return value
+        if (!Initialized)
+            return Init(p);
+
+        // Try to complete subtasks first
         TaskStatus subStatus = base.Execute(p);
-        if (subStatus == null)
-        {
-            subStatus = null;
-        }
-        else if (subStatus.Failed || !subStatus.Complete)
-        {
-            return subStatus;
-        }
-        else if (subStatus.Task is SourceGoodsTask)
-        {
-            Goods g = (Goods)subStatus.ReturnValue;
-            if (g.Type == GoodsType.TOOL)
-            {
-                Tool = g;
-                //ToolBorrowed = ((SourceGoodsTask)subStatus.Task).FromInventory;
-            }
-        }
-        else if (subStatus.Task is FindTileByTypeTask)
-        {
-            DestTile = (Tile)subStatus.ReturnValue;
-            GoToTask go = new();
-            go.SetAttributes("Going to build site", DestTile.GetPosition());
-            subTasks.Enqueue(go);
-        }
-
-        // All queued tasks complete, add build time
+        if (subStatus != null && !subStatus.Complete)
+            return Status;
+    
+        // Work until the request is complete
+        // If large building tasks are added, set a time limit for a single BuildTask
         if (subTasks.Count == 0)
-        {
-            // When enough time has passed, finish the building,
-            // return the tool if borrowed, and add the building to the tile
-            TimeSpent += Globals.Time;
-            if (TimeSpent >= BuildingInfo.GetBuildTime(BuildingType))
-            {
-                // TODO; Why is this failing to get a tool? Not being produced
-                //Tool.Use();
-                //if (ToolBorrowed)
-                //    p.PersonalStockpile.Add(Tool);
-                
-                // No tile type requirement - place it at home tile
-                if (DestTile == null)
-                    DestTile = p.Home;
+            Request.Work(p);
 
-                Building.CreateBuilding(DestTile, BuildingType);
-                Status.Complete = true;
-            }
-        }
+        if (Request.IsComplete)
+            Complete(p);
 
         return Status;
+    }
+
+    public TaskStatus Init(Person p)
+    {
+        Initialized = true;
+
+        GoToTask go = new();
+        go.SetAttributes("Going to construction site to build", Request.ToBuild.Sprite.Position);
+        subTasks.Enqueue(go);
+
+        return Status;
+    }
+
+    public override bool Complete(Person p)
+    {
+        // Subtract durability from the tool used in construction
+        ProductionRequirements reqs = BuildingProduction.GetRequirements(Request.ToBuild.Type);
+        if (reqs != null && reqs.ToolRequirement != null)
+            p.PersonalStockpile.UseTool(reqs.ToolRequirement.Tool, reqs.ToolTypeRequirement);
+
+        Status.Complete = true;
+
+        return true;
     }
 }
 
@@ -1144,7 +1167,7 @@ public class DepositInventoryTask : Task
             return Status;
         }
 
-        p.PersonalStockpile.DepositInto(p.House.Stockpile);
+        p.PersonalStockpile.DepositIntoExcludingProfessionTool(p.House.Stockpile, p.Profession);
 
         // Share household money
         p.House.Money += p.Money;

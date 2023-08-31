@@ -188,30 +188,29 @@ public class Person : Entity, Drawable
             return;
         }
 
+        // Perhaps the player's Market BuyOrders should be prioritized for TryToProduceTasks?
+
         float r = Globals.Rand.NextFloat(0f, 1f);
 
-        if (r < 1f)
-        {
-            // Pick a skill, biased toward high-level skills, then pick a task that uses that skill
-            AdjustSkillWeights();
-            SkillLevel weightedRandomChoice = Skills.Next();
+        // Pick a skill, biased toward high-level skills, then pick a task that uses that skill
+        AdjustSkillWeights();
+        SkillLevel weightedRandomChoice = Skills.Next();
 
-            Task task = null;
-            
-            const float PROFIT_SEEKING_CHANCE = 0.3f;
-            if (r < PROFIT_SEEKING_CHANCE)
-                task = Task.MostProfitableUsingSkill(weightedRandomChoice);
+        Task task = null;
+        const float PROFIT_SEEKING_CHANCE = 0.3f;
 
-            // Some skills may have no completable tasks, so have a chance to not get stuck in a loop
-            if (task == null || r >= PROFIT_SEEKING_CHANCE)
-                task = Task.RandomUsingSkill(this, weightedRandomChoice);
+        if (weightedRandomChoice.skill == Skill.BUILDING)
+            task = Globals.Model.ConstructionQueue.GetTask(this);
+        
+        if (task == null && r < PROFIT_SEEKING_CHANCE)
+            task = Task.MostProfitableUsingSkill(weightedRandomChoice);
 
-            Tasks.Enqueue(task);
-        }
-        else
-        {
-            Tasks.Enqueue(new IdleAtHomeTask());
-        }
+        // Some skills may have no completable tasks, so have a chance to not get stuck in a loop
+        if (task == null)
+            task = Task.RandomUsingSkill(this, weightedRandomChoice);
+
+        Tasks.Enqueue(task);
+        //Tasks.Enqueue(new IdleAtHomeTask());
     }
 
     public void AdjustSkillWeights()
@@ -294,6 +293,7 @@ public class Person : Entity, Drawable
         // If you have a house, go there, desposit your inventory, then try to cook
         if (House != null && Home != null)
             DailyHomeTasks();
+        DailyTasks();
 
         // Eat until you run out of food or are no longer hungry
         AssignPriorityTask(new EatTask(), 1);
@@ -312,6 +312,10 @@ public class Person : Entity, Drawable
         Tasks.Enqueue(go);
         Tasks.Enqueue(new DepositInventoryTask());
         Tasks.Enqueue(new CookTask());
+    }
+
+    public void DailyTasks()
+    {
         Tasks.Enqueue(new EatTask());
         Tasks.Enqueue(new SellAtMarketTask());
         Tasks.Enqueue(new BuyFoodFromMarketTask());
@@ -374,6 +378,17 @@ public class Person : Entity, Drawable
     public List<Goods> FigureOutWhatToSell()
     {
         List<Goods> extras = new();
+
+        // Usually your inventory gets deposited each day, unless you're homeless
+        // This will allow homeless people to sell things directly from their inventory
+        foreach (Goods g in PersonalStockpile)
+        {
+            if (!g.IsEdible() && !g.IsTool())
+                extras.Add(g);
+        }
+
+        if (House == null)
+            return extras;
 
         // Try to keep enough food to feed everyone in the household
         float totalSatiation = House.Stockpile.TotalSatiation();

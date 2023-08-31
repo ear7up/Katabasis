@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using ProfessionExtension;
 
 public class Stockpile
 {
@@ -166,6 +167,21 @@ public class Stockpile
         foreach (Goods g in _stock.Values)
             other.Add(g);
         _stock.Clear();
+    }
+
+    public void DepositIntoExcludingProfessionTool(Stockpile other, ProfessionType profession)
+    {
+        Goods.Tool toolType = profession.GetTool();
+        List<Goods> keep = new();
+        foreach (Goods g in _stock.Values)
+            if (g.IsTool() && g.SubType == (int)toolType)
+                keep.Add(g);
+            else
+                other.Add(g);
+
+        _stock.Clear();
+        foreach (Goods g in keep)
+            Add(g);
     }
 
     public void DepositIntoExcludingFoodAndTools(Stockpile other)

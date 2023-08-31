@@ -9,6 +9,7 @@ public class GameModel
     public Player Player1 { get; set; }
     public Market Market { get; set; }
     public Map TileMap { get; set; }
+    public ConstructionRequests ConstructionQueue { get; set; }
 
     public GameModel()
     {
@@ -36,6 +37,8 @@ public class GameModel
             person.Money = Globals.Rand.Next(20, 50);
             Player1.Kingdom.AddPerson(person);
         }
+
+        ConstructionQueue = new();
 
         Globals.Model = this;
     }

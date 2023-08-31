@@ -26,8 +26,6 @@ public class Map
 
     private readonly Point _mapTileSize = new(128, 128);
 
-    private Building _editBuilding = null;
-
     public Tile HighlightedTile;
 
     public static Point TileSize { get; private set; }
@@ -51,8 +49,6 @@ public class Map
 
         VerticalOverlap = 30;
         HorizontalOverlap = TileSize.X / 2;
-
-        _editBuilding = null;
 
         // Fix the map origin to account for overlap and perspective
         Origin = new(MapSize.X / 2 - HorizontalOverlap, MapSize.Y / 2 - VerticalOverlap * _mapTileSize.Y);
@@ -375,49 +371,6 @@ public class Map
             UnhighlightTile();
         }
 
-        if (_editBuilding != null)
-        {
-            // Make the currently editing building follow the mouse pointer
-            _editBuilding.Sprite.Position = InputManager.MousePos;
-
-            Tile location = TileAtPos(InputManager.MousePos);
-            if (Building.ValidPlacement(_editBuilding, location))
-                _editBuilding.Sprite.SpriteColor = new Color(Color.LightBlue, 0.3f);
-            else
-                _editBuilding.Sprite.SpriteColor = new Color(Color.OrangeRed, 0.3f);
-
-            // Confirm and add the building (stop editing)
-            if (InputManager.ConfirmBuilding)
-            {
-                _editBuilding.Sprite.SpriteColor = Color.White;
-                AddBuilding(_editBuilding);
-            
-                // Keep building more of the same type if shift is held
-                if (InputManager.ShiftHeld)
-                    CreateEditBuilding(_editBuilding.Type);
-                else
-                    _editBuilding = null;
-            }
-            // Resize the building before placing it (scroll wheel while in build mode)
-            else if (InputManager.Mode == InputManager.BUILD_MODE && InputManager.ScrollValue > 0)
-            {
-                _editBuilding.Sprite.ScaleUp(SCALE_CONSTANT);
-            }
-            else if (InputManager.Mode == InputManager.BUILD_MODE && InputManager.ScrollValue < 0)
-            {
-                _editBuilding.Sprite.ScaleDown(SCALE_CONSTANT);
-            }
-            else if (InputManager.Mode != InputManager.BUILD_MODE)
-            {
-                _editBuilding = null;
-            }            
-        }
-        else if (_editBuilding == null && InputManager.Mode == InputManager.BUILD_MODE)
-        {
-            // When build mode is first enabled, create a building at the mouse cursor
-            //CreateEditBuilding();
-        }
-
         // Update tiles
         foreach (Tile t in tiles)
             t.Update();
@@ -429,31 +382,8 @@ public class Map
             t.DailyUpdate();
     }
 
-    public void CreateEditBuilding(BuildingType buildingType = BuildingType.NONE)
+    public void DrawTiles(Tile.DisplayType displayType)
     {
-        Building b = Building.Random(type: buildingType, temporary: true);
-        b.Sprite.Position = InputManager.MousePos;
-        _editBuilding = b;
-        _editBuilding.Sprite.SpriteColor = new Color(Color.LightBlue, 0.3f);
-    }
-
-    public void ClearEditBuilding()
-    {
-        _editBuilding = null;
-    }
-
-    public void DrawTiles()
-    {
-        Tile.DisplayType displayType = Tile.DisplayType.DEFAULT;
-        if (_editBuilding != null && _editBuilding.Type == BuildingType.FARM)
-            displayType = Tile.DisplayType.SOIL_QUALITY;
-        else if (_editBuilding != null && _editBuilding.Type == BuildingType.MINE)
-            displayType = Tile.DisplayType.MINERALS;
-        else if (_editBuilding != null && _editBuilding.Type == BuildingType.RANCH)
-            displayType = Tile.DisplayType.PLACING_RANCH;
-        else if (InputManager.Mode == InputManager.TILE_MODE)
-            displayType = Tile.DisplayType.BUYING_TILE;
-
         // Draw map tiles
         int numTiles = _mapTileSize.X * _mapTileSize.Y;
         for (int n = 0; n < numTiles; n++)
@@ -466,11 +396,7 @@ public class Map
 
     public void DrawUI()
     {
-        // If the user is placing a building, draw that temporary sprite
-        if (_editBuilding != null)
-        {
-            _editBuilding.Draw();
-        }
+        
     }
 
     // Keep building list sorted by y order

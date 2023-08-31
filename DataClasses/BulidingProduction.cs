@@ -1,5 +1,6 @@
 using System.Collections;
 
+// Every buliding MUST require goods to be built
 public class BuildingProduction
 {
     public static Hashtable Requirements;
@@ -67,8 +68,24 @@ public class BuildingProduction
         // building: stone + furnace -> smithy
         Requirements.Add(BuildingType.SMITHY, new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.STONE, 60)),
+                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.STONE, 60),
+                new Goods(GoodsType.TOOL, (int)Goods.Tool.FURNACE, 1),
+                and: true),
             toolRequirement: new ToolRequirement(Goods.Tool.FURNACE),
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 20)));
+
+        // building: stone + wood -> granary
+        Requirements.Add(BuildingType.GRANARY, new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.STONE, 20),
+                new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 50),
+                and: true),
+            toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
+            levelRequirement: SkillLevel.Create(Skill.BUILDING, 20)));
+    }
+
+    public static ProductionRequirements GetRequirements(BuildingType buildingType)
+    {
+        return (ProductionRequirements)Requirements[buildingType];
     }
 }

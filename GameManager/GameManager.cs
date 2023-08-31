@@ -12,6 +12,8 @@ public class GameManager
 
     public GameModel Model;
 
+    private static BuildingPlacer _buildingPlacer;
+
     private readonly Sprite _sky;
     private TextSprite _coordinateDisplay;
     private DecorationManager _decorationManager;
@@ -30,6 +32,8 @@ public class GameManager
 
     public GameManager()
     {
+        _buildingPlacer = new();
+
         _sky = Sprite.Create(Sprites.Sky, Vector2.Zero);
         _sky.SetScale(2f);
 
@@ -158,7 +162,7 @@ public class GameManager
         }
         else
         {
-            Model.TileMap.CreateEditBuilding(buildingType);
+            _buildingPlacer.CreateEditBuilding(buildingType);
             InputManager.SwitchToMode(InputManager.BUILD_MODE);
         }
     }
@@ -172,7 +176,7 @@ public class GameManager
         else
         {
             InputManager.SwitchToMode(InputManager.CAMERA_MODE);
-            Model.TileMap.ClearEditBuilding();
+            _buildingPlacer.ClearEditBuilding();
             _bottomPanel.Hide();
         }
     }
@@ -308,12 +312,19 @@ public class GameManager
             InputManager.MousePos, Matrix.Invert(Model.GameCamera.Transform));
 
         _decorationManager.Update(Model.TileMap);
+        _buildingPlacer.Update();
         
         _personPanel.Update();
         HandlePersonFollowing();
 
         _statsPanel.Update();
         MarketPanel.Update();
+
+        inventoryPanel.UpdatePrivate(Model.Player1.Kingdom.PrivateGoods());
+        inventoryPanel.UpdatePublic(Model.Player1.Kingdom.Treasury);
+        inventoryPanel.Update();
+
+        _tileInfoPanel.UpdateTileData(Model.TileMap.HighlightedTile);
 
         // Update UI last (pop-up panels are on top, they should get clicks first)
         UI.Update();
@@ -328,13 +339,9 @@ public class GameManager
         Model.Player1.Update();
         Model.TileMap.Update();
         Model.Market.Update();
+        Model.ConstructionQueue.Update();
 
         // TODO: Write code to support click and drag on UIElements
-        inventoryPanel.UpdatePrivate(Model.Player1.Kingdom.PrivateGoods());
-        inventoryPanel.UpdatePublic(Model.Player1.Kingdom.Treasury);
-        inventoryPanel.Update();
-
-        _tileInfoPanel.UpdateTileData(Model.TileMap.HighlightedTile);
 
         HandleTileAcquisition();
 
@@ -410,6 +417,23 @@ public class GameManager
         }
     }
 
+    public Tile.DisplayType GetTileDisplayType()
+    {
+        Building b = _buildingPlacer._editBuilding;
+
+        Tile.DisplayType displayType = Tile.DisplayType.DEFAULT;
+        if (b != null && b.Type == BuildingType.FARM)
+            displayType = Tile.DisplayType.SOIL_QUALITY;
+        else if (b != null && b.Type == BuildingType.MINE)
+            displayType = Tile.DisplayType.MINERALS;
+        else if (b != null && b.Type == BuildingType.RANCH)
+            displayType = Tile.DisplayType.PLACING_RANCH;
+        else if (InputManager.Mode == InputManager.TILE_MODE)
+            displayType = Tile.DisplayType.BUYING_TILE;
+
+        return displayType;
+    }
+
     public void Draw()
     {
         // Draw background independent of transformations
@@ -420,7 +444,7 @@ public class GameManager
         Globals.SpriteBatch.Begin(transformMatrix: Model.GameCamera.Transform);
         
         // Tiles belong on the bottom
-        Model.TileMap.DrawTiles();
+        Model.TileMap.DrawTiles(GetTileDisplayType());
 
         Globals.Ybuffer.Sort(CompareDrawable);
         
@@ -436,6 +460,8 @@ public class GameManager
 
         // Draw the UI on top
         Model.TileMap.DrawUI();
+
+        _buildingPlacer.DrawUI();
 
         Globals.SpriteBatch.End();
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 public enum BuildingType
 {
@@ -46,6 +47,7 @@ public class Building : Drawable
     public int CurrentUsers { get; set; }
     public bool Selected { get; set; }
     public int MaxUsers { get; set; }
+    public float BuildProgress { get; set; }
 
     // Only used for houses
     public Stockpile Stockpile { get; set; }
@@ -253,7 +255,11 @@ public class Building : Drawable
             Sprite.UndoScaleUp(0.025f);
 
             SelectedText.Unhide();
-            SelectedText.Text = $"Occupants: ({CurrentUsers}/{MaxUsers})";
+
+            if (BuildProgress < 1f)
+                SelectedText.Text = $"Build Progress: ({(int)(100 * BuildProgress)}%)";
+            else
+                SelectedText.Text = $"Occupants: ({CurrentUsers}/{MaxUsers})";
 
             Rectangle bounds = Sprite.GetBounds();
             SelectedText.Position = new Vector2(
@@ -266,6 +272,33 @@ public class Building : Drawable
         }
 
         Sprite.Draw();
+    }
+
+    // Keep in mind this is non-deterministic when there are multiple options for building materials
+    public List<Goods> GetMaterials()
+    {
+        return BuildingProduction.GetRequirements(Type).GoodsRequirement.ToList();
+    }
+
+    // Calculate how expensive it will be to produce this building including materials and labor
+    public float MaterialCost(List<Goods> materials)
+    {
+        float materialCost = 0f;
+        foreach (Goods goods in materials)
+            materialCost += Globals.Model.Market.GetPrice(goods.GetId()) * goods.Quantity;
+        return materialCost;
+    }
+
+    public float LaborCost()
+    {
+        // building cost $1.5/second
+        float timeToProduce = BuildingInfo.GetBuildTime(Type);
+        float buildingCost = timeToProduce * 1.5f;
+
+        // 10% of labor cost for hauling
+        float haulingCost = buildingCost * 0.1f;
+
+        return buildingCost + haulingCost;
     }
 
     public float GetMaxY()

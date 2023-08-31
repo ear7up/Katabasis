@@ -58,7 +58,7 @@ public class TaskConverter : JsonConverter<Task>
             TaskDiscriminator.SellAtMarketTask => JsonSerializer.Deserialize<SellAtMarketTask>(ref reader!, jsonOptions),
             TaskDiscriminator.SellTask => JsonSerializer.Deserialize<SellTask>(ref reader!, jsonOptions),
             TaskDiscriminator.SourceGoodsTask => JsonSerializer.Deserialize<SourceGoodsTask>(ref reader!, jsonOptions),
-            TaskDiscriminator.TryToBuildTask => JsonSerializer.Deserialize<TryToBuildTask>(ref reader!, jsonOptions),
+            TaskDiscriminator.BuildTask => JsonSerializer.Deserialize<BuildTask>(ref reader!, jsonOptions),
             TaskDiscriminator.TryToProduceTask => JsonSerializer.Deserialize<TryToProduceTask>(ref reader!, jsonOptions),
             _ => throw new JsonException()
         };

@@ -10,6 +10,11 @@ public abstract class Layout : UIElement
         OnClick = null;
     }
 
+    public override int GetElementCount()
+    {
+        return Elements.Count;
+    }
+
     public virtual void Add(UIElement element)
     {
         Elements.Add(element);

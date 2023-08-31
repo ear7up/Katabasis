@@ -80,6 +80,11 @@ public class UIElement
             Hide();
     }
 
+    public virtual int GetElementCount()
+    {
+        return 1;
+    }
+
     public virtual void Update()
     {
         // Don't process clicks or hovers on hidden elements

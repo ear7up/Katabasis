@@ -32,7 +32,7 @@ public class Player
     {
         Kingdom = Kingdom.Create(this, startTile);
 
-        Person.PersonalStockpile = Kingdom.Treasury;
+        Person.PersonalStockpile = new();
     }
 
     public void UnlockPlant(Goods.FoodPlant plant)

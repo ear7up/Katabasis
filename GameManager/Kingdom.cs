@@ -49,8 +49,12 @@ public class Kingdom
         // Start with 25 tiles centered around the start tile, which will contain a market
         AcquireTilesAround(StartTile, distance: 2);
         ExploreTilesAround(StartTile, distance: 7);
+
         Building city = Building.CreateBuilding(StartTile, BuildingType.CITY);
+        city.BuildProgress = 1f;
+
         Building market = Building.CreateBuilding(StartTile.Neighbors[0], BuildingType.MARKET);
+        market.BuildProgress = 1f;
     }
 
     // Checks if tile is adjacent to one owned by the player

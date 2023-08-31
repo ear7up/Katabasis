@@ -4,8 +4,10 @@ using System.Collections.Generic;
 // Crappy GridLayout implementation, assumes all objects have equal dimensions
 public class GridLayout : Layout
 {
+    // Don't add to this directly, always use SetContent(x, y) otherwise Rows/Columns can be wrong
     public List<List<UIElement>> GridContent;
 
+    public int Rows;
     public int Columns;
 
     public GridLayout(SpriteTexture texture = null) : base(texture)
@@ -13,11 +15,17 @@ public class GridLayout : Layout
         GridContent = new();
     }
 
+    public override int GetElementCount()
+    {
+        return Rows * Columns;
+    }
+
     public void Expand(int x, int y)
     {
         // Expand to y rows
         while (y >= GridContent.Count)
             GridContent.Add(new());
+        Rows = Math.Max(Rows, y + 1);
 
         // Expand to x columns
         List<UIElement> row = GridContent[y];

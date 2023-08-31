@@ -40,6 +40,10 @@ public class TileFilter
 
         foreach (Building b in t.Buildings)
         {
+            // Building is under construction
+            if (b.BuildProgress < 1f)
+                continue;
+
             // Continue, wrong type
             if (!Building.EquivalentType(b.Type, FilterBuildingType))
                 continue;

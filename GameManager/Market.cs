@@ -191,6 +191,7 @@ public class Market
 
                 Goods sold = new Goods(o.Goods);
                 sold.Quantity = sale_quantity;
+                trade.Requestor.PersonalStockpile.Add(sold.GetId(), sold.Quantity);
                 o.Requestor.PersonalStockpile.Take(sold);
             }
 
