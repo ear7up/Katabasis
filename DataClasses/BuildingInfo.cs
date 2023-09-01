@@ -7,8 +7,10 @@ public class BuildingInfo
     public float TimeToProduce;
     public int MaxUsers;
 
-    public BuildingInfo(BuildingType type)
+    public BuildingInfo(int buildingId)
     {
+        BuildingType type = Building.TypeFromId(buildingId);
+
         TimeToProduce = 30f;
         switch (type)
         {
@@ -24,21 +26,32 @@ public class BuildingInfo
     public static void Init()
     {
         Array buildingTypes = Enum.GetValues(typeof(BuildingType));
-        Data = new BuildingInfo[buildingTypes.Length];
+        Array subTypes = Enum.GetValues(typeof(BuildingSubType));
+
+        Data = new BuildingInfo[buildingTypes.Length * Building.MAX_BUILDING_SUBTYPES];
 
         foreach (BuildingType type in buildingTypes)
-        {
-            Data[(int)type] = new BuildingInfo(type);
-        }
+            foreach (BuildingSubType subType in subTypes)
+                Data[Building.GetId(type, subType)] = new BuildingInfo(Building.GetId(type, subType));
     }
 
-    public static float GetBuildTime(BuildingType buildingType)
+    public static float GetBuildTime(BuildingType buildingType, BuildingSubType subType = BuildingSubType.NONE)
     {
-        return Data[(int)buildingType].TimeToProduce;
+        return Data[Building.GetId(buildingType, subType)].TimeToProduce;
     }
 
-    public static int GetMaxUsers(BuildingType buildingType)
+    public static float GetBuildTime(int id)
     {
-        return Data[(int)buildingType].MaxUsers;
+        return Data[id].TimeToProduce;
+    }
+
+    public static int GetMaxUsers(BuildingType buildingType, BuildingSubType subType = BuildingSubType.NONE)
+    {
+        return Data[(int)Building.GetId(buildingType, subType)].MaxUsers;
+    }
+
+    public static int GetMaxUsers(int id)
+    {
+        return Data[id].MaxUsers;
     }
 }

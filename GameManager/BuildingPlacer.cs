@@ -19,6 +19,8 @@ public class BuildingPlacer
     
         // Make the currently editing building follow the mouse pointer
         _editBuilding.Sprite.Position = InputManager.MousePos;
+        if (_editBuilding.ConstructionSprite != null)
+            _editBuilding.ConstructionSprite.Position = InputManager.MousePos;
 
         Tile location = Globals.Model.TileMap.TileAtPos(InputManager.MousePos);
 
@@ -51,9 +53,9 @@ public class BuildingPlacer
             _editBuilding = null;
     }
 
-    public void CreateEditBuilding(BuildingType buildingType = BuildingType.NONE)
+    public void CreateEditBuilding(BuildingType buildingType, BuildingSubType subType = BuildingSubType.NONE)
     {
-        Building b = Building.Random(type: buildingType, temporary: true);
+        Building b = Building.Random(buildingType, subType, temporary: true);
         b.Sprite.Position = InputManager.MousePos;
         _editBuilding = b;
         _editBuilding.Sprite.SpriteColor = new Color(Color.LightBlue, 0.3f);
@@ -69,7 +71,7 @@ public class BuildingPlacer
         List<Goods> materials = b.GetMaterials();
 
         float materialCost = Building.MaterialCost(materials);
-        float laborCost = Building.LaborCost(b.Type);
+        float laborCost = Building.LaborCost(b.Type, b.SubType);
 
         // TODO: Alert the user they could not afford the building
         if (!Config.InstantBuilding && Globals.Model.Player1.Person.Money < materialCost + laborCost)

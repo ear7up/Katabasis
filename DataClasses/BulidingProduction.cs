@@ -3,6 +3,7 @@ using System.Collections;
 // Every buliding MUST require goods to be built
 public class BuildingProduction
 {
+    // Building ID -> ProductionRequirements
     public static Hashtable Requirements;
 
     public static void Init()
@@ -10,7 +11,7 @@ public class BuildingProduction
         Requirements = new();
         
         // building: wood + saw + vegetation -> farm
-        Requirements.Add(BuildingType.FARM, new ProductionRequirements(
+        Requirements.Add(Building.GetId(BuildingType.FARM), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 40)),
             toolRequirement: new ToolRequirement(Goods.Tool.SAW),
@@ -18,7 +19,7 @@ public class BuildingProduction
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 10)));
 
         // building: wood + saw + animals -> ranch
-        Requirements.Add(BuildingType.RANCH, new ProductionRequirements(
+        Requirements.Add(Building.GetId(BuildingType.RANCH), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 40)),
             toolRequirement: new ToolRequirement(Goods.Tool.SAW),
@@ -26,22 +27,28 @@ public class BuildingProduction
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 10)));
 
         // building: stone + furnace -> forge
-        Requirements.Add(BuildingType.FORGE, new ProductionRequirements(
+        Requirements.Add(Building.GetId(BuildingType.FORGE), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.STONE, 60)),
             toolRequirement: new ToolRequirement(Goods.Tool.FURNACE),
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 20)));
 
-        // building: [bricks or wood] -> house
-        Requirements.Add(BuildingType.HOUSE, new ProductionRequirements(
+        // building: brick -> house (brick)
+        Requirements.Add(Building.GetId(BuildingType.HOUSE, BuildingSubType.BRICK), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.BRICKS, 30),
+                new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.BRICKS, 30)),
+            toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
+            levelRequirement: SkillLevel.Create(Skill.BUILDING, 10)));
+
+        // building: wood -> house (wood)
+        Requirements.Add(Building.GetId(BuildingType.HOUSE, BuildingSubType.WOOD), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 30)),
             toolRequirement: new ToolRequirement(Goods.Tool.SAW),
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 10)));
 
         // building: wood + saw -> lumbermill
-        Requirements.Add(BuildingType.LUMBERMILL, new ProductionRequirements(
+        Requirements.Add(Building.GetId(BuildingType.LUMBERMILL), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 30)),
             toolRequirement: new ToolRequirement(Goods.Tool.SAW),
@@ -49,7 +56,7 @@ public class BuildingProduction
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 30)));
 
         // building: saw + [wood AND linen] -> market
-        Requirements.Add(BuildingType.MARKET, new ProductionRequirements(
+        Requirements.Add(Building.GetId(BuildingType.MARKET), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 50),
                 new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.LINEN, 20), 
@@ -58,7 +65,7 @@ public class BuildingProduction
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 30)));
 
         // building: wood + shovel -> mine
-        Requirements.Add(BuildingType.MINE, new ProductionRequirements(
+        Requirements.Add(Building.GetId(BuildingType.MINE), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 30)),
             toolRequirement: new ToolRequirement(Goods.Tool.SHOVEL),
@@ -66,7 +73,7 @@ public class BuildingProduction
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 30)));
 
         // building: stone + furnace -> smithy
-        Requirements.Add(BuildingType.SMITHY, new ProductionRequirements(
+        Requirements.Add(Building.GetId(BuildingType.SMITHY), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.STONE, 60),
                 new Goods(GoodsType.TOOL, (int)Goods.Tool.FURNACE, 1),
@@ -75,7 +82,7 @@ public class BuildingProduction
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 20)));
 
         // building: stone + wood -> granary
-        Requirements.Add(BuildingType.GRANARY, new ProductionRequirements(
+        Requirements.Add(Building.GetId(BuildingType.GRANARY), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.STONE, 20),
                 new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 50),
@@ -84,7 +91,7 @@ public class BuildingProduction
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 20)));
 
         // building: bricks + wood -> barracks
-        Requirements.Add(BuildingType.BARRACKS, new ProductionRequirements(
+        Requirements.Add(Building.GetId(BuildingType.BARRACKS), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.BRICKS, 80),
                 new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 50),
@@ -93,8 +100,13 @@ public class BuildingProduction
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 30)));
     }
 
-    public static ProductionRequirements GetRequirements(BuildingType buildingType)
+    public static ProductionRequirements GetRequirements(BuildingType buildingType, BuildingSubType subType = BuildingSubType.NONE)
     {
-        return (ProductionRequirements)Requirements[buildingType];
+        return (ProductionRequirements)Requirements[Building.GetId(buildingType, subType)];
+    }
+
+    public static ProductionRequirements GetRequirements(int id)
+    {
+        return (ProductionRequirements)Requirements[id];
     }
 }

@@ -51,7 +51,7 @@ public class Tile
     public int Population { get; set; }
     public bool DrawBase { get; set; }
     public Sprite BaseSprite { get; set; }
-    public Sprite BuildingSprite { get; set; }
+    public Sprite BuildingConSprite { get; set; }
     public List<Building> Buildings { get; set; }
     public float BaseSoilQuality { get; set; }
     public float SoilQuality { get; set; }
@@ -103,24 +103,20 @@ public class Tile
     public static Tile Create(
         TileType type, 
         Vector2 position, 
-        SpriteTexture baseTexture, 
-        SpriteTexture buildingTexture)
+        SpriteTexture baseTexture)
     {
         Tile tile = new();
-        tile.SetAttributes(type, position, baseTexture, buildingTexture);
+        tile.SetAttributes(type, position, baseTexture);
         return tile;
     }
 
     public virtual void SetAttributes(
         TileType type, 
         Vector2 position, 
-        SpriteTexture baseTexture, 
-        SpriteTexture buildingTexture)
+        SpriteTexture baseTexture)
     {
         SetTileType(type);
         BaseSprite = Sprite.Create(baseTexture, position);
-        if (buildingTexture != null)
-            BuildingSprite = Sprite.Create(buildingTexture, position);
 
         BaseSoilQuality = Globals.Rand.NextFloat(MIN_SOIL_QUALITY, MAX_SOIL_QUALITY);
 
@@ -372,24 +368,33 @@ public class Tile
             BaseSprite.UndoScaleDown(0.02f);
         }
 
-        if (BuildingSprite != null)
+        Sprite buildingSprite = GetBuildingSprite();
+
+        if (buildingSprite != null)
         {
             if (DrawBase)
             {
-                BuildingSprite.Draw();    
+                Buildings[0].Draw();
             }
             else
             {
-                Color temp = BuildingSprite.SpriteColor;
-                BuildingSprite.SpriteColor = Color.SteelBlue;
-                BuildingSprite.Draw();
+                Color temp = buildingSprite.SpriteColor;
+                buildingSprite.SpriteColor = Color.SteelBlue;
+                Buildings[0].Draw();
 
-                BuildingSprite.ScaleDown(0.02f);
-                BuildingSprite.SpriteColor = temp;
-                BuildingSprite.Draw();
-                BuildingSprite.UndoScaleDown(0.02f);
+                buildingSprite.ScaleDown(0.02f);
+                buildingSprite.SpriteColor = temp;
+                Buildings[0].Draw();
+                buildingSprite.UndoScaleDown(0.02f);
             }
         }
+    }
+
+    public Sprite GetBuildingSprite()
+    {
+        if (Buildings.Count == 1 && Buildings[0].IsWholeTile())
+            return Buildings[0].GetSprite();
+        return null;
     }
 
     public enum DisplayType
@@ -403,19 +408,21 @@ public class Tile
 
     public void Draw(DisplayType displayType)
     {
+        Sprite buildingSprite = GetBuildingSprite();
+
         if (displayType == DisplayType.SOIL_QUALITY)
         {
             float max = GetMaxSoilQuality();
             Color c = new Color(0.25f, MathHelper.Clamp((SoilQuality / max) + 0.2f, 0.5f, 1.0f), 0.25f);
             BaseSprite.SpriteColor = c;
-            if (BuildingSprite != null)
-                BuildingSprite.SpriteColor = BaseSprite.SpriteColor;
+            if (buildingSprite != null)
+                buildingSprite.SpriteColor = BaseSprite.SpriteColor;
         }
         else if (displayType == DisplayType.MINERALS)
         {
             BaseSprite.SpriteColor = MineralInfo.GetColor(Minerals);
-            if (BuildingSprite != null)
-                BuildingSprite.SpriteColor = BaseSprite.SpriteColor;
+            if (buildingSprite != null)
+                buildingSprite.SpriteColor = BaseSprite.SpriteColor;
         }
         else if (displayType == DisplayType.PLACING_RANCH)
         {
@@ -436,8 +443,8 @@ public class Tile
         else
         {
             BaseSprite.SpriteColor = Color.White;
-            if (BuildingSprite != null)
-                BuildingSprite.SpriteColor = Color.White;
+            if (buildingSprite != null)
+                buildingSprite.SpriteColor = Color.White;
         }
 
         if (Owner != null && Config.ShowBorders)
@@ -448,8 +455,8 @@ public class Tile
         {
             if (DrawBase)
                 BaseSprite.Draw();
-            if (BuildingSprite != null)
-                BuildingSprite.Draw();
+            if (buildingSprite != null)
+                Buildings[0].Draw();
         }
 
         if (displayType == DisplayType.SOIL_QUALITY && PlantIcon != null)
@@ -498,8 +505,13 @@ public class Tile
         // otherwise, added it to the ybuffer so overlaps are avoidable
         if (building.IsWholeTile())
         {
-            BuildingSprite = building.Sprite;
-            BuildingSprite.Position = BaseSprite.Position;
+            building.Sprite.Position = BaseSprite.Position;
+
+            if (building.ConstructionSprite != null)
+            {
+                BuildingConSprite = building.ConstructionSprite;
+                BuildingConSprite.Position = BaseSprite.Position;
+            }
         }
         else
         {

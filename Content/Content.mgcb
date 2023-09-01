@@ -805,6 +805,18 @@
 /processorParam:TextureFormat=Color
 /build:buildings/barracks/004.png
 
+#begin buildings/barracks/construction/001.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:buildings/barracks/construction/001.png
+
 #begin buildings/city/001.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -853,6 +865,18 @@
 /processorParam:TextureFormat=Color
 /build:buildings/farm_river/002.png
 
+#begin buildings/farm_river/construction/001.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:buildings/farm_river/construction/001.png
+
 #begin buildings/farm_river/river_only.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -900,6 +924,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:buildings/farm/003.png
+
+#begin buildings/farm/construction/001.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:buildings/farm/construction/001.png
 
 #begin buildings/granary/001.png
 /importer:TextureImporter
@@ -996,6 +1032,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:buildings/granary/009.png
+
+#begin buildings/granary/construction/001.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:buildings/granary/construction/001.png
 
 #begin buildings/house/001.png
 /importer:TextureImporter
@@ -1105,6 +1153,18 @@
 /processorParam:TextureFormat=Color
 /build:buildings/house/009.png
 
+#begin buildings/house/construction/001.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:buildings/house/construction/001.png
+
 #begin buildings/market/001.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1189,6 +1249,18 @@
 /processorParam:TextureFormat=Color
 /build:buildings/market/007.png
 
+#begin buildings/market/construction/001.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:buildings/market/construction/001.png
+
 #begin buildings/mine/001.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1236,6 +1308,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:buildings/mine/004.png
+
+#begin buildings/mine/construction/001.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:buildings/mine/construction/001.png
 
 #begin buildings/ranch/001.png
 /importer:TextureImporter
@@ -1297,6 +1381,18 @@
 /processorParam:TextureFormat=Color
 /build:buildings/ranch/005.png
 
+#begin buildings/ranch/construction/001.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:buildings/ranch/construction/001.png
+
 #begin buildings/smithy/001.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1344,6 +1440,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:buildings/smithy/004.png
+
+#begin buildings/smithy/construction/001.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:buildings/smithy/construction/001.png
 
 #begin circle.png
 /importer:TextureImporter

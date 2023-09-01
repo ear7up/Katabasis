@@ -98,18 +98,20 @@ public class GameManager
             onClick: BuildRanch, hoverElement: new BuildingPriceDisplay(null, BuildingType.RANCH)));
         _bottomPanel.SetContent(3, 0, new UIElement(Sprites.markets[0], scale: 0.3f, 
             onClick: BuildMarket, hoverElement: new BuildingPriceDisplay(null, BuildingType.MARKET)));
-
-        _bottomPanel.SetContent(4, 0, new UIElement(Sprites.decorations[0], scale: 0.5f, 
+        _bottomPanel.SetContent(4, 0, new UIElement(Sprites.decorations[0], scale: 0.4f, 
             onClick: BuildDecoration, onHover: UI.SetTooltipText, tooltip: "Decoration"));
 
         _bottomPanel.SetContent(0, 1, new UIElement(Sprites.houses[0], scale: 0.3f, 
-            onClick: BuildHouse, hoverElement: new BuildingPriceDisplay(null, BuildingType.HOUSE)));
-        _bottomPanel.SetContent(1, 1, new UIElement(Sprites.barracks[0], scale: 0.3f, 
+            onClick: BuildBrickHouse, hoverElement: new BuildingPriceDisplay(null, BuildingType.HOUSE, BuildingSubType.BRICK)));
+        _bottomPanel.SetContent(1, 1, new UIElement(Sprites.houses[0], scale: 0.3f, 
+            onClick: BuildWoodHouse, hoverElement: new BuildingPriceDisplay(null, BuildingType.HOUSE, BuildingSubType.WOOD)));
+        _bottomPanel.SetContent(2, 1, new UIElement(Sprites.barracks[0], scale: 0.3f, 
             onClick: BuildBarracks, hoverElement: new BuildingPriceDisplay(null, BuildingType.BARRACKS)));
-        _bottomPanel.SetContent(2, 1, new UIElement(Sprites.granaries[0], scale: 0.3f, 
+        _bottomPanel.SetContent(3, 1, new UIElement(Sprites.granaries[0], scale: 0.3f, 
             onClick: BuildGranary, hoverElement: new BuildingPriceDisplay(null, BuildingType.GRANARY)));
-        _bottomPanel.SetContent(3, 1, new UIElement(Sprites.smithies[0], scale: 0.3f, 
+        _bottomPanel.SetContent(4, 1, new UIElement(Sprites.smithies[0], scale: 0.3f, 
             onClick: BuildSmithy, hoverElement: new BuildingPriceDisplay(null, BuildingType.SMITHY)));
+
         _bottomPanel.Hide();
 
         _personPanel = new(null);
@@ -145,7 +147,8 @@ public class GameManager
     public void BuildMarket(Object clicked) { Build(BuildingType.MARKET); }
 
     public void BuildBarracks(Object clicked) { Build(BuildingType.BARRACKS); }
-    public void BuildHouse(Object clicked) { Build(BuildingType.HOUSE); }
+    public void BuildBrickHouse(Object clicked) { Build(BuildingType.HOUSE, BuildingSubType.BRICK); }
+    public void BuildWoodHouse(Object clicked) { Build(BuildingType.HOUSE, BuildingSubType.WOOD); }
     public void BuildGranary(Object clicked) { Build(BuildingType.GRANARY); }
     public void BuildSmithy(Object clicked) { Build(BuildingType.SMITHY); }
 
@@ -154,7 +157,7 @@ public class GameManager
         _decorationManager.NewDecoration();
     }
 
-    public void Build(BuildingType buildingType)
+    public void Build(BuildingType buildingType, BuildingSubType subType = BuildingSubType.NONE)
     {
         if (InputManager.Mode == InputManager.BUILD_MODE)
         {
@@ -162,7 +165,7 @@ public class GameManager
         }
         else
         {
-            _buildingPlacer.CreateEditBuilding(buildingType);
+            _buildingPlacer.CreateEditBuilding(buildingType, subType);
             InputManager.SwitchToMode(InputManager.BUILD_MODE);
         }
     }

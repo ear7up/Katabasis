@@ -32,7 +32,13 @@ public class ConstructionRequest
     {
         ConstructionRequest req = new();
         req.ToBuild = building;
-        req.Requirements = BuildingProduction.GetRequirements(building.Type);
+        req.Requirements = BuildingProduction.GetRequirements(building.GetId());
+
+        // If there's no rule for building a specific building type/subtype combination, e.g. MINE -> GOLD_MINE
+        // then just use the general rule for building the building type (e.g. MINE)
+        if (req.Requirements == null)
+            req.Requirements = BuildingProduction.GetRequirements(building.Type);
+
         req.GoodsRequired = materials;
 
         building.BuildProgress = 0f;
@@ -78,7 +84,7 @@ public class ConstructionRequest
     public bool SkillRequirementMetBy(Person person)
     {
         if (Requirements == null)
-            return false;
+            return true;
 
         // Person must meet the skill requirement if one is set
         if (Requirements.SkillRequirement != null)
@@ -200,7 +206,7 @@ public class ConstructionRequest
 
         // Any number of builders can work on the project, 
         // they get paid a wage as a percentage of the total build time
-        float buildTime = BuildingInfo.GetBuildTime(ToBuild.Type);
+        float buildTime = BuildingInfo.GetBuildTime(ToBuild.GetId());
         float wage = Globals.Time / buildTime * BuildingMoney;
         person.Money += wage;
 

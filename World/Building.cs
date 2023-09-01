@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
 
 public enum BuildingType
 {
     CITY,
     MARKET,
     HOUSE,
+    BRICK_HOUSE,
     LUMBERMILL,
     FORGE,
     FARM,
@@ -20,6 +23,7 @@ public enum BuildingType
 
 public enum BuildingSubType
 {
+    NONE = 0,
     GOLD_MINE,
     SILVER_MINE,
     COPPER_MINE,
@@ -29,11 +33,13 @@ public enum BuildingSubType
     TIN_MINE,
     IRON_MINE,
     SALT_MINE,
-    NONE
+    BRICK,
+    WOOD
 }
 
 public class Building : Drawable
 {
+    public const int MAX_BUILDING_SUBTYPES = 100;
     public const int MAX_BUILDINGS_PER_TILE = 4;
 
     public static int IdCounter = 0;
@@ -44,6 +50,7 @@ public class Building : Drawable
     public BuildingType Type { get; set; }
     public BuildingSubType SubType { get; set; }
     public Sprite Sprite { get; set; }
+    public Sprite ConstructionSprite { get; set; }
     public int CurrentUsers { get; set; }
     public bool Selected { get; set; }
     public int MaxUsers { get; set; }
@@ -62,7 +69,10 @@ public class Building : Drawable
     // No need to persist
     public TextSprite SelectedText;
 
-    public static Building Random(BuildingType type = BuildingType.NONE, bool temporary = false)
+    public static Building Random(
+        BuildingType type,
+        BuildingSubType subType, 
+        bool temporary = false)
     {
         // Random building type (excluding NONE)
         if (type == BuildingType.NONE)
@@ -71,17 +81,24 @@ public class Building : Drawable
             type = (BuildingType)Globals.Rand.Next(buildingTypes.Length - 1);
         }
 
-        Building b = CreateBuilding(null, type);
+        Building b = CreateBuilding(null, type, subType);
         return b;
     }
 
-    public void SetAttributes(Tile location, Sprite sprite, BuildingType buildingType = BuildingType.NONE)
+    public void SetAttributes(
+        Tile location, 
+        Sprite sprite, 
+        Sprite constructionSprite, 
+        BuildingType buildingType,
+        BuildingSubType subType = BuildingSubType.NONE)
     {
         Location = location;
         Sprite = sprite;
+        ConstructionSprite = constructionSprite;
         Type = buildingType;
+        SubType = subType;
 
-        MaxUsers = BuildingInfo.GetMaxUsers(buildingType);
+        MaxUsers = BuildingInfo.GetMaxUsers(buildingType, subType);
     }
 
     public Building()
@@ -97,7 +114,30 @@ public class Building : Drawable
         Money = 0f;
     }
 
-    public static Building CreateBuilding(Tile location, BuildingType buildingType = BuildingType.NONE)
+    public int GetId()
+    {
+        return (int)Type * MAX_BUILDING_SUBTYPES + (int)SubType;
+    }
+
+    public static int GetId(BuildingType type, BuildingSubType subType = BuildingSubType.NONE)
+    {
+        return (int)type * MAX_BUILDING_SUBTYPES + (int)subType;
+    }
+
+    public static BuildingType TypeFromId(int id)
+    {
+        return (BuildingType)(id / MAX_BUILDING_SUBTYPES);
+    }
+
+    public static BuildingSubType SubTypeFromId(int id)
+    {
+        return (BuildingSubType)(id % MAX_BUILDING_SUBTYPES);
+    }
+
+    public static Building CreateBuilding(
+        Tile location, 
+        BuildingType buildingType,
+        BuildingSubType subType = BuildingSubType.NONE)
     {
         // Try lay out the building in the empty space on the diamond based on building count
         Vector2 position = Vector2.Zero;
@@ -109,12 +149,17 @@ public class Building : Drawable
         }
 
         // TODO: need sprites for all building types
-        Sprite sprite = Sprite.Create(Sprites.RandomBuilding(buildingType), position);
+        Sprite sprite = Sprite.Create(Sprites.RandomBuilding(buildingType, subType), position);
+        Sprite conSprite = Sprite.Create(Sprites.RandomConstruction(buildingType, subType), position);
         Building b = new Building();
-        b.SetAttributes(location, sprite, buildingType);
+        b.SetAttributes(location, sprite, conSprite, buildingType, subType);
 
         if (!b.IsWholeTile())
+        {
             sprite.SetScale(0.4f);
+            if (conSprite != null)
+                conSprite.SetScale(0.4f);
+        }
 
         if (location != null)
             location.AddBuilding(b);
@@ -243,17 +288,31 @@ public class Building : Drawable
             $"users=({CurrentUsers}/{MaxUsers})";
     }
 
+    public Sprite GetSprite()
+    {
+        if (BuildProgress < 1f && Location != null)
+            return ConstructionSprite;
+        return Sprite;
+    }
+
+    public void DrawSelected()
+    {
+        Sprite active = GetSprite();
+        active.SpriteColor = Color.Cyan;
+        active.ScaleUp(0.025f);
+        active.Draw();
+
+        active.SpriteColor = Color.White;
+        active.UndoScaleUp(0.025f);
+    }
+
     public void Draw()
     {
         if (Selected)
+            DrawSelected();
+
+        if (Selected || (BuildProgress < 1f && Location != null))
         {
-            Sprite.SpriteColor = Color.Cyan;
-            Sprite.ScaleUp(0.025f);
-            Sprite.Draw();
-
-            Sprite.SpriteColor = Color.White;
-            Sprite.UndoScaleUp(0.025f);
-
             SelectedText.Unhide();
 
             if (BuildProgress < 1f)
@@ -271,13 +330,13 @@ public class Building : Drawable
             SelectedText.Hide();
         }
 
-        Sprite.Draw();
+        GetSprite().Draw();
     }
 
     // Keep in mind this is non-deterministic when there are multiple options for building materials
     public List<Goods> GetMaterials()
     {
-        return BuildingProduction.GetRequirements(Type).GoodsRequirement.ToList();
+        return BuildingProduction.GetRequirements(Type, SubType).GoodsRequirement.ToList();
     }
 
     // Calculate how expensive it will be to produce this building including materials and labor
@@ -289,10 +348,10 @@ public class Building : Drawable
         return materialCost;
     }
 
-    public static float LaborCost(BuildingType buildingType)
+    public static float LaborCost(BuildingType buildingType, BuildingSubType subType = BuildingSubType.NONE)
     {
         // building cost $1.5/second
-        float timeToProduce = BuildingInfo.GetBuildTime(buildingType);
+        float timeToProduce = BuildingInfo.GetBuildTime(buildingType, subType);
         float buildingCost = timeToProduce * 1.5f;
 
         // 10% of labor cost for hauling

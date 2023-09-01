@@ -25,15 +25,25 @@ static class Sprites
 	// Buildings
 	public static List<SpriteTexture> buildings;
 	public static List<SpriteTexture> barracks;
+	public static List<SpriteTexture> barracksCon;
 	public static List<SpriteTexture> farms;
+	public static List<SpriteTexture> farmsCon;
 	public static List<SpriteTexture> farmsRiver;
+	public static List<SpriteTexture> farmsRiverCon;
 	public static List<SpriteTexture> granaries;
+	public static List<SpriteTexture> granariesCon;
 	public static List<SpriteTexture> houses;
+	public static List<SpriteTexture> housesCon;
 	public static List<SpriteTexture> mines;
+	public static List<SpriteTexture> minesCon;
 	public static List<SpriteTexture> ranches;
+	public static List<SpriteTexture> ranchesCon;
 	public static List<SpriteTexture> cities;
+	//public static List<SpriteTexture> citiesCon;
 	public static List<SpriteTexture> markets;
+	public static List<SpriteTexture> marketsCon;
 	public static List<SpriteTexture> smithies;
+	public static List<SpriteTexture> smithiesCon;
 
 	public static List<SpriteTexture> decorations;
 
@@ -147,6 +157,17 @@ static class Sprites
 		markets = LoadTextures("buildings/market", 7);
 		smithies = LoadTextures("buildings/smithy", 4);
 
+		barracksCon = LoadTextures("buildings/barracks/construction", 1);
+		farmsCon = LoadTextures("buildings/farm/construction", 1);
+		farmsRiverCon = LoadTextures("buildings/farm_river/construction", 1);
+		granariesCon = LoadTextures("buildings/granary/construction", 1);
+		housesCon = LoadTextures("buildings/house/construction", 1);
+		minesCon = LoadTextures("buildings/mine/construction", 1);
+		ranchesCon = LoadTextures("buildings/ranch/construction", 1);
+		//citiesCon = LoadTextures("buildings/city/construction", 1);
+		marketsCon = LoadTextures("buildings/market/construction", 1);
+		smithiesCon = LoadTextures("buildings/smithy/construction", 1);
+
 		decorations = LoadTextures("decorations", 10);
 
 		// Animals
@@ -224,7 +245,7 @@ static class Sprites
 		return farmsRiver[i];
 	}
 
-	public static SpriteTexture RandomBuilding(BuildingType buildingType)
+	public static SpriteTexture RandomBuilding(BuildingType buildingType, BuildingSubType subType = BuildingSubType.NONE)
 	{
 		List<SpriteTexture> textures = null;
 		switch (buildingType)
@@ -239,6 +260,27 @@ static class Sprites
 			case BuildingType.MARKET: textures = markets; break;
 			case BuildingType.CITY: textures = cities; break;
 			case BuildingType.SMITHY: textures = smithies; break;
+			default: textures = buildings; break;
+		}
+
+		return Random(textures);
+	}
+
+	public static SpriteTexture RandomConstruction(BuildingType buildingType, BuildingSubType subType = BuildingSubType.NONE)
+	{
+		List<SpriteTexture> textures = null;
+		switch (buildingType)
+		{
+			case BuildingType.MINE: textures = minesCon; break;
+			case BuildingType.HOUSE: textures = housesCon; break;
+			case BuildingType.RANCH: textures = ranchesCon; break;
+			case BuildingType.FARM: textures = farmsCon; break;
+			case BuildingType.FARM_RIVER: textures = farmsRiverCon; break;
+			case BuildingType.BARRACKS: textures = barracksCon; break;
+			case BuildingType.GRANARY: textures = granariesCon; break;
+			case BuildingType.MARKET: textures = marketsCon; break;
+			case BuildingType.CITY: textures = cities; break; // No con textures
+			case BuildingType.SMITHY: textures = smithiesCon; break;
 			default: textures = buildings; break;
 		}
 

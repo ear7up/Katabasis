@@ -4,18 +4,26 @@ public class BuildingPriceDisplay : UIElement
 {
     public VBox Layout;
     public BuildingType Type;
+    public BuildingSubType SubType;
     public List<Goods> RequiredGoods;
     public TextSprite LaborPrice;
     public TextSprite MaterialsPrice;
 
     public BuildingPriceDisplay(
         SpriteTexture texture,
-        BuildingType buildingType) : base(texture)
+        BuildingType buildingType,
+        BuildingSubType subType = BuildingSubType.NONE) : base(texture)
     {
         Type = buildingType;
-        RequiredGoods = BuildingProduction.GetRequirements(buildingType).GoodsRequirement.ToList();
+        SubType = subType;
 
-        TextSprite typeText = new(Sprites.Font, text: Globals.Title(Type.ToString()));
+        RequiredGoods = BuildingProduction.GetRequirements(buildingType, subType).GoodsRequirement.ToList();
+
+        string name = Globals.Title(Type.ToString());
+        if (subType != BuildingSubType.NONE)
+            name = Globals.Title(SubType.ToString()) + " " + name;
+
+        TextSprite typeText = new(Sprites.Font, text: name);
         typeText.ScaleDown(0.2f);
 
         UIElement coinIcon = new(Sprites.Coin, 0.3f);
@@ -41,7 +49,7 @@ public class BuildingPriceDisplay : UIElement
 
     public override void Update()
     {
-        LaborPrice.Text = $"Labor: ${(int)(Building.LaborCost(Type) + 1)}";
+        LaborPrice.Text = $"Labor: ${(int)(Building.LaborCost(Type, SubType) + 1)}";
         MaterialsPrice.Text = $"Materials: ~${(int)(Building.MaterialCost(RequiredGoods) + 1)}";
         base.Update();
     }

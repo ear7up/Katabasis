@@ -108,14 +108,13 @@ public class Map
             // Each row is half a tile size down, shave off a bit because each tile has a thick base
             float ypos = (TileSize.Y / 2) * row - (VerticalOverlap * row);
 
-            SpriteTexture feature = null;
             Tile tile = null;
 
             // 5% chance to add animals to plain desert tiles
             if (r < 0.05)
-                tile = TileAnimal.Create(new(xpos, ypos), texture, feature);
+                tile = TileAnimal.Create(new(xpos, ypos), texture);
             else
-                tile = Tile.Create(tileType, new(xpos, ypos), texture, feature);
+                tile = Tile.Create(tileType, new(xpos, ypos), texture);
 
             if (mineralType != MineralType.NONE)
                 tile.Minerals = mineralType;
