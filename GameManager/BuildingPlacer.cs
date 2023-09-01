@@ -68,8 +68,8 @@ public class BuildingPlacer
 
         List<Goods> materials = b.GetMaterials();
 
-        float materialCost = b.MaterialCost(materials);
-        float laborCost = b.LaborCost();
+        float materialCost = Building.MaterialCost(materials);
+        float laborCost = Building.LaborCost(b.Type);
 
         // TODO: Alert the user they could not afford the building
         if (!Config.InstantBuilding && Globals.Model.Player1.Person.Money < materialCost + laborCost)

@@ -105,6 +105,9 @@ static class Sprites
 	public static List<SpriteTexture> desertRiverTextures;
 	public static List<SpriteTexture> fogTextures;
 
+	// Misc
+	public static SpriteTexture Coin;
+
 	public static void Load(ContentManager content)
 	{
 		// folder/file
@@ -204,6 +207,9 @@ static class Sprites
 		Buy1 = LoadTexture("UI_maybe/buttons/buy1");
 		Buy10 = LoadTexture("UI_maybe/buttons/buy10");
 		Buy100 = LoadTexture("UI_maybe/buttons/buy100");
+
+		// Misc
+		Coin = LoadTexture("misc/coin");
 	}
 
 	public static SpriteTexture RandomBuilding()

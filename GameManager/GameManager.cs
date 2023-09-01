@@ -91,25 +91,25 @@ public class GameManager
         _bottomPanel.SetPadding(bottom: -250);
         _bottomPanel.SetMargin(left: 30, top: 60);
         _bottomPanel.SetContent(0, 0, new UIElement(Sprites.farms[0], scale: 0.3f, 
-            onClick: BuildFarm, onHover: UI.SetTooltipText, tooltip: "Farm"));
+            onClick: BuildFarm, hoverElement: new BuildingPriceDisplay(null, BuildingType.FARM)));
         _bottomPanel.SetContent(1, 0, new UIElement(Sprites.mines[0], scale: 0.3f, 
-            onClick: BuildMine, onHover: UI.SetTooltipText, tooltip: "Mine"));
+            onClick: BuildMine, hoverElement: new BuildingPriceDisplay(null, BuildingType.MINE)));
         _bottomPanel.SetContent(2, 0, new UIElement(Sprites.ranches[0], scale: 0.3f, 
-            onClick: BuildRanch, onHover: UI.SetTooltipText, tooltip: "Ranch"));
+            onClick: BuildRanch, hoverElement: new BuildingPriceDisplay(null, BuildingType.RANCH)));
         _bottomPanel.SetContent(3, 0, new UIElement(Sprites.markets[0], scale: 0.3f, 
-            onClick: BuildMarket, onHover: UI.SetTooltipText, tooltip: "Market"));
+            onClick: BuildMarket, hoverElement: new BuildingPriceDisplay(null, BuildingType.MARKET)));
 
         _bottomPanel.SetContent(4, 0, new UIElement(Sprites.decorations[0], scale: 0.5f, 
             onClick: BuildDecoration, onHover: UI.SetTooltipText, tooltip: "Decoration"));
 
         _bottomPanel.SetContent(0, 1, new UIElement(Sprites.houses[0], scale: 0.3f, 
-            onClick: BuildHouse, onHover: UI.SetTooltipText, tooltip: "House"));
+            onClick: BuildHouse, hoverElement: new BuildingPriceDisplay(null, BuildingType.HOUSE)));
         _bottomPanel.SetContent(1, 1, new UIElement(Sprites.barracks[0], scale: 0.3f, 
-            onClick: BuildBarracks, onHover: UI.SetTooltipText, tooltip: "Barracks"));
+            onClick: BuildBarracks, hoverElement: new BuildingPriceDisplay(null, BuildingType.BARRACKS)));
         _bottomPanel.SetContent(2, 1, new UIElement(Sprites.granaries[0], scale: 0.3f, 
-            onClick: BuildGranary, onHover: UI.SetTooltipText, tooltip: "Granary"));
+            onClick: BuildGranary, hoverElement: new BuildingPriceDisplay(null, BuildingType.GRANARY)));
         _bottomPanel.SetContent(3, 1, new UIElement(Sprites.smithies[0], scale: 0.3f, 
-            onClick: BuildSmithy, onHover: UI.SetTooltipText, tooltip: "Smithy"));
+            onClick: BuildSmithy, hoverElement: new BuildingPriceDisplay(null, BuildingType.SMITHY)));
         _bottomPanel.Hide();
 
         _personPanel = new(null);

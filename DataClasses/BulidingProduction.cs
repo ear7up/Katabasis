@@ -82,6 +82,15 @@ public class BuildingProduction
                 and: true),
             toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 20)));
+
+        // building: bricks + wood -> barracks
+        Requirements.Add(BuildingType.BARRACKS, new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.BRICKS, 80),
+                new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 50),
+                and: true),
+            toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
+            levelRequirement: SkillLevel.Create(Skill.BUILDING, 30)));
     }
 
     public static ProductionRequirements GetRequirements(BuildingType buildingType)

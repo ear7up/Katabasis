@@ -21,14 +21,15 @@ public class UIElement
     public bool Hidden { get; set; }
     public string Name;
     public bool IsSelected { get; set; }
-    
+    public UIElement HoverElement;
 
     public UIElement(
         SpriteTexture texture = null,
         float scale = 1f, 
         Action<Object> onClick = null, 
         Action<Object> onHover = null,
-        string tooltip = "")
+        string tooltip = "",
+        UIElement hoverElement = null)
     {
         if (texture != null)
         {
@@ -47,6 +48,7 @@ public class UIElement
 
         OnHover = onHover;
         TooltipText = tooltip;
+        HoverElement = hoverElement;
         Name = "";
         Hidden = false;
         SelectedImage = null;
@@ -106,6 +108,9 @@ public class UIElement
                 OnHover(TooltipText);
             Hovering = true;
         }
+
+        if (Hovering && HoverElement != null)
+            HoverElement.Update();
     }
 
     public virtual Rectangle GetBounds()
@@ -153,6 +158,12 @@ public class UIElement
             if (draw.DrawRelativeToOrigin)
                 draw.Position += draw.Origin * draw.Scale;
             draw.Draw();
+        }
+
+        if (Hovering && HoverElement != null)
+        {
+            HoverElement.Position = offset;
+            HoverElement.Draw(HoverElement.Position);
         }
     }
 

@@ -281,7 +281,7 @@ public class Building : Drawable
     }
 
     // Calculate how expensive it will be to produce this building including materials and labor
-    public float MaterialCost(List<Goods> materials)
+    public static float MaterialCost(List<Goods> materials)
     {
         float materialCost = 0f;
         foreach (Goods goods in materials)
@@ -289,10 +289,10 @@ public class Building : Drawable
         return materialCost;
     }
 
-    public float LaborCost()
+    public static float LaborCost(BuildingType buildingType)
     {
         // building cost $1.5/second
-        float timeToProduce = BuildingInfo.GetBuildTime(Type);
+        float timeToProduce = BuildingInfo.GetBuildTime(buildingType);
         float buildingCost = timeToProduce * 1.5f;
 
         // 10% of labor cost for hauling
