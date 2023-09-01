@@ -21,14 +21,6 @@ public static class InputManager
     public static bool MouseDown;
     public static bool RClicked;
 
-    // Pressing B no longer toggles build mode, it just toggles the build ui
-    // clicking on a building type in the UI is what enables build mode
-    public static bool BPressed;
-    public static bool IPressed;
-    public static bool XPressed;
-    public static bool FPressed;
-    public static bool PlusPressed;
-    public static bool MinusPressed;
     public static bool ShiftHeld;
     public static bool SavePressed;
     public static bool LoadPressed;
@@ -197,13 +189,6 @@ public static class InputManager
         }
 
         MouseDown = (mouseState.LeftButton == ButtonState.Pressed);
-
-        BPressed = keyboardState.IsKeyUp(Keys.B) && lastKeyboardState.IsKeyDown(Keys.B);
-        IPressed = keyboardState.IsKeyUp(Keys.I) && lastKeyboardState.IsKeyDown(Keys.I);
-        XPressed = keyboardState.IsKeyUp(Keys.X) && lastKeyboardState.IsKeyDown(Keys.X);
-        FPressed = keyboardState.IsKeyUp(Keys.F) && lastKeyboardState.IsKeyDown(Keys.F);
-        PlusPressed = keyboardState.IsKeyUp(Keys.OemPlus) && lastKeyboardState.IsKeyDown(Keys.OemPlus);
-        MinusPressed = keyboardState.IsKeyUp(Keys.OemMinus) && lastKeyboardState.IsKeyDown(Keys.OemMinus);
         
         ShiftHeld = (keyboardState.IsKeyDown(Keys.LeftShift) && lastKeyboardState.IsKeyDown(Keys.LeftShift)) ||
                     (keyboardState.IsKeyDown(Keys.RightShift) && lastKeyboardState.IsKeyDown(Keys.RightShift));

@@ -29,7 +29,8 @@ public class UIElement
         Action<Object> onClick = null, 
         Action<Object> onHover = null,
         string tooltip = "",
-        UIElement hoverElement = null)
+        UIElement hoverElement = null,
+        Sprite hoverImage = null)
     {
         if (texture != null)
         {
@@ -49,11 +50,11 @@ public class UIElement
         OnHover = onHover;
         TooltipText = tooltip;
         HoverElement = hoverElement;
+        HoverImage = hoverImage;
         Name = "";
         Hidden = false;
         SelectedImage = null;
 
-        HoverImage = null;
         Hovering = false;
 
         IsSelected = false;
@@ -254,6 +255,15 @@ public class UIElement
         Scale *= new Vector2(1 + s, 1 + s);
         if (Image != null)
             Image.ScaleUp(s);
+
+        if (HoverImage != null)
+            HoverImage.ScaleUp(s);
+
+        if (SelectedImage != null)
+            SelectedImage.ScaleUp(s);
+
+        if (HoverElement != null)
+            HoverElement.ScaleUp(s);
     }
 
     public virtual void ScaleDown(float s)
@@ -261,6 +271,15 @@ public class UIElement
         Scale *= new Vector2(1 - s, 1 - s);
         if (Image != null)
             Image.ScaleDown(s);
+
+        if (HoverImage != null)
+            HoverImage.ScaleDown(s);
+
+        if (SelectedImage != null)
+            SelectedImage.ScaleDown(s);
+
+        if (HoverElement != null)
+            HoverElement.ScaleDown(s);
     }
 
     public void AddSelectedImage(SpriteTexture texture)

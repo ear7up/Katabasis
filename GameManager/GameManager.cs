@@ -69,21 +69,49 @@ public class GameManager
         _buttonPanel.SetMargin(left: 49, top: 70);
         _buttonPanel.SetPadding(right: -20, bottom: -170);
 
+        Sprite[] hoverButtons = new Sprite[8];
+        for (int i = 0; i < hoverButtons.Length; i++)
+            hoverButtons[i] = Sprite.Create(Sprites.BottomLeftButtonsHover[i], Vector2.Zero);
+
         UIElement buildElement = new(
             Sprites.BottomLeftButtons[0], 
             onClick: BuildButton, 
-            onHover: UI.SetTooltipText);
-        buildElement.TooltipText = "(B)uild";
-
+            onHover: UI.SetTooltipText,
+            tooltip: "(B)uild",
+            hoverImage: hoverButtons[0]);
         _buttonPanel.SetContent(0, 0, buildElement);
-        _buttonPanel.SetContent(1, 0, new UIElement(Sprites.BottomLeftButtons[1], 
-            onClick: TileButton, onHover: UI.SetTooltipText, tooltip: "Buy (T)ile"));
-        _buttonPanel.SetContent(2, 0, new UIElement(Sprites.BottomLeftButtons[2], onClick: Button3));
-        _buttonPanel.SetContent(0, 1, new UIElement(Sprites.BottomLeftButtons[3], onClick: Button4));
-        _buttonPanel.SetContent(1, 1, new UIElement(Sprites.BottomLeftButtons[4], 
-            onHover: UI.SetTooltipText, tooltip: "Statistics(X)", onClick: ToggleStatistics));
-        _buttonPanel.SetContent(2, 1, new UIElement(Sprites.BottomLeftButtons[5], 
-            onHover: UI.SetTooltipText, tooltip: "(I)nventory", onClick: ToggleGoodsDisplay));
+
+        _buttonPanel.SetContent(1, 0, new UIElement(
+            Sprites.BottomLeftButtons[1], 
+            onClick: TileButton, 
+            onHover: UI.SetTooltipText, 
+            tooltip: "Buy (T)ile",
+            hoverImage: hoverButtons[1]));
+
+        _buttonPanel.SetContent(2, 0, new UIElement(
+            Sprites.BottomLeftButtons[2], 
+            onClick: Button3));
+
+        _buttonPanel.SetContent(0, 1, new UIElement(
+            Sprites.BottomLeftButtons[3], 
+            onClick: ToggleMarketPanel,
+            onHover: UI.SetTooltipText,
+            tooltip: "(M)arket",
+            hoverImage: hoverButtons[3]));
+
+        _buttonPanel.SetContent(1, 1, new UIElement(
+            Sprites.BottomLeftButtons[4], 
+            onHover: UI.SetTooltipText, 
+            tooltip: "Statistics(X)", 
+            onClick: ToggleStatistics,
+            hoverImage: hoverButtons[4]));
+
+        _buttonPanel.SetContent(2, 1, new UIElement(
+            Sprites.BottomLeftButtons[5], 
+            onHover: UI.SetTooltipText, 
+            tooltip: "(I)nventory", 
+            onClick: ToggleGoodsDisplay,
+            hoverImage: hoverButtons[5]));
 
         UI.AddElement(_buttonPanel, UI.Position.BOTTOM_LEFT);
 
@@ -170,7 +198,7 @@ public class GameManager
         }
     }
 
-    public void BuildButton(Object clicked)
+    public void BuildButton(Object clicked = null)
     {
         if (_bottomPanel.Hidden)
         {
@@ -211,7 +239,7 @@ public class GameManager
             _personPanel.Unhide();
     }
 
-    public static void ToggleMarketPanel()
+    public static void ToggleMarketPanel(Object clicked = null)
     {
         if (MarketPanel.Hidden)
             MarketPanel.Unhide();
@@ -240,12 +268,7 @@ public class GameManager
         Console.WriteLine("Button 3 pressed");
     }
 
-    public void Button4(Object clicked)
-    {
-        Console.WriteLine("Button 4 pressed");
-    }
-
-    public void ToggleStatistics(Object clicked)
+    public void ToggleStatistics(Object clicked = null)
     {
         // Update once on un-hide
         if (_statsPanel.Hidden)
@@ -265,7 +288,7 @@ public class GameManager
         escMenuPanel.ToggleHidden();
     }
 
-    public void ToggleGoodsDisplay(Object clicked)
+    public void ToggleGoodsDisplay(Object clicked = null)
     {
         if (inventoryPanel.Hidden)
             inventoryPanel.Unhide();
@@ -279,27 +302,30 @@ public class GameManager
 
         Model.GameCamera.UpdateCamera(KatabasisGame.Viewport);
 
-        if (InputManager.PlusPressed)
+        if (InputManager.WasPressed(Keys.OemPlus))
         {
             UI.ScaleUp(0.05f);
             _buttonPanel.ScaleUp(0.05f);
         }
-        else if (InputManager.MinusPressed)
+        else if (InputManager.WasPressed(Keys.OemMinus))
         {
             UI.ScaleDown(0.05f);
             _buttonPanel.ScaleDown(0.05f);
         }
         
-        if (InputManager.BPressed)
-            BuildButton(null);
+        if (InputManager.WasPressed(Keys.B))
+            BuildButton();
 
-        if (InputManager.IPressed)
-            ToggleGoodsDisplay(null);
+        if (InputManager.WasPressed(Keys.I))
+            ToggleGoodsDisplay();
 
-        if (InputManager.XPressed)
-            ToggleStatistics(null);
+        if (InputManager.WasPressed(Keys.X))
+            ToggleStatistics();
 
-        if (InputManager.FPressed)
+        if (InputManager.WasPressed(Keys.M))
+            ToggleMarketPanel();
+
+        if (InputManager.WasPressed(Keys.F))
             Config.ShowFog = !Config.ShowFog;
 
         escMenuPanel.Update();

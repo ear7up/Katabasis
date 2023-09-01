@@ -24,7 +24,7 @@ static class UI
         BottomLeft = new();
         TopRight = new();
         BottomRight = new();
-        Tooltip = new(Sprites.Tooltip);
+        Tooltip = new(/*Sprites.Tooltip*/);
         TooltipText = new TextSprite(Sprites.Font);
         TooltipText.ScaleUp(0.1f);
     }
@@ -46,7 +46,9 @@ static class UI
         // Tooltip text needs to be cleared to disable hover,
         // must be cleared before updating UI elements, which will update on hover
         TooltipText.Text = "";
-        Tooltip.Image.Position = InputManager.ScreenMousePos + new Vector2(15f, -15f);
+
+        if (Tooltip.Image != null)
+            Tooltip.Image.Position = InputManager.ScreenMousePos + new Vector2(15f, -15f);
 
         List<UIElement>[] all = { Top, TopLeft, TopRight, BottomLeft, BottomRight };
         foreach (List<UIElement> list in all)
@@ -117,8 +119,11 @@ static class UI
         }
 
         // Resize tooltip box to fit text
-        float ratio = (float)TooltipText.Width() / Tooltip.Image.Texture.Width;
-        Tooltip.Image.SetScaleX(ratio + 0.07f);
+        if (Tooltip.Image != null)
+        {
+            float ratio = (float)TooltipText.Width() / Tooltip.Image.Texture.Width;
+            Tooltip.Image.SetScaleX(ratio + 0.07f);
+        }
 
         // Draw tooltip at cursor if the text is set
         if (TooltipText.Text.Length > 0)
