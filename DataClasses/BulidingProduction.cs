@@ -18,6 +18,14 @@ public class BuildingProduction
             tileRequirement: TileType.VEGETATION,
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 10)));
 
+        // building: wood + saw + vegetation -> farm river
+        Requirements.Add(Building.GetId(BuildingType.FARM_RIVER), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 40)),
+            toolRequirement: new ToolRequirement(Goods.Tool.SAW),
+            tileRequirement: TileType.VEGETATION,
+            levelRequirement: SkillLevel.Create(Skill.BUILDING, 10)));
+
         // building: wood + saw + animals -> ranch
         Requirements.Add(Building.GetId(BuildingType.RANCH), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(

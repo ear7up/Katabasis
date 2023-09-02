@@ -39,7 +39,7 @@ public class BuildingPlacer
         
             // Keep building more of the same type if shift is held
             if (InputManager.ShiftHeld)
-                CreateEditBuilding(_editBuilding.Type);
+                CreateEditBuilding(_editBuilding.Type, _editBuilding.SubType);
             else
                 _editBuilding = null;
         }

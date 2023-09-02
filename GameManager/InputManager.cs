@@ -17,7 +17,10 @@ public static class InputManager
     public static bool Clicked;
     public static bool ClickConsumed;
     public static object ClickConsumer;
+
     public static bool ClickAndHold;
+    public static bool HoldConsumed;
+
     public static bool MouseDown;
     public static bool RClicked;
 
@@ -27,13 +30,6 @@ public static class InputManager
 
     public static Keys KeyConsumed;
     public static Object KeyConsumer;
-
-    // Camera movement
-    private static Vector2 _dragStart;
-    public static Vector2 MouseDrag = Vector2.Zero;
-
-    // Trigger to reset the camera to the default position and zoom
-    public static bool CameraReset = false;
 
     public static bool Paused = false;
 
@@ -64,8 +60,6 @@ public static class InputManager
     public static void SwitchToMode(int mode)
     {
         Mode = mode;
-        _dragStart = Vector2.Zero;
-        MouseDrag = Vector2.Zero;
         ConfirmBuilding = false;
     }
 
@@ -83,28 +77,14 @@ public static class InputManager
         KeyConsumer = consumer;
     }
 
-    private static void ProcessCameraInputs()
+    public static void ConsumeHold(object consumer)
     {
-        // If 'R' was pressed, set the CameraReset state
-        CameraReset = keyboardState.IsKeyUp(Keys.R) && lastKeyboardState.IsKeyDown(Keys.R);
+        HoldConsumed = true;
+    }
 
-        // Track click-and-drag
-        if (ClickAndHold)
-        {
-            _dragStart = new Vector2(mouseState.X, mouseState.Y);
-        }
-        else if (!Clicked && _dragStart != Vector2.Zero && lastMouseState.LeftButton == ButtonState.Pressed)
-        {
-            // MouseDrag smoothly, move camera in the opposite direction to drag
-            Vector2 pos = new Vector2(mouseState.X, mouseState.Y);
-            MouseDrag = -1 * (pos - _dragStart);
-            _dragStart = pos;
-        }
-        else if (mouseState.LeftButton != ButtonState.Pressed)
-        {
-            _dragStart = Vector2.Zero;
-            MouseDrag = Vector2.Zero;
-        }
+    public static bool UnconsumedHold()
+    {
+        return ClickAndHold && !HoldConsumed;
     }
 
     private static void ProcessBuildingInputs()
@@ -180,6 +160,7 @@ public static class InputManager
         ClickAndHold = 
             (mouseState.LeftButton == ButtonState.Pressed && 
             lastMouseState.LeftButton != ButtonState.Pressed);
+        HoldConsumed = false;
 
         // Ignore off-screen clicks
         if (!KatabasisGame.Viewport.TitleSafeArea.Contains(ScreenMousePos))
@@ -205,8 +186,6 @@ public static class InputManager
         switch (Mode)
         {
             case BUILD_MODE : ProcessBuildingInputs(); break;
-            case CAMERA_MODE: ProcessCameraInputs();   break;
-            default: ProcessCameraInputs(); break;
         }
         
         // Cancel tile mode with right click

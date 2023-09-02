@@ -64,11 +64,18 @@ public class PersonPanel : CloseablePanel
         Layout.SetMargin(top: 50, left: 40);
         SkillsLayout.SetPadding(bottom: 20);
         TopPart.SetPadding(bottom: 20);
+
+        Position = new Vector2(
+            Globals.WindowSize.X - Width(), 50f);
     }
 
     public void SetPerson(Person p)
     {
         PersonTracking = p;
+        if (p == null)
+            Hide();
+        else
+            Unhide();
     }
 
     public override void Update()

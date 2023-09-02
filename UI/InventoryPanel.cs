@@ -42,6 +42,9 @@ public class InventoryPanel : CloseablePanel
 
         BuildCategoryLayout(PrivateLayout);
         BuildCategoryLayout(PublicLayout);
+
+        Position = new Vector2(
+            Globals.WindowSize.X / 2 - Width() / 2, 50f);
     }
 
     // Build an accordion with fold-out options for each GoodsType category and add it to the parent layout

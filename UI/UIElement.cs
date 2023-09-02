@@ -119,7 +119,9 @@ public class UIElement
         Vector2 pos = GetRealPosition();
         if (Image == null)
             return new Rectangle((int)pos.X, (int)pos.Y, Width(), Height());
-        return Image.GetBounds();
+
+        Rectangle imageBounds = Image.GetBounds();
+        return new Rectangle((int)pos.X, (int)pos.Y, imageBounds.Width, imageBounds.Height);
     }
 
     public Vector2 GetPadding()
@@ -236,18 +238,26 @@ public class UIElement
 
     public virtual int Width()
     {
-        if (Image == null || Hidden)
+        if (Hidden)
             return 0;
 
-        return GetLeftPadding() + Image.GetBounds().Width + GetRightPadding();
+        int w = 0;
+        if (Image != null)
+            w = Image.GetBounds().Width;
+
+        return GetLeftPadding() + w + GetRightPadding();
     }
 
     public virtual int Height()
     {
-        if (Image == null || Hidden)
+        if (Hidden)
             return 0;
 
-        return GetTopPadding() + Image.GetBounds().Height + GetBottomPadding();
+        int h = 0;
+        if (Image != null)
+            h = Image.GetBounds().Height;
+
+        return GetTopPadding() + h + GetBottomPadding();
     }
 
     public virtual void ScaleUp(float s)

@@ -64,8 +64,10 @@ public class StatsPanel : CloseablePanel
 
         Layout.AddTab("Overview", tab1, OverviewLayout);
         Layout.AddTab("Demographics", tab2, DemographicsLayout);
-    }
 
+        Position = new Vector2(
+            Globals.WindowSize.X / 2 - Width() / 2, 50f);
+    }
 
     public void Update(string overview, List<Person> people)
     {

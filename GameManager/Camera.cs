@@ -19,6 +19,8 @@ public class Camera
     public Matrix Transform { get; set; }
     [JsonIgnore]
     public Matrix InverseViewMatrix { get; set; }
+
+    private Vector2 _dragStart;
     
     private const float DEFAULT_ZOOM = 0.5f;
     private const float MIN_ZOOM = 0.14f;
@@ -27,6 +29,7 @@ public class Camera
     public Camera()
     {
         Zoom = DEFAULT_ZOOM;
+        _dragStart = Vector2.Zero;
     }
 
     public static Camera Create(Viewport viewport, Vector2 position)
@@ -108,11 +111,6 @@ public class Camera
 
     public void UpdateCamera(Viewport bounds)
     {
-        if (InputManager.Mode == InputManager.CAMERA_MODE && InputManager.CameraReset)
-        {
-            Reset();
-        }
-
         Bounds = bounds.Bounds;
         UpdateMatrix();
 
@@ -132,26 +130,44 @@ public class Camera
 
         if (InputManager.Mode == InputManager.CAMERA_MODE)
         {
-            // Drag movement
-            if (InputManager.MouseDrag != Vector2.Zero)
+            if (InputManager.WasPressed(Keys.R))
+                Reset();
+
+            Vector2 drag = Vector2.Zero;
+
+            // Track click-and-drag
+            if (InputManager.UnconsumedHold())
+                _dragStart = InputManager.ScreenMousePos;
+
+            if (_dragStart != Vector2.Zero && !InputManager.MouseDown)
+                _dragStart = Vector2.Zero;
+
+            // MouseDrag smoothly, move camera in the opposite direction to drag
+            if (_dragStart != Vector2.Zero && InputManager.MouseDown)
             {
-                cameraMovement = Vector2.Transform(InputManager.MouseDrag, Matrix.Invert(Matrix.CreateScale(Zoom)));
+                drag = -1 * (InputManager.ScreenMousePos - _dragStart);
+                _dragStart = InputManager.ScreenMousePos;
             }
+
+            // Drag movement
+            if (drag != Vector2.Zero)
+                cameraMovement = Vector2.Transform(drag, Matrix.Invert(Matrix.CreateScale(Zoom)));
 
             // Zooming with scroll wheel
             if (InputManager.ScrollValue > 0)
-            {
                 AdjustZoom(1.05f);
-            }
             else if (InputManager.ScrollValue < 0)
-            {
                 AdjustZoom(0.95f);
-            }
         }
 
         if (Following != null)
             Position = Following.Position;
         else
             MoveCamera(cameraMovement);
+    }
+
+    private void ProcessCameraInputs()
+    {
+
     }
 }

@@ -121,6 +121,8 @@ public class MarketPanel : CloseablePanel
             SellingAccordion.AddSection(Goods.Categories[i], categoryLayout);
             i++;
         }
+
+        Position = new Vector2(Globals.WindowSize.X - Width(), 50f);
     }
 
     public override void Update()

@@ -233,10 +233,6 @@ public class GameManager
     public void SetPersonTracking(Person p)
     {
         _personPanel.SetPerson(p);
-        if (p == null)
-            _personPanel.Hide();
-        else
-            _personPanel.Unhide();
     }
 
     public static void ToggleMarketPanel(Object clicked = null)
@@ -300,8 +296,6 @@ public class GameManager
     {
         Globals.Update(gameTime);
 
-        Model.GameCamera.UpdateCamera(KatabasisGame.Viewport);
-
         if (InputManager.WasPressed(Keys.OemPlus))
         {
             UI.ScaleUp(0.05f);
@@ -358,6 +352,9 @@ public class GameManager
         // Update UI last (pop-up panels are on top, they should get clicks first)
         UI.Update();
 
+        // Give the other interfaces a chance to consume camera inputs, update this last
+        Model.GameCamera.UpdateCamera(KatabasisGame.Viewport);
+
         // Anything after this return will be pauseable
         if (InputManager.Paused)
             return;
@@ -369,8 +366,6 @@ public class GameManager
         Model.TileMap.Update();
         Model.Market.Update();
         Model.ConstructionQueue.Update();
-
-        // TODO: Write code to support click and drag on UIElements
 
         HandleTileAcquisition();
 
@@ -508,20 +503,16 @@ public class GameManager
         UI.Draw();
 
         // Draw the popup interface
-        inventoryPanel.Draw(new Vector2(
-            Globals.WindowSize.X / 2 - inventoryPanel.Width() / 2, 50f));
+        inventoryPanel.Draw(inventoryPanel.Position);
 
-        _statsPanel.Draw(new Vector2(
-            Globals.WindowSize.X / 2 - _statsPanel.Width() / 2, 50f));
+        _statsPanel.Draw(_statsPanel.Position);
 
-        _personPanel.Draw(new Vector2(
-            Globals.WindowSize.X - _personPanel.Width(), 50f));
+        _personPanel.Draw(_personPanel.Position);
 
         _tileInfoPanel.Draw(new Vector2(
             Globals.WindowSize.X - _tileInfoPanel.Width(), 260f));
 
-        MarketPanel.Draw(new Vector2(
-            Globals.WindowSize.X - MarketPanel.Width(), 50f));
+        MarketPanel.Draw(MarketPanel.Position);
 
         escMenuPanel.Draw(new Vector2(
             Globals.WindowSize.X / 2 - escMenuPanel.Width() / 2,
