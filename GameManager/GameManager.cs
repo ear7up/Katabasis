@@ -27,6 +27,7 @@ public class GameManager
     private static UIElement _clockHand;
     private static PersonPanel _personPanel;
     private static TileInfoPanel _tileInfoPanel;
+    private static BuildingInfoPanel buildingInfoPanel;
     private static EscapeMenuPanel escMenuPanel;
     public static MarketPanel MarketPanel;
 
@@ -146,6 +147,7 @@ public class GameManager
         _personPanel.Hide();
 
         _tileInfoPanel = new();
+        buildingInfoPanel = new();
         escMenuPanel = new();
 
         MarketPanel = new();
@@ -342,12 +344,13 @@ public class GameManager
 
         _statsPanel.Update();
         MarketPanel.Update();
-
-        inventoryPanel.UpdatePrivate(Model.Player1.Kingdom.PrivateGoods());
-        inventoryPanel.UpdatePublic(Model.Player1.Kingdom.Treasury);
-        inventoryPanel.Update();
-
+        inventoryPanel.Update(Model.Player1.Kingdom.Treasury, Model.Player1.Kingdom.PrivateGoods());
         _tileInfoPanel.UpdateTileData(Model.TileMap.HighlightedTile);
+
+        if (Building.SelectedBuilding != null && Building.SelectedBuilding.Type == BuildingType.MARKET)
+            buildingInfoPanel.Update(null);
+        else
+            buildingInfoPanel.Update(Building.SelectedBuilding);
 
         // Update UI last (pop-up panels are on top, they should get clicks first)
         UI.Update();
@@ -511,6 +514,8 @@ public class GameManager
 
         _tileInfoPanel.Draw(new Vector2(
             Globals.WindowSize.X - _tileInfoPanel.Width(), 260f));
+
+        buildingInfoPanel.Draw(buildingInfoPanel.Position);
 
         MarketPanel.Draw(MarketPanel.Position);
 

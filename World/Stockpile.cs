@@ -140,6 +140,11 @@ public class Stockpile
             _stock.Remove(available.GetId());
     }
 
+    public bool IsEmpty()
+    {
+        return _stock.Count == 0;
+    }
+
     public ICollection Values()
     {
         return _stock.Values;

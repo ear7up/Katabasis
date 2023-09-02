@@ -23,12 +23,12 @@ public class TabLayout : Layout
 
     public override int Width()
     {
-        return Layout.Width();
+        return base.Width() + Layout.Width();
     }
 
     public override int Height()
     {
-        return Layout.Height();
+        return base.Height() + Layout.Height();
     }
 
     public override void Draw(Vector2 offset)

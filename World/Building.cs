@@ -45,6 +45,8 @@ public class Building : Drawable
     public static int IdCounter = 0;
     public int Id;
 
+    public static Building SelectedBuilding = null;
+
     // Serialized content
     public Tile Location { get; set; }
     public BuildingType Type { get; set; }
@@ -268,6 +270,9 @@ public class Building : Drawable
                 InputManager.ConsumeClick(this);
                 Selected = !Selected;
 
+                if (Selected)
+                    SelectedBuilding = this;
+
                 if (Type == BuildingType.MARKET)
                     Katabasis.GameManager.ToggleMarketPanel();
 
@@ -278,6 +283,8 @@ public class Building : Drawable
                 (InputManager.ClickConsumer == null || !(InputManager.ClickConsumer is UIElement))) 
             {
                 Selected = false;
+                if (SelectedBuilding == this)
+                    SelectedBuilding = null;
             }
         }
     }
@@ -288,11 +295,32 @@ public class Building : Drawable
             $"users=({CurrentUsers}/{MaxUsers})";
     }
 
+    public string Describe()
+    {
+        string description = "";
+
+        if (SubType != BuildingSubType.NONE)
+            description += Globals.Title(SubType.ToString()) + " ";
+        description += $"{Globals.Title(Type.ToString())}\n";
+
+        description += $"Users: ({CurrentUsers}/{MaxUsers})\n";
+
+        if (BuildProgress < 1f)
+            description += $"Build Progress: {(int)(100 * BuildProgress)}%\n";
+
+        return description;
+    }
+
     public Sprite GetSprite()
     {
         if (BuildProgress < 1f && Location != null)
             return ConstructionSprite;
         return Sprite;
+    }
+
+    public SpriteTexture GetSpriteTexture()
+    {
+        return new SpriteTexture(Sprite.TexturePathSerial, Sprite.Texture);
     }
 
     public void DrawSelected()
@@ -317,7 +345,7 @@ public class Building : Drawable
 
             if (BuildProgress < 1f)
                 SelectedText.Text = $"Build Progress: ({(int)(100 * BuildProgress)}%)";
-            else
+            else if (MaxUsers < 9999)
                 SelectedText.Text = $"Occupants: ({CurrentUsers}/{MaxUsers})";
 
             Rectangle bounds = Sprite.GetBounds();

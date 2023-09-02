@@ -221,8 +221,11 @@ public class ConstructionRequest
         IsComplete = true;
         BuildingMoney = 0f;
 
-        // Type is no longer BuildingType.UNDER_CONSTRUCTION, it can be used
-        ToBuild.Type = ToBuild.Type;
+        // Remove the goods used in constructing the building
+        // I've chosen to do this here rather than BuildTask as multiple villagers can work a build task
+        // we don't want to try to remove goods 5 times if 5 workers are building the same building
+        foreach (Goods goods in GoodsRequired)
+            ToBuild.Stockpile.Take(goods.GetId(), goods.Quantity);
     }
 }
 
