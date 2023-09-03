@@ -1,4 +1,5 @@
 using System;
+using Katabasis;
 
 public class BuildingInfoPanel : CloseablePanel
 {
@@ -8,6 +9,7 @@ public class BuildingInfoPanel : CloseablePanel
 
     public UIElement BuildingIcon;
     public TextSprite Description;
+    public VBox OccupantsLayout;
 
     public Sprite Tall;
     public Sprite Small;
@@ -32,13 +34,16 @@ public class BuildingInfoPanel : CloseablePanel
         TopPart.Add(BuildingIcon);
         TopPart.Add(Description);
 
+        OccupantsLayout = new();
+
         Layout.Add(TopPart);
         Layout.Add(StockpileLayout);
+        Layout.Add(OccupantsLayout);
 
         StockpileLayout.SetPadding(bottom: 20);
 
         Position = new Vector2(
-            Globals.WindowSize.X - Width(), 50f);
+            Globals.WindowSize.X - 2 * Width(), 50f);
     }
 
     public void Update(Building building)
@@ -80,7 +85,32 @@ public class BuildingInfoPanel : CloseablePanel
         else
             Image = Small;
 
+        // Update layout before replacing elements so that they can register the fact that they've been clicked
         Layout.Update();
+
+        OccupantsLayout.Elements = new();
+        int i = 0;
+        GridLayout grid = new();
+        foreach (Person person in building.CurrentUsers)
+        {
+            HBox personLayout = new();
+
+            UIElement personIcon = new(person.GetSpriteTexture(), 0.1f, onClick: JumpToPerson);
+            personIcon.UserData = person;
+            personLayout.Add(personIcon);
+
+            TextSprite personName = new(Sprites.Font, text: person.Name);
+            personName.ScaleDown(0.45f);
+            personLayout.Add(personName);
+            
+            personLayout.SetPadding(left: 10);
+            grid.SetContent(i % 2, i / 2, personLayout);
+
+            i++;
+        }
+
+        OccupantsLayout.Add(grid);
+
         base.Update();
     }
 
@@ -91,6 +121,18 @@ public class BuildingInfoPanel : CloseablePanel
 
         base.Draw(offset);
         Layout.Draw(offset);
+    }
+
+    public void JumpToPerson(Object clicked)
+    {
+        Person clickedPerson = (Person)((UIElement)clicked).UserData;
+        GameManager.SetPersonTracking(clickedPerson);
+
+        // Uncomment if you want this to close the current panel
+        // ClosePanel(clicked);
+
+        // Uncomment if you want the game camera to follow the person once clicked
+        // Globals.Model.GameCamera.Follow(clickedPerson);
     }
 
     public override void ClosePanel(Object clicked)

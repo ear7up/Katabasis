@@ -239,7 +239,7 @@ public class Kingdom
             if (p.House == null)
                 homeless++;
             else
-                totalWealth += p.House.Wealth() / p.House.CurrentUsers;
+                totalWealth += p.House.Wealth() / p.House.CurrentUsers.Count;
             totalHunger += p.Hunger;
             totalAge +=  p.Age;
             foreach (SkillLevel s in p.Skills._list)

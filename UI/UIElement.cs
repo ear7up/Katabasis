@@ -22,6 +22,7 @@ public class UIElement
     public string Name;
     public bool IsSelected { get; set; }
     public UIElement HoverElement;
+    public object UserData; 
 
     public UIElement(
         SpriteTexture texture = null,

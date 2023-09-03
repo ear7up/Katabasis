@@ -41,6 +41,8 @@ public class PersonPanel : CloseablePanel
             SkillsLayout.SetContent(0, y, skillText);
 
             OverlapLayout levelDisplay = new();
+            levelDisplay.SetMargin(top: 1);
+            
             UIElement startLevelBar = new(Sprites.VerticalGreenBar);
             UIElement levelBar = new(Sprites.VerticalGreenBar);
             levelBar.Image.SpriteColor = Color.Goldenrod;

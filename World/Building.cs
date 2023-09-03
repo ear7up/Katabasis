@@ -53,7 +53,7 @@ public class Building : Drawable
     public BuildingSubType SubType { get; set; }
     public Sprite Sprite { get; set; }
     public Sprite ConstructionSprite { get; set; }
-    public int CurrentUsers { get; set; }
+    public List<Person> CurrentUsers { get; set; }
     public bool Selected { get; set; }
     public int MaxUsers { get; set; }
     public float BuildProgress { get; set; }
@@ -113,6 +113,7 @@ public class Building : Drawable
         SelectedText.Hide();
         Globals.TextBuffer.Add(SelectedText);
         Stockpile = new();
+        CurrentUsers = new();
         Money = 0f;
     }
 
@@ -179,14 +180,14 @@ public class Building : Drawable
                Type == BuildingType.MARKET;
     }
     
-    public void StartUsing()
+    public void StartUsing(Person p)
     {
-        CurrentUsers++;
+        CurrentUsers.Add(p);
     }
 
-    public void StopUsing()
+    public void StopUsing(Person p)
     {
-        CurrentUsers--;
+        CurrentUsers.Remove(p);
     }
 
     public static bool EquivalentType(BuildingType a, BuildingType b)
@@ -292,7 +293,7 @@ public class Building : Drawable
     public override string ToString()
     {
         return base.ToString() + " " + Sprite.Position.ToString() + " " + Type.ToString() + " " +
-            $"users=({CurrentUsers}/{MaxUsers})";
+            $"users=({CurrentUsers.Count}/{MaxUsers})";
     }
 
     public string Describe()
@@ -303,7 +304,7 @@ public class Building : Drawable
             description += Globals.Title(SubType.ToString()) + " ";
         description += $"{Globals.Title(Type.ToString())}\n";
 
-        description += $"Users: ({CurrentUsers}/{MaxUsers})\n";
+        description += $"Occupants: ({CurrentUsers.Count}/{MaxUsers})\n";
 
         if (BuildProgress < 1f)
             description += $"Build Progress: {(int)(100 * BuildProgress)}%\n";
@@ -346,7 +347,7 @@ public class Building : Drawable
             if (BuildProgress < 1f)
                 SelectedText.Text = $"Build Progress: ({(int)(100 * BuildProgress)}%)";
             else if (MaxUsers < 9999)
-                SelectedText.Text = $"Occupants: ({CurrentUsers}/{MaxUsers})";
+                SelectedText.Text = $"Occupants: ({CurrentUsers.Count}/{MaxUsers})";
 
             Rectangle bounds = Sprite.GetBounds();
             SelectedText.Position = new Vector2(
@@ -397,6 +398,7 @@ public class Building : Drawable
     public void DailyUpdate()
     {
         Stockpile.DailyUpdate();
+        CurrentUsers.RemoveAll(x => x.IsDead);
     }
 
     public float Wealth()

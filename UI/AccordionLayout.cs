@@ -6,23 +6,29 @@ public class AccordionLayout : VBox
     public Hashtable Sections;
     public Layout Active;
 
+    public Sprite SectionSprite;
+    public Sprite SectionSpriteExpanded;
+
     public AccordionLayout()
     {
         Sections = new();
         Active = null;
+
+        SectionSprite = Sprite.Create(Sprites.AccodionSection, Vector2.Zero);
+        SectionSpriteExpanded = Sprite.Create(Sprites.AccodionSectionExpanded, Vector2.Zero);
     }
 
     public void AddSection(string name, Layout layout)
     {
-        // Make a container with a 
         VBox container = new();
-        container.SetMargin(left: 1);
+        container.SetMargin(left: 5, top: 1);
+        container.Image = SectionSprite;
         TextSprite label = new(Sprites.Font, text: name);
         label.ScaleDown(0.2f);
-        label.OnClick = ToggleSection;
+        container.OnClick = ToggleSection;
         container.Add(label);
         container.Add(layout);
-        container.SetPadding(bottom: 8);
+        container.SetPadding(bottom: 16);
 
         container.Name = name;
         layout.Name = name;
@@ -54,12 +60,21 @@ public class AccordionLayout : VBox
     {
         Layout layout = (Layout)Sections[name];
         if (Active != null && Active != layout)
+        {
+            Active.Image = SectionSprite;
             Active.Elements[1].Hide();
+        }
 
         if (layout.Elements[1].Hidden)
+        {
+            layout.Image = SectionSpriteExpanded;
             layout.Elements[1].Unhide();
+        }
         else
+        {
+            layout.Image = SectionSprite;
             layout.Elements[1].Hide();
+        }
 
         Active = layout;
     }

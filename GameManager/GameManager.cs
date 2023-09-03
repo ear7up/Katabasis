@@ -232,7 +232,7 @@ public class GameManager
         TasksTest.RunTests(Model.TileMap);
     }
 
-    public void SetPersonTracking(Person p)
+    public static void SetPersonTracking(Person p)
     {
         _personPanel.SetPerson(p);
     }
@@ -340,8 +340,6 @@ public class GameManager
         _buildingPlacer.Update();
         
         _personPanel.Update();
-        HandlePersonFollowing();
-
         _statsPanel.Update();
         MarketPanel.Update();
         inventoryPanel.Update(Model.Player1.Kingdom.Treasury, Model.Player1.Kingdom.PrivateGoods());
@@ -354,6 +352,8 @@ public class GameManager
 
         // Update UI last (pop-up panels are on top, they should get clicks first)
         UI.Update();
+
+        HandlePersonFollowing();
 
         // Give the other interfaces a chance to consume camera inputs, update this last
         Model.GameCamera.UpdateCamera(KatabasisGame.Viewport);
@@ -508,16 +508,15 @@ public class GameManager
         // Draw the popup interface
         inventoryPanel.Draw(inventoryPanel.Position);
 
+        MarketPanel.Draw(MarketPanel.Position);
+
         _statsPanel.Draw(_statsPanel.Position);
 
+        buildingInfoPanel.Draw(buildingInfoPanel.Position);
         _personPanel.Draw(_personPanel.Position);
 
         _tileInfoPanel.Draw(new Vector2(
             Globals.WindowSize.X - _tileInfoPanel.Width(), 260f));
-
-        buildingInfoPanel.Draw(buildingInfoPanel.Position);
-
-        MarketPanel.Draw(MarketPanel.Position);
 
         escMenuPanel.Draw(new Vector2(
             Globals.WindowSize.X / 2 - escMenuPanel.Width() / 2,

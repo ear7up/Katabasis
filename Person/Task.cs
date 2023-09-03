@@ -551,7 +551,7 @@ public class TryToProduceTask : Task
 
         // Mark the building as in-use
         if (TimeSpent == 0f && ReqBuilding != null)
-            ReqBuilding.StartUsing();
+            ReqBuilding.StartUsing(p);
 
         // Add progress
         TimeSpent += Globals.Time;
@@ -624,7 +624,7 @@ public class TryToProduceTask : Task
         // Finish by adding the completed goods to the person's stockpile
         p.PersonalStockpile.Add(Goods);
         if (ReqBuilding != null)
-            ReqBuilding.StopUsing();
+            ReqBuilding.StopUsing(p);
         return true;
     }
 
@@ -1171,7 +1171,7 @@ public class DepositInventoryTask : Task
 
         // Share household money
         p.House.Money += p.Money;
-        p.Money = p.House.Money / p.House.CurrentUsers;
+        p.Money = p.House.Money / p.House.CurrentUsers.Count;
         p.House.Money -= p.Money;
 
         Status.Complete = true;

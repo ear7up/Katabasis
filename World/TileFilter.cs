@@ -49,7 +49,7 @@ public class TileFilter
                 continue;
 
             // Continue, building is already at capacity
-            if (b.CurrentUsers >= b.MaxUsers)
+            if (b.CurrentUsers.Count >= b.MaxUsers)
                 continue;
 
             // Right type, no subtype required

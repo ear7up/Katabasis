@@ -5,6 +5,7 @@ using ProfessionExtension;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
 public enum PersonType
@@ -47,6 +48,7 @@ public class Person : Entity, Drawable
     public float Age { get; set; }
     public int Hunger { get; set; }
     public float Money { get; set; }
+    public bool IsDead { get; set; }
     public ProfessionType Profession { get; set; }
     private float[,] Demand { get; set; }
     public Stockpile PersonalStockpile { get; set; }
@@ -167,7 +169,7 @@ public class Person : Entity, Drawable
     public void SetHouse(Object x)
     {
         House = (Building)x;
-        House.StartUsing();
+        House.StartUsing(this);
 
         Home.Population -= 1;
         Home = House.Location;
@@ -392,7 +394,7 @@ public class Person : Entity, Drawable
 
         // Try to keep enough food to feed everyone in the household
         float totalSatiation = House.Stockpile.TotalSatiation();
-        float keepSatiation = House.CurrentUsers * Person.DAILY_HUNGER;
+        float keepSatiation = House.CurrentUsers.Count * Person.DAILY_HUNGER;
 
         foreach (Goods g in House.Stockpile)
         {
@@ -483,11 +485,12 @@ public class Person : Entity, Drawable
         if (Home != null)
             Home.Population--;
         if (House != null)
-            House.StopUsing();
+            House.StopUsing(this);
         if (BuildingUsing != null)
-            BuildingUsing.StopUsing();
+            BuildingUsing.StopUsing(this);
         Owner.Kingdom.PersonDied(this);
         Globals.Ybuffer.Remove(this);
+        IsDead = true;
     }
 
     public float Wealth()
