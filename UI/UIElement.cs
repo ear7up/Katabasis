@@ -1,4 +1,6 @@
 using System;
+using System.Numerics;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 public class UIElement
 {
@@ -15,6 +17,7 @@ public class UIElement
     public Sprite HoverImage;
     public Sprite SelectedImage;
     public Vector2 Position { get; set; }
+    public Vector2 DefaultPosition { get; set; }
     public Action<Object> OnClick;
     public Action<Object> OnHover;
     public string TooltipText;
@@ -22,6 +25,10 @@ public class UIElement
     public string Name;
     public bool IsSelected { get; set; }
     public UIElement HoverElement;
+    public Vector2 AnimationVelocity { get; set; }
+    public Vector2 AnimationAcceleration { get; set; }
+    public Vector2 AnimationDestination { get; set; }
+    public Action AnimationOnComplete { get; set; }
     public object UserData; 
 
     public UIElement(
@@ -64,6 +71,10 @@ public class UIElement
         _padding = new int[4] { 0, 0, 0, 0 };
         _margin = new int[4] { 10, 0, 0, 10 };
         Scale = Vector2.One;
+
+        AnimationAcceleration = Vector2.Zero;
+        AnimationVelocity = Vector2.Zero;
+        AnimationDestination = Vector2.Zero;
     }
 
     public virtual void Hide()
@@ -89,11 +100,19 @@ public class UIElement
         return 1;
     }
 
+    public void SetDefaultPosition (Vector2 pos)
+    {
+        DefaultPosition = pos;
+        Position = pos;
+    }
+
     public virtual void Update()
     {
         // Don't process clicks or hovers on hidden elements
         if (Hidden)
             return;
+
+        AnimationMove();
 
         Hovering = false;
 
@@ -133,6 +152,48 @@ public class UIElement
     public Vector2 GetRealPosition()
     {
         return Position + GetPadding();
+    }
+
+    public void SetAnimation(
+        Vector2 destination, 
+        float speed, 
+        float acceleration,
+        Action onComplete = null)
+    {
+        AnimationDestination = destination;
+
+        AnimationVelocity = destination - Position;
+        AnimationVelocity.Normalize();
+        AnimationVelocity *= speed;
+
+        AnimationAcceleration = acceleration * AnimationVelocity;
+
+        AnimationOnComplete = onComplete;
+    }
+
+    public void AnimationMove()
+    {
+        if (AnimationVelocity != Vector2.Zero)
+        {
+            float distance = Vector2.Distance(Position, AnimationDestination);
+            float stepSize = AnimationVelocity.Length() * Globals.Time;
+
+            if (distance < stepSize)
+            {
+                AnimationVelocity *= distance / stepSize;
+                Position += AnimationVelocity * Globals.Time;
+
+                AnimationVelocity = Vector2.Zero;
+                AnimationDestination = Vector2.Zero;
+
+                AnimationOnComplete?.Invoke();
+            }
+            else
+            {
+                Position += AnimationVelocity * Globals.Time;
+                AnimationVelocity += AnimationAcceleration;
+            }
+        }
     }
 
     public virtual void Draw(Vector2 offset)

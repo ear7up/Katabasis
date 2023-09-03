@@ -21,7 +21,7 @@ public class GameManager
     private static TextSprite _logoDisplay;
     private static TextSprite _logoDisplay2;
     private static GridLayout _buttonPanel;
-    private static GridLayout _bottomPanel;
+    private static CloseablePanel _bottomPanel;
     private static InventoryPanel inventoryPanel;
     private static StatsPanel _statsPanel;
     private static UIElement _clockHand;
@@ -117,29 +117,36 @@ public class GameManager
         UI.AddElement(_buttonPanel, UI.Position.BOTTOM_LEFT);
 
         _bottomPanel = new(Sprites.BottomPanel);
-        _bottomPanel.SetPadding(bottom: -250);
+        _bottomPanel.Draggable = false;
         _bottomPanel.SetMargin(left: 30, top: 60);
-        _bottomPanel.SetContent(0, 0, new UIElement(Sprites.farms[0], scale: 0.3f, 
+
+        GridLayout bottomPanelGrid = new();
+        bottomPanelGrid.SetContent(0, 0, new UIElement(Sprites.farms[0], scale: 0.3f, 
             onClick: BuildFarm, hoverElement: new BuildingPriceDisplay(null, BuildingType.FARM)));
-        _bottomPanel.SetContent(1, 0, new UIElement(Sprites.mines[0], scale: 0.3f, 
+        bottomPanelGrid.SetContent(1, 0, new UIElement(Sprites.mines[0], scale: 0.3f, 
             onClick: BuildMine, hoverElement: new BuildingPriceDisplay(null, BuildingType.MINE)));
-        _bottomPanel.SetContent(2, 0, new UIElement(Sprites.ranches[0], scale: 0.3f, 
+        bottomPanelGrid.SetContent(2, 0, new UIElement(Sprites.ranches[0], scale: 0.3f, 
             onClick: BuildRanch, hoverElement: new BuildingPriceDisplay(null, BuildingType.RANCH)));
-        _bottomPanel.SetContent(3, 0, new UIElement(Sprites.markets[0], scale: 0.3f, 
+        bottomPanelGrid.SetContent(3, 0, new UIElement(Sprites.markets[0], scale: 0.3f, 
             onClick: BuildMarket, hoverElement: new BuildingPriceDisplay(null, BuildingType.MARKET)));
-        _bottomPanel.SetContent(4, 0, new UIElement(Sprites.decorations[0], scale: 0.4f, 
+        bottomPanelGrid.SetContent(4, 0, new UIElement(Sprites.decorations[0], scale: 0.4f, 
             onClick: BuildDecoration, onHover: UI.SetTooltipText, tooltip: "Decoration"));
 
-        _bottomPanel.SetContent(0, 1, new UIElement(Sprites.houses[0], scale: 0.3f, 
+        bottomPanelGrid.SetContent(0, 1, new UIElement(Sprites.houses[0], scale: 0.3f, 
             onClick: BuildBrickHouse, hoverElement: new BuildingPriceDisplay(null, BuildingType.HOUSE, BuildingSubType.BRICK)));
-        _bottomPanel.SetContent(1, 1, new UIElement(Sprites.houses[0], scale: 0.3f, 
+        bottomPanelGrid.SetContent(1, 1, new UIElement(Sprites.houses[0], scale: 0.3f, 
             onClick: BuildWoodHouse, hoverElement: new BuildingPriceDisplay(null, BuildingType.HOUSE, BuildingSubType.WOOD)));
-        _bottomPanel.SetContent(2, 1, new UIElement(Sprites.barracks[0], scale: 0.3f, 
+        bottomPanelGrid.SetContent(2, 1, new UIElement(Sprites.barracks[0], scale: 0.3f, 
             onClick: BuildBarracks, hoverElement: new BuildingPriceDisplay(null, BuildingType.BARRACKS)));
-        _bottomPanel.SetContent(3, 1, new UIElement(Sprites.granaries[0], scale: 0.3f, 
+        bottomPanelGrid.SetContent(3, 1, new UIElement(Sprites.granaries[0], scale: 0.3f, 
             onClick: BuildGranary, hoverElement: new BuildingPriceDisplay(null, BuildingType.GRANARY)));
-        _bottomPanel.SetContent(4, 1, new UIElement(Sprites.smithies[0], scale: 0.3f, 
+        bottomPanelGrid.SetContent(4, 1, new UIElement(Sprites.smithies[0], scale: 0.3f, 
             onClick: BuildSmithy, hoverElement: new BuildingPriceDisplay(null, BuildingType.SMITHY)));
+
+        _bottomPanel.Add(bottomPanelGrid);
+
+        _bottomPanel.SetDefaultPosition(new Vector2(
+            _buttonPanel.Width(), Globals.WindowSize.Y - _bottomPanel.Height() + 250));
 
         _bottomPanel.Hide();
 
@@ -149,11 +156,10 @@ public class GameManager
         _tileInfoPanel = new();
         buildingInfoPanel = new();
         escMenuPanel = new();
+        escMenuPanel.Draggable = false;
 
         MarketPanel = new();
         MarketPanel.Hide();
-
-        UI.AddElement(_bottomPanel, UI.Position.BOTTOM_LEFT);
 
         inventoryPanel = new();
         inventoryPanel.Hide();
@@ -202,16 +208,12 @@ public class GameManager
 
     public void BuildButton(Object clicked = null)
     {
-        if (_bottomPanel.Hidden)
-        {
-            _bottomPanel.Unhide();
-        }
-        else
+        if (!_bottomPanel.Hidden)
         {
             InputManager.SwitchToMode(InputManager.CAMERA_MODE);
             _buildingPlacer.ClearEditBuilding();
-            _bottomPanel.Hide();
         }
+        TogglePanel(_bottomPanel);
     }
 
     public void TileButton(Object clicked)
@@ -237,14 +239,6 @@ public class GameManager
         _personPanel.SetPerson(p);
     }
 
-    public static void ToggleMarketPanel(Object clicked = null)
-    {
-        if (MarketPanel.Hidden)
-            MarketPanel.Unhide();
-        else
-            MarketPanel.Hide();
-    }
-
     public static int CompareDrawable(Drawable a, Drawable b)
     {
         float ya = a.GetMaxY();
@@ -268,30 +262,57 @@ public class GameManager
 
     public void ToggleStatistics(Object clicked = null)
     {
-        // Update once on un-hide
-        if (_statsPanel.Hidden)
-        {
-            _statsPanel.Unhide();
-            _statsPanel.Update(Model.Player1.Kingdom.Statistics(), Model.Player1.Kingdom.People);
-        }
-        else
-        {
-            _statsPanel.Hide();
-        }
+        TogglePanel(_statsPanel);
+        _statsPanel.Update(Globals.Model.Player1.Kingdom.Statistics(), Globals.Model.Player1.Kingdom.People);
     }
 
     public void ToggleEscMenu()
     {
         InputManager.Paused = !InputManager.Paused;
-        escMenuPanel.ToggleHidden();
+        TogglePanel(escMenuPanel);
     }
 
     public void ToggleGoodsDisplay(Object clicked = null)
     {
-        if (inventoryPanel.Hidden)
-            inventoryPanel.Unhide();
+        TogglePanel(inventoryPanel);
+    }
+
+    public static void ToggleMarketPanel(Object clicked = null)
+    {
+        TogglePanel(MarketPanel);
+    }
+
+    public static void TogglePanel(UIElement panel)
+    {
+        if (panel.Hidden)
+        {
+            panel.Unhide();
+            panel.Position = new Vector2(panel.Position.X, Globals.WindowSize.Y);
+            panel.SetAnimation(panel.DefaultPosition, 2f, 3f);
+        }
         else
-            inventoryPanel.Hide();
+        {
+            panel.DefaultPosition = panel.Position;
+            Vector2 pos = new Vector2(panel.Position.X, Globals.WindowSize.Y);
+            panel.SetAnimation(pos, 2f, 3f, panel.Hide);
+        }
+    }
+
+    public void ToggleFullscreen()
+    {
+        CloseablePanel[] panels = { _bottomPanel, escMenuPanel, inventoryPanel, _statsPanel, MarketPanel };
+        foreach (CloseablePanel panel in panels)
+            if (panel.Hidden)
+                panel.Position = new Vector2(panel.Position.X, Globals.WindowSize.Y);
+
+        // Centered vertically and horizontally
+        escMenuPanel.SetDefaultPosition(new Vector2(
+            Globals.WindowSize.X / 2 - escMenuPanel.Width() / 2,
+            Globals.WindowSize.Y / 2 - escMenuPanel.Height() / 2));
+
+        // Stick to the bottom, but cut off a bit of the extra
+        _bottomPanel.SetDefaultPosition(new Vector2(
+            _buttonPanel.Width(), Globals.WindowSize.Y - _bottomPanel.Height() + 250));        
     }
 
     public void Update(GameTime gameTime)
@@ -339,6 +360,7 @@ public class GameManager
         _decorationManager.Update(Model.TileMap);
         _buildingPlacer.Update();
         
+        _bottomPanel.Update();
         _personPanel.Update();
         _statsPanel.Update();
         MarketPanel.Update();
@@ -505,7 +527,9 @@ public class GameManager
         // Draw the user interface
         UI.Draw();
 
-        // Draw the popup interface
+        // Draw the popup interfaces
+        _bottomPanel.Draw(_bottomPanel.Position);
+
         inventoryPanel.Draw(inventoryPanel.Position);
 
         MarketPanel.Draw(MarketPanel.Position);
@@ -518,9 +542,7 @@ public class GameManager
         _tileInfoPanel.Draw(new Vector2(
             Globals.WindowSize.X - _tileInfoPanel.Width(), 260f));
 
-        escMenuPanel.Draw(new Vector2(
-            Globals.WindowSize.X / 2 - escMenuPanel.Width() / 2,
-            Globals.WindowSize.Y / 2 - escMenuPanel.Height() / 2));
+        escMenuPanel.Draw(escMenuPanel.Position);
 
         // Draw the current coordinates at the cursor location
         _coordinateDisplay.Text = $"({InputManager.ScreenMousePos.X:0.0}, {InputManager.ScreenMousePos.Y:0.0})";

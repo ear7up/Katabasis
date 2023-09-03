@@ -4,7 +4,7 @@ public class PersonPanel : CloseablePanel
 {
     Person PersonTracking;
 
-    public VBox Layout;
+    public VBox MyLayout;
     public HBox TopPart;
     public GridLayout SkillsLayout;
 
@@ -17,7 +17,7 @@ public class PersonPanel : CloseablePanel
     {
         PersonTracking = person;
 
-        Layout = new();
+        MyLayout = new();
         TopPart = new();
         SkillsLayout = new();
 
@@ -58,17 +58,16 @@ public class PersonPanel : CloseablePanel
         TopPart.Add(PersonIcon);
         TopPart.Add(PersonDescription);
 
-        Layout.Add(TopPart);
-        Layout.Add(SkillsLayout);
-        Layout.Add(TaskDescription);
-        Layout.Add(InventoryDescription);
+        MyLayout.Add(TopPart);
+        MyLayout.Add(SkillsLayout);
+        MyLayout.Add(TaskDescription);
+        MyLayout.Add(InventoryDescription);
 
-        Layout.SetMargin(top: 50, left: 40);
+        MyLayout.SetMargin(top: 50, left: 40);
         SkillsLayout.SetPadding(bottom: 20);
         TopPart.SetPadding(bottom: 20);
 
-        Position = new Vector2(
-            Globals.WindowSize.X - Width(), 50f);
+        SetDefaultPosition(new Vector2(Globals.WindowSize.X - Width(), 50f));
     }
 
     public void SetPerson(Person p)
@@ -102,7 +101,7 @@ public class PersonPanel : CloseablePanel
 
         InventoryDescription.Text = "[ Inventory ]\n" + PersonTracking.PersonalStockpile.ToString();
 
-        Layout.Update();
+        MyLayout.Update();
         base.Update();
     }
 
@@ -112,7 +111,7 @@ public class PersonPanel : CloseablePanel
             return;
 
         base.Draw(offset);
-        Layout.Draw(offset);
+        MyLayout.Draw(offset);
     }
 
     // Override to disable camera following when the panel closes

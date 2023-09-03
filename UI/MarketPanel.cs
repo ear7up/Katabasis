@@ -20,7 +20,7 @@ public class MarketPanel : CloseablePanel
     // Goods id -> buy buttons
     public Dictionary<int, ThreeBuyButtons> BuyButtons;
 
-    public TabLayout Layout;
+    public TabLayout MyLayout;
     
     // Map goods ids to OverlapLayouts containig price information
     public Hashtable PriceDisplayHash;
@@ -33,10 +33,10 @@ public class MarketPanel : CloseablePanel
     public MarketPanel() : base(Sprites.TallPanel)
     {
         BuyButtons = new();
-        Layout = new();
-        Layout.TabBox.Image = Sprite.Create(Sprites.TabBackground, Vector2.Zero);
-        Layout.TabBox.Image.DrawRelativeToOrigin = false;
-        Layout.SetMargin(top: 30, left: 35);
+        MyLayout = new();
+        MyLayout.TabBox.Image = Sprite.Create(Sprites.TabBackground, Vector2.Zero);
+        MyLayout.TabBox.Image.DrawRelativeToOrigin = false;
+        MyLayout.SetMargin(top: 30, left: 35);
 
         PriceLayout = new();
         PriceLayout.SetMargin(top: 1, left: 1);
@@ -49,8 +49,8 @@ public class MarketPanel : CloseablePanel
         UIElement tab2 = new UIElement(Sprites.TabUnselected);
         tab2.AddSelectedImage(Sprites.TabSelected);
 
-        Layout.AddTab("Market Prices", tab1, PriceLayout);
-        Layout.AddTab("Sell Orders", tab2, SellingLayout);
+        MyLayout.AddTab("Market Prices", tab1, PriceLayout);
+        MyLayout.AddTab("Sell Orders", tab2, SellingLayout);
 
         PriceDisplayHash = new();
 
@@ -122,7 +122,7 @@ public class MarketPanel : CloseablePanel
             i++;
         }
 
-        Position = new Vector2(Globals.WindowSize.X - Width(), 50f);
+        SetDefaultPosition(new Vector2(Globals.WindowSize.X - Width(), 50f));
     }
 
     public override void Update()
@@ -248,7 +248,7 @@ public class MarketPanel : CloseablePanel
             i++;
         }
 
-        Layout.Update();
+        MyLayout.Update();
         base.Update();
     }
 
@@ -282,6 +282,6 @@ public class MarketPanel : CloseablePanel
             return;
 
         base.Draw(offset);
-        Layout.Draw(offset);
+        MyLayout.Draw(offset);
     }
 }

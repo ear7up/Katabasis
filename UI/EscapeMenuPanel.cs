@@ -7,12 +7,10 @@ public class EscapeMenuPanel : CloseablePanel
 
     public EscapeMenuPanel() : base(Sprites.EscapeMenu)
     {
-        Hidden = true;
-
         Container = new();
         Container.SetMargin(top: 25, left: 25);
 
-        ScaleDownCloseButton(0.5f);
+        XButton.ScaleDown(0.5f);
 
         string[] text = new string[]{ 
             "Options", "Save", "Load", "Exit Game", "Save and Exit", "Return to Game" };
@@ -35,6 +33,12 @@ public class EscapeMenuPanel : CloseablePanel
             olayout.SetMargin(bottom: 5, left: 1);
             Container.Add(olayout);
         }
+
+        SetDefaultPosition(new Vector2(
+            Globals.WindowSize.X / 2 - Width() / 2, 
+            Globals.WindowSize.Y / 2 - Height() / 2));
+
+        Hidden = true;
     }
 
     public void OptionsButton(Object clicked)

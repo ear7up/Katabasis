@@ -53,6 +53,9 @@ public class KatabasisGame : Game
                 GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
         else
             Globals.WindowSize = new(1600, 900);
+
+        // Reposition elements hidden off-screen
+        _gameManager.ToggleFullscreen();
     }
 
     protected override void Initialize()

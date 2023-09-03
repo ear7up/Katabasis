@@ -3,7 +3,7 @@ using Katabasis;
 
 public class BuildingInfoPanel : CloseablePanel
 {
-    public VBox Layout;
+    public VBox MyLayout;
     public HBox TopPart;
     public StockpileDisplay StockpileLayout;
 
@@ -20,8 +20,8 @@ public class BuildingInfoPanel : CloseablePanel
         Tall = Sprite.Create(Sprites.TallPanel, Vector2.Zero);
         Tall.DrawRelativeToOrigin = false;
 
-        Layout = new();
-        Layout.SetMargin(top: 50, left: 40);
+        MyLayout = new();
+        MyLayout.SetMargin(top: 50, left: 40);
 
         TopPart = new();
         StockpileLayout = new("Inventory");
@@ -36,14 +36,13 @@ public class BuildingInfoPanel : CloseablePanel
 
         OccupantsLayout = new();
 
-        Layout.Add(TopPart);
-        Layout.Add(StockpileLayout);
-        Layout.Add(OccupantsLayout);
+        MyLayout.Add(TopPart);
+        MyLayout.Add(StockpileLayout);
+        MyLayout.Add(OccupantsLayout);
 
         StockpileLayout.SetPadding(bottom: 20);
 
-        Position = new Vector2(
-            Globals.WindowSize.X - 2 * Width(), 50f);
+        SetDefaultPosition(new Vector2(Globals.WindowSize.X - 2 * Width(), 50f));
     }
 
     public void Update(Building building)
@@ -65,7 +64,7 @@ public class BuildingInfoPanel : CloseablePanel
         if (StockpileLayout.StockpileRef != building.Stockpile)
         {
             StockpileLayout = new("Inventory");
-            Layout.Elements[1] = StockpileLayout;
+            MyLayout.Elements[1] = StockpileLayout;
         }
 
         // Don't bother displaying or updating if the building stockpile is empty
@@ -80,13 +79,13 @@ public class BuildingInfoPanel : CloseablePanel
         }
 
         // Switch image when the stockpile gets bigger than the image (~40 pixels dead space at bottom of panels)
-        if (Layout.Height() > Small.GetBounds().Height - 100)
+        if (MyLayout.Height() > Small.GetBounds().Height - 100)
             Image = Tall;
         else
             Image = Small;
 
         // Update layout before replacing elements so that they can register the fact that they've been clicked
-        Layout.Update();
+        MyLayout.Update();
 
         OccupantsLayout.Elements = new();
         int i = 0;
@@ -120,7 +119,7 @@ public class BuildingInfoPanel : CloseablePanel
             return;
 
         base.Draw(offset);
-        Layout.Draw(offset);
+        MyLayout.Draw(offset);
     }
 
     public void JumpToPerson(Object clicked)

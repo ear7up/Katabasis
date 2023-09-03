@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class StatsPanel : CloseablePanel
 {
-    public TabLayout Layout;
+    public TabLayout MyLayout;
     public VBox OverviewLayout;
     public TextSprite OverviewText;
     public VBox DemographicsLayout;
@@ -14,10 +14,10 @@ public class StatsPanel : CloseablePanel
     {
         // Tab layout with two tabs: Overview and Demographics
         Hidden = true;
-        Layout = new();
-        Layout.TabBox.Image = Sprite.Create(Sprites.TabBackground, Vector2.Zero);
-        Layout.TabBox.Image.DrawRelativeToOrigin = false;
-        Layout.SetMargin(top: 30, left: 35);
+        MyLayout = new();
+        MyLayout.TabBox.Image = Sprite.Create(Sprites.TabBackground, Vector2.Zero);
+        MyLayout.TabBox.Image.DrawRelativeToOrigin = false;
+        MyLayout.SetMargin(top: 30, left: 35);
 
         // Overview will contain a SpriteText label followed by a SpriteText description
         OverviewLayout = new();
@@ -62,11 +62,10 @@ public class StatsPanel : CloseablePanel
         UIElement tab2 = new UIElement(Sprites.TabUnselected);
         tab2.AddSelectedImage(Sprites.TabSelected);
 
-        Layout.AddTab("Overview", tab1, OverviewLayout);
-        Layout.AddTab("Demographics", tab2, DemographicsLayout);
+        MyLayout.AddTab("Overview", tab1, OverviewLayout);
+        MyLayout.AddTab("Demographics", tab2, DemographicsLayout);
 
-        Position = new Vector2(
-            Globals.WindowSize.X / 2 - Width() / 2, 50f);
+        SetDefaultPosition(new Vector2(Globals.WindowSize.X / 2 - Width() / 2, 50f));
     }
 
     public void Update(string overview, List<Person> people)
@@ -107,7 +106,7 @@ public class StatsPanel : CloseablePanel
             female.Image.SetScaleX(ROW_WIDTH * 2 * female.Image.Scale.X / people.Count);
         }
         
-        Layout.Update();
+        MyLayout.Update();
         base.Update();
     }
 
@@ -116,7 +115,7 @@ public class StatsPanel : CloseablePanel
         if (Hidden)
             return;
 
-        Layout.Update();
+        MyLayout.Update();
         base.Update();
     }
 
@@ -126,6 +125,6 @@ public class StatsPanel : CloseablePanel
             return;
 
         base.Draw(offset);
-        Layout.Draw(offset);
+        MyLayout.Draw(offset);
     }
 }

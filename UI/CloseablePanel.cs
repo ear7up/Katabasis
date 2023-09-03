@@ -1,13 +1,13 @@
 using System;
 
-public class CloseablePanel : UIElement
+public class CloseablePanel : VBox
 {
     public UIElement TopBar;
     public UIElement XButton;
     public Vector2 DragStart;
     public bool Draggable;
 
-    public  CloseablePanel(SpriteTexture texture, bool draggable = true) : base(texture)
+    public CloseablePanel(SpriteTexture texture, bool draggable = true) : base(texture)
     {
         Draggable = draggable;
         DragStart = Vector2.Zero;
@@ -26,6 +26,9 @@ public class CloseablePanel : UIElement
 
     public override void Draw(Vector2 offset)
     {
+        if (Hidden)
+            return;
+
         base.Draw(offset);
 
         XButton.Position = new Vector2(Width() - XButton.Width(), 0f) + offset;
@@ -65,11 +68,5 @@ public class CloseablePanel : UIElement
             Position += InputManager.ScreenMousePos - DragStart;;
             DragStart = InputManager.ScreenMousePos;
         }
-    }
-
-    public void ScaleDownCloseButton(float s)
-    {
-        XButton.ScaleDown(s);
-        XButton.HoverImage.ScaleDown(s);
     }
 }

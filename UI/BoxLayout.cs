@@ -7,14 +7,14 @@ public class BoxLayout : Layout
 
     public LayoutDirection Layout;
 
-    protected BoxLayout(LayoutDirection layout) : base()
+    protected BoxLayout(SpriteTexture texture, LayoutDirection layout) : base(texture)
     {
         Layout = layout;
     }
 
     public override int Width()
     {
-        if (Elements.Count == 0 || Hidden)
+        if (Hidden)
             return 0;
 
         int sumWidth = 0;
@@ -29,6 +29,9 @@ public class BoxLayout : Layout
         if (Image != null)
             maxWidth = Math.Max(maxWidth, GetBounds().Width);
 
+        // If the background image is wider than the elements
+        sumWidth = Math.Max(sumWidth, maxWidth);
+
         int realWidth = 0;
         if (Layout == LayoutDirection.VERTICAL)
             realWidth = maxWidth;
@@ -40,7 +43,7 @@ public class BoxLayout : Layout
 
     public override int Height()
     {
-        if (Elements.Count == 0 || Hidden)
+        if (Hidden)
             return 0;
 
         int sumHeight = 0;
@@ -55,6 +58,9 @@ public class BoxLayout : Layout
         if (Image != null)
             maxHeight = Math.Max(maxHeight, GetBounds().Height);
 
+        // If the background image is bigger than the elements, use that height instead
+        sumHeight = Math.Max(sumHeight, maxHeight);
+
         int realHeight = 0;
         if (Layout == LayoutDirection.VERTICAL)
             realHeight = sumHeight;
@@ -66,10 +72,10 @@ public class BoxLayout : Layout
 
     public override void Draw(Vector2 offset)
     {
-        base.Draw(offset);
-
         if (Hidden)
             return;
+
+        base.Draw(offset);
 
         Vector2 margin = new Vector2(GetLeftMargin(), GetTopMargin());
 
@@ -89,7 +95,7 @@ public class BoxLayout : Layout
 
 public class HBox : BoxLayout
 {
-    public HBox() : base(LayoutDirection.HORIZONTAL)
+    public HBox(SpriteTexture texture = null) : base(texture, LayoutDirection.HORIZONTAL)
     {
 
     }
@@ -97,7 +103,7 @@ public class HBox : BoxLayout
 
 public class VBox : BoxLayout
 {
-    public VBox() : base(LayoutDirection.VERTICAL)
+    public VBox(SpriteTexture texture = null) : base(texture, LayoutDirection.VERTICAL)
     {
 
     }
