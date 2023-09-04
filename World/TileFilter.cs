@@ -62,6 +62,27 @@ public class TileFilter
         }
         return null;
     }
+
+    public string Describe()
+    {
+        string description = "a valid ";
+        if (FilterBuildingType != BuildingType.NONE)
+        {
+            description = Globals.Title(FilterBuildingType.ToString());
+            if (FilterBuildingSubType != BuildingSubType.NONE)
+                description += " (" + Globals.Title(FilterBuildingSubType.ToString()) + ")";
+        }
+
+        if (FilterTileType != TileType.NONE)
+        {
+            string tileDesc = Globals.Title(FilterTileType.ToString());
+            if (FilterBuildingType != BuildingType.NONE)
+                description += " on a ";
+            description += tileDesc + " tile";
+        }
+
+        return description;
+    }
 }
 
 // Match suitable home tiles (population < MAX)

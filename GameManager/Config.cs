@@ -6,4 +6,5 @@ static class Config
     public static int AutoSaveFrequencySeconds = 0;
     public static bool InstantBuilding = false;
     public static bool ShowTaskNotifications = true;
+    public static bool ShowTaskFailures = false;
 }

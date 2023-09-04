@@ -29,6 +29,7 @@ public class TaskStatus
 {
     public bool Complete { get; set; }
     public bool Failed { get; set; }
+    public string FailureReason { get; set; }
     public Object ReturnValue { get; set; }
     public Task Task { get; set; }
 
@@ -37,6 +38,7 @@ public class TaskStatus
         Complete = false;
         ReturnValue = null;
         Failed = false;
+        FailureReason = "";
     }
 
     public void SetAttributes(Task task)
@@ -161,6 +163,7 @@ public class Task
                 if (subStatus.Failed)
                 {
                     Status.Failed = true;
+                    Status.FailureReason = subStatus.FailureReason;
                     Status.Complete = true;
                 }
             }
@@ -258,8 +261,8 @@ public class FindNewHomeTask : Task
 
         if (newHome == null)
         {
-            Debug($"Failed to find a home for {p}");
             Status.Failed = true;
+            Status.FailureReason = "Can't find a house";
             return Status;
         }
 
@@ -637,6 +640,7 @@ public class TryToProduceTask : Task
             return Status;
         }
 
+        // Checks if the good is available, e.g. some crops must be unlocked
         if (!p.Owner.CanProduce(Goods))
         {
             Status.Failed = true;
@@ -676,6 +680,7 @@ public class TryToProduceTask : Task
             if (found == null)
             {
                 Status.Failed = true;
+                Status.FailureReason = "Failed to find " + filter.Describe();
                 return Status;
             }
         }

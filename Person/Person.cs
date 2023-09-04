@@ -464,15 +464,7 @@ public class Person : Entity, Drawable
                 // This happens often if the task prerequisites cannot be fulfilled
                 if (currentStatus.Complete || currentStatus.Failed)
                 {
-                    if (current is TryToProduceTask && !currentStatus.Failed)
-                    {
-                        // TODO: Failed notification with a reason? e.g. "No blacksmith building"
-                        TaskCompleteNotification.Reset();
-                        TaskCompleteNotification.Text = ((TryToProduceTask)current).Goods.ToString();
-                        TaskCompleteNotification.SetDefaultPosition(Position + new Vector2(
-                            -TaskCompleteNotification.Width() / 2, -GetBounds().Height));
-                        TaskCompleteNotification.StartAnimation();
-                    }
+                    HandleTaskComplete(current, currentStatus);
                     Tasks.Dequeue();
                 }
 
@@ -493,6 +485,35 @@ public class Person : Entity, Drawable
 
         if (Config.ShowTaskNotifications)
             TaskCompleteNotification.Draw();
+    }
+
+    public void HandleTaskComplete(Task current, TaskStatus currentStatus)
+    {
+        if (!(current is TryToProduceTask))
+            return;
+
+        TaskCompleteNotification.Reset();
+
+        if (currentStatus.Failed)
+        {
+            if (Config.ShowTaskFailures)
+            {
+                TaskCompleteNotification.FontColor = Color.Red;
+                TaskCompleteNotification.Text = currentStatus.FailureReason;
+            }
+        }
+        else
+        {
+            TaskCompleteNotification.FontColor = Color.Green;
+            TaskCompleteNotification.Text = ((TryToProduceTask)current).Goods.ToString();
+        }
+
+        if (TaskCompleteNotification.Text.Length > 0)
+        {
+            TaskCompleteNotification.SetDefaultPosition(Position + new Vector2(
+                -TaskCompleteNotification.Width() / 2, -GetBounds().Height));
+            TaskCompleteNotification.StartAnimation();
+        }
     }
 
     public float GetMaxY()

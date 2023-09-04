@@ -317,16 +317,18 @@ public class Goods
     {
         string typeName = Globals.Title(Enum.GetName(typeof(GoodsType), Type));
         string subTypeName = GetGoodsName(Type, SubType);
-        float value = Globals.Model.Market.GetPrice(GetId()) * Quantity;
+        //float value = Globals.Model.Market.GetPrice(GetId()) * Quantity;
         
         if (Type == GoodsType.TOOL)
         {
             string materialName = "";
             if (Material != (int)ToolMaterial.NONE)
                 materialName = Globals.Title(((ToolMaterial)Material).ToString()) + " ";
-            return $"{materialName}{subTypeName} x{Quantity:0.0} (${value:0.0})";
+            return $"{materialName}{subTypeName} x{Quantity:0.0}";
+            //return $"{materialName}{subTypeName} x{Quantity:0.0} (${value:0.0})";
         }
-        return $"{subTypeName} x{Quantity:0.0} (${value:0.0})";
+        return $"{subTypeName} x{Quantity:0.0}";
+        //return $"{subTypeName} x{Quantity:0.0} (${value:0.0})";
     }
 
     // Subtract and return as much of the requested quantity if possible
