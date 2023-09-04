@@ -24,8 +24,7 @@ public class StatsPanel : CloseablePanel
         OverviewLayout.SetMargin(top: 1, left: 1);
         OverviewLayout.Add(new TextSprite(Sprites.Font, text: "Overview"));
 
-        OverviewText = new TextSprite(Sprites.Font);
-        OverviewText.ScaleDown(0.45f);
+        OverviewText = new TextSprite(Sprites.SmallFont);
         OverviewLayout.Add(OverviewText);
 
         // Demographics will contain a SpriteText label followed by a GridLayout containing
@@ -37,8 +36,7 @@ public class StatsPanel : CloseablePanel
         DemographicsTable = new();
         for (int y = 0; y < 10; y++)
         {
-            TextSprite ageGroupLabel = new(Sprites.Font, text: $"{10 * y}-{10 * y + 9}");
-            ageGroupLabel.ScaleDown(0.45f);
+            TextSprite ageGroupLabel = new(Sprites.SmallFont, text: $"{10 * y}-{10 * y + 9}");
 
             HBox fLayout = new();
             UIElement female = new(Sprites.VerticalBar);

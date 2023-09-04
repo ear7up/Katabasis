@@ -622,7 +622,7 @@ public class TryToProduceTask : Task
             p.PersonalStockpile.UseTool(Requirements.ToolRequirement.Tool, Requirements.ToolRequirement.Material);
 
         // Finish by adding the completed goods to the person's stockpile
-        p.PersonalStockpile.Add(Goods);
+        p.PersonalStockpile.Add(Goods.GetId(), Goods.Quantity);
         if (ReqBuilding != null)
             ReqBuilding.StopUsing(p);
         return true;
@@ -727,8 +727,15 @@ public class TryToProduceTask : Task
             Tile t = (Tile)found;
             ReqTile = t;
 
+            Rectangle bounds = t.BaseSprite.GetBounds();
+
+            // Randomize the destination slightly
+            Vector2 destination = new Vector2(
+                bounds.X + bounds.Width * Globals.Rand.NextFloat(0.2f, 0.8f),
+                bounds.Y + bounds.Height * Globals.Rand.NextFloat(0.2f, 0.8f));
+
             GoToTask go = new();
-            go.SetAttributes("Going to " + Globals.Title(t.Type.ToString()), t.GetPosition());
+            go.SetAttributes("Going to " + Globals.Title(t.Type.ToString()), destination);
             subTasks.Enqueue(go);
         }
 
@@ -1047,8 +1054,16 @@ public class BuyFoodFromMarketTask : Task
                 foodOrder.Goods.Quantity = Math.Min(p.Money * 0.8f / price, foodOrder.Goods.Quantity);
                 buyTask.SetAttributes(market.Sprite.Position, foodOrder);
                 
-                // Eat right after buying
+                // Cook right after buying (if raw)
                 subTasks.Enqueue(buyTask);
+                if (foodOrder.Goods.IsCookable())
+                {
+                    List<Goods> rawFood = new();
+                    rawFood.Add(new Goods(foodOrder.Goods));
+                    subTasks.Enqueue(CookTask.Create(rawFood));
+                }
+
+                // Eat right after buying
                 subTasks.Enqueue(new EatTask());
             }
         }
@@ -1224,8 +1239,23 @@ public class CookTask : Task
         return Status;
     }
 
+    public static CookTask Create(List<Goods> toCook)
+    {
+        CookTask task = new();
+        foreach (Goods goods in toCook)
+            task.ToCook.Enqueue(goods);
+        return task;
+    }
+
     public void Init(Person p)
     {
+        // Task may be created with a list of goods ready to cook
+        if (ToCook.Count > 0)
+        {
+            Initialized = true;
+            return;
+        }
+        
         if (p.House == null)
         {
             Status.Complete = true;

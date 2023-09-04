@@ -27,11 +27,9 @@ public class BuildingPriceDisplay : UIElement
         typeText.ScaleDown(0.2f);
 
         UIElement coinIcon = new(Sprites.Coin, 0.3f);
-        LaborPrice = new(Sprites.Font);
-        LaborPrice.ScaleDown(0.45f);
+        LaborPrice = new(Sprites.SmallFont);
 
-        MaterialsPrice = new(Sprites.Font);
-        MaterialsPrice.ScaleDown(0.45f);
+        MaterialsPrice = new(Sprites.SmallFont);
 
         HBox priceLayout1 = new();
         priceLayout1.Add(coinIcon);

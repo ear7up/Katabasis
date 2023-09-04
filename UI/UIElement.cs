@@ -25,7 +25,7 @@ public class UIElement
     public string Name;
     public bool IsSelected { get; set; }
     public UIElement HoverElement;
-    public Vector2 AnimationVelocity { get; set; }
+    public Vector2 AnimationVelocity; // Must be a field, not a property
     public Vector2 AnimationAcceleration { get; set; }
     public Vector2 AnimationDestination { get; set; }
     public Action AnimationOnComplete { get; set; }
@@ -112,7 +112,7 @@ public class UIElement
         if (Hidden)
             return;
 
-        AnimationMove();
+        ExecuteAnimation();
 
         Hovering = false;
 
@@ -171,7 +171,7 @@ public class UIElement
         AnimationOnComplete = onComplete;
     }
 
-    public void AnimationMove()
+    public virtual void ExecuteAnimation()
     {
         if (AnimationVelocity != Vector2.Zero)
         {

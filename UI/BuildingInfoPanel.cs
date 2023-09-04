@@ -98,8 +98,7 @@ public class BuildingInfoPanel : CloseablePanel
             personIcon.UserData = person;
             personLayout.Add(personIcon);
 
-            TextSprite personName = new(Sprites.Font, text: person.Name);
-            personName.ScaleDown(0.45f);
+            TextSprite personName = new(Sprites.SmallFont, text: person.Name);
             personLayout.Add(personName);
             
             personLayout.SetPadding(left: 10);

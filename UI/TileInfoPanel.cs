@@ -49,8 +49,7 @@ public class TileInfoPanel : CloseablePanel
         SoilQualityBar.Image.SpriteColor = Color.Green;
         soilQualityLayout.Add(SoilQualityBar);
 
-        SoilQualityPercent = new(Sprites.Font);
-        SoilQualityPercent.ScaleDown(0.45f);
+        SoilQualityPercent = new(Sprites.SmallFont);
         soilQualityLayout.Add(SoilQualityPercent);
 
         Container.Add(topRow);
@@ -77,8 +76,7 @@ public class TileInfoPanel : CloseablePanel
         ResourceQuantityBar = new(Sprites.VerticalBar);
         ResourceQuantityBar.Image.SpriteColor = Color.Green;
 
-        ResourceQuantityPercent = new TextSprite(Sprites.Font);
-        ResourceQuantityPercent.ScaleDown(0.45f);
+        ResourceQuantityPercent = new TextSprite(Sprites.SmallFont);
 
         resourceBarLayout.Add(ResourceQuantityBaseBar);
         resourceBarLayout.Add(ResourceQuantityBar);

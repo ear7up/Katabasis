@@ -79,16 +79,14 @@ public class MarketPanel : CloseablePanel
                         materialName = Globals.Title(((ToolMaterial)materialType).ToString()) + " ";
                     string name = $"{materialName}{subType.ToString()}";
 
-                    TextSprite nameText = new TextSprite(Sprites.Font, text: Globals.Title(name));
+                    TextSprite nameText = new TextSprite(Sprites.SmallFont, text: Globals.Title(name));
                     nameText.SetPadding(right: 10);
-                    nameText.ScaleDown(0.45f);
 
                     UIElement priceBar = new(Sprites.VerticalBar);
                     priceBar.Image.SpriteColor = Color.Green;
                     priceBar.SetPadding(right: 10);
 
-                    TextSprite priceText = new TextSprite(Sprites.Font, text: "0.0");
-                    priceText.ScaleDown(0.45f);
+                    TextSprite priceText = new TextSprite(Sprites.SmallFont, text: "0.0");
 
                     OverlapLayout priceDisplay = new();
                     priceDisplay.Add(priceBar);
@@ -193,17 +191,14 @@ public class MarketPanel : CloseablePanel
             int row = categoryLayout.GridContent.Count;
             //int col = i / GOODS_ROWS * 2;
             
-            TextSprite nameText = new(Sprites.Font, text: name);
-            nameText.ScaleDown(0.45f);
+            TextSprite nameText = new(Sprites.SmallFont, text: name);
             nameText.SetPadding(right: 10);
             
-            TextSprite quantityText = new(Sprites.Font, text: $"{quantity:0.0}");
-            quantityText.ScaleDown(0.45f);
+            TextSprite quantityText = new(Sprites.SmallFont, text: $"{quantity:0.0}");
             quantityText.SetPadding(right: 10);
 
             float price = Globals.Model.Market.GetPrice(kv.Key);
-            TextSprite priceText = new(Sprites.Font, text: $"${price:0.0}");
-            priceText.ScaleDown(0.45f);
+            TextSprite priceText = new(Sprites.SmallFont, text: $"${price:0.0}");
             priceText.SetPadding(right: 10);
 
             string idText = $"{kv.Key}";
@@ -241,8 +236,7 @@ public class MarketPanel : CloseablePanel
             GridLayout categoryLayout = (GridLayout)container.Elements[1];
             if (categoryLayout.GridContent.Count == 0)
             {
-                TextSprite noSellOrders = new(Sprites.Font, text: "No sell orders");
-                noSellOrders.ScaleDown(0.45f);
+                TextSprite noSellOrders = new(Sprites.SmallFont, text: "No sell orders");
                 categoryLayout.SetContent(0, 0, noSellOrders);
             }
             i++;

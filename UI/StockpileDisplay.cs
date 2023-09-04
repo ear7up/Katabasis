@@ -64,8 +64,7 @@ public class StockpileDisplay : VBox
             int id = goods.GetId();
             if (!TextLookup.ContainsKey(id))
             {
-                TextSprite textSprite = new(Sprites.Font, text: description);
-                textSprite.ScaleDown(0.45f);
+                TextSprite textSprite = new(Sprites.SmallFont, text: description);
                 textSprite.SetPadding(right: 10);
 
                 string category = Goods.Categories[(int)goods.Type];

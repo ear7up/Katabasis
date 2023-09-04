@@ -3741,6 +3741,13 @@
 /processorParam:TextureFormat=Color
 /build:sky.jpg
 
+#begin SmallFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:SmallFont.spritefont
+
 #begin UI_maybe/00000-3022157009.png
 /importer:TextureImporter
 /processor:TextureProcessor

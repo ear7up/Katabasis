@@ -55,7 +55,7 @@ public class KatabasisGame : Game
             Globals.WindowSize = new(1600, 900);
 
         // Reposition elements hidden off-screen
-        _gameManager.ToggleFullscreen();
+        _gameManager.ResizeScreen();
     }
 
     protected override void Initialize()

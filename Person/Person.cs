@@ -57,6 +57,8 @@ public class Person : Entity, Drawable
     public PriorityQueue2<Task, int> Tasks { get; set; }
     public WeightedList<SkillLevel> Skills { get; set; }
 
+    public FadingTextSprite TaskCompleteNotification;
+
     // Don't serialize, we need to requeue this task if we saved and loaded in the middle
     public bool SearchingForHouse;
 
@@ -86,6 +88,9 @@ public class Person : Entity, Drawable
         BuildingUsing = null;
         
         Tasks = new();
+        TaskCompleteNotification = new(Sprites.SmallFont, "", Vector2.Zero, 1f, 2f);
+        TaskCompleteNotification.FontColor = Color.Green;
+
         PersonalStockpile = new();
         Demand = new float[Goods.NUM_GOODS_TYPES, Goods.GOODS_PER_TYPE];
 
@@ -458,7 +463,18 @@ public class Person : Entity, Drawable
             {
                 // This happens often if the task prerequisites cannot be fulfilled
                 if (currentStatus.Complete || currentStatus.Failed)
+                {
+                    if (current is TryToProduceTask && !currentStatus.Failed)
+                    {
+                        // TODO: Failed notification with a reason? e.g. "No blacksmith building"
+                        TaskCompleteNotification.Reset();
+                        TaskCompleteNotification.Text = ((TryToProduceTask)current).Goods.ToString();
+                        TaskCompleteNotification.SetDefaultPosition(Position + new Vector2(
+                            -TaskCompleteNotification.Width() / 2, -GetBounds().Height));
+                        TaskCompleteNotification.StartAnimation();
+                    }
                     Tasks.Dequeue();
+                }
 
                 if (currentStatus.Complete && !currentStatus.Failed && current.OnSuccess != null)
                     current.OnSuccess(currentStatus.ReturnValue);
@@ -466,12 +482,15 @@ public class Person : Entity, Drawable
                     current.OnFailure(currentStatus.ReturnValue);
             }
         }
+
+        TaskCompleteNotification.Update();
     }
 
     public override void Draw()
     {
         // Why did I override this and the origin with Size instead of Size/2 and set Orientation to 0?
         Globals.SpriteBatch.Draw(image, Position, null, color, 0f, Size / 2f, Scale, 0, 0);
+        TaskCompleteNotification.Draw();
     }
 
     public float GetMaxY()

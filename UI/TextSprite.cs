@@ -10,8 +10,10 @@ public class TextSprite : UIElement, Drawable
 
     public string Text { get; set; }
 
-    public Color FontColor { get; set; }
+    public Color FontColor;
     public bool HasDropShadow { get; set; }
+
+    public float Transparency { get; set; }
 
     public TextSprite()
     {
@@ -21,6 +23,7 @@ public class TextSprite : UIElement, Drawable
         Position = Vector2.Zero;
         Text = "";
         FontColor = Color.White;
+        Transparency = 1f;
     }
 
     public TextSprite(SpriteFont font, bool hasDropShadow = true, string text = "") : base()
@@ -34,7 +37,8 @@ public class TextSprite : UIElement, Drawable
             FontColor = Color.White;
         else
             FontColor = Color.Blue;
-        
+
+        Transparency = 1f;
     }
 
     public override int Width()
@@ -71,12 +75,13 @@ public class TextSprite : UIElement, Drawable
         // Draw using layerDepth = 1f, draw text above everything else on layer 0 (default)
         if (HasDropShadow)
         {
+            Color shadowColor = Color.Black * Transparency;
             Globals.SpriteBatch.DrawString(Font, Text, offset + GetPadding() + new Vector2(2f, 2f), 
-                Color.Black, 0f, Vector2.Zero, Scale, SpriteEffects.None, 1f);
+                shadowColor, 0f, Vector2.Zero, Scale, SpriteEffects.None, 1f);
         }
 
         Globals.SpriteBatch.DrawString(Font, Text, offset + GetPadding(), 
-            FontColor, 0f, Vector2.Zero, Scale, SpriteEffects.None, 1f);
+            FontColor * Transparency, 0f, Vector2.Zero, Scale, SpriteEffects.None, 1f);
     }
 
     public void Draw()

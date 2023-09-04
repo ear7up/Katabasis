@@ -288,31 +288,37 @@ public class GameManager
         {
             panel.Unhide();
             panel.Position = new Vector2(panel.Position.X, Globals.WindowSize.Y);
-            panel.SetAnimation(panel.DefaultPosition, 2f, 3f);
+            panel.SetAnimation(panel.DefaultPosition, 55f, 13f);
         }
         else
         {
             panel.DefaultPosition = panel.Position;
             Vector2 pos = new Vector2(panel.Position.X, Globals.WindowSize.Y);
-            panel.SetAnimation(pos, 2f, 3f, panel.Hide);
+            panel.SetAnimation(pos, 55f, 13f, panel.Hide);
         }
     }
 
-    public void ToggleFullscreen()
+    public void ResizeScreen()
     {
         CloseablePanel[] panels = { _bottomPanel, escMenuPanel, inventoryPanel, _statsPanel, MarketPanel };
         foreach (CloseablePanel panel in panels)
             if (panel.Hidden)
                 panel.Position = new Vector2(panel.Position.X, Globals.WindowSize.Y);
 
+        bool hidden = escMenuPanel.Hidden;
+        escMenuPanel.Hidden = false;
         // Centered vertically and horizontally
         escMenuPanel.SetDefaultPosition(new Vector2(
             Globals.WindowSize.X / 2 - escMenuPanel.Width() / 2,
             Globals.WindowSize.Y / 2 - escMenuPanel.Height() / 2));
+        escMenuPanel.Hidden = hidden;
 
         // Stick to the bottom, but cut off a bit of the extra
+        hidden = _bottomPanel.Hidden;
+        _bottomPanel.Hidden = false;
         _bottomPanel.SetDefaultPosition(new Vector2(
-            _buttonPanel.Width(), Globals.WindowSize.Y - _bottomPanel.Height() + 250));        
+            _buttonPanel.Width(), Globals.WindowSize.Y - _bottomPanel.Height() + 250));
+        _bottomPanel.Hidden = hidden;
     }
 
     public void Update(GameTime gameTime)
