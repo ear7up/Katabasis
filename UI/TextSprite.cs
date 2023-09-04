@@ -41,6 +41,11 @@ public class TextSprite : UIElement, Drawable
         Transparency = 1f;
     }
 
+    public TextSprite(SpriteFont font, Color color, string text = "") : this(font, true, text)
+    {
+        FontColor = color;
+    }
+
     public override int Width()
     {
         return (int)(
@@ -76,7 +81,7 @@ public class TextSprite : UIElement, Drawable
         if (HasDropShadow  && Transparency == 1f)
         {
             Color shadowColor = Color.Black * Transparency;
-            Globals.SpriteBatch.DrawString(Font, Text, offset + GetPadding() + new Vector2(2f, 2f), 
+            Globals.SpriteBatch.DrawString(Font, Text, offset + GetPadding() + new Vector2(1f, 1f), 
                 shadowColor, 0f, Vector2.Zero, Scale, SpriteEffects.None, 1f);
         }
 

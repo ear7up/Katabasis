@@ -119,6 +119,22 @@ public class Person : Entity, Drawable
         Home = home;
     }
 
+    public string DescribeTask()
+    {
+        string description = "Idle";
+        if (Task.Peek(Tasks) != null)
+            description  = Task.Peek(Tasks).Describe();
+        return description;
+    }
+
+    public string DescribeCurrentTask()
+    {
+        string description = "Idle";
+        if (Task.Peek(Tasks) != null)
+            description  = Task.Peek(Tasks).Description;
+        return description;
+    }
+
     public override string ToString()
     {
         string skills = "[";
@@ -127,9 +143,7 @@ public class Person : Entity, Drawable
         skills = skills.Substring(0, skills.Length - 1);
         skills += "]";
 
-        string task = "Idle";
-        if (Task.Peek(Tasks) != null)
-            task  = Task.Peek(Tasks).Describe();
+        string task = DescribeTask();
 
         string house = "homeless";
         if (House != null)

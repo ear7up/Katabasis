@@ -194,7 +194,7 @@ public static class InputManager
             SwitchToMode(CAMERA_MODE);
         }
 
-        if (keyboardState.IsKeyUp(Keys.P) && lastKeyboardState.IsKeyDown(Keys.P))
+        if (keyboardState.IsKeyUp(Keys.Space) && lastKeyboardState.IsKeyDown(Keys.Space))
             Paused = !Paused;
 
         if ((keyboardState.IsKeyDown(Keys.LeftAlt) || keyboardState.IsKeyDown(Keys.RightAlt)) && 

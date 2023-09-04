@@ -77,7 +77,5 @@ public class ScrollPane : VBox
             ScrollOffset.Y -= MyHeight;
 
         InputManager.ScrollValue = 0;
-
-        // TODO: Update ScrollBar
     }
 }

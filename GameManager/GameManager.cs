@@ -26,6 +26,7 @@ public class GameManager
     private static StatsPanel _statsPanel;
     private static UIElement _clockHand;
     private static PersonPanel _personPanel;
+    private static PeoplePanel _peoplePanel;
     private static TileInfoPanel _tileInfoPanel;
     private static BuildingInfoPanel buildingInfoPanel;
     private static EscapeMenuPanel escMenuPanel;
@@ -90,8 +91,11 @@ public class GameManager
             hoverImage: hoverButtons[1]));
 
         _buttonPanel.SetContent(2, 0, new UIElement(
-            Sprites.BottomLeftButtons[2], 
-            onClick: Button3));
+            Sprites.BottomLeftButtons[2],
+            onHover: UI.SetTooltipText,
+            tooltip: "(P)eople", 
+            onClick: TogglePeoplePanel,
+            hoverImage: hoverButtons[2]));
 
         _buttonPanel.SetContent(0, 1, new UIElement(
             Sprites.BottomLeftButtons[3], 
@@ -152,6 +156,9 @@ public class GameManager
 
         _personPanel = new(null);
         _personPanel.Hide();
+
+        _peoplePanel = new();
+        _peoplePanel.Hide();
 
         _tileInfoPanel = new();
         buildingInfoPanel = new();
@@ -250,14 +257,14 @@ public class GameManager
         return 0;
     }
 
-    public void TogglePause(Object clicked)
+    public void TogglePause(Object clicked = null)
     {
         InputManager.Paused = !InputManager.Paused;
     }
 
-    public void Button3(Object clicked)
+    public void TogglePeoplePanel(Object clicked = null)
     {
-        Console.WriteLine("Button 3 pressed");
+        TogglePanel(_peoplePanel);
     }
 
     public void ToggleStatistics(Object clicked = null)
@@ -347,6 +354,9 @@ public class GameManager
 
         if (InputManager.WasPressed(Keys.M))
             ToggleMarketPanel();
+        
+        if (InputManager.WasPressed(Keys.P))
+            TogglePeoplePanel();
 
         if (InputManager.WasPressed(Keys.F))
             Config.ShowFog = !Config.ShowFog;
@@ -368,6 +378,7 @@ public class GameManager
         
         _bottomPanel.Update();
         _personPanel.Update();
+        _peoplePanel.Update(Globals.Model.Player1.Kingdom.People);
         _statsPanel.Update();
         MarketPanel.Update();
         inventoryPanel.Update(Model.Player1.Kingdom.Treasury, Model.Player1.Kingdom.PrivateGoods());
@@ -535,12 +546,10 @@ public class GameManager
 
         // Draw the popup interfaces
         _bottomPanel.Draw(_bottomPanel.Position);
-
         inventoryPanel.Draw(inventoryPanel.Position);
-
         MarketPanel.Draw(MarketPanel.Position);
-
         _statsPanel.Draw(_statsPanel.Position);
+        _peoplePanel.Draw(_peoplePanel.Position);
 
         buildingInfoPanel.Draw(buildingInfoPanel.Position);
         _personPanel.Draw(_personPanel.Position);

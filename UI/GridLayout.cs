@@ -10,9 +10,14 @@ public class GridLayout : Layout
     public int Rows;
     public int Columns;
 
+    public bool HasHeader;
+    public int ElementsPerPage;
+    public int Page;
+
     public GridLayout(SpriteTexture texture = null) : base(texture)
     {
         GridContent = new();
+        Page = 1;
     }
 
     public override int GetElementCount()
@@ -38,6 +43,7 @@ public class GridLayout : Layout
     {
         GridContent.Clear();
         Columns = 0;
+        Rows = 0;
     }
 
     public override void Hide()
@@ -67,7 +73,23 @@ public class GridLayout : Layout
         foreach (List<UIElement> row in GridContent)
             foreach (UIElement element in row)
                 element.Update();
+
+        if (ElementsPerPage > 0)
+            ChangePageOnScroll();
         base.Update();
+    }
+
+    public void ChangePageOnScroll()
+    {
+        if (!Hovering)
+            return;
+
+        if (InputManager.ScrollValue < 0 && Page < GridContent.Count / ElementsPerPage)
+            Page++;
+        else if (InputManager.ScrollValue > 0 && Page > 1)
+            Page--;
+
+        InputManager.ScrollValue = 0;
     }
 
     public override void Draw(Vector2 offset)
@@ -89,8 +111,26 @@ public class GridLayout : Layout
 
         // Draw each item in the grid
         Vector2 relative = Vector2.Zero;
+        int rowNumber = 0;
+
+        if (HasHeader)
+            rowNumber--;
+
         foreach (List<UIElement> row in GridContent)
         {
+            // If pagination is enabled, skip rows before the page, break after the page
+            if (ElementsPerPage > 0 && rowNumber > -1)
+            {
+                if (rowNumber > Page * ElementsPerPage)
+                    break;
+
+                if  (rowNumber < (Page - 1) * ElementsPerPage)
+                {
+                    rowNumber++;
+                    continue;
+                }
+            }
+
             int col = 0;
             relative.X = 0f;
             foreach (UIElement element in row)
@@ -102,6 +142,8 @@ public class GridLayout : Layout
             // Assume they're the same height
             if (row.Count > 0)
                 relative.Y += row[0].Height();
+
+            rowNumber++;
         }
     }
     

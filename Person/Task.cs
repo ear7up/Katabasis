@@ -211,7 +211,6 @@ public class Task
         TryToProduceTask task = new();
         task.SetAttributes(goods);
         return task;
-
     }
 
     public virtual string Describe(string extra = "", bool debug = true, string depth = "")
