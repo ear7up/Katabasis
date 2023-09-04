@@ -232,9 +232,10 @@ public class Task
         return s.TrimEnd();
     }
 
-    public virtual void Init()
+    public virtual TaskStatus Init(Person p)
     {
-
+        Initialized = true;
+        return Status;
     }
 
     public virtual bool Complete(Person p)
@@ -391,7 +392,7 @@ public class SourceGoodsTask : Task
         return Status;
     }
 
-    public TaskStatus Init(Person p)
+    public override TaskStatus Init(Person p)
     {
         Initialized = true;
 
@@ -631,7 +632,7 @@ public class TryToProduceTask : Task
         return true;
     }
 
-    public TaskStatus Init(Person p)
+    public override TaskStatus Init(Person p)
     {
         if (Requirements == null)
         {
@@ -869,7 +870,7 @@ public class HaulGoodsTask : Task
         return Status;
     }
 
-    public void Init(Person p)
+    public override TaskStatus Init(Person p)
     {
         Initialized = true;
 
@@ -880,6 +881,8 @@ public class HaulGoodsTask : Task
         GoToTask goTo = new();
         goTo.SetAttributes("Delivering materials", To);
         subTasks.Enqueue(goTo);
+
+        return Status;
     }
 
     public override bool Complete(Person p)
@@ -989,8 +992,10 @@ public class SellAtMarketTask : Task
         return Status;
     }
 
-    public void Init(Person p)
+    public override TaskStatus Init(Person p)
     {
+        Initialized = true;
+
         // Figure out what to take to market and sell
         Building market = (Building)Tile.Find(p.Home, 
             new TileFilter(buildingType: BuildingType.MARKET));
@@ -1009,7 +1014,7 @@ public class SellAtMarketTask : Task
                 subTasks.Enqueue(sell);
             }
         }
-        Initialized = true;
+        return Status;
     }
 }
 
@@ -1037,7 +1042,7 @@ public class BuyFoodFromMarketTask : Task
         return Status;
     }
 
-    public TaskStatus Init(Person p)
+    public override TaskStatus Init(Person p)
     {
         Initialized = true;
 
@@ -1146,7 +1151,7 @@ public class BuildTask : Task
         return Status;
     }
 
-    public TaskStatus Init(Person p)
+    public override TaskStatus Init(Person p)
     {
         Initialized = true;
 
@@ -1218,11 +1223,7 @@ public class CookTask : Task
     public override TaskStatus Execute(Person p)
     {
         if (!Initialized)
-        {
-            Init(p);
-            Initialized = true;
-            return Status;
-        }
+            return Init(p);
 
         if (ToCook.Count > 0)
         {
@@ -1252,20 +1253,19 @@ public class CookTask : Task
         return task;
     }
 
-    public void Init(Person p)
+    public override TaskStatus Init(Person p)
     {
+        Initialized = true;
+
         // Task may be created with a list of goods ready to cook
         if (ToCook.Count > 0)
-        {
-            Initialized = true;
-            return;
-        }
+            return Status;
         
         if (p.House == null)
         {
             Status.Complete = true;
             Status.Failed = true;
-            return;
+            return Status;
         }
 
         // Try to cook as much as you want to eat, or two days worth if not very hungry
@@ -1302,6 +1302,7 @@ public class CookTask : Task
             if (current >= limit)
                 break;
         }
+        return Status;
     }
 
     public override string Describe(string extra = "", bool debug = true, string depth = "")

@@ -216,6 +216,14 @@ public class Person : Entity, Drawable
         if (task == null)
             task = Task.RandomUsingSkill(this, weightedRandomChoice);
 
+        // Catch initialization failures, try up to 10 times to pick another task
+        TaskStatus initStatus = task.Init(this);
+        for (int i = 0; i < 10 && initStatus.Failed; i++)
+        {
+            task = Task.RandomUsingSkill(this, weightedRandomChoice);
+            initStatus = task.Init(this);
+        }
+
         Tasks.Enqueue(task);
         //Tasks.Enqueue(new IdleAtHomeTask());
     }
