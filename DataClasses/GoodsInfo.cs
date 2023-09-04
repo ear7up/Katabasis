@@ -110,6 +110,7 @@ public class GoodsInfo
                     // Simple craft goods like bricks and pottery should be cheap
                     // Complex goods like jewelry and instruments should be expensive
                     case Goods.Crafted.BRICKS: DefaultPrice = 1.8f; break;
+                    case Goods.Crafted.PAPYRUS: DefaultPrice = 1.5f; break;
                     case Goods.Crafted.POTTERY: DefaultPrice = 2f; break;
                     case Goods.Crafted.JEWELRY: DefaultPrice = 8f; break;
                     case Goods.Crafted.INSTRUMENTS: DefaultPrice = 7f; break;
@@ -181,7 +182,7 @@ public class GoodsInfo
                 {
                     case Goods.MaterialPlant.WOOD: DefaultPrice = 1.8f; break;
                     case Goods.MaterialPlant.FLAX: DefaultPrice = 2f; break;
-                    case Goods.MaterialPlant.REEDS: DefaultPrice = 1.6f; break;
+                    case Goods.MaterialPlant.REEDS: DefaultPrice = 1f; break;
                 }
                 break;
             }

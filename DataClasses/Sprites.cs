@@ -121,6 +121,7 @@ static class Sprites
 
 	// Misc
 	public static SpriteTexture Coin;
+	public static SpriteTexture Cursor;
 
 	public static void Load(ContentManager content)
 	{
@@ -239,6 +240,7 @@ static class Sprites
 
 		// Misc
 		Coin = LoadTexture("misc/coin");
+		Cursor = LoadTexture("misc/cursor");
 	}
 
 	public static SpriteTexture RandomBuilding()

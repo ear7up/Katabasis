@@ -107,8 +107,14 @@ public class BuildingPlacer
     {
         foreach (Goods goods in materials)
         {
-            MarketOrder buyOrder = MarketOrder.Create(Globals.Model.Player1.Person, true, new Goods(goods));
-            Globals.Model.Market.PlaceBuyOrder(buyOrder);
+            // Order the amount required minus the amount currently owned
+            float owned = Globals.Model.Player1.Kingdom.Treasury.Measure(goods.GetId());
+            if (owned < goods.Quantity)
+            {
+                Goods req = new Goods(goods, goods.Quantity - owned);
+                MarketOrder buyOrder = MarketOrder.Create(Globals.Model.Player1.Person, true, req);
+                Globals.Model.Market.PlaceBuyOrder(buyOrder);
+            }
         }
     }
 

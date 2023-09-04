@@ -5,4 +5,5 @@ static class Config
     public static float MusicVolume = 0f;
     public static int AutoSaveFrequencySeconds = 0;
     public static bool InstantBuilding = false;
+    public static bool ShowTaskNotifications = true;
 }

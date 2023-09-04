@@ -73,7 +73,7 @@ public class TextSprite : UIElement, Drawable
         Position = offset;
 
         // Draw using layerDepth = 1f, draw text above everything else on layer 0 (default)
-        if (HasDropShadow)
+        if (HasDropShadow  && Transparency == 1f)
         {
             Color shadowColor = Color.Black * Transparency;
             Globals.SpriteBatch.DrawString(Font, Text, offset + GetPadding() + new Vector2(2f, 2f), 

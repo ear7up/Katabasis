@@ -129,7 +129,7 @@ static class UI
         if (TooltipText.Text.Length > 0)
         {
             Tooltip.Draw(InputManager.ScreenMousePos + new Vector2(15f, -15f));
-            TooltipText.Draw(InputManager.ScreenMousePos + new Vector2(16f, -14f));
+            TooltipText.Draw(InputManager.ScreenMousePos + new Vector2(28f, -14f));
         }
     }
 

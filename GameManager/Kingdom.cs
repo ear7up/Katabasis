@@ -55,6 +55,9 @@ public class Kingdom
 
         Building market = Building.CreateBuilding(StartTile.Neighbors[0], BuildingType.MARKET);
         market.BuildProgress = 1f;
+
+        Treasury.Add(Goods.GetId(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 0), 200f);
+        Treasury.Add(Goods.GetId(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.STONE, 0), 100f);
     }
 
     // Checks if tile is adjacent to one owned by the player

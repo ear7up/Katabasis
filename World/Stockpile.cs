@@ -97,6 +97,14 @@ public class Stockpile
             goods.Quantity = 0;
     }
 
+    public float Measure(int goodsId)
+    {
+        Goods available = Get(goodsId);
+        if (available != null)
+            return available.Quantity;
+        return 0f;
+    }
+
     public float Borrow(int goodsId, float quantity)
     {
         Goods available = Get(goodsId);

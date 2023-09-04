@@ -39,7 +39,7 @@ public class GameManager
         _sky.SetScale(2f);
 
         _coordinateDisplay = new(Sprites.Font, hasDropShadow: true);
-        _coordinateDisplay.ScaleDown(0.2f);
+        _coordinateDisplay.ScaleDown(0.4f);
 
         _decorationManager = new();
 
@@ -552,7 +552,7 @@ public class GameManager
 
         // Draw the current coordinates at the cursor location
         _coordinateDisplay.Text = $"({InputManager.ScreenMousePos.X:0.0}, {InputManager.ScreenMousePos.Y:0.0})";
-        _coordinateDisplay.Draw(InputManager.ScreenMousePos + new Vector2(15f, 15f));
+        _coordinateDisplay.Draw(InputManager.ScreenMousePos + new Vector2(30f, 30f));
 
         // Draw debug text
         _debugDisplay.Draw(new Vector2(30f, 30f));

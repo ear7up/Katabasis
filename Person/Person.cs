@@ -490,7 +490,9 @@ public class Person : Entity, Drawable
     {
         // Why did I override this and the origin with Size instead of Size/2 and set Orientation to 0?
         Globals.SpriteBatch.Draw(image, Position, null, color, 0f, Size / 2f, Scale, 0, 0);
-        TaskCompleteNotification.Draw();
+
+        if (Config.ShowTaskNotifications)
+            TaskCompleteNotification.Draw();
     }
 
     public float GetMaxY()
