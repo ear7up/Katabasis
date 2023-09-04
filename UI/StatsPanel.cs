@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class StatsPanel : CloseablePanel
 {
     public TabLayout MyLayout;
-    public VBox OverviewLayout;
+    public ScrollPane OverviewLayout;
     public TextSprite OverviewText;
     public VBox DemographicsLayout;
     public GridLayout DemographicsTable;
@@ -20,7 +20,7 @@ public class StatsPanel : CloseablePanel
         MyLayout.SetMargin(top: 30, left: 35);
 
         // Overview will contain a SpriteText label followed by a SpriteText description
-        OverviewLayout = new();
+        OverviewLayout = new(height: 300, minWidth: 475);
         OverviewLayout.SetMargin(top: 1, left: 1);
         OverviewLayout.Add(new TextSprite(Sprites.Font, text: "Overview"));
 
