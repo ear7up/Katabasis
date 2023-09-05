@@ -12,6 +12,7 @@ public class TabLayout : Layout
     public TabLayout() : base()
     {
         Layout = new();
+        Layout.OnClick = null;
         TabBox = new();
         TabBox.SetPadding(bottom: 5);
         TabBox.SetMargin(top: 1, left: 1);

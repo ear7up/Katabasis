@@ -16,7 +16,7 @@ public class CloseablePanel : VBox
 
         // Invisible element representing the draggable window bar at the top
         TopBar = new();
-        TopBar.SetPadding(bottom: 50, right: Width());
+        TopBar.SetPadding(bottom: 50, right: Width() - XButton.Width());
     }
 
     public virtual void ClosePanel(Object clicked)
@@ -43,10 +43,11 @@ public class CloseablePanel : VBox
         if (Hidden)
             return;
 
+        XButton.Update();
+
         if (Draggable)
             HandleDragInputs();
 
-        XButton.Update();
         base.Update();
     }
 
@@ -61,7 +62,10 @@ public class CloseablePanel : VBox
         }
 
         if (DragStart != Vector2.Zero && !InputManager.MouseDown)
+        {
             DragStart = Vector2.Zero;
+            InputManager.ConsumeClick(this);
+        }
 
         if (InputManager.MouseDown && DragStart != Vector2.Zero)
         {

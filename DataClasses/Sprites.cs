@@ -40,6 +40,8 @@ static class Sprites
 	public static List<SpriteTexture> ranches;
 	public static List<SpriteTexture> ranchesCon;
 	public static List<SpriteTexture> cities;
+	public static List<SpriteTexture> city1Composite;
+	public static List<SpriteTexture> market1Composite;
 	//public static List<SpriteTexture> citiesCon;
 	public static List<SpriteTexture> markets;
 	public static List<SpriteTexture> marketsCon;
@@ -119,10 +121,15 @@ static class Sprites
 	public static List<SpriteTexture> desertForestTextures;
 	public static List<SpriteTexture> desertRiverTextures;
 	public static List<SpriteTexture> fogTextures;
+	public static SpriteTexture pavedTexture;
 
 	// Misc
 	public static SpriteTexture Coin;
 	public static SpriteTexture Cursor;
+
+	// Resusable sprites
+	public static Sprite Paved;
+	public static Sprite BuildingShadow;
 
 	public static void Load(ContentManager content)
 	{
@@ -161,8 +168,14 @@ static class Sprites
 		mines = LoadTextures("buildings/mine", 4);
 		ranches = LoadTextures("buildings/ranch", 5);
 		cities = LoadTextures("buildings/city", 2);
+		city1Composite = LoadTextures("buildings/city/composite", 6);
 		markets = LoadTextures("buildings/market", 7);
+		market1Composite = LoadTextures("buildings/market/composite", 4);
 		smithies = LoadTextures("buildings/smithy", 4);
+
+		pavedTexture = LoadTexture("buildings/paved");
+		Paved = Sprite.Create(pavedTexture, Vector2.Zero);
+		BuildingShadow = Sprite.Create(LoadTexture("buildings/buildingShadow"), Vector2.Zero);
 
 		barracksCon = LoadTextures("buildings/barracks/construction", 1);
 		farmsCon = LoadTextures("buildings/farm/construction", 1);

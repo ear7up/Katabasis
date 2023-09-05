@@ -113,6 +113,7 @@ public class StatsPanel : CloseablePanel
         if (Hidden)
             return;
 
+        XButton.Update();
         MyLayout.Update();
         base.Update();
     }

@@ -384,10 +384,15 @@ public class GameManager
         inventoryPanel.Update(Model.Player1.Kingdom.Treasury, Model.Player1.Kingdom.PrivateGoods());
         _tileInfoPanel.UpdateTileData(Model.TileMap.HighlightedTile);
 
-        if (Building.SelectedBuilding != null && Building.SelectedBuilding.Type == BuildingType.MARKET)
+        if (Building.SelectedBuilding != null && 
+            (Building.SelectedBuilding.Type == BuildingType.MARKET || Building.SelectedBuilding.Type == BuildingType.CITY))
+        {
             buildingInfoPanel.Update(null);
+        }
         else
+        {
             buildingInfoPanel.Update(Building.SelectedBuilding);
+        }
 
         // Update UI last (pop-up panels are on top, they should get clicks first)
         UI.Update();

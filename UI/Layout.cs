@@ -7,7 +7,7 @@ public abstract class Layout : UIElement
     protected Layout(SpriteTexture texture = null) : base(texture)
     {
         Elements = new();
-        OnClick = null;
+        //OnClick = null;
     }
 
     public override int GetElementCount()

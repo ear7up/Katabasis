@@ -53,6 +53,7 @@ public class Building : Drawable
     public BuildingSubType SubType { get; set; }
     public Sprite Sprite { get; set; }
     public Sprite ConstructionSprite { get; set; }
+    public List<Sprite> Composite { get; set; }
     public List<Person> CurrentUsers { get; set; }
     public bool Selected { get; set; }
     public int MaxUsers { get; set; }
@@ -65,7 +66,7 @@ public class Building : Drawable
     // Hack to make the JSON deserializer populate the ybuffer
     public bool Unused {
         get { return false; }
-        set { if (!IsWholeTile()) Globals.Ybuffer.Add(this); }
+        set { AddToYBuffer(); }
     }
 
     // No need to persist
@@ -114,6 +115,7 @@ public class Building : Drawable
         Globals.TextBuffer.Add(SelectedText);
         Stockpile = new();
         CurrentUsers = new();
+        Composite = new();
         Money = 0f;
     }
 
@@ -137,12 +139,46 @@ public class Building : Drawable
         return (BuildingSubType)(id % MAX_BUILDING_SUBTYPES);
     }
 
+    public static void BuildCityComposite(Building building)
+    {
+        List<SpriteTexture> sprites = Sprites.city1Composite;
+
+        Rectangle bounds = building.Sprite.GetBounds();
+        Vector2 pos = new Vector2(bounds.X, bounds.Y + 25) + building.Sprite.Origin * 0.25f;
+        building.Composite.Add(Sprite.Create(sprites[0], pos + new Vector2(98, 100)));
+        building.Composite.Add(Sprite.Create(sprites[1], pos + new Vector2(63, 66)));
+        building.Composite.Add(Sprite.Create(sprites[2], pos + new Vector2(242, 170)));
+        building.Composite.Add(Sprite.Create(sprites[3], pos + new Vector2(250, 125)));
+        building.Composite.Add(Sprite.Create(sprites[4], pos + new Vector2(267, 70)));
+        building.Composite.Add(Sprite.Create(sprites[5], pos + new Vector2(151, 3)));
+    }
+
+    public static void BuildMarketComposite(Building building)
+    {
+        List<SpriteTexture> sprites = Sprites.market1Composite;
+
+        Rectangle bounds = building.Sprite.GetBounds();
+        Vector2 pos = new Vector2(bounds.X, bounds.Y + 25) + building.Sprite.Origin * 0.25f;
+        building.Composite.Add(Sprite.Create(sprites[0], pos + new Vector2(172, 155)));
+        building.Composite.Add(Sprite.Create(sprites[1], pos + new Vector2(217, 100)));
+        building.Composite.Add(Sprite.Create(sprites[2], pos + new Vector2(260, 121)));
+        building.Composite.Add(Sprite.Create(sprites[3], pos + new Vector2(190, 80)));
+    }
+
+    public void AddToYBuffer()
+    {
+        if (!IsWholeTile()) 
+            Globals.Ybuffer.Add(this); 
+
+        foreach (Sprite part in Composite)
+            Globals.Ybuffer.Add(part);
+    }
+
     public static Building CreateBuilding(
         Tile location, 
         BuildingType buildingType,
         BuildingSubType subType = BuildingSubType.NONE)
     {
-        // Try lay out the building in the empty space on the diamond based on building count
         Vector2 position = Vector2.Zero;
 
         if (location != null)
@@ -151,17 +187,26 @@ public class Building : Drawable
             position.Y = location.GetPosition().Y;
         }
 
-        // TODO: need sprites for all building types
-        Sprite sprite = Sprite.Create(Sprites.RandomBuilding(buildingType, subType), position);
+        SpriteTexture spriteTexture = null;
+        if (buildingType == BuildingType.MARKET)
+            spriteTexture = Sprites.markets[5];
+        else
+            spriteTexture = Sprites.RandomBuilding(buildingType, subType);
+
+        Sprite sprite = Sprite.Create(spriteTexture, position);
         Sprite conSprite = Sprite.Create(Sprites.RandomConstruction(buildingType, subType), position);
         Building b = new Building();
         b.SetAttributes(location, sprite, conSprite, buildingType, subType);
 
+        if (buildingType == BuildingType.CITY)
+            BuildCityComposite(b);
+        if (buildingType == BuildingType.MARKET)
+            BuildMarketComposite(b);
+
         if (!b.IsWholeTile())
         {
             sprite.SetScale(0.4f);
-            if (conSprite != null)
-                conSprite.SetScale(0.4f);
+            conSprite?.SetScale(0.4f);
         }
 
         if (location != null)
@@ -337,6 +382,13 @@ public class Building : Drawable
 
     public void Draw()
     {
+        if (Type != BuildingType.FARM && Type != BuildingType.MINE)
+        {
+            Sprites.BuildingShadow.Position = Sprite.Position;
+            Sprites.BuildingShadow.Scale = Sprite.Scale;
+            Sprites.BuildingShadow.Draw();
+        }
+
         if (Selected)
             DrawSelected();
 
@@ -360,6 +412,10 @@ public class Building : Drawable
         }
 
         GetSprite().Draw();
+
+        if (Location == null)
+            foreach (Sprite part in Composite)
+                part.Draw();
     }
 
     // Keep in mind this is non-deterministic when there are multiple options for building materials
@@ -404,5 +460,23 @@ public class Building : Drawable
     public float Wealth()
     {
         return Stockpile.Wealth();
+    }
+
+    public void SetPosition(Vector2 newPosition)
+    {
+        // If there are composite sprites, update their positions
+        // so that they maintain the same offset from the base sprite position
+        Rectangle bounds = Sprite.GetBounds();
+        Vector2 pos = Sprite.Position;
+
+        foreach (Sprite part in Composite)
+        {
+            Vector2 offset = part.Position - pos;
+            part.Position = newPosition + offset;
+        }
+        Sprite.Position = newPosition;
+
+        if (ConstructionSprite != null)
+            ConstructionSprite.Position = newPosition;
     }
 }

@@ -647,8 +647,6 @@ public class TryToProduceTask : Task
             return Status;
         }
 
-        Initialized = true;
-
         BuildingType bReq = Requirements.BuildingRequirement;
         BuildingSubType bReq2 = Requirements.BuildingSubTypeRequirement;
         TileType tReq = Requirements.TileRequirement;
@@ -759,6 +757,7 @@ public class TryToProduceTask : Task
         if (found != null && found is Tile && Goods.Type == GoodsType.FOOD_PLANT)
             TimeToProduce /= ((Tile)found).SoilQuality;
 
+        Initialized = true;
         return Status;
     }
 }

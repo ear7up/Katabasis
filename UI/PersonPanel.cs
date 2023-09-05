@@ -100,6 +100,7 @@ public class PersonPanel : CloseablePanel
 
         InventoryDescription.Text = "[ Inventory ]\n" + PersonTracking.PersonalStockpile.ToString();
 
+        XButton.Update();
         MyLayout.Update();
         base.Update();
     }

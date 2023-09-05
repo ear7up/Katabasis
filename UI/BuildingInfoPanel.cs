@@ -22,6 +22,7 @@ public class BuildingInfoPanel : CloseablePanel
 
         MyLayout = new();
         MyLayout.SetMargin(top: 50, left: 40);
+        MyLayout.OnClick = null;
 
         TopPart = new();
         StockpileLayout = new("Inventory");

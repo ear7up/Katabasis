@@ -368,6 +368,12 @@ public class Tile
             BaseSprite.UndoScaleDown(0.02f);
         }
 
+        if (Buildings.Count >= 3)
+        {
+            Sprites.Paved.Position = BaseSprite.Position;
+            Sprites.Paved.Draw();
+        }
+
         Sprite buildingSprite = GetBuildingSprite();
 
         if (buildingSprite != null)
@@ -504,19 +510,8 @@ public class Tile
         // If the building replaces the whole tile, set it as a sprite to be drawn on the tile layer
         // otherwise, added it to the ybuffer so overlaps are avoidable
         if (building.IsWholeTile())
-        {
-            building.Sprite.Position = BaseSprite.Position;
-
-            if (building.ConstructionSprite != null)
-            {
-                BuildingConSprite = building.ConstructionSprite;
-                BuildingConSprite.Position = BaseSprite.Position;
-            }
-        }
-        else
-        {
-            Globals.Ybuffer.Add(building);
-        }
+            building.SetPosition(BaseSprite.Position);
+        building.AddToYBuffer();
 
         // Replace hills with mines otherwise the overlap looks bad
         if (building.Type == BuildingType.MINE)

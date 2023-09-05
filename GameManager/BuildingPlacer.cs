@@ -34,6 +34,8 @@ public class BuildingPlacer
         if (InputManager.ConfirmBuilding)
         {
             _editBuilding.Sprite.SpriteColor = Color.White;
+            if (_editBuilding.ConstructionSprite != null)
+                _editBuilding.ConstructionSprite.Scale = _editBuilding.Sprite.Scale;
 
             AddBuilding(_editBuilding);
         
@@ -56,7 +58,8 @@ public class BuildingPlacer
     public void CreateEditBuilding(BuildingType buildingType, BuildingSubType subType = BuildingSubType.NONE)
     {
         Building b = Building.Random(buildingType, subType, temporary: true);
-        b.Sprite.Position = InputManager.MousePos;
+        
+        b.SetPosition(InputManager.MousePos);
         _editBuilding = b;
         _editBuilding.Sprite.SpriteColor = new Color(Color.LightBlue, 0.3f);
     }
@@ -95,8 +98,6 @@ public class BuildingPlacer
 
                 ConstructionRequest req = ConstructionRequest.Create(t, b, materials, laborCost);
                 Globals.Model.ConstructionQueue.AddRequest(req);
-
-                // TODO: Signal the building to switch to the under construction sprite
             }
         }
         else
