@@ -189,7 +189,7 @@ public static class InputManager
         }
         
         // Cancel tile mode with right click
-        if (Mode == TILE_MODE && RClicked)
+        if (Mode == TILE_MODE && (RClicked || WasPressed(Keys.Escape)))
         {
             SwitchToMode(CAMERA_MODE);
         }

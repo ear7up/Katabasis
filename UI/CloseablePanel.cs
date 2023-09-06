@@ -43,6 +43,12 @@ public class CloseablePanel : VBox
         if (Hidden)
             return;
 
+        if (InputManager.WasPressed(Keys.Escape))
+        {
+            InputManager.ConsumeKeypress(Keys.Escape, this);
+            Hide();
+        }
+
         XButton.Update();
 
         if (Draggable)

@@ -91,10 +91,29 @@ public class EscapeMenuPanel : CloseablePanel
         Container.Draw(offset);
     }
 
+    public override void Hide()
+    {
+        InputManager.Paused = false;
+        base.Hide();
+    }
+
+    public override void Unhide()
+    {
+        InputManager.Paused = true;
+        base.Unhide();
+    }
+
     public override void Update()
     {
+        if (InputManager.WasPressed(Keys.Escape))
+        {
+            GameManager.TogglePanel(this);
+            InputManager.ConsumeKeypress(Keys.Escape, this);
+        }
+
         if (Hidden)
             return;
+
         Container.Update();
         base.Update();
     }
