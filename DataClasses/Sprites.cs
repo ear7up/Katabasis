@@ -107,6 +107,9 @@ static class Sprites
 	public static SpriteTexture XButtonHover;
 	public static SpriteTexture AccodionSection;
 	public static SpriteTexture AccodionSectionExpanded;
+	public static SpriteTexture RightClickMenu;
+	public static SpriteTexture MenuItem;
+	public static SpriteTexture MenuItemHover;
 
 	// Market UI
 	public static SpriteTexture Buy1;
@@ -247,6 +250,9 @@ static class Sprites
 		XButtonHover = LoadTexture("UI_maybe/buttons/xbuttonHover");
 		AccodionSection = LoadTexture("UI_maybe/accordionSection");
 		AccodionSectionExpanded = LoadTexture("UI_maybe/accordionSectionExpanded");
+		RightClickMenu = LoadTexture("UI_maybe/rightClickMenu");
+		MenuItem = LoadTexture("UI_maybe/menuItem");
+		MenuItemHover = LoadTexture("UI_maybe/menuItemHover");
 
 		// UI - Market
 		Buy1 = LoadTexture("UI_maybe/buttons/buy1");

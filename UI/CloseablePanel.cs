@@ -43,7 +43,7 @@ public class CloseablePanel : VBox
         if (Hidden)
             return;
 
-        if (InputManager.WasPressed(Keys.Escape))
+        if (InputManager.UnconsumedKeypress(Keys.Escape))
         {
             InputManager.ConsumeKeypress(Keys.Escape, this);
             Hide();

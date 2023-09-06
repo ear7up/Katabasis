@@ -130,7 +130,7 @@ public class Camera
 
         if (InputManager.Mode == InputManager.CAMERA_MODE)
         {
-            if (InputManager.WasPressed(Keys.R))
+            if (InputManager.UnconsumedKeypress(Keys.R))
                 Reset();
 
             Vector2 drag = Vector2.Zero;

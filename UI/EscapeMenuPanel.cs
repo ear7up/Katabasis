@@ -105,7 +105,7 @@ public class EscapeMenuPanel : CloseablePanel
 
     public override void Update()
     {
-        if (InputManager.WasPressed(Keys.Escape))
+        if (InputManager.UnconsumedKeypress(Keys.Escape))
         {
             GameManager.TogglePanel(this);
             InputManager.ConsumeKeypress(Keys.Escape, this);

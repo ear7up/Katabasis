@@ -19,8 +19,9 @@ public class DecorationManager
             return;
 
         // Cancel on right click
-        if (InputManager.RClicked)
+        if (InputManager.UnconsumedRClick())
         {
+            InputManager.ConsumeRClick(this);
             Editing = null;
             return;
         }

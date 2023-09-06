@@ -829,18 +829,6 @@
 /processorParam:TextureFormat=Color
 /build:buildings/buildingShadow.png
 
-#begin buildings/buildingShadow.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:buildings/buildingShadow.png
-
 #begin buildings/city/001.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -4444,6 +4432,30 @@
 /processorParam:TextureFormat=Color
 /build:UI_maybe/escapeMenuPanel.png
 
+#begin UI_maybe/menuItem.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI_maybe/menuItem.png
+
+#begin UI_maybe/menuItemHover.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI_maybe/menuItemHover.png
+
 #begin UI_maybe/panel1.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -4467,6 +4479,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:UI_maybe/pause_button.png
+
+#begin UI_maybe/rightClickMenu.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI_maybe/rightClickMenu.png
 
 #begin UI_maybe/small_panel.png
 /importer:TextureImporter

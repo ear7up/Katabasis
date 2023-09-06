@@ -20,9 +20,11 @@ public static class InputManager
 
     public static bool ClickAndHold;
     public static bool HoldConsumed;
-
     public static bool MouseDown;
+
     public static bool RClicked;
+    public static bool RClickConsumed;
+    public static object RClickConsumer;
 
     public static bool ShiftHeld;
     public static bool SavePressed;
@@ -63,12 +65,19 @@ public static class InputManager
         ConfirmBuilding = false;
     }
 
-    public static bool WasPressed(Keys key)
+    public static bool UnconsumedKeypress(Keys key)
     {
         return 
             lastKeyboardState.IsKeyDown(key) && 
             keyboardState.IsKeyUp(key) &&
             KeyConsumed != key;
+    }
+
+    public static bool WasPressed(Keys key)
+    {
+        return 
+            lastKeyboardState.IsKeyDown(key) && 
+            keyboardState.IsKeyUp(key);
     }
 
     public static void ConsumeKeypress(Keys key, object consumer)
@@ -90,8 +99,9 @@ public static class InputManager
     private static void ProcessBuildingInputs()
     {
         // Disable build mode on right click
-        if (lastMouseState.RightButton == ButtonState.Released && mouseState.RightButton == ButtonState.Pressed)
+        if (UnconsumedRClick())
         {
+            ConsumeRClick(null);
             SwitchToMode(CAMERA_MODE);
         }
         // Confirm the building if left click is pressed
@@ -122,6 +132,17 @@ public static class InputManager
     public static bool UnconsumedClick()
     {
         return Clicked && !ClickConsumed;
+    }
+
+    public static void ConsumeRClick(Object consumer)
+    {
+        RClickConsumed = true;
+        RClickConsumer = consumer;
+    }
+
+    public static bool UnconsumedRClick()
+    {
+        return RClicked && !RClickConsumed;
     }
 
     public static void Update()
@@ -156,6 +177,8 @@ public static class InputManager
 
         RClicked = lastMouseState.RightButton == ButtonState.Released && 
             mouseState.RightButton == ButtonState.Pressed;
+        RClickConsumed = false;
+        RClickConsumer = null;
 
         ClickAndHold = 
             (mouseState.LeftButton == ButtonState.Pressed && 
@@ -189,8 +212,10 @@ public static class InputManager
         }
         
         // Cancel tile mode with right click
-        if (Mode == TILE_MODE && (RClicked || WasPressed(Keys.Escape)))
+        if (Mode == TILE_MODE && (UnconsumedRClick() || UnconsumedKeypress(Keys.Escape)))
         {
+            if (UnconsumedRClick())
+                ConsumeRClick(null);
             SwitchToMode(CAMERA_MODE);
         }
 

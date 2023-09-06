@@ -12,25 +12,31 @@ public class GameManager
 
     public GameModel Model;
 
+    // Managers
     private static BuildingPlacer _buildingPlacer;
+    private DecorationManager _decorationManager;
 
+    // Misc UI elements
     private readonly Sprite _sky;
     private TextSprite _coordinateDisplay;
-    private DecorationManager _decorationManager;
     private static TextSprite _debugDisplay;
     private static TextSprite _logoDisplay;
     private static TextSprite _logoDisplay2;
+    private static UIElement _clockHand;
+
+    // Pop-up panels
     private static GridLayout _buttonPanel;
     private static CloseablePanel _bottomPanel;
     private static InventoryPanel inventoryPanel;
     private static StatsPanel _statsPanel;
-    private static UIElement _clockHand;
     private static PersonPanel _personPanel;
     private static PeoplePanel _peoplePanel;
     private static TileInfoPanel _tileInfoPanel;
     private static BuildingInfoPanel buildingInfoPanel;
     private static EscapeMenuPanel escMenuPanel;
     public static MarketPanel MarketPanel;
+
+    private static RightClickMenu _rightClickMenu;
 
     public GameManager()
     {
@@ -177,6 +183,14 @@ public class GameManager
         manButton.SelectedImage.ScaleDown(0.9f);
 
         _statsPanel = new();
+
+        // Temporary options
+        _rightClickMenu = new(Sprites.RightClickMenu);
+        _rightClickMenu.AddOption(new TextSprite(Sprites.SmallFont, Color.White, text: "Option 1"));
+        _rightClickMenu.AddOption(new TextSprite(Sprites.SmallFont, Color.White, text: "Option 2"));
+        _rightClickMenu.AddOption(new TextSprite(Sprites.SmallFont, Color.White, text: "Option 3"));
+        _rightClickMenu.AddOption(new TextSprite(Sprites.SmallFont, Color.White, text: "Option 4"));
+
     }
 
     public void SetGameModel(GameModel gameModel)
@@ -332,39 +346,34 @@ public class GameManager
     {
         Globals.Update(gameTime);
 
-        if (InputManager.WasPressed(Keys.OemPlus))
+        if (InputManager.UnconsumedKeypress(Keys.OemPlus))
         {
             UI.ScaleUp(0.05f);
             _buttonPanel.ScaleUp(0.05f);
         }
-        else if (InputManager.WasPressed(Keys.OemMinus))
+        else if (InputManager.UnconsumedKeypress(Keys.OemMinus))
         {
             UI.ScaleDown(0.05f);
             _buttonPanel.ScaleDown(0.05f);
         }
         
-        if (InputManager.WasPressed(Keys.B))
+        if (InputManager.UnconsumedKeypress(Keys.B))
             BuildButton();
 
-        if (InputManager.WasPressed(Keys.I))
+        if (InputManager.UnconsumedKeypress(Keys.I))
             ToggleGoodsDisplay();
 
-        if (InputManager.WasPressed(Keys.X))
+        if (InputManager.UnconsumedKeypress(Keys.X))
             ToggleStatistics();
 
-        if (InputManager.WasPressed(Keys.M))
+        if (InputManager.UnconsumedKeypress(Keys.M))
             ToggleMarketPanel();
         
-        if (InputManager.WasPressed(Keys.P))
+        if (InputManager.UnconsumedKeypress(Keys.P))
             TogglePeoplePanel();
 
-        if (InputManager.WasPressed(Keys.F))
+        if (InputManager.UnconsumedKeypress(Keys.F))
             Config.ShowFog = !Config.ShowFog;
-
-        escMenuPanel.Update();
-
-        if (InputManager.WasPressed(Keys.Escape))
-            ToggleEscMenu();
 
         // Calculate the real mouse position by inverting the camera transformations
         InputManager.MousePos = Vector2.Transform(
@@ -376,13 +385,18 @@ public class GameManager
         _decorationManager.Update(Model.TileMap);
         _buildingPlacer.Update();
         
-        _bottomPanel.Update();
         _personPanel.Update();
         _peoplePanel.Update(Globals.Model.Player1.Kingdom.People);
         _statsPanel.Update();
         MarketPanel.Update();
         inventoryPanel.Update(Model.Player1.Kingdom.Treasury, Model.Player1.Kingdom.PrivateGoods());
+        _bottomPanel.Update();
         _tileInfoPanel.UpdateTileData(Model.TileMap.HighlightedTile);
+
+        _rightClickMenu.Update();
+
+        // Last panel to update (other panels or right-cick menu may consume Escape keypress)
+        escMenuPanel.Update();
 
         if (Building.SelectedBuilding != null && 
             (Building.SelectedBuilding.Type == BuildingType.MARKET || Building.SelectedBuilding.Type == BuildingType.CITY))
@@ -555,14 +569,13 @@ public class GameManager
         MarketPanel.Draw(MarketPanel.Position);
         _statsPanel.Draw(_statsPanel.Position);
         _peoplePanel.Draw(_peoplePanel.Position);
-
         buildingInfoPanel.Draw(buildingInfoPanel.Position);
         _personPanel.Draw(_personPanel.Position);
-
         _tileInfoPanel.Draw(new Vector2(
             Globals.WindowSize.X - _tileInfoPanel.Width(), 260f));
-
         escMenuPanel.Draw(escMenuPanel.Position);
+
+        _rightClickMenu.Draw(_rightClickMenu.Position);
 
         // Draw the current coordinates at the cursor location
         _coordinateDisplay.Text = $"({InputManager.ScreenMousePos.X:0.0}, {InputManager.ScreenMousePos.Y:0.0})";

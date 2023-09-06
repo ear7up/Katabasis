@@ -1,7 +1,13 @@
 using System;
+using System.Collections.Generic;
 
 public class OverlapLayout : Layout
 {
+    public OverlapLayout(SpriteTexture texture = null) : base(texture)
+    {
+
+    }
+
     public override void Draw(Vector2 offset)
     {
         if (Hidden)
