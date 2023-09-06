@@ -37,6 +37,7 @@ public static class Globals
     public static void Update(GameTime gt)
     {
         Time = (float)gt.ElapsedGameTime.TotalSeconds;
+        //Console.WriteLine(Time);
     }
 
     public static string Title(string s)

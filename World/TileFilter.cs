@@ -95,3 +95,13 @@ public class TileFilterHome : TileFilter
         return null;
     }
 }
+
+public class TileFilterHover : TileFilter
+{
+    public override object Match(Tile t)
+    {
+        if (t.ContainsSimple(InputManager.MousePos))
+            return t;
+        return null;
+    }
+}

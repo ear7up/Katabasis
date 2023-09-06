@@ -38,7 +38,7 @@ public class Tile
 {
     public const int MAX_POP = 32;
     public const int MAX_BUILDINGS = 6;
-    public const int HIGHLIGHT_HEIGHT = 30;
+    public const int HIGHLIGHT_HEIGHT = 10;
     public const float MIN_SOIL_QUALITY = 0.3f;
     public const float MAX_SOIL_QUALITY = 0.6f;
     public const float RIVER_SOIL_QUALITY_BONUS = 0.25f;
@@ -503,6 +503,63 @@ public class Tile
         }
     }
 
+    public bool ContainsSimple(Vector2 pos)
+    {
+        // Simple check when near the center of the tile sprite
+        Vector2 center = GetOrigin() + new Vector2(0, -Map.VerticalOverlap);
+        float dist = Vector2.Distance(pos, BaseSprite.Position);
+        if (dist < 200)
+            return true;
+        return false;
+    }
+
+    public bool Contains(Vector2 pos)
+    {
+        if (ContainsSimple(pos))
+            return true;
+
+        // More complex, diamond shaped check
+        Rectangle bounds = BaseSprite.GetBounds();
+        BaseSprite.Contains(pos);
+
+        float x = bounds.X;
+        float y = bounds.Y - Map.VerticalOverlap;
+
+        float height = bounds.Height;
+        float width = bounds.Width;
+
+        // Not within the width of the box
+        if (pos.X < x || pos.X > x + width)
+            return false;
+
+        // Not within the height of the box
+        if (pos.Y < y || pos.Y > y + height - Map.VerticalOverlap)
+            return false;
+
+        // Exclude the overlapping bit at the bottom
+        int top = (pos.Y < (y + height - Map.VerticalOverlap) / 2f) ? 1 : 0;
+        int left = (pos.X < x + width / 2f) ? 2 : 0;
+
+        // ~0.63
+        float slope = (float)(height - Map.VerticalOverlap) / width; 
+        float halfHeight = (height - Map.VerticalOverlap) / 2f;
+
+        // Conditions are different within each quadrant of the diamond
+        return (top + left) switch
+        {
+            // bottom right
+            0 => pos.X < (halfHeight - pos.Y) * (1 / slope),
+            // top right
+            1 => pos.X * slope < pos.Y,
+            // bottom left
+            2 => pos.X * slope > pos.Y,
+            // top left
+            3 => pos.X > (halfHeight - pos.Y) * (1 / slope),
+            _ => false,
+        };
+
+    }
+
     public void AddBuilding(Building building)
     {
         Buildings.Add(building);
@@ -560,6 +617,9 @@ public class Tile
 
     public static Object Find(Tile start, TileFilter f, int distance = 8)
     {
+        if (start == null)
+            return null;
+
         int num_tiles = (2 * distance + 1) * (2 * distance + 1);
 
         Tile current = start;

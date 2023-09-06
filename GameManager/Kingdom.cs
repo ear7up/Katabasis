@@ -129,6 +129,9 @@ public class Kingdom
             {
                 current = current.Neighbors[direction];
 
+                if (current == null)
+                    break;
+
                 if (!circular)
                 {
                     action(current);

@@ -30,8 +30,8 @@ public class Map
 
     public static Point TileSize { get; private set; }
 
-    public int VerticalOverlap;
-    public int HorizontalOverlap;
+    public const int VerticalOverlap = 30;
+    public static int HorizontalOverlap;
 
     private const float HEXAGON_HEIGHT_RATIO = 0.8660254f;
     private const float SCALE_CONSTANT = 0.1f;
@@ -47,7 +47,6 @@ public class Map
 
         Origin = new(MapSize.X / 2, MapSize.Y / 2);
 
-        VerticalOverlap = 30;
         HorizontalOverlap = TileSize.X / 2;
 
         // Fix the map origin to account for overlap and perspective
@@ -317,15 +316,25 @@ public class Map
         }
     }
 
+    public static Tile LastTileAtPos = null;
+
     public Tile TileAtPos(Vector2 pos)
     {
-        // TODO: this should probably use a quad tree or something, searching >16,000 tiles is slow and unnecessary
+        // Usually the same tile will be checked many times a second
+        if (HighlightedTile != null && HighlightedTile.ContainsSimple(pos))
+            return HighlightedTile;
+
+        // Otherwise, the tile wil usually be nearby
+        Tile nearby = (Tile)Tile.Find(LastTileAtPos, new TileFilterHover(), 5);
+        if (nearby != null)
+            return nearby;
+
+        // Last resort, check ALL tiles (takes ~-0.1 - 0.2 seconds))
         foreach (Tile t in tiles)
         {
-            // Vaguely inside the bounding box for the tile (close enough tbh)
-            float dist = Vector2.Distance(pos, t.BaseSprite.Position);
-            if (dist < TileSize.X / 3.2)
+            if (t.Contains(pos))
             {
+                LastTileAtPos = t;
                 return t;
             }
         }

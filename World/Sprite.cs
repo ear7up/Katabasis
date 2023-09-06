@@ -109,8 +109,8 @@ public class Sprite : Drawable
         // Calculate top-left corner
         if (DrawRelativeToOrigin)
         {
-            Bounds.X = (int)(Position.X - Texture.Width * Scale.X / 2f);
-            Bounds.Y = (int)(Position.Y - Texture.Height * Scale.Y / 2f);
+            Bounds.X = (int)(Position.X - Origin.X * Scale.X);
+            Bounds.Y = (int)(Position.Y - Origin.Y * Scale.Y);
         }
         else
         {
