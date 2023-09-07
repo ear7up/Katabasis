@@ -10,7 +10,7 @@ public class UIElement
     }
 
     private int[] _padding;
-    private int[] _margin;
+    public int[] _margin { get; set; }
     public Vector2 Scale { get; set; }
     public Sprite Image;
     public bool Hovering;
@@ -38,7 +38,7 @@ public class UIElement
         Action<Object> onHover = null,
         string tooltip = "",
         UIElement hoverElement = null,
-        Sprite hoverImage = null)
+        SpriteTexture hoverImage = null)
     {
         if (texture != null)
         {
@@ -46,9 +46,12 @@ public class UIElement
             Image.DrawRelativeToOrigin = false;
             Image.SetScale(scale);
         }
-        else
+
+        if (hoverImage != null)
         {
-            Image = null;
+            HoverImage = Sprite.Create(hoverImage, Vector2.Zero);
+            HoverImage.DrawRelativeToOrigin = false;
+            HoverImage.SetScale(scale);
         }
 
         OnClick = onClick;
@@ -58,7 +61,6 @@ public class UIElement
         OnHover = onHover;
         TooltipText = tooltip;
         HoverElement = hoverElement;
-        HoverImage = hoverImage;
         Name = "";
         Hidden = false;
         SelectedImage = null;
@@ -69,7 +71,7 @@ public class UIElement
         Position = Vector2.Zero;
         
         _padding = new int[4] { 0, 0, 0, 0 };
-        _margin = new int[4] { 10, 0, 0, 10 };
+        _margin = new int[4] { 1, 0, 0, 1 };
         Scale = Vector2.One;
 
         AnimationAcceleration = Vector2.Zero;
@@ -211,7 +213,7 @@ public class UIElement
         Sprite draw = Image;
         if (IsSelected && SelectedImage != null)
             draw = SelectedImage;
-        else if (Hovering && HoverImage != null)
+        else if (GetBounds().Contains(InputManager.ScreenMousePos) && HoverImage != null)
             draw = HoverImage;
 
         Vector2 padding = new Vector2(GetLeftPadding(), GetTopPadding());

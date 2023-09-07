@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 public class RightClickMenu : VBox
@@ -12,10 +13,12 @@ public class RightClickMenu : VBox
         Hide();
     }
 
-    public void AddOption(UIElement option)
+    public void AddOption(UIElement option, Action<Object> callback = null, Object context = null)
     {
         option.SetPadding(left: 20);
         option.SetPadding(bottom: 5);
+        option.OnClick = callback;
+        option.UserData = context;
 
         OverlapLayout olayout = new(Sprites.MenuItem);
         olayout.HoverImage = Sprite.Create(Sprites.MenuItemHover, Vector2.Zero);

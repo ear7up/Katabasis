@@ -8,7 +8,7 @@ public class EscapeMenuPanel : CloseablePanel
     public EscapeMenuPanel() : base(Sprites.EscapeMenu)
     {
         Container = new();
-        Container.SetMargin(top: 25, left: 25);
+        Container.SetMargin(top: 35, left: 25);
 
         XButton.ScaleDown(0.5f);
 

@@ -18,6 +18,7 @@ public class Kingdom
     public List<Person> People { get; set; }
     public List<Person> Deceased { get; set; }
     public Stockpile Treasury { get; set; }
+    public Military Army { get; set; }
 
     public Kingdom()
     {
@@ -27,6 +28,7 @@ public class Kingdom
         People = new();
         Deceased = new();
         Treasury = new();
+        Army = new(this);
         TaxRate = 0.1f;
         StarvationDeaths = 0;
     }

@@ -1,60 +1,61 @@
 using System;
 
-public class Button : UIElement
+public class Button : OverlapLayout
 {
     public SpriteTexture DefaultTexture;
-    public SpriteTexture HoverTexture;
     public SpriteTexture PushedTexture;
+
+    public UIElement ButtonElement;
+    public TextSprite ButtonText;
 
     public Button(
         SpriteTexture texture,
         SpriteTexture hoverTexture = null,
         SpriteTexture pushedTexture = null,
+        string buttonText = null,
         float scale = 1f, 
         Action<Object> onClick = null, 
         Action<Object> onHover = null,
-        string tooltip = "") : base(texture, scale, onClick, onHover)
+        string tooltip = "") : base()
     {
-        DefaultTexture = texture;
-        HoverTexture = hoverTexture;
+        DefaultTexture = hoverTexture;
         PushedTexture = pushedTexture;
+
+        ButtonElement = new(texture, scale, onClick, onHover, hoverImage: hoverTexture);
+        Add(ButtonElement);
+
+        if (buttonText != null)
+        {
+            ButtonText = new(Sprites.SmallFont, text: buttonText);
+            ButtonText.SetPadding(top: 10, left: 10);
+            ButtonText.OnClick = null;
+            Add(ButtonText);
+        }
+    }
+
+    public void SetScale(float s)
+    {
+        ButtonElement.Image.SetScale(s);
+        ButtonElement.HoverImage.SetScale(s);
     }
 
     public override void Update()
     {
         // Don't process clicks or hovers on hidden elements
-        if (Hidden || Image == null)
+        if (Hidden)
             return;
 
-        bool mouseOverImage = Image.GetBounds().Contains(InputManager.MousePos);
-
-        if (!mouseOverImage)
-        {
-            Image.SetNewSpriteTexture(DefaultTexture);
-            return;
-        }
-
-        if (OnClick != null && InputManager.UnconsumedClick())
-        {
-            // Consume the click event and call the OnClick function
-            InputManager.ConsumeClick(this);
-            OnClick(this);
-        }
+        base.Update();
         
-        if (PushedTexture != null && InputManager.MouseDown)
+        // If the mouse is down while hovering over the button, switch to the pushed texture
+        if (PushedTexture != null && Hovering && InputManager.MouseDown)
         {
             // Set pushed texture while mouse is held down over the image
-            Image.SetNewSpriteTexture(PushedTexture);
-        }
-        else if (OnHover != null)
-        {
-            OnHover(TooltipText);
-            if (HoverTexture != null)
-                Image.SetNewSpriteTexture(HoverTexture);
+            ButtonElement.HoverImage.SetNewSpriteTexture(PushedTexture);
         }
         else
         {
-            Image.SetNewSpriteTexture(DefaultTexture);
+            ButtonElement.HoverImage.SetNewSpriteTexture(DefaultTexture);
         }
     }
 }

@@ -317,7 +317,7 @@ public class Person : Entity, Drawable
         TotalLevelCheck();
 
         // Change profession based on skills
-        ProfessionCheck();
+        ChooseProfession();
 
         // If you have a house, go there, desposit your inventory, then try to cook
         if (House != null && Home != null)
@@ -393,14 +393,30 @@ public class Person : Entity, Drawable
     }
 
     // Pick the highest skill as the person's profession
-    public void ProfessionCheck()
+    public void ChooseProfession()
     {
+        // Soldiers stay soldiers until dismissed
+        if (Profession == ProfessionType.SOLDIER)
+            return;
+
         SkillLevel max = Skills[0];
         foreach (SkillLevel skillLevel in Skills._list)
             if (skillLevel.level > max.level)
                 max = skillLevel;
         
-        Profession = (ProfessionType)max.skill;
+        SetProfession((ProfessionType)max.skill);
+    }
+
+    public void SetProfession(ProfessionType profession)
+    {
+        // TODO: If soldier, change sprite
+        Profession = profession;
+    }
+
+    public void ResetProfession()
+    {
+        Profession = ProfessionType.NONE;
+        ChooseProfession();
     }
 
     // Takes excess goods from person's home and adds to their personal stockpile

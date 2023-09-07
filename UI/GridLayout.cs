@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 // Crappy GridLayout implementation, assumes all objects have equal dimensions
 public class GridLayout : Layout
@@ -84,7 +85,10 @@ public class GridLayout : Layout
         if (!Hovering)
             return;
 
-        if (InputManager.ScrollValue < 0 && Page < GridContent.Count / ElementsPerPage)
+        float dataRows = (float)GridContent.Count;
+        if (HasHeader)
+            dataRows--;
+        if (InputManager.ScrollValue < 0 && Page < dataRows / ElementsPerPage)
             Page++;
         else if (InputManager.ScrollValue > 0 && Page > 1)
             Page--;
@@ -121,7 +125,7 @@ public class GridLayout : Layout
             // If pagination is enabled, skip rows before the page, break after the page
             if (ElementsPerPage > 0 && rowNumber > -1)
             {
-                if (rowNumber > Page * ElementsPerPage)
+                if (rowNumber >= Page * ElementsPerPage)
                     break;
 
                 if  (rowNumber < (Page - 1) * ElementsPerPage)
@@ -184,6 +188,7 @@ public class GridLayout : Layout
         if (Hidden)
             return 0;
 
+        
         float maxWidth = 0f;
         foreach (List<UIElement> row in GridContent)
         {
@@ -192,8 +197,13 @@ public class GridLayout : Layout
                 sumWidth += element.Width();
             maxWidth = Math.Max(maxWidth, sumWidth);
         }
-        maxWidth += GetLeftPadding() + GetRightPadding() + GetLeftMargin() + GetRightMargin();
-        return (int)Math.Max(maxWidth, base.Width());
+
+        int width = 0;
+        for (int col = 0; col < Columns; col++)
+            width += ColumnWidth(col);
+
+        return width + GetLeftPadding() + GetRightPadding() + GetLeftMargin() + GetRightMargin();
+        //return (int)Math.Max(maxWidth, base.Width());
     }
 
     public override int Height()

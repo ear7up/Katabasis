@@ -77,16 +77,12 @@ public class GameManager
         _buttonPanel.SetMargin(left: 49, top: 70);
         _buttonPanel.SetPadding(right: -20, bottom: -170);
 
-        Sprite[] hoverButtons = new Sprite[8];
-        for (int i = 0; i < hoverButtons.Length; i++)
-            hoverButtons[i] = Sprite.Create(Sprites.BottomLeftButtonsHover[i], Vector2.Zero);
-
         UIElement buildElement = new(
             Sprites.BottomLeftButtons[0], 
             onClick: BuildButton, 
             onHover: UI.SetTooltipText,
             tooltip: "(B)uild",
-            hoverImage: hoverButtons[0]);
+            hoverImage: Sprites.BottomLeftButtonsHover[0]);
         _buttonPanel.SetContent(0, 0, buildElement);
 
         _buttonPanel.SetContent(1, 0, new UIElement(
@@ -94,35 +90,35 @@ public class GameManager
             onClick: TileButton, 
             onHover: UI.SetTooltipText, 
             tooltip: "Buy (T)ile",
-            hoverImage: hoverButtons[1]));
+            hoverImage: Sprites.BottomLeftButtonsHover[1]));
 
         _buttonPanel.SetContent(2, 0, new UIElement(
             Sprites.BottomLeftButtons[2],
             onHover: UI.SetTooltipText,
             tooltip: "(P)eople", 
             onClick: TogglePeoplePanel,
-            hoverImage: hoverButtons[2]));
+            hoverImage: Sprites.BottomLeftButtonsHover[2]));
 
         _buttonPanel.SetContent(0, 1, new UIElement(
             Sprites.BottomLeftButtons[3], 
             onClick: ToggleMarketPanel,
             onHover: UI.SetTooltipText,
             tooltip: "(M)arket",
-            hoverImage: hoverButtons[3]));
+            hoverImage: Sprites.BottomLeftButtonsHover[3]));
 
         _buttonPanel.SetContent(1, 1, new UIElement(
             Sprites.BottomLeftButtons[4], 
             onHover: UI.SetTooltipText, 
             tooltip: "Statistics(X)", 
             onClick: ToggleStatistics,
-            hoverImage: hoverButtons[4]));
+            hoverImage: Sprites.BottomLeftButtonsHover[4]));
 
         _buttonPanel.SetContent(2, 1, new UIElement(
             Sprites.BottomLeftButtons[5], 
             onHover: UI.SetTooltipText, 
             tooltip: "(I)nventory", 
             onClick: ToggleGoodsDisplay,
-            hoverImage: hoverButtons[5]));
+            hoverImage: Sprites.BottomLeftButtonsHover[5]));
 
         UI.AddElement(_buttonPanel, UI.Position.BOTTOM_LEFT);
 
@@ -390,7 +386,7 @@ public class GameManager
         _buildingPlacer.Update();
         
         _personPanel.Update();
-        _peoplePanel.Update(Globals.Model.Player1.Kingdom.People);
+        _peoplePanel.Update();
         _statsPanel.Update();
         MarketPanel.Update();
         inventoryPanel.Update(Model.Player1.Kingdom.Treasury, Model.Player1.Kingdom.PrivateGoods());

@@ -7,37 +7,91 @@ public class PeopleDisplay : GridLayout
 {
     public static Color TextColor = Color.SaddleBrown;
 
+    public class PeopleColumn
+    {
+        public TextSprite HeaderSprite;
+        public Func<Person, UIElement> GetValueFunction;
+
+        public PeopleColumn(string name, Func<Person, UIElement> getValue, Action<Object> onClick = null)
+        {
+            HeaderSprite = new(Sprites.Font, TextColor, name);
+            HeaderSprite.OnClick = onClick;
+            GetValueFunction = getValue;
+        }
+    }
+
     public CloseablePanel Parent;
-    public List<UIElement> ColumnHeaders;
+    public List<PeopleColumn> PersonColumns;
 
     public PeopleDisplay(CloseablePanel parent, SpriteTexture texture = null) : base(texture)
     {
         HasHeader = true;
-        ColumnHeaders = new();
+        PersonColumns = new();
         ElementsPerPage = 18;
         
-        TextSprite icon = new(Sprites.Font, TextColor, text: "Icon");
-        ColumnHeaders.Add(icon);
+        PersonColumns.Add(new PeopleColumn("Icon", GetIcon));
+        PersonColumns.Add(new PeopleColumn("Name", GetName, SortByName));
+        PersonColumns.Add(new PeopleColumn("Profession", GetProfession, SortByProfession));
+        PersonColumns.Add(new PeopleColumn("Hunger", GetHunger, SortByHunger));
+        PersonColumns.Add(new PeopleColumn("Task", GetTask));
 
-        TextSprite name = new(Sprites.Font, TextColor, text: "Name");
-        name.OnClick = SortByName;
-        ColumnHeaders.Add(name);
-
-        TextSprite profession = new(Sprites.Font, TextColor, text: "Profession");
-        profession.OnClick = SortByProfession;
-        ColumnHeaders.Add(profession);
-
-        TextSprite hunger = new(Sprites.Font, TextColor, text: "Hunger");
-        hunger.OnClick = SortByHunger;
-        ColumnHeaders.Add(hunger);
-
-        TextSprite task = new(Sprites.Font, TextColor, text: "Task");
-        ColumnHeaders.Add(task);
-
-        foreach (TextSprite textSprite in ColumnHeaders)
-            textSprite.SetPadding(right: 15, bottom: 15);
+        foreach (PeopleColumn column in PersonColumns)
+            column.HeaderSprite.SetPadding(right: 15, bottom: 15);
 
         Parent = parent;
+    }
+
+    public void AddColumn(string name, Func<Person, UIElement> columnCallback, Action<Object> onClick = null)
+    {
+        PeopleColumn col = new(name, columnCallback, onClick);
+        col.HeaderSprite.SetPadding(right: 10);
+        PersonColumns.Add(col);
+    }
+
+    public void RemoveColumnAt(int index)
+    {
+        PersonColumns.RemoveAt(index);
+    }
+
+    public UIElement GetIcon(Person person)
+    {
+        UIElement icon = new(person.GetSpriteTexture(), 0.05f, onClick: JumpToPerson);
+        icon.UserData = person;
+        return icon;
+    }
+
+    public UIElement GetName(Person person)
+    {
+        TextSprite name = new(Sprites.SmallFont, TextColor, text: person.Name);
+        name.SetPadding(right: 10);
+        return name;
+    }
+
+    public UIElement GetProfession(Person person)
+    {
+        return new TextSprite(Sprites.SmallFont, TextColor, text: person.Profession.Describe());
+    }
+
+    public UIElement GetHunger(Person person)
+    {
+        string hungerText = "Not hungry";
+        if (person.Hunger >= Person.STARVING)
+            hungerText = "Starving";
+        else if (person.Hunger >= Person.STARVING / 2)
+            hungerText = "Very hungry";
+        else if (person.Hunger > Person.DAILY_HUNGER)
+            hungerText = "Hungry";
+        hungerText += $" ({person.Hunger})";
+        TextSprite hunger = new(Sprites.SmallFont, TextColor, text: hungerText);
+        hunger.SetPadding(right: 15);
+        return hunger;
+    }
+
+    public UIElement GetTask(Person person)
+    {
+        TextSprite task = new(Sprites.SmallFont, TextColor, text: person.DescribeCurrentTask());
+        task.SetPadding(right: 10);
+        return task;
     }
 
     public void Update(List<Person> people)
@@ -48,36 +102,18 @@ public class PeopleDisplay : GridLayout
 
         int row = 0;
         int col = 0;
-        foreach (TextSprite columnHeader in ColumnHeaders)
-            SetContent(col++, row, columnHeader);
+        foreach (PeopleColumn column in PersonColumns)
+            SetContent(col++, row, column.HeaderSprite);
 
         row = 1;
         foreach(Person person in people)
         {
             col = 0;
-            UIElement icon = new(person.GetSpriteTexture(), 0.05f, onClick: JumpToPerson);
-            icon.UserData = person;
-            SetContent(col++, row, icon);
-
-            TextSprite name = new(Sprites.SmallFont, TextColor, text: person.Name);
-            name.SetPadding(right: 10);
-            SetContent(col++, row, name);
-
-            SetContent(col++, row, new TextSprite(Sprites.SmallFont, TextColor, text: person.Profession.Describe()));
-
-            string hungerText = "Not hungry";
-            if (person.Hunger >= Person.STARVING)
-                hungerText = "Starving";
-            else if (person.Hunger >= Person.STARVING / 2)
-                hungerText = "Very hungry";
-            else if (person.Hunger > Person.DAILY_HUNGER)
-                hungerText = "Hungry";
-            hungerText += $" ({person.Hunger})";
-            TextSprite hunger = new(Sprites.SmallFont, TextColor, text: hungerText);
-            hunger.SetPadding(right: 15);
-            SetContent(col++, row, hunger);
-
-            SetContent(col++, row, new TextSprite(Sprites.SmallFont, TextColor, text: person.DescribeCurrentTask()));
+            foreach (PeopleColumn column in PersonColumns)
+            {
+                SetContent(col, row, column.GetValueFunction(person));
+                col++;
+            }
             row++;
         }
     }

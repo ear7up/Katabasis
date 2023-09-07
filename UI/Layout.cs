@@ -20,6 +20,19 @@ public abstract class Layout : UIElement
         Elements.Add(element);
     }
 
+    public virtual void Add(UIElement element1, UIElement element2)
+    {
+        Add(element1);
+        Add(element2);
+    }
+
+    public virtual void Add(UIElement element1, UIElement element2, UIElement element3)
+    {
+        Add(element1);
+        Add(element2);
+        Add(element3);
+    }
+
     public override void ScaleUp(float s)
     {
         base.ScaleUp(s);

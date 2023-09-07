@@ -17,7 +17,8 @@ public enum ProfessionType
     NONE,
 
     // Additional professions not tied to a single skill
-    // ...
+    SOLDIER,
+    SCRIBE
 }
 
 namespace ProfessionExtension
