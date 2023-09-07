@@ -239,6 +239,7 @@ public class Task
 
     public virtual bool Complete(Person p)
     {
+        Status.Complete = true;
         return true;
     }
 }
@@ -933,6 +934,13 @@ public class GoToTask : Task
     {
         Discriminator = TaskDiscriminator.GoToTask;
         Direction = Vector2.Zero;
+    }
+
+    public static GoToTask Create(string description, Vector2 destination)
+    {
+        GoToTask task = new();
+        task.SetAttributes(description, destination);
+        return task;
     }
 
     public void SetAttributes(string description, Vector2 destination)

@@ -76,4 +76,19 @@ public class Military
             }
         }
     }
+
+    public void Deploy(Vector2 pos)
+    {
+        CancelDeployment();
+        foreach (Person soldier in Soldiers)
+            soldier.Tasks.Enqueue(DeploymentTask.Create(pos));
+    }
+
+    public void CancelDeployment()
+    {
+        foreach (Person soldier in Soldiers)
+            foreach (Task task in soldier.Tasks) 
+                if (task is DeploymentTask)
+                    task.Complete(soldier);
+    }
 }

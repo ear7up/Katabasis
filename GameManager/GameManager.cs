@@ -182,8 +182,8 @@ public class GameManager
 
         // Temporary options
         _rightClickMenu = new(Sprites.RightClickMenu);
-        _rightClickMenu.AddOption(new TextSprite(Sprites.SmallFont, Color.White, text: "Option 1"));
-        _rightClickMenu.AddOption(new TextSprite(Sprites.SmallFont, Color.White, text: "Option 2"));
+        _rightClickMenu.AddOption(new TextSprite(Sprites.SmallFont, Color.White, text: "Deploy Army"), DeployArmy);
+        _rightClickMenu.AddOption(new TextSprite(Sprites.SmallFont, Color.White, text: "Undeploy"), CancelDeployment);
         _rightClickMenu.AddOption(new TextSprite(Sprites.SmallFont, Color.White, text: "Option 3"));
         _rightClickMenu.AddOption(new TextSprite(Sprites.SmallFont, Color.White, text: "Option 4"));
 
@@ -192,6 +192,18 @@ public class GameManager
     public void SetGameModel(GameModel gameModel)
     {
         Model = gameModel;
+    }
+
+    public void DeployArmy(Object clicked)
+    {
+        UIElement obj = (UIElement)clicked;
+        RightClickMenu.ClickPosition worldPos = (RightClickMenu.ClickPosition)obj.UserData;
+        Globals.Model.Player1.Kingdom.Army.Deploy(new Vector2(worldPos.X, worldPos.Y));
+    }
+
+    public void CancelDeployment(Object clicked)
+    {
+        Globals.Model.Player1.Kingdom.Army.CancelDeployment();
     }
 
     public void BuildFarm(Object clicked) { Build(BuildingType.FARM); }
