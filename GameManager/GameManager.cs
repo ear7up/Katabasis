@@ -303,8 +303,12 @@ public class GameManager
         TogglePanel(MarketPanel);
     }
 
-    public static void TogglePanel(UIElement panel)
+    public static void TogglePanel(CloseablePanel panel)
     {
+        // Don't bug out by hiding the panel mid-animation
+        if (panel.AnimationVelocity != Vector2.Zero)
+            return;
+
         if (panel.Hidden)
         {
             panel.Unhide();
