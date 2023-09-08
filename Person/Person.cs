@@ -222,6 +222,10 @@ public class Person : Entity, Drawable
 
         if (weightedRandomChoice.skill == Skill.BUILDING)
             task = Globals.Model.ConstructionQueue.GetTask(this);
+
+        // TODO: This will always return null until StartSowing is called (by the player setting the farm crops)
+        if (weightedRandomChoice.skill == Skill.FARMING)
+            task = Globals.Model.FarmingingMgr.GetTask(this);
         
         if (task == null && r < PROFIT_SEEKING_CHANCE)
             task = Task.MostProfitableUsingSkill(weightedRandomChoice);
@@ -320,9 +324,16 @@ public class Person : Entity, Drawable
         ChooseProfession();
 
         // If you have a house, go there, desposit your inventory, then try to cook
-        if (House != null && Home != null)
-            DailyHomeTasks();
-        DailyTasks();
+        if (Profession == ProfessionType.SOLDIER)
+        {
+            DailySoldierTasks();
+        }
+        else
+        {
+            if (House != null && Home != null)
+                DailyHomeTasks();
+            DailyTasks();
+        }
 
         // Eat until you run out of food or are no longer hungry
         AssignPriorityTask(new EatTask(), 1);
@@ -348,6 +359,22 @@ public class Person : Entity, Drawable
         Tasks.Enqueue(new EatTask());
         Tasks.Enqueue(new SellAtMarketTask());
         Tasks.Enqueue(new BuyFoodFromMarketTask());
+    }
+
+    public void DailySoldierTasks()
+    {
+        // TODO
+        // Depends on deployment status
+        //
+        // Deployed
+        //     Check for enemies in the area
+        //     Mill about on the tile 
+        //     Take food from a shared deployment stockpile?
+        //     Run resources from the nearest market to deployment area?
+        //
+        // Non-deployed
+        //     Report to barracks for training?
+        Tasks.Enqueue(new EatTask());
     }
 
     public void FindHouse()

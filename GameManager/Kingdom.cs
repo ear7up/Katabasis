@@ -28,7 +28,7 @@ public class Kingdom
         People = new();
         Deceased = new();
         Treasury = new();
-        Army = new(this);
+        Army = Military.Create(this);
         TaxRate = 0.1f;
         StarvationDeaths = 0;
     }

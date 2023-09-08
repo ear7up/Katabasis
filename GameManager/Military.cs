@@ -6,13 +6,20 @@ public class Military
     public const int MIN_AGE = 14;
     public const int MAX_AGE = 40;
 
-    public Kingdom MyKingdom;
-    public List<Person> Soldiers;
+    public Kingdom MyKingdom { get; set; }
+    public List<Person> Soldiers { get; set; }
 
-    public Military(Kingdom kingdom)
+    public Military()
     {
-        MyKingdom = kingdom;
         Soldiers = new();
+    }
+
+    public static Military Create(Kingdom kingdom)
+    {
+        Military military = new() {
+            MyKingdom = kingdom
+        };
+        return military;
     }
 
     public void Add(Person person)

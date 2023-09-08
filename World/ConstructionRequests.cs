@@ -226,6 +226,9 @@ public class ConstructionRequest
         // we don't want to try to remove goods 5 times if 5 workers are building the same building
         foreach (Goods goods in GoodsRequired)
             ToBuild.Stockpile.Take(goods.GetId(), goods.Quantity);
+
+        if (ToBuild.Type == BuildingType.FARM)
+            Globals.Model.FarmingingMgr.AddFarm(ToBuild);
     }
 }
 

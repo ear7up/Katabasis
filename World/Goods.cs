@@ -265,6 +265,16 @@ public class Goods
         return goods;
     }
 
+    public static Goods Create(int id, float quantity)
+    {
+        Goods goods = new() {
+            Type = (GoodsType)TypeFromId(id),
+            SubType = SubTypeFromid(id),
+            Quantity = quantity
+        };
+        return goods;
+    }
+
     public List<int> GetMaterials()
     {
         return GetMaterials((int)Type, SubType);

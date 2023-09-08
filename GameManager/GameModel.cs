@@ -10,6 +10,7 @@ public class GameModel
     public Market Market { get; set; }
     public Map TileMap { get; set; }
     public ConstructionRequests ConstructionQueue { get; set; }
+    public FarmingManager FarmingingMgr { get; set; }
 
     public GameModel()
     {
@@ -39,6 +40,7 @@ public class GameModel
         }
 
         ConstructionQueue = new();
+        FarmingingMgr = new();
 
         Globals.Model = this;
     }
