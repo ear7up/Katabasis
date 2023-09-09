@@ -17,7 +17,6 @@ public class Farm
     public const float HARVEST_TIME = 60f;
     
     public int PlantId { get; set; }
-    public bool Growing { get; set; }
     public FarmState State { get; set; }
     public Building FarmBuilding { get; set; }
 
@@ -27,7 +26,6 @@ public class Farm
     {
         State = FarmState.UNPLANTED;
         PlantId = 0;
-        Growing = false;
     }
 
     public static Farm Create(Building building)
@@ -35,6 +33,14 @@ public class Farm
         Farm farm = new();
         farm.FarmBuilding = building;
         return farm;
+    }
+
+    public string Describe()
+    {
+        string description = "";
+        description += Globals.Title(State.ToString()) + "\n";
+        description += GetPlantName() + "\n";
+        return description;
     }
 
     public void StartSowing(Goods.FoodPlant plant, float quantity)
@@ -180,7 +186,7 @@ public class Farm
     {
         GoodsType type = (GoodsType)Goods.TypeFromId(PlantId);
         int subType = Goods.SubTypeFromid(PlantId);
-        string plant = "ERROR";
+        string plant = "";
         switch (type)
         {
             case GoodsType.MATERIAL_PLANT: plant = Globals.Title(((Goods.MaterialPlant)subType).ToString()); break;
@@ -219,7 +225,7 @@ public class Farm
 
 public class FarmingManager
 {
-    public List<Farm> Farms { get; set; }
+    public Dictionary<int, Farm> Farms { get; set; }
 
     public FarmingManager()
     {
@@ -228,16 +234,16 @@ public class FarmingManager
 
     public void AddFarm(Building farmBuilding)
     {
-        Farms.Add(Farm.Create(farmBuilding));
+        Farms[farmBuilding.Id] = Farm.Create(farmBuilding);
     }
 
     public Task GetTask(Person p)
     {
         // Find the first task that the person is capable of doing
         // it may just be a SourceGoodsTask to go get a hoe, though
-        foreach (Farm farm in Farms.OrderBy(x => Globals.Rand.Next()))
+        foreach (KeyValuePair<int, Farm> kv in Farms.OrderBy(x => Globals.Rand.Next()))
         {
-            Task task = farm.GetTask(p);
+            Task task = kv.Value.GetTask(p);
             if (task != null)
                 return task;
         }
@@ -246,7 +252,14 @@ public class FarmingManager
 
     public void Update()
     {
-        foreach (Farm farm in Farms)
-            farm.Update();
+        foreach (KeyValuePair<int, Farm> kv in Farms)
+            kv.Value.Update();
+    }
+
+    public Farm GetFarm(Building building)
+    {
+        if (Farms.ContainsKey(building.Id))
+            return Farms[building.Id];
+        return null;
     }
 }

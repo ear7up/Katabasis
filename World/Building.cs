@@ -43,11 +43,10 @@ public class Building : Drawable
     public const int MAX_BUILDINGS_PER_TILE = 4;
 
     public static int IdCounter = 0;
-    public int Id;
-
     public static Building SelectedBuilding = null;
 
     // Serialized content
+    public int Id { get; set; }
     public Tile Location { get; set; }
     public BuildingType Type { get; set; }
     public BuildingSubType SubType { get; set; }

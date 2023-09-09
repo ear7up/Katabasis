@@ -143,6 +143,7 @@ public class KatabasisGame : Game
         Globals.TextBuffer.Clear();
         
         string jsonText = File.ReadAllText($"{filename}.json");
+        Building.IdCounter = 0;
         _gameModel = JsonSerializer.Deserialize<GameModel>(jsonText, Globals.JsonOptionsS);
         _gameModel.InitLoaded();
 

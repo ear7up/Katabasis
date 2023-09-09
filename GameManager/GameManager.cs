@@ -34,6 +34,7 @@ public class GameManager
     private static TileInfoPanel _tileInfoPanel;
     private static BuildingInfoPanel buildingInfoPanel;
     private static EscapeMenuPanel escMenuPanel;
+    private static FarmInfoPanel farmInfoPanel;
     public static MarketPanel MarketPanel;
 
     private static RightClickMenu _rightClickMenu;
@@ -166,6 +167,7 @@ public class GameManager
         buildingInfoPanel = new();
         escMenuPanel = new();
         escMenuPanel.Draggable = false;
+        farmInfoPanel = new();
 
         MarketPanel = new();
         MarketPanel.Hide();
@@ -407,11 +409,26 @@ public class GameManager
 
         _rightClickMenu.Update();
 
-        // Last panel to update (other panels or right-cick menu may consume Escape keypress)
-        escMenuPanel.Update();
+        if (Building.SelectedBuilding != null && InputManager.UnconsumedKeypress(Keys.Escape))
+        {
+            Building.SelectedBuilding = null;
+            InputManager.ConsumeKeypress(Keys.Escape, this);
+        }
 
-        if (Building.SelectedBuilding != null && 
-            (Building.SelectedBuilding.Type == BuildingType.MARKET || Building.SelectedBuilding.Type == BuildingType.CITY))
+        if (Building.SelectedBuilding == null)
+        {
+            buildingInfoPanel.Update(null);
+            farmInfoPanel.Update(null);
+        }
+        else if (
+            Building.SelectedBuilding.Type == BuildingType.FARM ||
+            Building.SelectedBuilding.Type == BuildingType.FARM_RIVER)
+        {
+            farmInfoPanel.Update(Building.SelectedBuilding);
+        }
+        else if (
+            Building.SelectedBuilding.Type == BuildingType.MARKET || 
+            Building.SelectedBuilding.Type == BuildingType.CITY)
         {
             buildingInfoPanel.Update(null);
         }
@@ -419,6 +436,9 @@ public class GameManager
         {
             buildingInfoPanel.Update(Building.SelectedBuilding);
         }
+
+        // Last panel to update (other panels or right-cick menu may consume Escape keypress)
+        escMenuPanel.Update();
 
         // Update UI last (pop-up panels are on top, they should get clicks first)
         UI.Update();
@@ -582,6 +602,7 @@ public class GameManager
         _statsPanel.Draw(_statsPanel.Position);
         _peoplePanel.Draw(_peoplePanel.Position);
         buildingInfoPanel.Draw(buildingInfoPanel.Position);
+        farmInfoPanel.Draw(farmInfoPanel.Position);
         _personPanel.Draw(_personPanel.Position);
         _tileInfoPanel.Draw(new Vector2(
             Globals.WindowSize.X - _tileInfoPanel.Width(), 260f));
