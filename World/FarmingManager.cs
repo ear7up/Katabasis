@@ -43,13 +43,12 @@ public class Farm
         return description;
     }
 
-    public void StartSowing(Goods.FoodPlant plant, float quantity)
+    public void StartSowing(int plantId, float quantity = 200f)
     {
-        if (!Globals.Model.Player1.IsPlantUnlocked(plant))
+        if (!Globals.Model.Player1.IsPlantUnlocked(plantId))
             return;
 
-        Goods g = new(GoodsType.FOOD_PLANT, (int)plant);
-        PlantId = g.GetId();
+        PlantId = plantId;
         Timer = SOW_TIME;
         State = FarmState.SOWING;
     }

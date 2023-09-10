@@ -60,7 +60,7 @@ public class Tile
     public float CurrentResourceQuantity { get; set; }
     public bool Explored { get; set; }
     public Sprite FogSprite { get; set; }
-    public Goods.FoodPlant Plants { get; set; }
+    public int PlantId { get; set; }
     public Sprite PlantIcon { get; set; }
     public TextSprite PlantText { get; set; }
 
@@ -77,7 +77,7 @@ public class Tile
         Buildings = new();
         DrawBase = true;
         Minerals = MineralType.NONE;
-        Plants = Goods.FoodPlant.NONE;
+        PlantId = 0;
         BaseResourceQuantity = 0f;
         CurrentResourceQuantity = 0f;
         Explored = false;
@@ -140,9 +140,9 @@ public class Tile
 
     public void SetPlantType(Goods.FoodPlant plantType)
     {
-        Plants = plantType;
+        PlantId = Goods.GetId(GoodsType.FOOD_PLANT, (int)plantType, 0);
         SpriteTexture texture = null;
-        switch (Plants)
+        switch (plantType)
         {
             case Goods.FoodPlant.GARLIC: texture = Sprites.Garlic; break;
             case Goods.FoodPlant.SCALLIONS: texture = Sprites.Scallions; break;
@@ -158,10 +158,11 @@ public class Tile
             case Goods.FoodPlant.PEAS: texture = Sprites.Peas; break;
             case Goods.FoodPlant.LENTILS: texture = Sprites.Lentils; break;
             case Goods.FoodPlant.CHICKPEAS: texture = Sprites.Chickpeas; break;
-            //case Goods.FoodPlant.NUTS
+            // case Goods.FoodPlant.NUTS
             case Goods.FoodPlant.OLIVE_OIL: texture = Sprites.OliveOil; break;
             case Goods.FoodPlant.BARLEY: texture = Sprites.Barley; break;
             case Goods.FoodPlant.WHEAT: texture = Sprites.Wheat; break;
+            // case Goods.MaterialPlant.FLAX: 
         }
 
         if (texture != null)
@@ -181,7 +182,7 @@ public class Tile
         float y = tileBounds.Y + tileBounds.Height / 2 - iconBounds.Height / 2;
         PlantIcon.Position = new Vector2(x, y);
 
-        PlantText = new TextSprite(Sprites.Font, text: Globals.Title(Plants.ToString()));
+        PlantText = new TextSprite(Sprites.Font, text: GetPlantName());
         PlantText.ScaleUp(0.3f);
         x = tileBounds.X + tileBounds.Width / 2 - PlantText.Width() / 2 + 10;
         y += 40f;
@@ -222,7 +223,7 @@ public class Tile
 
         if (type != TileType.VEGETATION)
         {
-            Plants = Goods.FoodPlant.NONE;
+            PlantId = 0;
             PlantIcon = null;
             PlantText = null;
         }
@@ -310,10 +311,24 @@ public class Tile
 
         if (Minerals != MineralType.NONE)
             resource = Globals.Title(Minerals.ToString());
-        else if (Plants != Goods.FoodPlant.NONE)
-            resource = Globals.Title(Plants.ToString());
+        else if (PlantId != 0)
+            resource = GetPlantName();
 
         return resource;
+    }
+
+    public string GetPlantName()
+    {
+        if (Goods.TypeFromId(PlantId) == (int)GoodsType.FOOD_PLANT)
+        {
+            Goods.FoodPlant plant = (Goods.FoodPlant)Goods.SubTypeFromid(PlantId);
+            return Globals.Title(plant.ToString());
+        }
+        else
+        {
+            Goods.MaterialPlant plant = (Goods.MaterialPlant)Goods.SubTypeFromid(PlantId);
+            return Globals.Title(plant.ToString());
+        }
     }
 
     public string Describe()

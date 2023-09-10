@@ -185,8 +185,7 @@ public class Task
         // Remove all plants that aren't unlcoked from consideration
         goodsIds.RemoveAll(id => 
             (GoodsType)Goods.TypeFromId(id) == GoodsType.FOOD_PLANT &&
-            !p.Owner.IsPlantUnlocked((Goods.FoodPlant)Goods.SubTypeFromid(id))
-        );
+            !p.Owner.IsPlantUnlocked(id));
 
         int index = Globals.Rand.Next(goodsIds.Count);
         int id = goodsIds[index];

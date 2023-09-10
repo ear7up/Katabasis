@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
@@ -7,18 +8,17 @@ public class Player
     // Serialized content
     public Person Person { get; set; }
     public Kingdom Kingdom { get; set; }
-    public bool[] UnlockedPlants { get; set; }
+    public Dictionary<int, bool> UnlockedPlants { get; set; }
     
     public Player()
     {
         Person = new();
         Person.Money = 1000f;
 
-        int num_plants = Enum.GetValues(typeof(Goods.FoodPlant)).Length;
-        UnlockedPlants = new bool[num_plants];
-        UnlockPlant(Goods.FoodPlant.WHEAT);
-        UnlockPlant(Goods.FoodPlant.BARLEY);
-        UnlockPlant(Goods.FoodPlant.WILD_EDIBLE);
+        UnlockedPlants = new();
+        UnlockPlant(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.WHEAT);
+        UnlockPlant(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.BARLEY);
+        UnlockPlant(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.WILD_EDIBLE);
     }
 
     public static Player Create(Tile startTile)
@@ -35,20 +35,30 @@ public class Player
         Person.PersonalStockpile = new();
     }
 
-    public void UnlockPlant(Goods.FoodPlant plant)
+    public void UnlockPlant(int id)
     {
-        UnlockedPlants[(int)plant] = true;
+        UnlockPlant((GoodsType)Goods.TypeFromId(id), Goods.SubTypeFromid(id));
     }
 
-    public bool IsPlantUnlocked(Goods.FoodPlant plant)
+    public void UnlockPlant(GoodsType type, int subType)
     {
-        return UnlockedPlants[(int)plant];
+        UnlockedPlants[Goods.GetId(type, subType, 0)] = true;
+    }
+
+    public bool IsPlantUnlocked(int id)
+    {
+        return IsPlantUnlocked(id);
+    }
+
+    public bool IsPlantUnlocked(GoodsType type, int subType)
+    {
+        return UnlockedPlants.ContainsKey(Goods.GetId(type, subType, 0));
     }
 
     public bool CanProduce(Goods goods)
     {
         // Plant type not unlocked, cannot be produced
-        if (goods.Type == GoodsType.FOOD_PLANT && !IsPlantUnlocked((Goods.FoodPlant)goods.SubType))
+        if (goods.Type == GoodsType.FOOD_PLANT && !IsPlantUnlocked(goods.Type, goods.SubType))
             return false;
         return true;
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 public class FarmInfoPanel : CloseablePanel
 {
@@ -7,6 +8,7 @@ public class FarmInfoPanel : CloseablePanel
     public TextSprite Description;
     public GridLayout CropGrid;
     public Building FarmBuilding;
+    public Dictionary<int, UIElement> PlantButtons;
 
     public Sprite Tall;
     public Sprite Small;
@@ -29,7 +31,29 @@ public class FarmInfoPanel : CloseablePanel
         topPart.Add(BuildingIcon);
         topPart.Add(Description);
 
+        // Make a list of crop ids
+        List<int> cropIds = new();
+        Goods g = new();
+        g.Type = GoodsType.FOOD_PLANT;
+        foreach (Goods.FoodPlant plant in Enum.GetValues(typeof(Goods.FoodPlant)))
+        {
+            // Skip wild edible plants (not a crop)
+            if (plant == Goods.FoodPlant.WILD_EDIBLE)
+                continue;
+            g.SubType = (int)plant;
+            cropIds.Add(g.GetId());
+        }
+
+        g.Type = GoodsType.MATERIAL_PLANT;
+        g.SubType = (int)Goods.MaterialPlant.FLAX;
+        cropIds.Add(g.GetId());
+
+        // Map crop ids to selection buttons
+        PlantButtons = new();
+
+        // Build the grid, assign crop ids as UserData
         CropGrid = new();
+        int i = 0;
         int rows = 4;
         int columns = 6;
         for (int y = 0; y < rows; y++)
@@ -37,8 +61,17 @@ public class FarmInfoPanel : CloseablePanel
             for (int x = 0; x < columns; x++)
             {
                 UIElement cropIcon = new(Sprites.CropIcon, onClick: SwitchCrop);
-                cropIcon.UserData = (int)(y * rows + x);
+                if (i < cropIds.Count)
+                {
+                    cropIcon.UserData = cropIds[i];
+                    PlantButtons[cropIds[i]] = cropIcon;
+                }
+                else
+                {
+                    cropIcon.UserData = 0;
+                }
                 CropGrid.SetContent(x, y, cropIcon);
+                i++;
             }
         }
 
@@ -53,12 +86,10 @@ public class FarmInfoPanel : CloseablePanel
     {
         int plantId = (int)((UIElement)clicked).UserData;
 
-        if (FarmBuilding != null)
+        if (FarmBuilding != null && plantId != 0)
         {
             Farm farm = Globals.Model.FarmingingMgr.GetFarm(FarmBuilding);
-            // TODO: farm.StartSowing( plantId -> plant type )
-            // how to handle switching?
-            // should farms start sowing after harvesting finishes?
+            farm?.StartSowing(plantId);
         }
     }
 
@@ -79,11 +110,25 @@ public class FarmInfoPanel : CloseablePanel
 
         Description.Text = building.Describe();
 
+        // Gray out unavailable options
+        foreach (UIElement plantButton in PlantButtons.Values)
+        {
+            // Clear the color
+            plantButton.Image.SpriteColor = Color.White;
+
+            int id = (int)plantButton.UserData;
+            if (id == 0 || !Globals.Model.Player1.IsPlantUnlocked(id))
+                plantButton.Image.SpriteColor = Color.DarkGray;
+        }
+
+        // Highlight what the farm is currently growing
         Farm farm = Globals.Model.FarmingingMgr.GetFarm(building);
         if (farm != null)
         {
             Description.Text += "\n" + farm.Describe();
-            // TODO: Highlight icon currently growing using farm.PlantId
+
+            if (PlantButtons.ContainsKey(farm.PlantId))
+                PlantButtons[farm.PlantId].Image.SpriteColor = Color.Brown;
         }
 
         // Switch image when the stockpile gets bigger than the image (~40 pixels dead space at bottom of panels)
