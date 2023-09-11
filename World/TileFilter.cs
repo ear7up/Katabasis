@@ -100,6 +100,8 @@ public class TileFilterHover : TileFilter
 {
     public override object Match(Tile t)
     {
+        if (t == null)
+            return null;
         if (t.ContainsSimple(InputManager.MousePos))
             return t;
         return null;

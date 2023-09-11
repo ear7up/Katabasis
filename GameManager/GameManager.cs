@@ -206,15 +206,7 @@ public class GameManager
         if (tile == null)
             return;
 
-        // Don't allow deployments outside the explored area (unless it's adjacent to explored territory?)
-        foreach (Tile neighbor in tile.Neighbors)
-        {
-            if (neighbor != null && neighbor.Explored)
-            {
-                Globals.Model.Player1.Kingdom.Army.Deploy(v);
-                break;
-            }
-        }
+        Globals.Model.Player1.Kingdom.Army.Deploy(v);
     }
 
     public void CancelDeployment(Object clicked)
@@ -625,7 +617,7 @@ public class GameManager
         _rightClickMenu.Draw(_rightClickMenu.Position);
 
         // Draw the current coordinates at the cursor location
-        _coordinateDisplay.Text = $"({InputManager.ScreenMousePos.X:0.0}, {InputManager.ScreenMousePos.Y:0.0})";
+        _coordinateDisplay.Text = $"({InputManager.WorldMousePos.X:0.0}, {InputManager.WorldMousePos.Y:0.0})";
         _coordinateDisplay.Draw(InputManager.ScreenMousePos + new Vector2(30f, 30f));
 
         // Draw debug text

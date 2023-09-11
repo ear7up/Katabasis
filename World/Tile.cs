@@ -45,7 +45,7 @@ public class Tile
     public const float VEGETATION_SOIL_QUALITY_BONUS = 0.1f;
 
     // Serialized content
-    public TileDiscriminator Discriminator { get; set; }
+    public Vector2 Coordinate { get; set; }
     public TileType Type { get; set; }
     public Player Owner { get; set; }
     public int Population { get; set; }
@@ -70,7 +70,6 @@ public class Tile
 
     public Tile()
     {
-        Discriminator = TileDiscriminator.Tile;
         Owner = null;
         Neighbors = new Tile[] { null, null, null, null};
         Population = 0;
@@ -101,20 +100,23 @@ public class Tile
     }
 
     public static Tile Create(
+        Vector2 coordinate,
         TileType type, 
         Vector2 position, 
         SpriteTexture baseTexture)
     {
         Tile tile = new();
-        tile.SetAttributes(type, position, baseTexture);
+        tile.SetAttributes(coordinate, type, position, baseTexture);
         return tile;
     }
 
     public virtual void SetAttributes(
+        Vector2 coordinate, 
         TileType type, 
         Vector2 position, 
         SpriteTexture baseTexture)
     {
+        Coordinate = coordinate;
         SetTileType(type);
         BaseSprite = Sprite.Create(baseTexture, position);
 

@@ -6,7 +6,8 @@ using System.Text.Json.Serialization;
 
 public class Map
 {
-    public Tile[] tiles { get; set; }
+    public Tile[][] Tiles { get; set; }
+    public Vector2 Origin { get; set; }
     public List<Sprite> Decorations { get; set; }
 
     public bool Unused {
@@ -21,10 +22,7 @@ public class Map
     [JsonIgnore]
     public Point MapSize { get; private set; }
 
-    [JsonIgnore]
-    public Vector2 Origin { get; private set; }
-
-    private readonly Point _mapTileSize = new(128, 128);
+    private readonly Point _mapDimensions = new(127, 127);
 
     public Tile HighlightedTile;
 
@@ -36,108 +34,101 @@ public class Map
     private const float HEXAGON_HEIGHT_RATIO = 0.8660254f;
     private const float SCALE_CONSTANT = 0.1f;
 
+    public static Vector2 NorthernTip;
+    public static Vector2 SouthEast;
+    public static Vector2 SouthWest;
+
     public Map()
     {
-        tiles = new Tile[_mapTileSize.X *_mapTileSize.Y];
+        Tiles = new Tile[_mapDimensions.Y][];
+        for (int col = 0; col < Tiles.Length; col++)
+            Tiles[col] = new Tile[_mapDimensions.X];
+
         Decorations = new();
 
         // 500x345
         TileSize = new(Sprites.desertTextures[0].Texture.Width, Sprites.desertTextures[0].Texture.Height);
-        MapSize = new(TileSize.X * _mapTileSize.X, TileSize.Y * _mapTileSize.Y);
-
-        Origin = new(MapSize.X / 2, MapSize.Y / 2);
+        MapSize = new(TileSize.X * _mapDimensions.X, (TileSize.Y - VerticalOverlap) * _mapDimensions.Y);
 
         HorizontalOverlap = TileSize.X / 2;
 
-        // Fix the map origin to account for overlap and perspective
-        Origin = new(MapSize.X / 2 - HorizontalOverlap, MapSize.Y / 2 - VerticalOverlap * _mapTileSize.Y);
+        NorthernTip = new Vector2(MapSize.X / 2f, 0f);
+        SouthEast = new Vector2(TileSize.X / 2f, TileSize.Y / 2f - VerticalOverlap);
+        SouthWest = new Vector2(-TileSize.X / 2f, TileSize.Y / 2f - VerticalOverlap);
+
+        Origin = Vector2.Zero;
+    }
+
+    public Tile GenerateTile(Vector2 coordinate, Vector2 pos)
+    {
+        Tile tile = null;
+        SpriteTexture texture = null;
+        TileType tileType = TileType.DESERT;
+
+        Array plantTypes = Enum.GetValues(typeof(Goods.FoodPlant));
+        Goods.FoodPlant plantType = Goods.FoodPlant.NONE;
+        MineralType mineralType = MineralType.NONE;
+
+        double r = Globals.Rand.NextDouble();
+
+        // Assign random tile textures
+        if (r < 0.65)
+        {
+            // 65% plain desert
+            texture = Sprites.RandomDesert();
+        }
+        else if (r < 0.8)
+        {
+            // 15% desert with hills
+            texture = Sprites.RandomHills();
+            tileType = TileType.HILLS;
+            mineralType = MineralInfo.Random();
+        }
+        else if (r < 0.98)
+        {
+            // 18% desert with vegetation
+            texture = Sprites.RandomVegetation();
+            tileType = TileType.VEGETATION;
+
+            if (Globals.Rand.NextFloat(0.0f, 1.0f) <= 0.1f)
+                plantType = (Goods.FoodPlant)plantTypes.GetValue(Globals.Rand.Next(plantTypes.Length));
+        }
+        else
+        {
+            // 2% bedouin camps
+            texture = Sprites.RandomCamp();
+            tileType = TileType.CAMP;
+        }
+
+        // 5% chance to add animals to plain desert tiles
+        if (r < 0.05)
+            tile = TileAnimal.Create(coordinate, pos, texture);
+        else
+            tile = Tile.Create(coordinate, tileType, pos, texture);
+
+        if (mineralType != MineralType.NONE)
+            tile.Minerals = mineralType;
+
+        if (plantType != Goods.FoodPlant.NONE)
+            tile.SetPlantType(plantType);
+
+        return tile;
     }
 
     public void Generate()
     {
-        Array plantTypes = Enum.GetValues(typeof(Goods.FoodPlant));
-
-        int row = 1;
-        int tiles_per_row = 1;
-        int tile_in_row = 0;
-        for (int n = 0; n < _mapTileSize.Y * _mapTileSize.X; n++)
+        Vector2 pos = Vector2.Zero;
+        for (int col = 0; col < _mapDimensions.Y; col++)
         {
-            SpriteTexture texture = null;
-            TileType tileType = TileType.DESERT;
-            MineralType mineralType = MineralType.NONE;
-            Goods.FoodPlant plantType = Goods.FoodPlant.NONE;
-            double r = Globals.Rand.NextDouble();
-
-            // Assign random tile textures
-            if (r < 0.65)
+            pos = NorthernTip + SouthWest * col;
+            for (int row = 0; row < _mapDimensions.X; row++)
             {
-                // 65% plain desert
-                texture = Sprites.RandomDesert();
-            }
-            else if (r < 0.8)
-            {
-                // 15% desert with hills
-                texture = Sprites.RandomHills();
-                tileType = TileType.HILLS;
-                mineralType = MineralInfo.Random();
-            }
-            else if (r < 0.98)
-            {
-                // 18% desert with vegetation
-                texture = Sprites.RandomVegetation();
-                tileType = TileType.VEGETATION;
-
-                if (Globals.Rand.NextFloat(0.0f, 1.0f) <= 0.1f)
-                    plantType = (Goods.FoodPlant)plantTypes.GetValue(Globals.Rand.Next(plantTypes.Length));
-            }
-            else
-            {
-                // 2% bedouin camps
-                texture = Sprites.RandomCamp();
-                tileType = TileType.CAMP;
-            }
-
-            // Rows get bigger until halfway, then they get smaller
-            float xpos = 0f;
-            if (row > _mapTileSize.Y)    
-                xpos = -Origin.X + ((TileSize.X / 2) * row) + (tile_in_row * TileSize.X);
-            else
-                xpos = Origin.X - ((TileSize.X / 2) * row) + (tile_in_row * TileSize.X);
-
-            // Each row is half a tile size down, shave off a bit because each tile has a thick base
-            float ypos = (TileSize.Y / 2) * row - (VerticalOverlap * row);
-
-            Tile tile = null;
-
-            // 5% chance to add animals to plain desert tiles
-            if (r < 0.05)
-                tile = TileAnimal.Create(new(xpos, ypos), texture);
-            else
-                tile = Tile.Create(tileType, new(xpos, ypos), texture);
-
-            if (mineralType != MineralType.NONE)
-                tile.Minerals = mineralType;
-
-            if (plantType != Goods.FoodPlant.NONE)
-                tile.SetPlantType(plantType);
-
-            tiles[n] = tile;
-
-            tile_in_row++;
-
-            // Start a new row
-            if (tile_in_row >= tiles_per_row)
-            {
-                tile_in_row = 0;
-                row++;
-
-                // Halfway through, each row will have fewer
-                if (row > _mapTileSize.Y)
-                    tiles_per_row--;
-                else
-                    tiles_per_row++;
+                pos += SouthEast;
+                Tiles[col][row] = GenerateTile(new Vector2(row, col), pos);
             }
         }
+
+        Origin = GetOriginTile().GetPosition();
 
         ComputeNeighbors();
         GenerateForests();
@@ -147,72 +138,26 @@ public class Map
     public void ComputeNeighbors()
     {
         // Second iteration to assign neighbors
-        int row = 1;
-        int tiles_per_row = 1;
-        int tile_in_row = 0;
-
-        for (int i = 0; i < _mapTileSize.X * _mapTileSize.Y; i++)
+        for (int y = 0; y < _mapDimensions.Y; y++)
         {
-            Tile t = tiles[i];
-            Tile ne = null;
-            Tile se = null;
-            Tile nw = null;
-            Tile sw = null;
-
-            bool halfway = row > _mapTileSize.Y;
-
-            // Top-half, last node has no NE neighbor
-            // Bottom-half, all nodes have NE neighbor
-            if (tile_in_row < tiles_per_row - 1 || halfway)
+            for (int x = 0; x < _mapDimensions.X; x++)
             {
-                // the row right after the midpoint is wrong
-                int offset = i - tiles_per_row + ((row <= _mapTileSize.Y) ? 1 : 0);
-                if (row == _mapTileSize.Y + 1)
-                    offset++;
-                ne = tiles[offset];
-            }
-            // Top-half, all nodes have SE neighbor (except the last node in the middle row)
-            // Bottom-half, last node has no SE neighbor
-            if (tile_in_row < tiles_per_row - 1 || (!halfway && row <= _mapTileSize.Y))
-            {
-                int offset = i + tiles_per_row + ((row < _mapTileSize.Y) ? 1 : 0);
-                if (row == _mapTileSize.Y)
-                    offset--;
-                se = tiles[offset];
-            }
-            // Top-half, last node in row has no NW neighbor
-            // Bottom-half, all nodes have NW neighbor
-            if (tile_in_row > 0 || halfway)
-            {
-                int offset = i - tiles_per_row  - (halfway ? 1 : 0);
-                if (row == _mapTileSize.Y + 1)
-                    offset++;
-                nw = tiles[offset];
-            }
-            // Top-half, all nodes have SW neighbor (except the first node in the middle row)
-            // Bottom-half, first node has no SW Neighbor
-            if (tile_in_row > 0 || !halfway)
-            {
-                int offset = (row >= _mapTileSize.Y) ? 1 : 0;
-                if (row == _mapTileSize.Y)
-                    offset++;
-                sw = tiles[i + tiles_per_row - offset];
-            }
-            t.Neighbors = new Tile[]{ ne, se, sw, nw };
+                Tile t = Tiles[y][x];
+                Tile ne = null;
+                Tile se = null;
+                Tile nw = null;
+                Tile sw = null;
 
-            tile_in_row++;
+                if (y - 1 > 0)
+                    ne = Tiles[y - 1][x];
+                if (x + 1 < _mapDimensions.X)
+                    se = Tiles[y][x + 1];
+                if (x - 1 > 0)
+                    nw = Tiles[y][x - 1];
+                if (y + 1 < _mapDimensions.Y)
+                    sw = Tiles[y + 1][x];
 
-            // Start a new row
-            if (tile_in_row >= tiles_per_row)
-            {
-                tile_in_row = 0;
-                row++;
-
-                // Halfway through, each row will have fewer
-                if (row > _mapTileSize.Y)
-                    tiles_per_row--;
-                else
-                    tiles_per_row++;
+                t.Neighbors = new Tile[]{ ne, se, sw, nw };
             }
         }
     }
@@ -221,7 +166,7 @@ public class Map
     {
         // Midpoint, rounded up wil be the origin for odd-sized maps,
         // even-sized mapps have no true origin, so this will give the tile SW of the center
-        return tiles[(int)(tiles.Length / 2f + 0.5)];
+        return Tiles[_mapDimensions.Y / 2][_mapDimensions.X / 2];
     }
 
     public void GenerateRivers()
@@ -236,14 +181,14 @@ public class Map
     public void GenerateRiver(bool startingFromTop)
     {
         // Head a random number of steps south east from the starting tile
-        int steps1 = Globals.Rand.Next(2, _mapTileSize.X);
-        Tile t = startingFromTop ? tiles[0] : tiles[tiles.Length - 1];
+        int steps1 = Globals.Rand.Next(2, _mapDimensions.X);
+        Tile t = startingFromTop ? Tiles[0][0] : Tiles[_mapDimensions.Y - 1][_mapDimensions.X - 1];
 
         for (int i = 0; i < steps1; i++)
             t = t.Neighbors[startingFromTop ? (int)Cardinal.SE : (int)Cardinal.NW];
 
         // Place a random number of river tiles toward the center
-        int length1 = Globals.Rand.Next(_mapTileSize.Y / 3, 3 * _mapTileSize.Y / 4);
+        int length1 = Globals.Rand.Next(_mapDimensions.Y / 3, 3 * _mapDimensions.Y / 4);
         for (int i = 0; i < length1; i++)
         {
             t.MakeRiver();
@@ -254,7 +199,7 @@ public class Map
     public void GenerateForests()
     {
         // Make some forests, e.g. about 80 for a 128x128 map
-        int NUM_FORESTS = (int)(0.005 * _mapTileSize.X * _mapTileSize.Y);
+        int NUM_FORESTS = (int)(0.005 * _mapDimensions.X * _mapDimensions.Y);
         for (int i = 0; i < NUM_FORESTS; i++)
             GenerateForest();
     }
@@ -269,8 +214,9 @@ public class Map
 
     public void GenerateForest()
     {
-        int i = Globals.Rand.Next(tiles.Length);
-        Tile start = tiles[i];
+        int ycoord = Globals.Rand.Next(_mapDimensions.Y);
+        int xcoord = Globals.Rand.Next(_mapDimensions.X);
+        Tile start = Tiles[ycoord][xcoord];
 
         int w = Globals.Rand.Next(3, 6);
 
@@ -316,28 +262,21 @@ public class Map
         }
     }
 
-    public static Tile LastTileAtPos = null;
-
+    // Calculates grid position from a world position in constant time
     public Tile TileAtPos(Vector2 pos)
     {
-        // Usually the same tile will be checked many times a second
-        if (HighlightedTile != null && HighlightedTile.ContainsSimple(pos))
-            return HighlightedTile;
+        Tile originTile = GetOriginTile();
+        Vector2 offsetFromOrigin = pos - originTile.GetPosition();
 
-        // Otherwise, the tile wil usually be nearby
-        Tile nearby = (Tile)Tile.Find(LastTileAtPos, new TileFilterHover(), 5);
-        if (nearby != null)
-            return nearby;
+        // No idea why this is off by 10% but it is
+        double yoff = 1.1 * offsetFromOrigin.Y / (TileSize.Y - VerticalOverlap);
+        double xoff = offsetFromOrigin.X / TileSize.X;
 
-        // Last resort, check ALL tiles (takes ~-0.1 - 0.2 seconds))
-        foreach (Tile t in tiles)
-        {
-            if (t.Contains(pos))
-            {
-                LastTileAtPos = t;
-                return t;
-            }
-        }
+        int newy = (int)Math.Round(originTile.Coordinate.Y - xoff + yoff);
+        int newx = (int)Math.Round(originTile.Coordinate.X + xoff + yoff);
+
+        if (newx > 0 && newx < _mapDimensions.X && newy > 0 && newy < _mapDimensions.Y)
+            return Tiles[newy][newx];
         return null;
     }
 
@@ -358,6 +297,13 @@ public class Map
             HighlightedTile.BaseSprite.SpriteColor = Color.OrangeRed;
         }
     }
+
+    public static Vector2 rotate(Vector2 v, float delta) {
+    return new Vector2(
+        v.X * MathF.Cos(delta) - v.Y * MathF.Sin(delta),
+        v.X * MathF.Sin(delta) + v.Y * MathF.Cos(delta)
+    );
+}
 
     public void Update()
     {
@@ -380,26 +326,29 @@ public class Map
         }
 
         // Update tiles
-        foreach (Tile t in tiles)
-            t.Update();
+        for (int y = 0; y < Tiles.Length; y++)
+            for (int x = 0 ; x < Tiles[y].Length; x++)
+                Tiles[y][x].Update();
     }
 
     public void DailyUpdate()
     {
-        foreach (Tile t in tiles)
-            t.DailyUpdate();
+        for (int y = 0; y < Tiles.Length; y++)
+            for (int x = 0 ; x < Tiles[y].Length; x++)
+                Tiles[y][x].DailyUpdate();
     }
 
     public void DrawTiles(Tile.DisplayType displayType)
     {
         // Draw map tiles
-        int numTiles = _mapTileSize.X * _mapTileSize.Y;
-        for (int n = 0; n < numTiles; n++)
-            tiles[n].Draw(displayType);
+        for (int y = 0; y < _mapDimensions.Y; y++)
+            for (int x = 0; x < _mapDimensions.X; x++)
+                Tiles[y][x].Draw(displayType);
 
         // Draw extra data on top (e.g. fog of war or UI icons associated with tiles)
-        for (int n = 0; n < numTiles; n++)
-            tiles[n].DrawTopLayer();
+        for (int y = 0; y < _mapDimensions.Y; y++)
+            for (int x = 0; x < _mapDimensions.X; x++)
+                Tiles[y][x].DrawTopLayer();
     }
 
     public void DrawUI()

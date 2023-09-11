@@ -32,6 +32,11 @@ public class Military
     {
         if (person == null)
             return;
+
+        foreach (Task task in person.Tasks) 
+            if (task is DeploymentTask)
+                task.Complete(person);
+
         Soldiers.Remove(person);
         person.ResetProfession();
     }

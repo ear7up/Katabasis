@@ -12,10 +12,10 @@ public class TasksTest
         p1.PersonalStockpile.Add(clay);
 
         // Make the next tile a river (clay can actually be found in any desert tile)
-        map.tiles[1].Type = TileType.RIVER;
+        map.Tiles[0][1].Type = TileType.RIVER;
 
         // Set the first tile as the person's home
-        p1.Home = map.tiles[0];
+        p1.Home = map.Tiles[0][0];
 
         // Try to make 20 clay bricks...
         TryToProduceTask task = new();

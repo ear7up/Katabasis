@@ -52,6 +52,8 @@ public class TaskStatus
     }
 }
 
+[JsonDerivedType(derivedType: typeof(SowTask), typeDiscriminator: "SowTask")]
+[JsonDerivedType(derivedType: typeof(HarvestTask), typeDiscriminator: "HarvestTask")]
 [JsonDerivedType(derivedType: typeof(BuyTask), typeDiscriminator: "BuyTask")]
 [JsonDerivedType(derivedType: typeof(EatTask), typeDiscriminator: "EatTask")]
 [JsonDerivedType(derivedType: typeof(GoToTask), typeDiscriminator: "GoToTask")]
@@ -59,6 +61,7 @@ public class TaskStatus
 [JsonDerivedType(derivedType: typeof(SellTask), typeDiscriminator: "SellTask")]
 [JsonDerivedType(derivedType: typeof(BuildTask), typeDiscriminator: "BuildTask")]
 [JsonDerivedType(derivedType: typeof(HaulGoodsTask), typeDiscriminator: "HaulGoodsTask")]
+[JsonDerivedType(derivedType: typeof(DeploymentTask), typeDiscriminator: "DeploymentTask")]
 [JsonDerivedType(derivedType: typeof(IdleAtHomeTask), typeDiscriminator: "IdleAtHomeTask")]
 [JsonDerivedType(derivedType: typeof(FindNewHomeTask), typeDiscriminator: "FindNewHomeTask")]
 [JsonDerivedType(derivedType: typeof(SourceGoodsTask), typeDiscriminator: "SourceGoodsTask")]

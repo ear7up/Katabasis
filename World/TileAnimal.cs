@@ -56,26 +56,27 @@ public class TileAnimal : Tile
 
     public TileAnimal() : base()
     {
-        Discriminator = TileDiscriminator.TileAnimal;
         Animals = new();
     }
 
     public static TileAnimal Create(
+        Vector2 coordinate,
         Vector2 position, 
         SpriteTexture baseTexture)
     {
         TileAnimal tile = new();
-        tile.SetAttributes(TileType.WILD_ANIMAL, position, baseTexture);
+        tile.SetAttributes(coordinate, TileType.WILD_ANIMAL, position, baseTexture);
         return tile;
     }
 
     public override void SetAttributes(
+        Vector2 coordinate,
         TileType type, 
         Vector2 position, 
         SpriteTexture baseTexture)
     {
         // TileAnimal will default to WILD_ANIMAL type, allowing hunting RawMeat.GAME
-        base.SetAttributes(type, position, baseTexture);
+        base.SetAttributes(coordinate, type, position, baseTexture);
 
         // AnimalType will replace tile type once a Ranch is built, allowing specific goods to be farmed
         AnimalType = (TileType)Globals.Rand.Next((int)TileType.ANIMAL + 1, (int)TileType.WILD_ANIMAL);
