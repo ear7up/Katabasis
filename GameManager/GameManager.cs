@@ -200,7 +200,21 @@ public class GameManager
     {
         UIElement obj = (UIElement)clicked;
         RightClickMenu.ClickPosition worldPos = (RightClickMenu.ClickPosition)obj.UserData;
-        Globals.Model.Player1.Kingdom.Army.Deploy(new Vector2(worldPos.X, worldPos.Y));
+
+        Vector2 v = new(worldPos.X, worldPos.Y);
+        Tile tile = Globals.Model.TileMap.TileAtPos(v);
+        if (tile == null)
+            return;
+
+        // Don't allow deployments outside the explored area (unless it's adjacent to explored territory?)
+        foreach (Tile neighbor in tile.Neighbors)
+        {
+            if (neighbor != null && neighbor.Explored)
+            {
+                Globals.Model.Player1.Kingdom.Army.Deploy(v);
+                break;
+            }
+        }
     }
 
     public void CancelDeployment(Object clicked)

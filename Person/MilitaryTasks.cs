@@ -37,7 +37,12 @@ public class DeploymentTask : Task
     public override TaskStatus Execute(Person p)
     {   
         Rectangle bounds = DestinationTile.BaseSprite.GetBounds();
-        if (Vector2.Distance(p.Position, Destination) < bounds.Width / 8f)
+        float distance = Vector2.Distance(p.Position, Destination);
+
+        if (distance < bounds.Width / 2f)
+            DestinationTile.Explored = true;
+
+        if (distance < bounds.Width / 8f)
         {
             Destination = new Vector2(0f, 0f);
             Destination += new Vector2(

@@ -47,7 +47,7 @@ public class Player
 
     public bool IsPlantUnlocked(int id)
     {
-        return IsPlantUnlocked(id);
+        return UnlockedPlants.ContainsKey(id);
     }
 
     public bool IsPlantUnlocked(GoodsType type, int subType)
