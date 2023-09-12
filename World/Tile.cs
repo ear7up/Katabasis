@@ -155,7 +155,7 @@ public class Tile
             case Goods.FoodPlant.CUCUMBER: texture = Sprites.Cucumber; break;
             case Goods.FoodPlant.TURNIP: texture = Sprites.Turnips; break;
             case Goods.FoodPlant.GRAPES: texture = Sprites.Grapes; break;
-            case Goods.FoodPlant.GOURD: texture = Sprites.Gourd; break;
+            case Goods.FoodPlant.SQUASH: texture = Sprites.Gourd; break;
             case Goods.FoodPlant.MELON: texture = Sprites.Melon; break;
             case Goods.FoodPlant.PEAS: texture = Sprites.Peas; break;
             case Goods.FoodPlant.LENTILS: texture = Sprites.Lentils; break;

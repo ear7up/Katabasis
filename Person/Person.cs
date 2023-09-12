@@ -47,6 +47,7 @@ public class Person : Entity, Drawable
     public GenderType Gender { get; set; }
     public float Age { get; set; }
     public int Hunger { get; set; }
+    public Health HealthStatus { get; set; }
     public float Money { get; set; }
     public bool IsDead { get; set; }
     public ProfessionType Profession { get; set; }
@@ -93,6 +94,8 @@ public class Person : Entity, Drawable
 
         PersonalStockpile = new();
         Demand = new float[Goods.NUM_GOODS_TYPES, Goods.GOODS_PER_TYPE];
+
+        HealthStatus = new();
 
         // New person starts with each skill assigned randomly between 1-20 (they go up to 100 with experience)
         Skills = new();
@@ -306,6 +309,7 @@ public class Person : Entity, Drawable
     public void DailyUpdate()
     {
         PersonalStockpile.DailyUpdate();
+        HealthStatus.DailyUpdate();
 
         // A year is 10 days, chance to die every 1/10th of a year after hitting old age
         Age += 0.1f;
@@ -359,6 +363,12 @@ public class Person : Entity, Drawable
         Tasks.Enqueue(new EatTask());
         Tasks.Enqueue(new SellAtMarketTask());
         Tasks.Enqueue(new BuyFoodFromMarketTask());
+    }
+
+    public void Eat1(Goods g)
+    {
+        HealthStatus.EatFood(g.GetId());
+        Hunger = Math.Max(0, Hunger - GoodsInfo.GetSatiation(g));
     }
 
     public void DailySoldierTasks()

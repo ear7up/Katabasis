@@ -87,6 +87,7 @@ public class KatabasisGame : Game
         BuildingProduction.Init();
         MineralInfo.Init();
         BuildingInfo.Init();
+        FoodInfo.Init();
 
         Mouse.SetCursor(MouseCursor.FromTexture2D(Sprites.Cursor.Texture, 0, 0));
 

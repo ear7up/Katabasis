@@ -94,7 +94,7 @@ public class Goods
     public enum FoodPlant
     {
         GARLIC, SCALLIONS, ONION, LEEK, LETTUCE, CELERY, 
-        CUCUMBER, RADISH, TURNIP, GRAPES, GOURD, MELON, 
+        CUCUMBER, RADISH, TURNIP, GRAPES, SQUASH, MELON, 
         PEAS, LENTILS, CHICKPEAS, NUTS, OLIVE_OIL, BARLEY,
         WHEAT, WILD_EDIBLE, NONE
     }
@@ -376,7 +376,7 @@ public class Goods
         // Don't eat uncooked flour, you can get salmonella
         return 
             type == GoodsType.FOOD_ANIMAL || 
-            type == GoodsType.FOOD_PLANT || 
+            (type == GoodsType.FOOD_PLANT && subType != (int)Goods.FoodPlant.WHEAT) || 
             (type == GoodsType.FOOD_PROCESSED && subType != (int)Goods.ProcessedFood.FLOUR);
     }
 
