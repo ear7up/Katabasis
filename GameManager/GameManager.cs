@@ -76,7 +76,7 @@ public class GameManager
         // Create the bottom left panel with a 2x3 grid of clickable buttons
         _buttonPanel = new(Sprites.BottomLeftPanel);
         _buttonPanel.SetMargin(left: 49, top: 70);
-        _buttonPanel.SetPadding(right: -20, bottom: -170);
+        _buttonPanel.SetPadding(bottom: -170);
 
         UIElement buildElement = new(
             Sprites.BottomLeftButtons[0], 
@@ -243,8 +243,15 @@ public class GameManager
         }
     }
 
+    public static void StoneButtonPress(Object clicked)
+    {
+        if (clicked != null)
+            SoundEffects.Play(SoundEffects.StoneButtonPress);
+    }
+
     public void BuildButton(Object clicked = null)
     {
+        StoneButtonPress(clicked);
         if (!_bottomPanel.Hidden)
         {
             InputManager.SwitchToMode(InputManager.CAMERA_MODE);
@@ -255,6 +262,7 @@ public class GameManager
 
     public void TileButton(Object clicked)
     {
+        StoneButtonPress(clicked);
         if (InputManager.Mode == InputManager.TILE_MODE)
         {
             InputManager.SwitchToMode(InputManager.CAMERA_MODE);
@@ -289,16 +297,19 @@ public class GameManager
 
     public void TogglePause(Object clicked = null)
     {
+        StoneButtonPress(clicked);
         InputManager.Paused = !InputManager.Paused;
     }
 
     public void TogglePeoplePanel(Object clicked = null)
     {
+        StoneButtonPress(clicked);
         TogglePanel(_peoplePanel);
     }
 
     public void ToggleStatistics(Object clicked = null)
     {
+        StoneButtonPress(clicked);
         TogglePanel(_statsPanel);
         _statsPanel.Update(Globals.Model.Player1.Kingdom.Statistics(), Globals.Model.Player1.Kingdom.People);
     }
@@ -311,11 +322,13 @@ public class GameManager
 
     public void ToggleGoodsDisplay(Object clicked = null)
     {
+        StoneButtonPress(clicked);
         TogglePanel(inventoryPanel);
     }
 
     public static void ToggleMarketPanel(Object clicked = null)
     {
+        StoneButtonPress(clicked);
         TogglePanel(MarketPanel);
     }
 

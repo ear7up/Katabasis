@@ -169,6 +169,12 @@
 /processorParam:TextureFormat=Color
 /build:animals/sheep_copper.png
 
+#begin audio/stoneButtonPress.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:audio/stoneButtonPress.wav
+
 #begin ball.png
 /importer:TextureImporter
 /processor:TextureProcessor

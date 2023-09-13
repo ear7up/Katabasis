@@ -72,6 +72,7 @@ public class KatabasisGame : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         Globals.SpriteBatch = _spriteBatch;
         Sprites.Load(Content);
+        SoundEffects.Load(Content);
 
         _defaultBGM = Globals.Content.Load<Song>("Desert-City");
         MediaPlayer.Play(_defaultBGM);
