@@ -316,7 +316,11 @@ public class Building : Drawable
                 Selected = !Selected;
 
                 if (Selected)
+                {
                     SelectedBuilding = this;
+                    if (BuildProgress < 1f)
+                        SoundEffects.Play(SoundEffects.BuildingSound);
+                }
 
                 if (Type == BuildingType.MARKET)
                     Katabasis.GameManager.ToggleMarketPanel();

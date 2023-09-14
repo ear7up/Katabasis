@@ -80,7 +80,7 @@ public class GridLayout : Layout
         base.Update();
     }
 
-    public void ChangePageOnScroll()
+    public virtual void ChangePageOnScroll()
     {
         if (!Hovering)
             return;

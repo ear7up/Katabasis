@@ -20,6 +20,7 @@ public class PeopleDisplay : GridLayout
         }
     }
 
+    public int MyPage;
     public CloseablePanel Parent;
     public List<PeopleColumn> PersonColumns;
 
@@ -27,6 +28,8 @@ public class PeopleDisplay : GridLayout
     {
         HasHeader = true;
         PersonColumns = new();
+
+        MyPage = 1;
         ElementsPerPage = 18;
         
         PersonColumns.Add(new PeopleColumn("Icon", GetIcon));
@@ -94,6 +97,20 @@ public class PeopleDisplay : GridLayout
         return task;
     }
 
+    // Override to let this class manage its own paging
+    public override void ChangePageOnScroll()
+    {
+        if (!Hovering)
+            return;
+
+        if (InputManager.ScrollValue < 0)
+            MyPage++;
+        else if (InputManager.ScrollValue > 0 && MyPage > 1)
+            MyPage--;
+
+        InputManager.ScrollValue = 0;
+    }
+
     public void Update(List<Person> people)
     {
         base.Update();
@@ -105,9 +122,11 @@ public class PeopleDisplay : GridLayout
         foreach (PeopleColumn column in PersonColumns)
             SetContent(col++, row, column.HeaderSprite);
 
+        // We don't want to store all people in GridContent, we only want to store the displayed content
         row = 1;
-        foreach(Person person in people)
+        for (int i = (MyPage - 1) * ElementsPerPage; i < MyPage * ElementsPerPage && i < people.Count; i++)
         {
+            Person person = people[i];
             col = 0;
             foreach (PeopleColumn column in PersonColumns)
             {

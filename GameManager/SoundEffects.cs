@@ -5,12 +5,16 @@ using Microsoft.Xna.Framework.Content;
 public class SoundEffects
 {
     public static SoundEffect StoneButtonPress;
+    public static SoundEffect BuildingSound;
+    public static SoundEffect MoneySound;
     public static List<SoundEffectInstance> Looping;
 
     public static void Load(ContentManager content)
     {
         Looping = new();
-        StoneButtonPress = content.Load<SoundEffect>("audio/stoneButtonPress");   
+        StoneButtonPress = content.Load<SoundEffect>("audio/stoneButtonPress");
+        BuildingSound = content.Load<SoundEffect>("audio/buildingSound");
+        MoneySound = content.Load<SoundEffect>("audio/moneySound");
     }
 
     public static void Play(SoundEffect effect)

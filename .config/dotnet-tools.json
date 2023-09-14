@@ -31,6 +31,12 @@
       "commands": [
         "mgcb-editor-mac"
       ]
+    },
+    "dotnet-trace": {
+      "version": "7.0.442301",
+      "commands": [
+        "dotnet-trace"
+      ]
     }
   }
 }

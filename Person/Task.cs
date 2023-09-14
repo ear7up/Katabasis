@@ -555,10 +555,6 @@ public class TryToProduceTask : Task
         if (subTasks.Count > 0)
             return Status;
 
-        // Mark the building as in-use
-        if (TimeSpent == 0f && ReqBuilding != null)
-            ReqBuilding.StartUsing(p);
-
         // Add progress
         TimeSpent += Globals.Time;
         if (TimeSpent >= TimeToProduce)
@@ -596,6 +592,7 @@ public class TryToProduceTask : Task
                 ReqBuilding.Location.TakeResource();
             else if (ReqBuilding.Type == BuildingType.FARM)
                 ReqBuilding.Location.Farm();
+            ReqBuilding.StopUsing(p);
         }
 
         // Reduce the number of trees when cutting wood (but not when farming honey)
@@ -629,8 +626,6 @@ public class TryToProduceTask : Task
 
         // Finish by adding the completed goods to the person's stockpile
         p.PersonalStockpile.Add(Goods.GetId(), Goods.Quantity);
-        if (ReqBuilding != null)
-            ReqBuilding.StopUsing(p);
         return true;
     }
 
@@ -759,6 +754,8 @@ public class TryToProduceTask : Task
         // Modify harvest yield time by soil quality (better near rivers)
         if (found != null && found is Tile && Goods.Type == GoodsType.FOOD_PLANT)
             TimeToProduce /= ((Tile)found).SoilQuality;
+
+        ReqBuilding?.StartUsing(p);
 
         Initialized = true;
         return Status;

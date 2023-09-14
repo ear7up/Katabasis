@@ -21,6 +21,7 @@ public class CloseablePanel : VBox
 
     public virtual void ClosePanel(Object clicked)
     {
+        SoundEffects.Play(SoundEffects.StoneButtonPress);
         Hide();
     }
 

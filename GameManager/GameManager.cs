@@ -329,6 +329,7 @@ public class GameManager
     public static void ToggleMarketPanel(Object clicked = null)
     {
         StoneButtonPress(clicked);
+        SoundEffects.Play(SoundEffects.MoneySound);
         TogglePanel(MarketPanel);
     }
 
@@ -422,7 +423,7 @@ public class GameManager
         _peoplePanel.Update();
         _statsPanel.Update();
         MarketPanel.Update();
-        inventoryPanel.Update(Model.Player1.Kingdom.Treasury, Model.Player1.Kingdom.PrivateGoods());
+        inventoryPanel.Update();
         _bottomPanel.Update();
         _tileInfoPanel.UpdateTileData(Model.TileMap.HighlightedTile);
 
@@ -463,6 +464,7 @@ public class GameManager
         UI.Update();
 
         HandlePersonFollowing();
+        HandleDebugText();
 
         // Give the other interfaces a chance to consume camera inputs, update this last
         Model.GameCamera.UpdateCamera(KatabasisGame.Viewport);
@@ -498,10 +500,14 @@ public class GameManager
 
     public void HandlePersonFollowing()
     {
+        if (!InputManager.UnconsumedClick())
+            return;
+
         // Check is a person was clicked in this frame
         Person clickedPerson = null;
         foreach (Person p in Model.Player1.Kingdom.People)
         {
+            // TODO: improve efficiency, maybe use TileAtPos to search only people in the clicked tile
             if (p.CheckIfClicked())
             {
                 clickedPerson = p;
@@ -520,11 +526,14 @@ public class GameManager
             SetPersonTracking(clickedPerson);
             Model.GameCamera.Follow(clickedPerson);
         }
+    }
 
+    public void HandleDebugText()
+    {
         // Write statistics to debug
         _debugDisplay.Text = 
-            $"Public Wealth: {(int)Model.Player1.Kingdom.PublicWealth()}\n" +
-            $"Private Wealth: {(int)Model.Player1.Kingdom.PrivateWealth()}\n";
+            $"Public Wealth: {(int)Model.Player1.Kingdom.PublicWealth()}\n"; /* +
+            $"Private Wealth: {(int)Model.Player1.Kingdom.PrivateWealth()}\n"; */
 
         _logoDisplay.Position = new Vector2(
             Globals.WindowSize.X - _logoDisplay.Width() - 30,

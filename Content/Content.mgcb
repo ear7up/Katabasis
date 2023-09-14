@@ -169,6 +169,18 @@
 /processorParam:TextureFormat=Color
 /build:animals/sheep_copper.png
 
+#begin audio/buildingSound.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:audio/buildingSound.wav
+
+#begin audio/moneySound.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:audio/moneySound.wav
+
 #begin audio/stoneButtonPress.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

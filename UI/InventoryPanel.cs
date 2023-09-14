@@ -31,13 +31,13 @@ public class InventoryPanel : CloseablePanel
         SetDefaultPosition(new Vector2(Globals.WindowSize.X / 2 - Width() / 2, 50f));
     }
 
-    public void Update(Stockpile publicStockpile, Stockpile privateStockpile)
+    public override void Update()
     {
         if (Hidden)
             return;
 
-        PublicStockpileLayout.Update(publicStockpile);
-        PrivateStockpileLayout.Update(privateStockpile);
+        PublicStockpileLayout.Update(Globals.Model.Player1.Kingdom.Treasury);
+        PrivateStockpileLayout.Update(Globals.Model.Player1.Kingdom.PrivateGoods());
 
         MyLayout.Update();
         base.Update();
