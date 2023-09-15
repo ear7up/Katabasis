@@ -341,6 +341,19 @@ public class Goods
         //return $"{subTypeName} x{Quantity:0.0} (${value:0.0})";
     }
 
+    public string GetName()
+    {
+        string subTypeName = GetGoodsName(Type, SubType);
+        if (Type == GoodsType.TOOL)
+        {
+            string materialName = "";
+            if (Material != (int)ToolMaterial.NONE)
+                materialName = Globals.Title(((ToolMaterial)Material).ToString()) + " ";
+            return $"{materialName}{subTypeName}";
+        }
+        return $"{subTypeName}";
+    }
+
     // Subtract and return as much of the requested quantity if possible
     public float Take(float quantity)
     {

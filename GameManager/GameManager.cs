@@ -480,6 +480,7 @@ public class GameManager
         Model.TileMap.Update();
         Model.Market.Update();
         Model.ConstructionQueue.Update();
+        Model.FarmingingMgr.Update();
 
         HandleTileAcquisition();
 
@@ -637,6 +638,9 @@ public class GameManager
         escMenuPanel.Draw(escMenuPanel.Position);
 
         _rightClickMenu.Draw(_rightClickMenu.Position);
+
+        // Draw tooltips above everything
+        UI.DrawTooltip();
 
         // Draw the current coordinates at the cursor location
         _coordinateDisplay.Text = $"({InputManager.WorldMousePos.X:0.0}, {InputManager.WorldMousePos.Y:0.0})";

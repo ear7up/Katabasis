@@ -73,9 +73,9 @@ public class HarvestTask : Task
         TargetFarm = farm;
     }
 
-    public static SowTask Create(string description, Farm farm)
+    public static HarvestTask Create(string description, Farm farm)
     {
-        SowTask task = new();
+        HarvestTask task = new();
         task.SetAttributes(description, farm);
         return task;
     }

@@ -11,6 +11,7 @@ static class UI
 
     public static UIElement Tooltip;
     public static TextSprite TooltipText;
+    public static bool TooltipSet;
 
     public enum Position
     {
@@ -45,7 +46,8 @@ static class UI
     {
         // Tooltip text needs to be cleared to disable hover,
         // must be cleared before updating UI elements, which will update on hover
-        TooltipText.Text = "";
+        if (!TooltipSet)
+            TooltipText.Text = "";
 
         if (Tooltip.Image != null)
             Tooltip.Image.Position = InputManager.ScreenMousePos + new Vector2(15f, -15f);
@@ -54,6 +56,8 @@ static class UI
         foreach (List<UIElement> list in all)
             foreach (UIElement element in list)
                 element.Update();
+
+        TooltipSet = false;
     }
 
     public static void ScaleUp(float s)
@@ -117,7 +121,10 @@ static class UI
             relative.Y = Globals.WindowSize.Y - element.Height();
             element.Draw(relative);
         }
+    }
 
+    public static void DrawTooltip()
+    {
         // Resize tooltip box to fit text
         if (Tooltip.Image != null)
         {
@@ -136,5 +143,6 @@ static class UI
     public static void SetTooltipText(object obj)
     {
         TooltipText.Text = obj.ToString();
+        TooltipSet = true;
     }
 }

@@ -20,7 +20,8 @@ public class Farm
     public FarmState State { get; set; }
     public Building FarmBuilding { get; set; }
 
-    public float Timer { get; set; }
+    public float TimeRemaining { get; set; }
+    public float TimeTotal { get; set; }
 
     public Farm()
     {
@@ -49,7 +50,8 @@ public class Farm
             return;
 
         PlantId = plantId;
-        Timer = SOW_TIME;
+        TimeRemaining = SOW_TIME;
+        TimeTotal = SOW_TIME;
         State = FarmState.SOWING;
     }
 
@@ -57,49 +59,63 @@ public class Farm
     {
         Goods g = new(GoodsType.FOOD_PLANT, (int)plant);
         PlantId = g.GetId();
-        Timer = SOW_TIME; 
+        TimeRemaining = SOW_TIME;
+        TimeTotal = SOW_TIME;
         State = FarmState.SOWING;
     }
 
     public bool Sow(Person worker)
     {
-        // TODO: farming skill should make this faster
-        // TODO: level up farming
+        // Another worker finished sowing, signal sowing
+        if (State != FarmState.SOWING)
+            return true;
 
-        Timer -= Globals.Time;
-        if (Timer > 0f)
+        float adjustedTime = Globals.Time * GetFarmingSkillModifier(worker);
+
+        TimeRemaining -= adjustedTime;
+        if (TimeRemaining > 0f)
             return false;
         State = FarmState.GROWING;
-        Timer = GROW_TIME;
+        TimeRemaining = GROW_TIME;
+        TimeTotal = GROW_TIME;
         return true;
     }
 
     public bool Grow()
     {
-        Timer -= Globals.Time;
-        if (Timer > 0f)
+        // Growing will be ~30-120% speed based on soil quality
+        float adjustedTime = Globals.Time * FarmBuilding.Location.SoilQuality;
+
+        TimeRemaining -= adjustedTime;
+        if (TimeRemaining > 0f)
             return false;
 
         State = FarmState.GROWN;
-        Timer = HARVEST_TIME;
+        TimeRemaining = HARVEST_TIME;
+        TimeTotal = HARVEST_TIME;
         return true;
+    }
+
+    // +0.5% speed per farming level (caps at 100 farming = +50%)
+    public float GetFarmingSkillModifier(Person worker)
+    {
+        return 1 + (worker.Skills[(int)Skill.FARMING].level / 200f);
     }
 
     public bool Harvest(Person worker)
     {
-        // TODO: farming skill should make this go faster
-        // TODO: level up farming
-        float skillModifier = 1.0f;
+        float adjustedTime = Globals.Time * GetFarmingSkillModifier(worker);
 
         // TODO: assumes 1-to-1 relationship between time and plant quantity
-        worker.PersonalStockpile.Add(PlantId, Globals.Time * skillModifier);
+        worker.PersonalStockpile.Add(PlantId, adjustedTime);
 
-        Timer -= Globals.Time * skillModifier;
-        if (Timer > 0f)
+        TimeRemaining -= adjustedTime;
+        if (TimeRemaining > 0f)
             return false;
 
-        State = FarmState.UNPLANTED;
-        Timer = 0f;
+        State = FarmState.SOWING;
+        TimeRemaining = SOW_TIME;
+        TimeTotal = SOW_TIME;
         return true;
     }
 
