@@ -1,3 +1,12 @@
+public enum DietReq
+{
+    FAT,
+    VITAMINA,
+    VITAMINC,
+    IRON,
+    CALCIUM
+}
+
 public class Health
 {
     public const int MIN = 0;
@@ -22,7 +31,7 @@ public class Health
 
     public void DailyUpdate()
     {
-        int change = -100;
+        int change = -10;
         Fat = MathHelper.Clamp(Fat + change, MIN, MAX);
         VitaminA = MathHelper.Clamp(VitaminA + change, MIN, MAX);
         VitaminC = MathHelper.Clamp(VitaminC + change, MIN, MAX);
@@ -44,5 +53,36 @@ public class Health
         Iron += info.Iron;
         Calcium += info.Calcium;
         Mood = MathHelper.Clamp(Mood + info.Mood, MIN, MAX);
+    }
+
+    public DietReq GetDietReq()
+    {
+        int min = Fat;
+        DietReq req = DietReq.FAT;
+        if (VitaminA < min)
+        {
+            min = VitaminA;
+            req = DietReq.VITAMINA;
+        }
+
+        if (VitaminC < min)
+        {
+            min = VitaminC;
+            req = DietReq.VITAMINC;
+        }
+
+        if (Iron < min)
+        {
+            min = Iron;
+            req = DietReq.IRON;
+        }
+
+        if (Calcium < min)
+        {
+            min = Calcium;
+            req = DietReq.CALCIUM;
+        }
+
+        return req;
     }
 }

@@ -1,6 +1,6 @@
 public class SowTask : Task
 {
-    public Farm TargetFarm;
+    public Farm TargetFarm { get; set; }
 
     public SowTask() : base()
     {
@@ -60,7 +60,7 @@ public class SowTask : Task
 
 public class HarvestTask : Task
 {
-    public Farm TargetFarm;
+    public Farm TargetFarm { get; set; }
 
     public HarvestTask() : base()
     {

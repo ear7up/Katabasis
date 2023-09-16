@@ -72,6 +72,9 @@ public class Farm
 
         float adjustedTime = Globals.Time * GetFarmingSkillModifier(worker);
 
+        // Extremely low chance to level up
+        worker.GainExperience((int)Skill.FARMING, -99 * SkillLevel.INCREASE_CHANCE);
+
         TimeRemaining -= adjustedTime;
         if (TimeRemaining > 0f)
             return false;
@@ -104,10 +107,17 @@ public class Farm
 
     public bool Harvest(Person worker)
     {
+        // Another worker finished harvesting, signal complete
+        if (State != FarmState.GROWN)
+            return true;
+
         float adjustedTime = Globals.Time * GetFarmingSkillModifier(worker);
 
         // TODO: assumes 1-to-1 relationship between time and plant quantity
         worker.PersonalStockpile.Add(PlantId, adjustedTime);
+
+        // Extremely low chance to level up
+        worker.GainExperience((int)Skill.FARMING, -99 * SkillLevel.INCREASE_CHANCE);
 
         TimeRemaining -= adjustedTime;
         if (TimeRemaining > 0f)

@@ -323,6 +323,45 @@ public class Market
         return order;
     }
 
+    public MarketOrder HealthiestFood(Health health, int hunger)
+    {
+        // Buy enough to satisfy hunger, or whatever is available if there's not enough
+        MarketOrder order = new();
+        order.Buying = true;
+
+        // Find the greatest dietary deficiency
+        DietReq req = health.GetDietReq();
+        int choice = 0;
+        int choiceContent = 0;
+
+        // Find the available food with the greatest needed dietary content
+        foreach (int id in FoodInfo.Data.Keys)
+        {
+            float quantity = GetQuantitySold(id);
+            int satiation = GoodsInfo.GetSatiation(id);
+
+            // Not enough being sold to satisfy hunger
+            if (quantity * satiation < hunger)
+                continue;
+
+            int dietaryContent = FoodInfo.GetContent(id, req);
+            if (dietaryContent > choiceContent)
+            {
+                choice = id;
+                choiceContent = dietaryContent;
+            }
+        }
+
+        // Couldn't find anything
+        if (GetQuantitySold(choice) == 0)
+            return null;
+
+        int choiceSatiation = GoodsInfo.GetSatiation(choice);
+        order.Goods = Goods.FromId(choice, hunger / choiceSatiation);
+
+        return order;
+    }
+
     // Returns the cheapest food being sold in sufficient quantity to fulfill hunger
     // Will also buy raw meat by checking the price of the raw version against the satiation of the cooked version
     public MarketOrder CheapestFoodUncached(int hunger)

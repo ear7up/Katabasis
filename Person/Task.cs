@@ -178,12 +178,20 @@ public class Task
     // Pick a random task a person swith skill level `s` can perform
     public static Task RandomUsingSkill(Person p, SkillLevel s)
     {
-        // TODO: Are there non-production tasks that use skills?
+        // These skills are handled by specialized managers
+        if (s.skill == Skill.FARMING || s.skill == Skill.BUILDING)
+            return null;
 
         // Production tasks (e.g. use farming at a farm building to make food or animal products)
         List<int> goodsIds = GoodsProduction.GetGoodsMadeUsingSkill(s);
+        
         if (goodsIds.Count == 0)
-            goodsIds = GoodsProduction.GetGoodsMadeUsingSkill(new SkillLevel() { skill = Skill.NONE, level = 100 });
+        {
+            return null;
+
+            // Or get a skill without a level requirement
+            // goodsIds = GoodsProduction.GetGoodsMadeUsingSkill(new SkillLevel() { skill = Skill.NONE, level = 100 });
+        }
 
         // Remove all plants that aren't unlcoked from consideration
         goodsIds.RemoveAll(id => 
@@ -202,6 +210,10 @@ public class Task
 
     public static Task MostProfitableUsingSkill(SkillLevel s)
     {
+        // These skills are handled by specialized managers
+        if (s.skill == Skill.FARMING || s.skill == Skill.BUILDING)
+            return null;
+
         int id = GoodsProduction.MostProfitableUsing(s);
 
         if (id < 0)
@@ -649,6 +661,13 @@ public class TryToProduceTask : Task
         BuildingSubType bReq2 = Requirements.BuildingSubTypeRequirement;
         TileType tReq = Requirements.TileRequirement;
 
+        // Villagers can't directly choose what to farm, the player sets farm production
+        if (bReq == BuildingType.FARM)
+        {
+            Status.Failed = true;
+            return Status;
+        }
+
         // Queue up subtasks to find all the necessary prerequisites to produce the good
         if (Requirements.ToolRequirement != null)
         {
@@ -1058,7 +1077,14 @@ public class BuyFoodFromMarketTask : Task
         if (market != null && p.Hunger > Person.DAILY_HUNGER)
         {
             BuyFromMarketTask buyTask = new();
-            MarketOrder foodOrder = Globals.Model.Market.CheapestFood(p.Hunger);
+
+            // Buy healthy food if not very hungry, otherwise buy cheapest food
+            MarketOrder foodOrder = null;
+            if (p.Hunger < Person.STARVING)
+                foodOrder = Globals.Model.Market.HealthiestFood(p.HealthStatus, p.Hunger);
+            
+            if (foodOrder == null)
+                foodOrder = Globals.Model.Market.CheapestFood(p.Hunger);
 
             if (foodOrder != null)
             {

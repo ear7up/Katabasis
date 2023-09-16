@@ -31,7 +31,7 @@ public class GameModel
         Market = new();
         Market.SetAttributes(Player1.Kingdom);
 
-        const int NUM_PEOPLE = 3000;
+        const int NUM_PEOPLE = 100;
         for (int i = 0 ; i < NUM_PEOPLE; i++)
         {
             Person person = Person.CreatePerson(TileMap.Origin, TileMap.GetOriginTile());

@@ -316,12 +316,11 @@ public class GoodsProduction
                 new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_GOOSE)),
             levelRequirement: SkillLevel.Create(Skill.COOKING, 10)));
 
-        // farm + forest -> honey
+        // forest + forestry -> honey
         g.SubType = (int)Goods.FoodAnimal.HONEY;
         Requirements.Add(g.GetId(), new ProductionRequirements(
-            buildingRequirement: BuildingType.FARM,
             tileRequirement: TileType.FOREST,
-            levelRequirement: SkillLevel.Create(Skill.FARMING, 40)));
+            levelRequirement: SkillLevel.Create(Skill.FORESTRY, 40)));
 
         // ranch + cows -> milk
         g.SubType = (int)Goods.FoodAnimal.MILK;

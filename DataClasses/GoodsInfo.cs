@@ -292,6 +292,11 @@ public class GoodsInfo
         return Data[g.GetId()].Satiation;
     }
 
+    public static int GetSatiation(int id)
+    {
+        return Data[id].Satiation;
+    }
+
     public static int GetExperience(Goods g)
     {
         return Data[g.GetId()].Experience;

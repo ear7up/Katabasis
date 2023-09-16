@@ -17,7 +17,9 @@ public class ConstructionRequest
         get { return _ToBuild; }
         set { 
             _ToBuild= value;
-            Requirements = (ProductionRequirements)BuildingProduction.Requirements[value.Type];
+            Requirements = (ProductionRequirements)BuildingProduction.Requirements[value.GetId()];
+            if (Requirements == null)
+                Requirements = BuildingProduction.GetRequirements(value.Type);
         }
     }
 
@@ -227,7 +229,7 @@ public class ConstructionRequest
         foreach (Goods goods in GoodsRequired)
             ToBuild.Stockpile.Take(goods.GetId(), goods.Quantity);
 
-        if (ToBuild.Type == BuildingType.FARM)
+        if (ToBuild.Type == BuildingType.FARM || ToBuild.Type == BuildingType.FARM_RIVER)
             Globals.Model.FarmingingMgr.AddFarm(ToBuild);
     }
 }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public class FoodInfo
 {
-    private static Dictionary<int, FoodInfo> Data;
+    public static Dictionary<int, FoodInfo> Data;
 
     // % daily value per 100 grams
     public int Fat;
@@ -28,6 +28,22 @@ public class FoodInfo
     public static int Id(GoodsType type, int subType)
     {
         return Goods.GetId(type, subType, 0);
+    }
+
+    // Get the dietary content of the food associated with the goods id
+    public static int GetContent(int id, DietReq req)
+    {
+        FoodInfo info = Get(id);
+        if (info == null)
+            return 0;
+        return req switch {
+            DietReq.CALCIUM => info.Calcium,
+            DietReq.FAT => info.Fat,
+            DietReq.IRON => info.Iron,
+            DietReq.VITAMINA => info.VitaminA,
+            DietReq.VITAMINC => info.VitaminC,
+            _ => 0
+        };
     }
 
     public static void Init()

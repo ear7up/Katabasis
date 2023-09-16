@@ -226,16 +226,19 @@ public class Person : Entity, Drawable
         if (weightedRandomChoice.skill == Skill.BUILDING)
             task = Globals.Model.ConstructionQueue.GetTask(this);
 
-        // TODO: This will always return null until StartSowing is called (by the player setting the farm crops)
-        if (weightedRandomChoice.skill == Skill.FARMING)
+        else if (weightedRandomChoice.skill == Skill.FARMING)
             task = Globals.Model.FarmingingMgr.GetTask(this);
-        
-        if (task == null && r < PROFIT_SEEKING_CHANCE)
+
+        else if (task == null && r < PROFIT_SEEKING_CHANCE)
             task = Task.MostProfitableUsingSkill(weightedRandomChoice);
 
         // Some skills may have no completable tasks, so have a chance to not get stuck in a loop
         if (task == null)
             task = Task.RandomUsingSkill(this, weightedRandomChoice);
+
+        // No task could be found, try again next Update cycle
+        if (task == null)
+            return;
 
         // Catch initialization failures, try up to 10 times to pick another task
         TaskStatus initStatus = task.Init(this);
