@@ -389,7 +389,7 @@ public class Goods
         // Don't eat uncooked flour, you can get salmonella
         return 
             type == GoodsType.FOOD_ANIMAL || 
-            (type == GoodsType.FOOD_PLANT && subType != (int)Goods.FoodPlant.WHEAT) || 
+            type == GoodsType.FOOD_PLANT || 
             (type == GoodsType.FOOD_PROCESSED && subType != (int)Goods.ProcessedFood.FLOUR);
     }
 

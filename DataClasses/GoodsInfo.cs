@@ -53,7 +53,7 @@ public class GoodsInfo
                     DecayRate = 0f;
                 else
                     DecayRate = 0.005f;
-                Satiation = 10;
+                Satiation = 7;
                 UseRate = 1f;
                 DefaultPrice = 5f;
                 break;
@@ -65,6 +65,9 @@ public class GoodsInfo
                 // Scavenged wild plants are less satiating
                 if (subType == (int)Goods.FoodPlant.WILD_EDIBLE)
                     Satiation = 2;
+                // Wheat and barley are worse, they should be used for bread and beer
+                else if (subType == (int)Goods.FoodPlant.WHEAT || subType == (int)Goods.FoodPlant.BARLEY)
+                    Satiation = 1;
                 UseRate = 1f;
                 DefaultPrice = 2f;
                 break;
@@ -79,7 +82,7 @@ public class GoodsInfo
                 if (subType == (int)Goods.ProcessedFood.FLOUR)
                 {
                     DefaultPrice = 2.5f;
-                    Satiation = 2;
+                    Satiation = 0;
                 }
                 break;
             }
@@ -191,8 +194,13 @@ public class GoodsInfo
         // Value units are in seconds, so these are the same thing at init time
         TimeToProduce = DefaultPrice;
 
+        // Make food faster to produce
         if (Goods.IsEdible(type, subType))
             TimeToProduce /= 2;
+
+        // Make game take longer to make hunting take longer than farming animals
+        if (type == GoodsType.RAW_MEAT && subType == (int)Goods.RawMeat.RAW_GAME)
+            TimeToProduce *= 1.5f;
 
         // Try to limit seconds per production task
         DefaultProductionQuanity = 20f / TimeToProduce;
@@ -214,6 +222,9 @@ public class GoodsInfo
 
             // Each tool tier reduces use rate by 5%
             UseRate = 0.07f * (float)Math.Pow(0.95f, materialType);
+
+            if (materialType == (int)ToolMaterial.STONE)
+                Experience = 1;
         }
     }
 

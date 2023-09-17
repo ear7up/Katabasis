@@ -611,7 +611,7 @@ public class TryToProduceTask : Task
         // Reduce the number of wild animals when hunting
         if (ReqTile != null)
         {
-            if (ReqTile.Type == TileType.FOREST && Requirements.ToolRequirement.Tool == Goods.Tool.AXE)
+            if (ReqTile.Type == TileType.FOREST && Requirements.ToolRequirement?.Tool == Goods.Tool.AXE)
                 ReqTile.TakeResource();
             else if (ReqTile.Type == TileType.WILD_ANIMAL || ReqTile.Type == TileType.ELEPHANT)
                 ReqTile.TakeResource();
@@ -638,6 +638,11 @@ public class TryToProduceTask : Task
 
         // Finish by adding the completed goods to the person's stockpile
         p.PersonalStockpile.Add(Goods.GetId(), Goods.Quantity);
+
+        // Add any secondary goods produced alongside it
+        if (Requirements.Secondary != null)
+            p.PersonalStockpile.Add(Requirements.Secondary.Id, Requirements.Secondary.Ratio * Goods.Quantity);
+
         return true;
     }
 
@@ -933,7 +938,10 @@ public class SellTask : Task
     public override TaskStatus Execute(Person p)
     {
         foreach (Goods g in Goods)
-            Globals.Model.Market.PlaceSellOrder(MarketOrder.Create(p, false, g));
+        {
+            Globals.Model.Market.PlaceSellOrder(MarketOrder.Create(p, false, new Goods(g)));
+            p.PersonalStockpile.Take(g.GetId(), g.Quantity);
+        }
         Status.Complete = true;
         return Status;
     }
@@ -1093,19 +1101,23 @@ public class BuyFoodFromMarketTask : Task
                 // Don't order more than you can afford (max 80% of money)
                 float price = Globals.Model.Market.GetPrice(foodOrder.Goods.GetId());
                 foodOrder.Goods.Quantity = Math.Min(p.Money * 0.8f / price, foodOrder.Goods.Quantity);
-                buyTask.SetAttributes(market.Sprite.Position, foodOrder);
-                
-                // Cook right after buying (if raw)
-                subTasks.Enqueue(buyTask);
-                if (foodOrder.Goods.IsCookable())
-                {
-                    List<Goods> rawFood = new();
-                    rawFood.Add(new Goods(foodOrder.Goods));
-                    subTasks.Enqueue(CookTask.Create(rawFood));
-                }
 
-                // Eat right after buying
-                subTasks.Enqueue(new EatTask());
+                if (foodOrder.Goods.Quantity >= 0.1f)
+                {
+                    buyTask.SetAttributes(market.Sprite.Position, foodOrder);
+                    
+                    // Cook right after buying (if raw)
+                    subTasks.Enqueue(buyTask);
+                    if (foodOrder.Goods.IsCookable())
+                    {
+                        List<Goods> rawFood = new();
+                        rawFood.Add(new Goods(foodOrder.Goods));
+                        subTasks.Enqueue(CookTask.Create(rawFood));
+                    }
+
+                    // Eat right after buying
+                    subTasks.Enqueue(new EatTask());
+                }
             }
         }
         return Status;
@@ -1291,18 +1303,11 @@ public class CookTask : Task
         // Task may be created with a list of goods ready to cook
         if (ToCook.Count > 0)
             return Status;
-        
-        if (p.House == null)
-        {
-            Status.Complete = true;
-            Status.Failed = true;
-            return Status;
-        }
 
         // Try to cook as much as you want to eat, or two days worth if not very hungry
         float current = 0;
         float limit = Math.Max(p.Hunger, Person.DAILY_HUNGER * 2f);
-        foreach (Goods g in p.House.Stockpile)
+        foreach (Goods g in p.PersonalStockpile)
         {
             // No need to cook if food is already available, this food will be used by EatTask that follows
             if (g.IsEdible())
@@ -1311,7 +1316,7 @@ public class CookTask : Task
 
                 Goods req = new(g);
                 req.Quantity = (limit - current) / satiation;
-                p.House.Stockpile.Take(req);
+                p.PersonalStockpile.Take(req);
                 current += req.Quantity * satiation;
             }
             else if (g.IsCookable())
@@ -1323,7 +1328,7 @@ public class CookTask : Task
 
                 Goods req = new(g);
                 req.Quantity = (limit - current) / satiation;
-                p.House.Stockpile.Take(req);
+                p.PersonalStockpile.Take(req);
                 current += req.Quantity * satiation;
 
                 if (req.Quantity > 0f)

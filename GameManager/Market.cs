@@ -312,11 +312,14 @@ public class Market
         order.Goods = Goods.FromId(CheapestFoodId);
 
         int satiation = GoodsInfo.GetSatiation(order.Goods);
-        if (satiation == 0f)
+        if (satiation == 0f && order.Goods.IsCookable())
         {
             Goods uncooked = new Goods(order.Goods);
             satiation = GoodsInfo.GetSatiation(uncooked.Cook());
         }
+        
+        if (satiation == 0f)
+            return CheapestFoodUncached(hunger);
 
         order.Goods.Quantity = Math.Min(hunger / satiation, quantity);
 

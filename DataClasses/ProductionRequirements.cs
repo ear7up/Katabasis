@@ -7,6 +7,7 @@ public class ProductionRequirements
     public BuildingType BuildingRequirement;
     public BuildingSubType BuildingSubTypeRequirement;
     public GoodsRequirement GoodsRequirement;
+    public SecondaryGoods Secondary;
 
     public ProductionRequirements(
         SkillLevel levelRequirement = null, 
@@ -14,7 +15,8 @@ public class ProductionRequirements
         TileType tileRequirement = TileType.NONE,
         BuildingType buildingRequirement = BuildingType.NONE,
         BuildingSubType buildingSubTypeRequirement = BuildingSubType.NONE,
-        GoodsRequirement goodsRequirement = null)
+        GoodsRequirement goodsRequirement = null,
+        SecondaryGoods secondary = null)
     {
         SkillRequirement = levelRequirement;
         ToolRequirement = toolRequirement;
@@ -22,6 +24,7 @@ public class ProductionRequirements
         BuildingRequirement = buildingRequirement;
         BuildingSubTypeRequirement = buildingSubTypeRequirement;
         GoodsRequirement = goodsRequirement;
+        Secondary = secondary;
     }
 
     public override string ToString()
@@ -33,5 +36,17 @@ public class ProductionRequirements
             $"  {BuildingRequirement}\n" +
             $"  {GoodsRequirement}\n" +
             ")";
+    }
+}
+
+public class SecondaryGoods
+{
+    public int Id;
+    public float Ratio;
+
+    public SecondaryGoods(int id, float ratio)
+    {
+        Id = id;
+        Ratio = ratio;
     }
 }

@@ -259,11 +259,11 @@ public class Person : Entity, Drawable
         SkillLevel cooking = Skills[(int)Skill.COOKING];
         Skills.SetWeightAtIndex((int)Skill.COOKING, cooking.level * (1 + (3 * Hunger / STARVED_TO_DEATH)));
 
-        // 2x likelihood of choosing a task related to the skill used by your profession
+        // Increased likelihood of choosing a task related to the skill used by your profession
         if ((int)Profession <= (int)Skill.NONE)
         {
             SkillLevel profession = Skills[(int)Profession];
-            Skills.SetWeightAtIndex((int)profession.skill, 3 * profession.level);
+            Skills.SetWeightAtIndex((int)profession.skill, (int)(1.5f * profession.level));
         }
 
         // Recalculate after adjusting weights, including from level-ups
@@ -357,7 +357,7 @@ public class Person : Entity, Drawable
         GoToTask go = new();
         go.SetAttributes("Going home for the day", House.Sprite.Position);
         Tasks.Enqueue(go);
-        Tasks.Enqueue(new DepositInventoryTask());
+        //Tasks.Enqueue(new DepositInventoryTask());
         Tasks.Enqueue(new CookTask());
     }
 
@@ -464,51 +464,12 @@ public class Person : Entity, Drawable
     {
         List<Goods> extras = new();
 
-        // Usually your inventory gets deposited each day, unless you're homeless
-        // This will allow homeless people to sell things directly from their inventory
         foreach (Goods g in PersonalStockpile)
         {
-            if (!g.IsEdible() && !g.IsTool())
+            if (!g.IsTool() || g.SubType != (int)Profession.GetTool())
                 extras.Add(g);
         }
 
-        if (House == null)
-            return extras;
-
-        // Try to keep enough food to feed everyone in the household
-        float totalSatiation = House.Stockpile.TotalSatiation();
-        float keepSatiation = House.CurrentUsers.Count * Person.DAILY_HUNGER;
-
-        foreach (Goods g in House.Stockpile)
-        {
-            // Try to keep twice the production quantity of the good lying around
-            float keepAmount = GoodsInfo.GetDefaultProductionQuantity(g) * 2f;
-
-            // However, for food, just try to keep enough to feed everyone
-            float satiation = GoodsInfo.GetSatiation(g);
-
-            if (satiation > 0f)
-            {
-                float qtyToTake = Math.Max(0f, (totalSatiation - keepSatiation) / satiation);
-                qtyToTake = Math.Min(qtyToTake, g.Quantity);
-                
-                float qty = House.Stockpile.Take(g.GetId(), qtyToTake);
-                if (qty > 0f)
-                {
-                    PersonalStockpile.Add(new Goods(g, qty));
-                    extras.Add(new Goods(g, qty));
-                }
-            }
-            else if (g.Quantity > keepAmount)
-            {
-                float qty = House.Stockpile.Take(g.GetId(), g.Quantity - keepAmount);
-                if (qty > 0f)
-                {
-                    PersonalStockpile.Add(new Goods(g, qty));
-                    extras.Add(new Goods(g, qty));
-                }
-            }
-        }
         return extras;
     }
 
