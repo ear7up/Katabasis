@@ -1,89 +1,138 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
-public class GamePiece : UIElement
+public class GamePiece
 {
-    public int Team;
-    public int X;
-    public int Y;
+    [JsonIgnore]
+    public UIElement Element;
 
-    public GamePiece(int team, int x, int y)
+    private int _Team;
+    public int Team { 
+        get { return _Team; }
+        set { SetTeam(value); }
+    }
+    public int X { get; set; }
+    public int Y { get; set; }
+
+    public GamePiece()
     {
-        X = x;
-        Y = y;
-        SetTeam(team);
+        Element = new();
+    }
+
+    public static GamePiece Create(int team, int x, int y)
+    {
+        GamePiece piece = new() {
+            X = x,
+            Y = y
+        };
+        piece.SetTeam(team);
+        return piece;
     }
 
     public void SetTeam(int team)
     {
-        Team = team;
-        switch (Team)
+        _Team = team;
+        switch (_Team)
         {
-            case 1: Image = Sprite.Create(Sprites.SenetPiece1, Vector2.Zero); break;
-            case 2: Image = Sprite.Create(Sprites.SenetPiece2, Vector2.Zero); break;
-            default: Image = null; break;
+            case 1: Element.Image = Sprite.Create(Sprites.SenetPiece1, Vector2.Zero); break;
+            case 2: Element.Image = Sprite.Create(Sprites.SenetPiece2, Vector2.Zero); break;
+            default: Element.Image = null; break;
         }
 
-        Image?.SetScale(0.5f);
+        Element.Image?.SetScale(0.5f);
     }
 
     public void Update(bool active)
     {
-        base.Update();
+        Element.Update();
 
-        if (Image == null)
+        if (Element.Image == null)
             return;
 
         if (active && Team == 1)
-            Image.SpriteColor = Color.Orange;
+            Element.Image.SpriteColor = Color.Orange;
         else if (active && Team == 2)
-            Image.SpriteColor = Color.Blue;
+            Element.Image.SpriteColor = Color.Blue;
         else
-            Image.SpriteColor = Color.White;
+            Element.Image.SpriteColor = Color.White;
     }
 
-    public override void Draw(Vector2 offset)
+    public void Draw(Vector2 offset)
     {
-        if (Image == null)
-            return;
-
         // Each row starts farther to the left and has more space between elements
         int adjustOffsetX = Y * 35;
         float adjustPerspectiveX = 1 + (Y * 0.14f);
         Vector2 gridOffset = new(245 - adjustOffsetX + (X * 54 * adjustPerspectiveX), 115 + (Y * 58));
-        base.Draw(offset + gridOffset);
+        Element.Draw(offset + gridOffset);
+    }
+
+    public void DrawAtPos(Vector2 offset)
+    {
+        Element.Draw(Element.Position);
     }
 
     public void MoveForward(GamePiece[][] board, int n)
     {
-        int x = (X + n) % 10;
-        int y = Y + (X + n) / 10;
+        int x = X;
+        int y = Y;
+
+        if (Y % 2 == 0)
+        {
+            x += n;
+            if (x > 9)
+            {
+                y++;
+                x = 9 - (x % 10);
+            }
+        }
+        else
+        {
+            x -= n;
+            if (x < 0)
+            {
+                y++;
+                x = -x - 1;
+            }
+        }
 
         // Off the board
         if (y > 2)
+        {
+            SetTeam(0);
             return;
+        }
 
         // Swap with piece at move location
         GamePiece whereLanding = board[y][x];
         board[Y][X]= whereLanding;
         whereLanding.X = X;
         whereLanding.Y = Y;
+        whereLanding.Element.SetAnimation(Element.Position, 20f, 10f);
 
         board[y][x] = this;
         X = x;
         Y = y;
+
+        Element.SetAnimation(whereLanding.Element.Position, 20f, 10f);
     }
 }
 
 public class SenetGame
 {
-    public int Turn;
-    public GamePiece[][] Board;
+    public int Turn { get; set; }
+    public GamePiece[][] Board { get; set; }
+    public GamePiece Selected { get; set; }
 
-    public GamePiece[] Player1Pieces;
-    public GamePiece[] Player2Pieces;
-    public int Player1MovingIndex;
-    public int Player2MovingIndex;
+    public GamePiece[] Player1Pieces { get; set; }
+    public GamePiece[] Player2Pieces { get; set; }
+    public int Player1MovingIndex { get; set; }
+    public int Player2MovingIndex { get; set; }
+
+    public bool Unused {
+        get { return false; }
+        set { SetOnClick(); }
+    }
 
     public SenetGame()
     {
@@ -93,13 +142,21 @@ public class SenetGame
         {
             Board[y] = new GamePiece[10];
             for (int x = 0; x < 10; x++)
-                Board[y][x] = new GamePiece(0, x, y);
+                Board[y][x] = GamePiece.Create(0, x, y);
         }
 
-        Player1Pieces = new GamePiece[7];
-        Player2Pieces = new GamePiece[7];
+        Player1Pieces = new GamePiece[5];
+        Player2Pieces = new GamePiece[5];
 
         SetPieces();
+        SetOnClick();
+    }
+
+    public void SelectPiece(Object clicked)
+    {
+        GamePiece piece = (GamePiece)((UIElement)clicked).UserData;
+        if (Turn % 2 == 0 && piece.Team == 1)
+            Selected = piece;
     }
 
     public void Update()
@@ -108,9 +165,7 @@ public class SenetGame
         {
             foreach (GamePiece piece in row)
             {
-                bool active = 
-                    Turn % 2 == 0 && piece == Player1Pieces[Player1MovingIndex] ||
-                    Turn % 2 == 1 && piece == Player2Pieces[Player2MovingIndex] ;
+                bool active = (piece == Selected);
                 piece.Update(active);
             }
         }
@@ -124,8 +179,15 @@ public class SenetGame
     public void Draw(Vector2 offset)
     {
         foreach (GamePiece[] row in Board)
+        {
             foreach (GamePiece piece in row)
-                piece.Draw(offset);
+            {
+                if (piece.Element.AnimationDestination != Vector2.Zero)
+                    piece.DrawAtPos(offset);
+                else
+                    piece.Draw(offset);
+            }
+        }
     }
 
     public void ResetBoard()
@@ -135,9 +197,15 @@ public class SenetGame
         Player2MovingIndex = 0;
 
         foreach (GamePiece[] row in Board)
+        {
             foreach(GamePiece piece in row)
+            {
                 piece.SetTeam(0);
+                piece.Element.AnimationDestination = Vector2.Zero;
+            }
+        }
         SetPieces();
+        SetOnClick();
     }
 
     public void SetPieces()
@@ -145,16 +213,30 @@ public class SenetGame
         Array.Clear(Player1Pieces);
         Array.Clear(Player2Pieces);
 
-        // Place fourteen pawns, alternating team
-        for (int i = 0; i < 14; i++)
+        // Place ten pawns, alternating team
+        for (int i = 0; i < 10; i++)
         {
             GamePiece piece = Board[i / 10][i % 10];
             piece.SetTeam((i % 2) + 1);
 
             if (i % 2 == 0)
-                Player1Pieces[6 - i / 2] = piece;
+                Player1Pieces[4 - i / 2] = piece;
             else
-                Player2Pieces[6 - i / 2] = piece;
+                Player2Pieces[4 - i / 2] = piece;
+        }
+
+        Selected = Player1Pieces[Player1MovingIndex];
+    }
+
+    public void SetOnClick()
+    {
+        foreach (GamePiece[] row in Board)
+        {
+            foreach(GamePiece piece in row)
+            {
+                piece.Element.OnClick = SelectPiece;
+                piece.Element.UserData = piece;
+            }
         }
     }
 
@@ -180,14 +262,16 @@ public class SenetGame
 
     public void MovePlayer1()
     {
-        Player1Pieces[Player1MovingIndex].MoveForward(Board, Roll());
+        Selected.MoveForward(Board, Roll());
         Player1MovingIndex = (Player1MovingIndex + 1) % Player1Pieces.Length;
+        Selected = Player2Pieces[Player2MovingIndex];
     }
 
     public void MovePlayer2()
     {
-        Player2Pieces[Player2MovingIndex].MoveForward(Board, Roll());
+        Selected.MoveForward(Board, Roll());
         Player2MovingIndex = (Player2MovingIndex + 1) % Player2Pieces.Length;
+        Selected = Player1Pieces[Player1MovingIndex];
     }
 }
 
@@ -198,7 +282,6 @@ public class SenetPanel : CloseablePanel
     public const int PROGRESS_BAR_WIDTH = 300;
 
     public VBox MyLayout;
-    public SenetGame Game;
 
     public SenetPanel() : base(Sprites.SenetBoard)
     {
@@ -207,7 +290,7 @@ public class SenetPanel : CloseablePanel
         MyLayout.OnClick = null;
         Add(MyLayout);
 
-        Game = new();
+        Draggable = false;
 
         SetDefaultPosition(new Vector2(Globals.WindowSize.X / 2 - Width() / 2, 50f));
     }
@@ -222,7 +305,7 @@ public class SenetPanel : CloseablePanel
         if (Hidden)
             return;
 
-        Game.Update();
+        Globals.Model.Senet.Update();
         base.Update();
     }
 
@@ -231,7 +314,7 @@ public class SenetPanel : CloseablePanel
         if (Hidden)
             return;
         base.Draw(offset);
-        Game.Draw(offset);
+        Globals.Model.Senet.Draw(offset);
     }
 
     public override void ClosePanel(Object clicked)

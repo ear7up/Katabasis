@@ -11,6 +11,7 @@ public class GameModel
     public Map TileMap { get; set; }
     public ConstructionRequests ConstructionQueue { get; set; }
     public FarmingManager FarmingingMgr { get; set; }
+    public SenetGame Senet { get; set; }
 
     public GameModel()
     {
@@ -41,6 +42,7 @@ public class GameModel
 
         ConstructionQueue = new();
         FarmingingMgr = new();
+        Senet = new();
 
         Globals.Model = this;
     }
@@ -49,6 +51,8 @@ public class GameModel
     public void InitLoaded()
     {
         TileMap.ComputeNeighbors();
+        if (Senet == null)
+            Senet = new();
         Globals.Model = this;
     }
 }

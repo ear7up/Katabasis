@@ -189,7 +189,7 @@ public class Map
 
         // Place a random number of river tiles toward the center
         int length1 = Globals.Rand.Next(_mapDimensions.Y / 3, 3 * _mapDimensions.Y / 4);
-        for (int i = 0; i < length1; i++)
+        for (int i = 0; i < length1 && t != null; i++)
         {
             t.MakeRiver();
             t = t.Neighbors[startingFromTop ? (int)Cardinal.SW : (int)Cardinal.NE];
