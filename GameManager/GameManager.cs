@@ -35,6 +35,7 @@ public class GameManager
     private static BuildingInfoPanel buildingInfoPanel;
     private static EscapeMenuPanel escMenuPanel;
     private static FarmInfoPanel farmInfoPanel;
+    private static SenetPanel senetPanel;
     public static MarketPanel MarketPanel;
 
     private static RightClickMenu _rightClickMenu;
@@ -149,6 +150,8 @@ public class GameManager
             onClick: BuildGranary, hoverElement: new BuildingPriceDisplay(null, BuildingType.GRANARY)));
         bottomPanelGrid.SetContent(4, 1, new UIElement(Sprites.smithies[0], scale: 0.3f, 
             onClick: BuildSmithy, hoverElement: new BuildingPriceDisplay(null, BuildingType.SMITHY)));
+        bottomPanelGrid.SetContent(5, 1, new UIElement(Sprites.temples[0], scale: 0.3f, 
+            onClick: BuildTemple, hoverElement: new BuildingPriceDisplay(null, BuildingType.TEMPLE)));
 
         _bottomPanel.Add(bottomPanelGrid);
 
@@ -168,6 +171,7 @@ public class GameManager
         escMenuPanel = new();
         escMenuPanel.Draggable = false;
         farmInfoPanel = new();
+        senetPanel = new();
 
         MarketPanel = new();
         MarketPanel.Hide();
@@ -224,6 +228,7 @@ public class GameManager
     public void BuildWoodHouse(Object clicked) { Build(BuildingType.HOUSE, BuildingSubType.WOOD); }
     public void BuildGranary(Object clicked) { Build(BuildingType.GRANARY); }
     public void BuildSmithy(Object clicked) { Build(BuildingType.SMITHY); }
+    public void BuildTemple(Object clicked) { Build(BuildingType.TEMPLE); }
 
     public void BuildDecoration(Object clicked)
     {
@@ -374,6 +379,47 @@ public class GameManager
         _bottomPanel.SetDefaultPosition(new Vector2(
             _buttonPanel.Width(), Globals.WindowSize.Y - _bottomPanel.Height() + 250));
         _bottomPanel.Hidden = hidden;
+
+        hidden = senetPanel.Hidden;
+        senetPanel.Hidden = false;
+        senetPanel.SetDefaultPosition(new Vector2(Globals.WindowSize.X / 2 - senetPanel.Width() / 2, 50f));
+        senetPanel.Hidden = hidden;
+    }
+
+    public void HandleBuildingSelection()
+    {
+        if (Building.SelectedBuilding != null && InputManager.UnconsumedKeypress(Keys.Escape))
+        {
+            Building.SelectedBuilding = null;
+            InputManager.ConsumeKeypress(Keys.Escape, this);
+        }
+
+        if (Building.SelectedBuilding == null)
+        {
+            buildingInfoPanel.Update(null);
+            farmInfoPanel.Update(null);
+            senetPanel.Update(null);
+        }
+        else if (
+            Building.SelectedBuilding.Type == BuildingType.FARM ||
+            Building.SelectedBuilding.Type == BuildingType.FARM_RIVER)
+        {
+            farmInfoPanel.Update(Building.SelectedBuilding);
+        }
+        else if (Building.SelectedBuilding.Type == BuildingType.TEMPLE)
+        {
+            senetPanel.Update(Building.SelectedBuilding);
+        }
+        else if (
+            Building.SelectedBuilding.Type == BuildingType.MARKET || 
+            Building.SelectedBuilding.Type == BuildingType.CITY)
+        {
+            buildingInfoPanel.Update(null);
+        }
+        else
+        {
+            buildingInfoPanel.Update(Building.SelectedBuilding);
+        }
     }
 
     public void Update(GameTime gameTime)
@@ -429,33 +475,7 @@ public class GameManager
 
         _rightClickMenu.Update();
 
-        if (Building.SelectedBuilding != null && InputManager.UnconsumedKeypress(Keys.Escape))
-        {
-            Building.SelectedBuilding = null;
-            InputManager.ConsumeKeypress(Keys.Escape, this);
-        }
-
-        if (Building.SelectedBuilding == null)
-        {
-            buildingInfoPanel.Update(null);
-            farmInfoPanel.Update(null);
-        }
-        else if (
-            Building.SelectedBuilding.Type == BuildingType.FARM ||
-            Building.SelectedBuilding.Type == BuildingType.FARM_RIVER)
-        {
-            farmInfoPanel.Update(Building.SelectedBuilding);
-        }
-        else if (
-            Building.SelectedBuilding.Type == BuildingType.MARKET || 
-            Building.SelectedBuilding.Type == BuildingType.CITY)
-        {
-            buildingInfoPanel.Update(null);
-        }
-        else
-        {
-            buildingInfoPanel.Update(Building.SelectedBuilding);
-        }
+        HandleBuildingSelection();
 
         // Last panel to update (other panels or right-cick menu may consume Escape keypress)
         escMenuPanel.Update();
@@ -632,6 +652,7 @@ public class GameManager
         _peoplePanel.Draw(_peoplePanel.Position);
         buildingInfoPanel.Draw(buildingInfoPanel.Position);
         farmInfoPanel.Draw(farmInfoPanel.Position);
+        senetPanel.Draw(senetPanel.Position);
         _personPanel.Draw(_personPanel.Position);
         _tileInfoPanel.Draw(new Vector2(
             Globals.WindowSize.X - _tileInfoPanel.Width(), 260f));

@@ -47,6 +47,8 @@ static class Sprites
 	public static List<SpriteTexture> marketsCon;
 	public static List<SpriteTexture> smithies;
 	public static List<SpriteTexture> smithiesCon;
+	public static List<SpriteTexture> temples;
+	public static List<SpriteTexture> templesCon;
 
 	public static List<SpriteTexture> decorations;
 
@@ -117,6 +119,11 @@ static class Sprites
 	public static SpriteTexture Buy10;
 	public static SpriteTexture Buy100;
 
+	// Temple UI (Senet)
+	public static SpriteTexture SenetBoard;
+	public static SpriteTexture SenetPiece1;
+	public static SpriteTexture SenetPiece2;
+
 	// Map
 	public static List<SpriteTexture> desertTextures;
 	public static List<SpriteTexture> desertHillTextures;
@@ -176,6 +183,7 @@ static class Sprites
 		markets = LoadTextures("buildings/market", 7);
 		market1Composite = LoadTextures("buildings/market/composite", 4);
 		smithies = LoadTextures("buildings/smithy", 4);
+		temples = LoadTextures("buildings/temple", 1);
 
 		pavedTexture = LoadTexture("buildings/paved");
 		Paved = Sprite.Create(pavedTexture, Vector2.Zero);
@@ -191,6 +199,7 @@ static class Sprites
 		//citiesCon = LoadTextures("buildings/city/construction", 1);
 		marketsCon = LoadTextures("buildings/market/construction", 1);
 		smithiesCon = LoadTextures("buildings/smithy/construction", 1);
+		templesCon = LoadTextures("buildings/temple/construction", 1);
 
 		decorations = LoadTextures("decorations", 10);
 
@@ -261,6 +270,11 @@ static class Sprites
 		Buy10 = LoadTexture("UI_maybe/buttons/buy10");
 		Buy100 = LoadTexture("UI_maybe/buttons/buy100");
 
+		// UI - Temple (Senet)
+		SenetBoard = LoadTexture("UI_maybe/senet/board");
+		SenetPiece1 = LoadTexture("UI_maybe/senet/piece1");
+		SenetPiece2 = LoadTexture("UI_maybe/senet/piece2");
+
 		// Misc
 		Coin = LoadTexture("misc/coin");
 		Cursor = LoadTexture("misc/cursor");
@@ -293,6 +307,7 @@ static class Sprites
 			case BuildingType.MARKET: textures = markets; break;
 			case BuildingType.CITY: textures = cities; break;
 			case BuildingType.SMITHY: textures = smithies; break;
+			case BuildingType.TEMPLE: textures = temples; break;
 			default: textures = buildings; break;
 		}
 
@@ -314,6 +329,7 @@ static class Sprites
 			case BuildingType.MARKET: textures = marketsCon; break;
 			case BuildingType.CITY: textures = cities; break; // No con textures
 			case BuildingType.SMITHY: textures = smithiesCon; break;
+			case BuildingType.TEMPLE: textures = templesCon; break;
 			default: textures = buildings; break;
 		}
 

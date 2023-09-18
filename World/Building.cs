@@ -18,6 +18,7 @@ public enum BuildingType
     SMITHY,
     BARRACKS,
     GRANARY,
+    TEMPLE,
     NONE
 }
 

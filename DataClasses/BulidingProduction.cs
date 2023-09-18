@@ -86,7 +86,14 @@ public class BuildingProduction
                 new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.STONE, 60),
                 new Goods(GoodsType.TOOL, (int)Goods.Tool.FURNACE, 1),
                 and: true),
-            toolRequirement: new ToolRequirement(Goods.Tool.FURNACE),
+            toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
+            levelRequirement: SkillLevel.Create(Skill.BUILDING, 20)));
+
+        // building: stone -> temple
+        Requirements.Add(Building.GetId(BuildingType.TEMPLE), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.STONE, 60)),
+            toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 20)));
 
         // building: stone + wood -> granary

@@ -7,6 +7,7 @@ public class SoundEffects
     public static SoundEffect StoneButtonPress;
     public static SoundEffect BuildingSound;
     public static SoundEffect MoneySound;
+    public static SoundEffect DiceSound;
     public static List<SoundEffectInstance> Looping;
 
     public static void Load(ContentManager content)
@@ -15,6 +16,7 @@ public class SoundEffects
         StoneButtonPress = content.Load<SoundEffect>("audio/stoneButtonPress");
         BuildingSound = content.Load<SoundEffect>("audio/buildingSound");
         MoneySound = content.Load<SoundEffect>("audio/moneySound");
+        DiceSound = content.Load<SoundEffect>("audio/dice");
     }
 
     public static void Play(SoundEffect effect)
