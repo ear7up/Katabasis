@@ -123,6 +123,20 @@ static class Sprites
 	public static SpriteTexture SenetBoard;
 	public static SpriteTexture SenetPiece1;
 	public static SpriteTexture SenetPiece2;
+	public static SpriteTexture Anubis;
+	public static SpriteTexture AnubisHover;
+	public static SpriteTexture Horus;
+	public static SpriteTexture HorusHover;
+	public static SpriteTexture Isis;
+	public static SpriteTexture IsisHover;
+	public static SpriteTexture Osiris;
+	public static SpriteTexture OsirisHover;
+	public static SpriteTexture Ra;
+	public static SpriteTexture RaHover;
+	public static SpriteTexture Set;
+	public static SpriteTexture SetHover;
+	public static SpriteTexture Thoth;
+	public static SpriteTexture ThothHover;
 
 	// Map
 	public static List<SpriteTexture> desertTextures;
@@ -274,6 +288,20 @@ static class Sprites
 		SenetBoard = LoadTexture("UI_maybe/senet/board");
 		SenetPiece1 = LoadTexture("UI_maybe/senet/piece1");
 		SenetPiece2 = LoadTexture("UI_maybe/senet/piece2");
+		Anubis = LoadTexture("UI_maybe/senet/anubis");
+		AnubisHover = LoadTexture("UI_maybe/senet/anubisHover");
+		Horus = LoadTexture("UI_maybe/senet/horus");
+		HorusHover = LoadTexture("UI_maybe/senet/horusHover");
+		Isis = LoadTexture("UI_maybe/senet/isis");
+		IsisHover = LoadTexture("UI_maybe/senet/isisHover");
+		Osiris = LoadTexture("UI_maybe/senet/osiris");
+		OsirisHover = LoadTexture("UI_maybe/senet/osirisHover");
+		Ra = LoadTexture("UI_maybe/senet/ra");
+		RaHover = LoadTexture("UI_maybe/senet/raHover");
+		Set = LoadTexture("UI_maybe/senet/set");
+		SetHover = LoadTexture("UI_maybe/senet/setHover");
+		Thoth = LoadTexture("UI_maybe/senet/thoth");
+		ThothHover = LoadTexture("UI_maybe/senet/thothHover");
 
 		// Misc
 		Coin = LoadTexture("misc/coin");

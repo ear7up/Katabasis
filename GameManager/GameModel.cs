@@ -43,6 +43,7 @@ public class GameModel
         ConstructionQueue = new();
         FarmingingMgr = new();
         Senet = new();
+        Senet.ResetBoard(null);
 
         Globals.Model = this;
     }

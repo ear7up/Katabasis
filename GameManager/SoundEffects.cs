@@ -8,6 +8,8 @@ public class SoundEffects
     public static SoundEffect BuildingSound;
     public static SoundEffect MoneySound;
     public static SoundEffect DiceSound;
+    public static SoundEffect DripSound;
+    public static SoundEffect ElimSound;
     public static List<SoundEffectInstance> Looping;
 
     public static void Load(ContentManager content)
@@ -17,6 +19,8 @@ public class SoundEffects
         BuildingSound = content.Load<SoundEffect>("audio/buildingSound");
         MoneySound = content.Load<SoundEffect>("audio/moneySound");
         DiceSound = content.Load<SoundEffect>("audio/dice");
+        DripSound = content.Load<SoundEffect>("audio/drip");
+        ElimSound = content.Load<SoundEffect>("audio/positive");
     }
 
     public static void Play(SoundEffect effect)
