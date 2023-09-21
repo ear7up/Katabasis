@@ -19,6 +19,7 @@ public enum BuildingType
     BARRACKS,
     GRANARY,
     TEMPLE,
+    TANNERY,
     NONE
 }
 

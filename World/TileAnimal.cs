@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Animal : Entity, Drawable
 {
@@ -79,7 +80,10 @@ public class TileAnimal : Tile
         base.SetAttributes(coordinate, type, position, baseTexture);
 
         // AnimalType will replace tile type once a Ranch is built, allowing specific goods to be farmed
-        AnimalType = (TileType)Globals.Rand.Next((int)TileType.ANIMAL + 1, (int)TileType.WILD_ANIMAL);
+        List<TileType> animalTypes = Enum.GetValues(typeof(TileType)).OfType<TileType>().ToList();
+        animalTypes.RemoveAll(x => x <= TileType.ANIMAL || x >= TileType.WILD_ANIMAL);
+
+        AnimalType = (TileType)animalTypes[Globals.Rand.Next(animalTypes.Count)];
 
         SpriteTexture animalTexture = null;
         switch (AnimalType)

@@ -167,7 +167,9 @@ public class Task
                 {
                     Status.Failed = true;
                     Status.FailureReason = subStatus.FailureReason;
-                    Status.Complete = true;
+
+                    // Call complete to cleanup anything in limbo (e.g. Building.StopUsing)
+                    Status.Complete = Complete(p);
                 }
             }
             return subStatus;
@@ -712,7 +714,8 @@ public class TryToProduceTask : Task
             {
                 foreach (Goods g in Requirements.GoodsRequirement.Options.Values)
                 {
-                    Goods req = Goods.FromId(g.GetId(), Goods.Quantity);
+                    // Multiply quantity by ratio expressed in GoodsRequirement.Options[n].Quantity (default 1)
+                    Goods req = Goods.FromId(g.GetId(), Goods.Quantity * g.Quantity);
                     SourceGoodsTask task = new SourceGoodsTask();
                     task.SetAttributes(req);
                     subTasks.Enqueue(task);

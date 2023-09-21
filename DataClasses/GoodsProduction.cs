@@ -179,6 +179,7 @@ public class GoodsProduction
         // Some production tasks produce secondary materials, such as bones from hunted animals
         // farmed animal also produce bones that can be collected from ranches (not treated as a secondary resource)
         SecondaryGoods bones = new(Goods.GetId(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.BONE, 0), 0.2f);
+        SecondaryGoods hide = new(Goods.GetId(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.HIDE, 0), 0.2f);
 
         // TODO: Set quantity on goods in GoodsRequirement for non 1:1 conversions
 
@@ -227,12 +228,16 @@ public class GoodsProduction
             toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
             levelRequirement: SkillLevel.Create(Skill.CRAFTING, 70)));
 
-        // Leather requires animal hides, should it require a tannery building?
+
+        // technically, should probably require salting first, but that's a bit too hard
+        // crafting: hide + tannery + tannins -> leather
         g.SubType = (int)Goods.Crafted.LEATHER;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.HIDE)),
-            toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
+                new Goods(GoodsType.MATERIAL_ANIMAL, (int)Goods.MaterialAnimal.HIDE),
+                new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.TANNINS),
+                and: true),
+            buildingRequirement: BuildingType.TANNERY,
             levelRequirement: SkillLevel.Create(Skill.CRAFTING, 40)));
 
         // Linen is crafted from flax using a loom, pretty easy
@@ -298,11 +303,11 @@ public class GoodsProduction
                 new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_DUCK)),
             levelRequirement: SkillLevel.Create(Skill.COOKING, 10)));
 
-        // farming: farm + goose -> eggs
+        // farming: farm + [any bird] -> eggs
         g.SubType = (int)Goods.FoodAnimal.EGGS;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
-            tileRequirement: TileType.GOOSE,
+            tileRequirement: TileType.GOOSE | TileType.QUAIL | TileType.FOWL | TileType.DUCK,
             levelRequirement: SkillLevel.Create(Skill.FARMING, 10)));
 
         // cooking: raw fish -> fish
@@ -332,11 +337,11 @@ public class GoodsProduction
             tileRequirement: TileType.FOREST,
             levelRequirement: SkillLevel.Create(Skill.FORESTRY, 40)));
 
-        // farming: ranch + cows -> milk
+        // farming: ranch + [cow or goat] -> milk
         g.SubType = (int)Goods.FoodAnimal.MILK;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
-            tileRequirement: TileType.COW,
+            tileRequirement: TileType.COW | TileType.GOAT,
             levelRequirement: SkillLevel.Create(Skill.FARMING, 20)));
 
         // cooking: raw mutton -> mutton
@@ -344,6 +349,13 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_MUTTON)),
+            levelRequirement: SkillLevel.Create(Skill.COOKING, 20)));
+
+        // cooking: raw goat -> goat
+        g.SubType = (int)Goods.FoodAnimal.GOAT;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_GOAT)),
             levelRequirement: SkillLevel.Create(Skill.COOKING, 20)));
 
         // cooking: raw fowl -> fowl
@@ -434,11 +446,12 @@ public class GoodsProduction
             buildingRequirement: BuildingType.RANCH,
             levelRequirement: SkillLevel.Create(Skill.FARMING, 20)));
 
-        // farming: ranch + cow -> hide
+
+        // farming: ranch + [cow, goat, pig, or sheep] -> hide
         g.SubType = (int)Goods.MaterialAnimal.HIDE;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
-            tileRequirement: TileType.COW,
+            tileRequirement: TileType.COW | TileType.GOAT | TileType.PIG | TileType.SHEEP,
             levelRequirement: SkillLevel.Create(Skill.FARMING, 20)));
 
         // hunting: spear + elephant -> ivory
@@ -567,6 +580,13 @@ public class GoodsProduction
             toolRequirement: new ToolRequirement(Goods.Tool.AXE),
             levelRequirement: SkillLevel.Create(Skill.FORESTRY, 10)));
 
+        // forestry: forest + knife -> tannins (made form tree bark)
+        g.SubType = (int)Goods.MaterialPlant.TANNINS;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            tileRequirement: TileType.FOREST,
+            toolRequirement: new ToolRequirement(Goods.Tool.KNIFE),
+            levelRequirement: SkillLevel.Create(Skill.FORESTRY, 30)));
+
         // Not directly used, farming occurs through FarmingManager
         // farming: farm -> flax
         g.SubType = (int)Goods.MaterialPlant.FLAX;
@@ -586,7 +606,8 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
             tileRequirement: TileType.COW,
-            levelRequirement: SkillLevel.Create(Skill.FARMING, 20)));
+            levelRequirement: SkillLevel.Create(Skill.FARMING, 20),
+            secondary: hide));
 
         // farming: farm + ducks -> raw duck
         g.SubType = (int)Goods.RawMeat.RAW_DUCK;
@@ -605,7 +626,7 @@ public class GoodsProduction
         // hunting: wild animals + spear -> raw game
         g.SubType = (int)Goods.RawMeat.RAW_GAME;
         Requirements.Add(g.GetId(), new ProductionRequirements(
-            tileRequirement: TileType.WILD_ANIMAL,
+            tileRequirement: TileType.WILD_ANIMAL | TileType.ELEPHANT,
             toolRequirement: new ToolRequirement(Goods.Tool.SPEAR),
             levelRequirement: SkillLevel.Create(Skill.HUNTING, 10),
             secondary: bones));
@@ -617,12 +638,21 @@ public class GoodsProduction
             tileRequirement: TileType.GOOSE,
             levelRequirement: SkillLevel.Create(Skill.FARMING, 20)));
 
-        // farming: RANCH + sheep -> raw mutton
+        // farming: RANCH + sheep -> raw mutton + hide
         g.SubType = (int)Goods.RawMeat.RAW_MUTTON;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
             tileRequirement: TileType.SHEEP,
-            levelRequirement: SkillLevel.Create(Skill.FARMING, 20)));
+            levelRequirement: SkillLevel.Create(Skill.FARMING, 20),
+            secondary: hide));
+
+        // farming: RANCH + goat -> raw mutton + hide
+        g.SubType = (int)Goods.RawMeat.RAW_GOAT;
+        Requirements.Add(g.GetId(), new ProductionRequirements(
+            buildingRequirement: BuildingType.RANCH,
+            tileRequirement: TileType.GOAT,
+            levelRequirement: SkillLevel.Create(Skill.FARMING, 20),
+            secondary: hide));
 
         // farming: RANCH + fowl -> raw fowl
         g.SubType = (int)Goods.RawMeat.RAW_FOWL;
@@ -636,7 +666,8 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
             tileRequirement: TileType.PIG,
-            levelRequirement: SkillLevel.Create(Skill.FARMING, 20)));
+            levelRequirement: SkillLevel.Create(Skill.FARMING, 20),
+            secondary: hide));
 
         // farming: RANCH + quail -> raw qual
         g.SubType = (int)Goods.RawMeat.RAW_QUAIL;
@@ -806,9 +837,9 @@ public class GoodsProduction
             g.SubType = (int)type;
             Requirements.Add(g.GetId(), new ProductionRequirements(
                 goodsRequirement: new GoodsRequirement(
-                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.IRON),
-                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.BRONZE),
-                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.COPPER)),
+                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.IRON, 10),
+                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.BRONZE, 10),
+                    new Goods(GoodsType.SMITHED, (int)Goods.Smithed.COPPER, 10)),
                 buildingRequirement: BuildingType.SMITHY,
                 toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
                 levelRequirement: SkillLevel.Create(Skill.SMITHING, 30)));
@@ -818,14 +849,22 @@ public class GoodsProduction
         g.SubType = (int)Goods.War.SLING;
         r = (ProductionRequirements)Requirements[g.GetId()];
         r.GoodsRequirement = new GoodsRequirement(
-            new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.LEATHER));
+            new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.LEATHER, 3));
+        r.BuildingRequirement = BuildingType.NONE;
+        r.ToolRequirement = new ToolRequirement(Goods.Tool.KNIFE);
+
+        // crafting: leather + knife -> leather armor
+        g.SubType = (int)Goods.War.LEATHER_ARMOR;
+        r = (ProductionRequirements)Requirements[g.GetId()];
+        r.GoodsRequirement = new GoodsRequirement(
+            new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.LEATHER, 10));
         r.BuildingRequirement = BuildingType.NONE;
         r.ToolRequirement = new ToolRequirement(Goods.Tool.KNIFE);
 
         // shields may also be wood
         g.SubType = (int)Goods.War.SHIELD;
         r = (ProductionRequirements)Requirements[g.GetId()];
-        r.GoodsRequirement.Add(new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD));
+        r.GoodsRequirement.Add(new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 8));
 
         // Map skill enum values -> list of goods ids
         foreach (int goodsId in Requirements.Keys)

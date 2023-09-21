@@ -14,17 +14,31 @@ public enum TileDiscriminator
 
 public enum TileType
 {
-    DESERT,
-    RIVER,
-    FOREST,
-    VEGETATION,
-    OASIS,
-    HILLS,
+    NONE = 0,
+    DESERT = 1,
+    RIVER = 2,
+    FOREST = 4,
+    VEGETATION = 8,
+    OASIS = 16,
+    HILLS = 32,
+    DORMANT_VOLCANO = 64,
+    CAMP = 128,
+
     // Only add new animals between ANIMAL and WILD_ANIMAL
-    ANIMAL, PIG, COW, SHEEP, DUCK, DONKEY, GOAT, GAZELLE, /*GIRAFFE,*/ ELEPHANT, FOWL, GOOSE, QUAIL, WILD_ANIMAL,
-    DORMANT_VOLCANO,
-    CAMP,
-    NONE
+    ANIMAL = 256, 
+    PIG = 512, 
+    COW = 1024, 
+    SHEEP = 2048, 
+    DUCK = 4096, 
+    DONKEY = 8192, 
+    GOAT = 16384, 
+    GAZELLE = 32768, 
+    /*GIRAFFE,*/ 
+    ELEPHANT = 65536, 
+    FOWL = 131072,
+    GOOSE = 262144,
+    QUAIL = 524288,
+    WILD_ANIMAL = 1048576,
 }
 
 public enum Cardinal
@@ -122,7 +136,7 @@ public class Tile
 
         BaseSoilQuality = Globals.Rand.NextFloat(MIN_SOIL_QUALITY, MAX_SOIL_QUALITY);
 
-        if (type == TileType.VEGETATION)
+        if (type.HasFlag(TileType.VEGETATION))
             BaseSoilQuality += VEGETATION_SOIL_QUALITY_BONUS;
 
         SoilQuality = BaseSoilQuality;
@@ -134,10 +148,10 @@ public class Tile
     public static bool CanHaveResource(TileType type)
     {
         return 
-            type == TileType.WILD_ANIMAL ||
-            type == TileType.ELEPHANT ||
-            type == TileType.HILLS ||
-            type == TileType.FOREST;
+            type.HasFlag(TileType.WILD_ANIMAL) ||
+            type.HasFlag(TileType.ELEPHANT) ||
+            type.HasFlag(TileType.HILLS) ||
+            type.HasFlag(TileType.FOREST);
     }
 
     public void SetPlantType(Goods.FoodPlant plantType)
@@ -195,18 +209,18 @@ public class Tile
     public static bool IsAnimal(TileType type)
     {
         return
-            type == TileType.WILD_ANIMAL || 
-            type == TileType.COW || 
-            type == TileType.DONKEY ||
-            type == TileType.DUCK ||
-            type == TileType.ELEPHANT ||
-            type == TileType.FOWL ||
-            type == TileType.GOAT || 
-            type == TileType.GAZELLE ||
-            type == TileType.GOOSE ||
-            type == TileType.PIG ||
-            type == TileType.QUAIL ||
-            type == TileType.SHEEP;
+            type.HasFlag(TileType.WILD_ANIMAL) || 
+            type.HasFlag(TileType.COW) || 
+            type.HasFlag(TileType.DONKEY) ||
+            type.HasFlag(TileType.DUCK) ||
+            type.HasFlag(TileType.ELEPHANT) ||
+            type.HasFlag(TileType.FOWL) ||
+            type.HasFlag(TileType.GOAT) || 
+            type.HasFlag(TileType.GAZELLE) ||
+            type.HasFlag(TileType.GOOSE) ||
+            type.HasFlag(TileType.PIG) ||
+            type.HasFlag(TileType.QUAIL) ||
+            type.HasFlag(TileType.SHEEP);
     }
 
     public void SetTileType(TileType type)
@@ -220,10 +234,10 @@ public class Tile
             CurrentResourceQuantity = 1f;
         }
         
-        if (type != TileType.HILLS)
+        if (!type.HasFlag(TileType.HILLS))
             Minerals = MineralType.NONE;
 
-        if (type != TileType.VEGETATION)
+        if (!type.HasFlag(TileType.VEGETATION))
         {
             PlantId = 0;
             PlantIcon = null;
@@ -449,7 +463,7 @@ public class Tile
         }
         else if (displayType == DisplayType.PLACING_RANCH)
         {
-            if (Type == TileType.WILD_ANIMAL)
+            if (Type.HasFlag(TileType.WILD_ANIMAL))
                 BaseSprite.SpriteColor = Color.LightGreen;
         }
         else if (displayType == DisplayType.BUYING_TILE)
@@ -592,7 +606,7 @@ public class Tile
             DrawBase = false;
         
         // Adding a ranch converts the tile from WILD_ANIMAL to ANIMAL (no hunting)
-        if (building.Type == BuildingType.RANCH && Type == TileType.WILD_ANIMAL)
+        if (building.Type == BuildingType.RANCH && Type.HasFlag(TileType.WILD_ANIMAL))
             Type = ((TileAnimal)this).AnimalType;
     }
 
@@ -601,7 +615,7 @@ public class Tile
         foreach (Building b in Buildings)
             b.Update();
 
-        if (Type == TileType.WILD_ANIMAL || Type == TileType.ELEPHANT)
+        if (Type.HasFlag(TileType.WILD_ANIMAL) || Type.HasFlag(TileType.ELEPHANT))
         {
             // Replenish by 1% every 100 seconds
             CurrentResourceQuantity = Math.Min(

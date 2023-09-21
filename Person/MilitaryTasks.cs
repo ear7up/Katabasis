@@ -3,12 +3,6 @@
 // TrainTask - increase fighting ability
 using System.Runtime.CompilerServices;
 
-public class MilitaryTasks
-{
-
-
-}
-
 public class DeploymentTask : Task
 {
     // Serialized content

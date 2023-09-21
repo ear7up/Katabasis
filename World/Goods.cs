@@ -86,7 +86,7 @@ public class Goods
     public enum FoodAnimal
     {
         PORK, BEEF, MUTTON, DUCK, FOWL, 
-        GOOSE, QUAIL, GAME, FISH, 
+        GOOSE, QUAIL, GAME, FISH, GOAT,
 
         MILK, EGGS, HONEY
     }
@@ -116,7 +116,7 @@ public class Goods
 
     public enum MaterialPlant
     {
-        FLAX, WOOD, REEDS
+        FLAX, WOOD, REEDS, TANNINS
     }
 
     public enum MaterialNatural
@@ -134,7 +134,7 @@ public class Goods
 
     public enum War
     {
-        CHARIOT, SWORD, AXE, SLING, SHIELD, HELMET
+        CHARIOT, SWORD, AXE, SLING, SHIELD, HELMET, LEATHER_ARMOR
     }
 
     public enum Smithed
@@ -145,7 +145,7 @@ public class Goods
     public enum RawMeat
     {
         RAW_PORK, RAW_BEEF, RAW_MUTTON, RAW_DUCK, RAW_FOWL, 
-        RAW_GOOSE, RAW_QUAIL, RAW_GAME, RAW_FISH
+        RAW_GOOSE, RAW_QUAIL, RAW_GAME, RAW_FISH, RAW_GOAT,
     }
 
     public static int NUM_GOODS_TYPES = 0;

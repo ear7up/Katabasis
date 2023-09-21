@@ -29,7 +29,8 @@ public class TileFilter
 
         if (FilterTileType != TileType.NONE)
         {
-            if (t.Type != FilterTileType)
+            // TileType filter may allow multiple types, e.g. TileType.PIG | TileType.COW
+            if (!FilterTileType.HasFlag(t.Type))
                return null;
             if (FindResource && !t.HasResource())
                 return null;
