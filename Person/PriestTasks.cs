@@ -13,3 +13,4 @@
 // Writing horoscopes / calendars
 //      - People would buy these
 
+// Embalming the dead (should bodies be a good and mummies a crated good from bodies and linen?)
