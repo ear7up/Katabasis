@@ -334,7 +334,7 @@ public class IdleAtHomeTask : Task
         }
 
         // Move in the direction of the destination at default movespeed scaled by time elapsed
-        p.Position +=  direction * (Person.MOVE_SPEED * Globals.Time);
+        p.Position +=  direction * (p.MoveSpeed * Globals.Time);
 
         // If we're within 1/8th of the tile's height from the destination, 
         // choose a new one as the home tile's origin plus or minus half the width/height
@@ -1007,7 +1007,7 @@ public class GoToTask : Task
         }
 
         // Move in the direction of the destination at default movespeed scaled by time elapsed
-        p.Position += Direction * (Person.MOVE_SPEED * Globals.Time);
+        p.Position += Direction * (p.MoveSpeed * Globals.Time);
 
         // If we're within 1/8th of the tile's height from the destination, 
         // choose a new one as the home tile's origin plus or minus half the width/height

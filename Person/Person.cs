@@ -47,6 +47,7 @@ public class Person : Entity, Drawable
     public GenderType Gender { get; set; }
     public float Age { get; set; }
     public int Hunger { get; set; }
+    public float MoveSpeed { get; set; }
     public Health HealthStatus { get; set; }
     public float Money { get; set; }
     public bool IsDead { get; set; }
@@ -83,6 +84,7 @@ public class Person : Entity, Drawable
         SetImage(image);
         Name = NameGenerator.Random(Gender);
         Age = Globals.Rand.Next(10, 50);
+        MoveSpeed = Globals.Rand.NextFloat(0.8f, 1.2f) * Person.MOVE_SPEED;
         Profession = ProfessionType.NONE;
         House = null;
         SearchingForHouse = false;
@@ -248,6 +250,16 @@ public class Person : Entity, Drawable
         if (task == null)
             task = Task.RandomUsingSkill(this, weightedRandomChoice);
 
+        // Don't try to make things that we already have a ton of
+        if (task is TryToProduceTask)
+        {
+            int goodsId = ((TryToProduceTask)task).Goods.GetId();
+            int limit = GoodsInfo.GetMarketSoftLimit(goodsId);
+            float marketQty = Globals.Model.Market.GetQuantitySold(goodsId);
+            if (marketQty > limit)
+                task = null;
+        }
+
         // No task could be found, try again next Update cycle
         if (task == null)
             return;
@@ -261,7 +273,6 @@ public class Person : Entity, Drawable
         }
 
         Tasks.Enqueue(task);
-        //Tasks.Enqueue(new IdleAtHomeTask());
     }
 
     public void AdjustSkillWeights()

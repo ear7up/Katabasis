@@ -14,6 +14,7 @@ public class GoodsInfo
     public int Experience { get; protected set; }
     public float DefaultPrice { get; protected set; }
     public bool HasMaterial { get; protected set; }
+    public int MarketSoftLimit { get; protected set; }
 
     public GoodsInfo(Goods g) : this(g.Type, g.SubType, g.Material) { }
 
@@ -42,6 +43,9 @@ public class GoodsInfo
 
         // Whether the good has a material type
         HasMaterial = false;
+
+        // Try not to produce more if the market already has this much for sale
+        MarketSoftLimit = 300;
 
         // Set broad defaults by type (can be overriden later in Init function)
         switch (type)
@@ -108,6 +112,7 @@ public class GoodsInfo
                 {
                     HasMaterial = true;
                 }
+                MarketSoftLimit = 50;
                 break;
             }
             case GoodsType.CRAFT_GOODS: 
@@ -116,7 +121,7 @@ public class GoodsInfo
                 {
                     // Simple craft goods like bricks and pottery should be cheap
                     // Complex goods like jewelry and instruments should be expensive
-                    case Goods.Crafted.BRICKS: DefaultPrice = 1.8f; break;
+                    case Goods.Crafted.BRICKS: DefaultPrice = 1.8f; MarketSoftLimit = 3000; break;
                     case Goods.Crafted.PAPYRUS: DefaultPrice = 1.5f; break;
                     case Goods.Crafted.POTTERY: DefaultPrice = 2f; break;
                     case Goods.Crafted.JEWELRY: DefaultPrice = 8f; break;
@@ -166,7 +171,7 @@ public class GoodsInfo
             {
                 switch ((Goods.MaterialNatural)subType)
                 {
-                    case Goods.MaterialNatural.CLAY: DefaultPrice = 1.1f; break;
+                    case Goods.MaterialNatural.CLAY: DefaultPrice = 1.1f; MarketSoftLimit = 1000; break;
                     case Goods.MaterialNatural.FLINT: DefaultPrice = 1.2f; break;
                     case Goods.MaterialNatural.LAPIS_LAZULI: DefaultPrice = 7f; break;
                     case Goods.MaterialNatural.MALACHITE: DefaultPrice = 5.5f; break;
@@ -178,8 +183,8 @@ public class GoodsInfo
                     case Goods.MaterialNatural.RAW_SILVER: DefaultPrice = 8f; break;
                     case Goods.MaterialNatural.RAW_TIN: DefaultPrice = 1.5f; break;
                     case Goods.MaterialNatural.SALT: DefaultPrice = 2.5f; break;
-                    case Goods.MaterialNatural.SANDSTONE: DefaultPrice = 1.6f; break;
-                    case Goods.MaterialNatural.STONE: DefaultPrice = 1.1f; break;
+                    case Goods.MaterialNatural.SANDSTONE: DefaultPrice = 1.6f; MarketSoftLimit = 3000; break;
+                    case Goods.MaterialNatural.STONE: DefaultPrice = 1.1f; MarketSoftLimit = 3000; break;
                 }
                 break;
             }
@@ -187,7 +192,7 @@ public class GoodsInfo
             {
                 switch ((Goods.MaterialPlant)subType)
                 {
-                    case Goods.MaterialPlant.WOOD: DefaultPrice = 1.8f; break;
+                    case Goods.MaterialPlant.WOOD: DefaultPrice = 1.8f; MarketSoftLimit = 2000; break;
                     case Goods.MaterialPlant.FLAX: DefaultPrice = 2f; break;
                     case Goods.MaterialPlant.REEDS: DefaultPrice = 1f; break;
                 }
@@ -306,5 +311,12 @@ public class GoodsInfo
         if (goodsId < Data.Length)
             return Data[goodsId].HasMaterial;
         return false;
+    }
+
+    public static int GetMarketSoftLimit(int goodsId)
+    {
+        if (goodsId < Data.Length)
+            return Data[goodsId].MarketSoftLimit;
+        return 300;
     }
 }

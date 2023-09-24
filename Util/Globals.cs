@@ -17,7 +17,8 @@ public static class Globals
     public static GameModel Model { get; set; }
 
     // Write JSON indented, and preserve references (don't duplicate objects, use $ref instead)
-    public static JsonSerializerOptions JsonOptionsS = new() { 
+    public static JsonSerializerOptions JsonOptionsS = new() {
+        MaxDepth = 128, 
         WriteIndented = true, 
         Converters = { new Vector2Converter(), new PointConverter() },
         ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve };
@@ -26,8 +27,6 @@ public static class Globals
     public static JsonSerializerOptions JsonOptionsD = new() { 
         WriteIndented = true, 
         Converters = { 
-            //new TaskConverter(), 
-            //new TileConverter(), 
             new Vector2Converter(),
             new PointConverter()
         },

@@ -42,7 +42,7 @@ public class DeploymentTask : Task
         }
         Vector2 direction = Destination - p.Position;
         direction.Normalize();
-        p.Position += direction * Person.MOVE_SPEED * Globals.Time;
+        p.Position += direction * p.MoveSpeed * Globals.Time;
 
         Tile tile = Globals.Model.TileMap.TileAtPos(p.Position);
         tile?.Explore();

@@ -15,10 +15,13 @@ public class Player
         Person = new();
         Person.Money = 1000f;
 
+        // By default, players will be able to farm wheat, barley, and flax
+        // villagers may also gather wild edible plants from tiles with vegetation
         UnlockedPlants = new();
         UnlockPlant(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.WHEAT);
         UnlockPlant(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.BARLEY);
         UnlockPlant(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.WILD_EDIBLE);
+        UnlockPlant(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.FLAX);
     }
 
     public static Player Create(Tile startTile)
