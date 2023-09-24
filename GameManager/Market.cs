@@ -334,7 +334,7 @@ public class Market
 
         // Find the greatest dietary deficiency
         DietReq req = health.GetDietReq();
-        int choice = 0;
+        int choice = -1;
         int choiceContent = 0;
 
         // Find the available food with the greatest needed dietary content
@@ -356,7 +356,7 @@ public class Market
         }
 
         // Couldn't find anything
-        if (GetQuantitySold(choice) == 0)
+        if (choice == -1)
             return null;
 
         int choiceSatiation = GoodsInfo.GetSatiation(choice);
@@ -369,9 +369,9 @@ public class Market
     // Will also buy raw meat by checking the price of the raw version against the satiation of the cooked version
     public MarketOrder CheapestFoodUncached(int hunger)
     {
-        int minId = -1;
+        int maxId = -1;
         float reqQuantity = 0f;
-        float min = 9999f;
+        float max = 0f;;
         Goods lookup = new();
         lookup.Type = GoodsType.FOOD_PROCESSED;
 
@@ -401,23 +401,23 @@ public class Market
 
                 // Check if most efficient satiation per cost
                 float price = Prices[id];
-                if (satiation / price < min)
+                if (satiation / price > max)
                 {
-                    min = satiation / price;
-                    minId = id;
+                    max = satiation / price;
+                    maxId = id;
                     reqQuantity = hunger / satiation;
                 }
             }
         }
 
-        if (minId == -1)
+        if (maxId == -1)
             return null;
 
         // Cache the id of the cheapest food
-        CheapestFoodId = minId;
+        CheapestFoodId = maxId;
 
         MarketOrder buyOrder = new();
-        buyOrder.Goods = Goods.FromId(minId, reqQuantity);
+        buyOrder.Goods = Goods.FromId(maxId, reqQuantity);
         buyOrder.Buying = true;
 
         return buyOrder;

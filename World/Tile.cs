@@ -463,7 +463,7 @@ public class Tile
         }
         else if (displayType == DisplayType.PLACING_RANCH)
         {
-            if (Type.HasFlag(TileType.WILD_ANIMAL))
+            if (TileAnimal.Domesticateable(this))
                 BaseSprite.SpriteColor = Color.LightGreen;
         }
         else if (displayType == DisplayType.BUYING_TILE)

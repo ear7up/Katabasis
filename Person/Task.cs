@@ -104,6 +104,7 @@ public class Task
     // if they depend on knowing whether a task succeeded or failed
     public Action<Object> OnSuccess;
     public Action<Object> OnFailure;
+    public bool Cancelable;
 
     public Task()
     {
@@ -113,6 +114,7 @@ public class Task
         Status = new();
         Status.SetAttributes(this);
         Initialized = false;
+        Cancelable = false;
     }
 
     public virtual void SetAttributes(
@@ -165,16 +167,22 @@ public class Task
                 // Make the whole task fail when a subtask fails
                 if (subStatus.Failed)
                 {
-                    Status.Failed = true;
                     Status.FailureReason = subStatus.FailureReason;
 
-                    // Call complete to cleanup anything in limbo (e.g. Building.StopUsing)
-                    Status.Complete = Complete(p);
+                    // Call Fail to cleanup anything in limbo (e.g. Building.StopUsing)
+                    return Fail(p);
                 }
             }
             return subStatus;
         }
         return null;
+    }
+
+    public virtual TaskStatus Fail(Person p)
+    {
+        Status.Failed = true;
+        Status.Complete = true;
+        return Status;
     }
 
     // Pick a random task a person swith skill level `s` can perform
@@ -258,6 +266,15 @@ public class Task
         Status.Complete = true;
         return true;
     }
+
+    public virtual bool Cancel(Person p)
+    {
+        if (!Cancelable)
+            Console.WriteLine($"Tried to cancel uncancelable task {this}");
+        Status.Complete = true;
+        Status.Failed = true;
+        return true;
+    }
 }
 
 public class FindNewHomeTask : Task
@@ -278,9 +295,8 @@ public class FindNewHomeTask : Task
 
         if (newHome == null)
         {
-            Status.Failed = true;
             Status.FailureReason = "Can't find a house";
-            return Status;
+            return Fail(p);
         }
 
         p.Home = newHome;
@@ -458,10 +474,7 @@ public class SourceGoodsTask : Task
         // Try to produce the goods
         ProductionRequirements rule = (ProductionRequirements)GoodsProduction.Requirements[id];
         if (rule == null)
-        {
-            Status.Failed = true;
-            return Status;
-        }
+            return Fail(p);
 
         // null indicates no skill requirement to check
         SkillLevel req = rule.SkillRequirement;
@@ -473,7 +486,7 @@ public class SourceGoodsTask : Task
         }
         else
         {
-            Status.Failed = true;
+            return Fail(p);
         }
 
         return Status;
@@ -554,6 +567,13 @@ public class TryToProduceTask : Task
 
         Goods = new Goods(goods);
         Requirements = (ProductionRequirements)GoodsProduction.Requirements[goods.GetId()];
+    }
+
+    public static TryToProduceTask Create(Goods goods)
+    {
+        TryToProduceTask task = new();
+        task.SetAttributes(goods);
+        return task;
     }
 
     public override TaskStatus Execute(Person p)
@@ -653,16 +673,12 @@ public class TryToProduceTask : Task
         if (Requirements == null)
         {
             Console.Write("Requirements lookup failed for " + Goods.ToString());
-            Status.Failed = true;
-            return Status;
+            return Fail(p);
         }
 
         // Checks if the good is available, e.g. some crops must be unlocked
         if (!p.Owner.CanProduce(Goods))
-        {
-            Status.Failed = true;
-            return Status;
-        }
+            return Fail(p);
 
         BuildingType bReq = Requirements.BuildingRequirement;
         BuildingSubType bReq2 = Requirements.BuildingSubTypeRequirement;
@@ -670,10 +686,7 @@ public class TryToProduceTask : Task
 
         // Villagers can't directly choose what to farm, the player sets farm production
         if (bReq == BuildingType.FARM)
-        {
-            Status.Failed = true;
-            return Status;
-        }
+            return Fail(p);
 
         // Queue up subtasks to find all the necessary prerequisites to produce the good
         if (Requirements.ToolRequirement != null)
@@ -701,9 +714,8 @@ public class TryToProduceTask : Task
             found = Tile.Find(p.Home, filter);
             if (found == null)
             {
-                Status.Failed = true;
                 Status.FailureReason = "Failed to find " + filter.Describe();
-                return Status;
+                return Fail(p);
             }
         }
 
@@ -786,6 +798,13 @@ public class TryToProduceTask : Task
 
         Initialized = true;
         return Status;
+    }
+
+    public override TaskStatus Fail(Person p)
+    {
+        if (ReqBuilding != null)
+            ReqBuilding.StopUsing(p);
+        return base.Fail(p);
     }
 }
 
@@ -1233,8 +1252,7 @@ public class DepositInventoryTask : Task
     {
         if (p.House == null)
         {
-            Status.Complete = true;
-            Status.Failed = true;
+            Fail(p);
             return Status;
         }
 
@@ -1253,15 +1271,11 @@ public class DepositInventoryTask : Task
 public class CookTask : Task
 {
     // Serialized content
-    public float TimeToProduce { get; set; }
-    public float TimeSpent { get; set; }
     public Queue<Goods> ToCook { get; set; }
 
     public CookTask()
     {
         Discriminator = TaskDiscriminator.CookTask;
-        TimeSpent = 0f;
-        TimeToProduce = 0f;
         ToCook = new();
         SetAttributes("Cooking");
     }
@@ -1271,23 +1285,14 @@ public class CookTask : Task
         if (!Initialized)
             return Init(p);
 
-        if (ToCook.Count > 0)
-        {
-            Goods current = ToCook.Peek();
-            TimeToProduce = GoodsInfo.GetTime(current) * current.Quantity;
-            
-            TimeSpent += Globals.Time;
-            if (TimeSpent >= TimeToProduce)
-            {
-                ToCook.Dequeue();
-                current.Cook();
-                p.PersonalStockpile.Add(current);
-                TimeSpent = 0f;
-            }
-        }
+        // Try to complete subtasks first
+        TaskStatus subStatus = base.Execute(p);
+        if (subStatus != null && !subStatus.Complete)
+            return Status;
+    
+        if (subTasks.Count == 0)
+            Complete(p);
 
-        if (ToCook.Count == 0)
-            Status.Complete = true;
         return Status;
     }
 
@@ -1299,13 +1304,20 @@ public class CookTask : Task
         return task;
     }
 
+    public TaskStatus InitProduceTasks()
+    {
+        foreach (Goods g in ToCook)
+            subTasks.Enqueue(TryToProduceTask.Create(g.Cook()));
+        return Status;
+    }
+
     public override TaskStatus Init(Person p)
     {
         Initialized = true;
 
         // Task may be created with a list of goods ready to cook
         if (ToCook.Count > 0)
-            return Status;
+            return InitProduceTasks();
 
         // Try to cook as much as you want to eat, or two days worth if not very hungry
         float current = 0;
@@ -1318,8 +1330,7 @@ public class CookTask : Task
                 int satiation = GoodsInfo.GetSatiation(g);
 
                 Goods req = new(g);
-                req.Quantity = (limit - current) / satiation;
-                p.PersonalStockpile.Take(req);
+                req.Quantity = Math.Min(g.Quantity, (limit - current) / satiation);
                 current += req.Quantity * satiation;
             }
             else if (g.IsCookable())
@@ -1330,8 +1341,7 @@ public class CookTask : Task
                 int satiation = GoodsInfo.GetSatiation(cooked);
 
                 Goods req = new(g);
-                req.Quantity = (limit - current) / satiation;
-                p.PersonalStockpile.Take(req);
+                req.Quantity = Math.Min(g.Quantity, (limit - current) / satiation);
                 current += req.Quantity * satiation;
 
                 if (req.Quantity > 0f)
@@ -1341,7 +1351,7 @@ public class CookTask : Task
             if (current >= limit)
                 break;
         }
-        return Status;
+        return InitProduceTasks();
     }
 
     public override string Describe(string extra = "", bool debug = true, string depth = "")

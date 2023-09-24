@@ -12,6 +12,7 @@ public enum FarmState
 
 public class Farm
 {
+    public const float PRODUCED_QUANTITY = 300f;
     public const float SOW_TIME = 60f;
     public const float GROW_TIME = 300f;
     public const float HARVEST_TIME = 60f;
@@ -105,16 +106,21 @@ public class Farm
         return 1 + (worker.Skills[(int)Skill.FARMING].level / 200f);
     }
 
+    // Returns true when harvesting is done
     public bool Harvest(Person worker)
     {
         // Another worker finished harvesting, signal complete
         if (State != FarmState.GROWN)
             return true;
 
+        // Working time is accelerated by the FARMING skill
         float adjustedTime = Globals.Time * GetFarmingSkillModifier(worker);
 
+        // Get a portion of the total produced quantity
+        float quantity = adjustedTime * (PRODUCED_QUANTITY / HARVEST_TIME);
+
         // TODO: assumes 1-to-1 relationship between time and plant quantity
-        worker.PersonalStockpile.Add(PlantId, adjustedTime);
+        worker.PersonalStockpile.Add(PlantId, quantity);
 
         // Extremely low chance to level up
         worker.GainExperience((int)Skill.FARMING, -99 * SkillLevel.INCREASE_CHANCE);

@@ -86,7 +86,8 @@ public class Goods
     public enum FoodAnimal
     {
         PORK, BEEF, MUTTON, DUCK, FOWL, 
-        GOOSE, QUAIL, GAME, FISH, GOAT,
+        GOOSE, QUAIL, GAME, FISH,
+        GAZELLE, 
 
         MILK, EGGS, HONEY
     }
@@ -145,7 +146,8 @@ public class Goods
     public enum RawMeat
     {
         RAW_PORK, RAW_BEEF, RAW_MUTTON, RAW_DUCK, RAW_FOWL, 
-        RAW_GOOSE, RAW_QUAIL, RAW_GAME, RAW_FISH, RAW_GOAT,
+        RAW_GOOSE, RAW_QUAIL, RAW_GAME, RAW_FISH,
+        RAW_GAZELLE
     }
 
     public static int NUM_GOODS_TYPES = 0;
@@ -386,21 +388,24 @@ public class Goods
 
     public static bool IsEdible(GoodsType type, int subType)
     {
-        // Don't eat uncooked flour, you can get salmonella
-        return 
-            type == GoodsType.FOOD_ANIMAL || 
-            type == GoodsType.FOOD_PLANT || 
-            (type == GoodsType.FOOD_PROCESSED && subType != (int)Goods.ProcessedFood.FLOUR);
+        return GoodsInfo.GetSatiation(Goods.GetId(type, subType, 0)) > 0;
     }
 
     public bool IsCookable()
     {
-        return 
-            Type == GoodsType.RAW_MEAT || 
-            (Type == GoodsType.FOOD_PROCESSED && SubType == (int)Goods.ProcessedFood.FLOUR);
+        return IsCookable(Type, SubType);
     }
 
-    // Converts a cookable good into its cooked version
+    public static bool IsCookable(GoodsType type, int subType)
+    {
+        return 
+            type == GoodsType.RAW_MEAT || 
+            (type == GoodsType.FOOD_PROCESSED && subType == (int)Goods.ProcessedFood.FLOUR ||
+             type == GoodsType.FOOD_PLANT && subType == (int)Goods.FoodPlant.WHEAT ||
+             type == GoodsType.FOOD_PLANT && subType == (int)Goods.FoodPlant.BARLEY);
+    }
+
+    // Converts a cookable good into its cooked version - only to be used for lookups, not production
     public Goods Cook()
     {
         if (!IsCookable())
@@ -408,6 +413,10 @@ public class Goods
 
         if (Type == GoodsType.FOOD_PROCESSED && SubType == (int)Goods.ProcessedFood.FLOUR)
             SubType = (int)Goods.ProcessedFood.BREAD;
+        else if (Type == GoodsType.FOOD_PLANT && SubType == (int)Goods.FoodPlant.WHEAT)
+            SubType = (int)Goods.ProcessedFood.BREAD;
+        else if (Type == GoodsType.FOOD_PLANT && SubType == (int)Goods.FoodPlant.BARLEY)
+            SubType = (int)Goods.ProcessedFood.BEER;
         else if (Type == GoodsType.RAW_MEAT)
             Type = GoodsType.FOOD_ANIMAL;
         return this;

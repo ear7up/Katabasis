@@ -137,4 +137,17 @@ public class TileAnimal : Tile
     {
         return Globals.Title(AnimalType.ToString());
     }
+
+    public static bool Domesticateable(Tile tile)
+    {
+        if (tile.Type != TileType.WILD_ANIMAL)
+            return false;
+
+        // Can't domesticate some wild animals like gazelles and elephants
+        TileAnimal tileAnimal = (TileAnimal)tile;
+        TileType banned = TileType.ELEPHANT | TileType.GAZELLE;
+        if (banned.HasFlag(tileAnimal.AnimalType))
+            return false;
+        return true;
+    }
 }

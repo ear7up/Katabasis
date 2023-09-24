@@ -203,8 +203,20 @@ public class Person : Entity, Drawable
         SearchingForHouse = false;
     }
 
+    public void DiePermanently()
+    {
+        Orientation = MathHelper.ToRadians(90f);
+        Owner.Kingdom.PersonDied(this);
+    }
+
     public void ChooseNextTask()
     {
+        if (IsDead)
+        {
+            DiePermanently();
+            return;
+        }
+
         // If the Person's home is too populated, find a new home
         if (Home != null && Home.Population > Tile.MAX_POP)
         {
@@ -358,11 +370,11 @@ public class Person : Entity, Drawable
         go.SetAttributes("Going home for the day", House.Sprite.Position);
         Tasks.Enqueue(go);
         //Tasks.Enqueue(new DepositInventoryTask());
-        Tasks.Enqueue(new CookTask());
     }
 
     public void DailyTasks()
     {
+        Tasks.Enqueue(new CookTask());
         Tasks.Enqueue(new EatTask());
         Tasks.Enqueue(new SellAtMarketTask());
         Tasks.Enqueue(new BuyFoodFromMarketTask());
@@ -466,8 +478,10 @@ public class Person : Entity, Drawable
 
         foreach (Goods g in PersonalStockpile)
         {
-            if (!g.IsTool() || g.SubType != (int)Profession.GetTool())
-                extras.Add(g);
+            if (g.IsTool() && g.SubType == (int)Profession.GetTool())
+                continue;
+
+            extras.Add(g);
         }
 
         return extras;
@@ -569,8 +583,6 @@ public class Person : Entity, Drawable
             House.StopUsing(this);
         if (BuildingUsing != null)
             BuildingUsing.StopUsing(this);
-        Owner.Kingdom.PersonDied(this);
-        Globals.Ybuffer.Remove(this);
         IsDead = true;
     }
 

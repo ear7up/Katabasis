@@ -65,9 +65,9 @@ public class GoodsInfo
                 // Scavenged wild plants are less satiating
                 if (subType == (int)Goods.FoodPlant.WILD_EDIBLE)
                     Satiation = 2;
-                // Wheat and barley are worse, they should be used for bread and beer
+                // Don't eat raw wheat or barley
                 else if (subType == (int)Goods.FoodPlant.WHEAT || subType == (int)Goods.FoodPlant.BARLEY)
-                    Satiation = 1;
+                    Satiation = 0;
                 UseRate = 1f;
                 DefaultPrice = 2f;
                 break;
@@ -81,8 +81,12 @@ public class GoodsInfo
                 
                 if (subType == (int)Goods.ProcessedFood.FLOUR)
                 {
-                    DefaultPrice = 2.5f;
+                    DefaultPrice = 3f;
                     Satiation = 0;
+                }
+                else if (subType == (int)Goods.ProcessedFood.BREAD)
+                {
+                    Satiation = 10;
                 }
                 break;
             }
@@ -195,8 +199,11 @@ public class GoodsInfo
         TimeToProduce = DefaultPrice;
 
         // Make food faster to produce
-        if (Goods.IsEdible(type, subType))
+        if (Goods.IsCookable(type, subType))
             TimeToProduce /= 2;
+
+        if (type == GoodsType.FOOD_PLANT && subType == (int)Goods.FoodPlant.WILD_EDIBLE)
+            TimeToProduce *= 2;
 
         // Make game take longer to make hunting take longer than farming animals
         if (type == GoodsType.RAW_MEAT && subType == (int)Goods.RawMeat.RAW_GAME)
@@ -239,37 +246,6 @@ public class GoodsInfo
                 Goods.SubTypeFromid(id),
                 Goods.MaterialFromId(id));
         }
-        /*
-        Array goodsTypes = Enum.GetValues(typeof(GoodsType));
-        
-        foreach (int type in goodsTypes)
-        {
-            Type x = typeof(Goods.ProcessedFood);
-            switch ((GoodsType)type)
-            {
-                case GoodsType.FOOD_PROCESSED: x = typeof(Goods.ProcessedFood); break;
-                case GoodsType.FOOD_ANIMAL: x = typeof(Goods.FoodAnimal); break;
-                case GoodsType.FOOD_PLANT: x = typeof(Goods.FoodPlant); break;
-                case GoodsType.TOOL: x = typeof(Goods.Tool); break;
-                case GoodsType.MATERIAL_ANIMAL: x = typeof(Goods.MaterialAnimal); break;
-                case GoodsType.MATERIAL_PLANT: x = typeof(Goods.MaterialPlant); break;
-                case GoodsType.MATERIAL_NATURAL: x = typeof(Goods.MaterialNatural); break;
-                case GoodsType.CRAFT_GOODS: x = typeof(Goods.Crafted); break;
-                case GoodsType.WAR_GOODS: x = typeof(Goods.War); break;
-                case GoodsType.SMITHED: x = typeof(Goods.Smithed); break;
-                case GoodsType.RAW_MEAT: x = typeof(Goods.RawMeat); break;
-            }
-            
-            foreach (int subType in Enum.GetValues(x))
-            {
-                foreach (int materialType in Goods.GetMaterials(type))
-                {
-                    int id = Goods.GetId((GoodsType)type, subType, materialType);
-                    Data[id] = new GoodsInfo((GoodsType)type, subType);
-                }
-            }
-        }
-        */
     }
 
     // Get the time it takes to produce 1f unit of the good

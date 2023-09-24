@@ -143,7 +143,7 @@ public class GoodsProduction
 
         float cheapestMaterialCost = 99999999f;
         float materialCost = 0f;
-        foreach (Goods good in req.Options)
+        foreach (Goods good in req.Options.Values)
         {
             float reqPrice = Globals.Model.Market.Prices[good.GetId()];
             cheapestMaterialCost = Math.Min(cheapestMaterialCost, reqPrice);
@@ -165,7 +165,7 @@ public class GoodsProduction
         {
             SkillLevel slevel = new() { skill = (Skill)skillId, level = 100 };
             List<int> goodsIds = GetGoodsMadeUsingSkill(slevel);
-            goodsIds.OrderBy(x => CalculateProfitability(x, level: 100));
+            goodsIds = goodsIds.OrderByDescending(x => CalculateProfitability(x, level: 100)).ToList();
             MostProfitable.Add(goodsIds);
         }
     }
@@ -351,13 +351,6 @@ public class GoodsProduction
                 new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_MUTTON)),
             levelRequirement: SkillLevel.Create(Skill.COOKING, 20)));
 
-        // cooking: raw goat -> goat
-        g.SubType = (int)Goods.FoodAnimal.GOAT;
-        Requirements.Add(g.GetId(), new ProductionRequirements(
-            goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.RAW_MEAT, (int)Goods.RawMeat.RAW_GOAT)),
-            levelRequirement: SkillLevel.Create(Skill.COOKING, 20)));
-
         // cooking: raw fowl -> fowl
         g.SubType = (int)Goods.FoodAnimal.FOWL;
         Requirements.Add(g.GetId(), new ProductionRequirements(
@@ -424,11 +417,11 @@ public class GoodsProduction
             buildingRequirement: BuildingType.GRANARY,
             levelRequirement: SkillLevel.Create(Skill.COOKING, 10)));
 
-        // cooking: flour -> bread
+        // cooking: flour -> bread (2x)
         g.SubType = (int)Goods.ProcessedFood.BREAD;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.FOOD_PROCESSED, (int)Goods.ProcessedFood.FLOUR)),
+                new Goods(GoodsType.FOOD_PROCESSED, (int)Goods.ProcessedFood.FLOUR, 0.5f)),
             levelRequirement: SkillLevel.Create(Skill.COOKING, 20)));
 
         // cooking: grapes -> wine
@@ -643,14 +636,6 @@ public class GoodsProduction
         Requirements.Add(g.GetId(), new ProductionRequirements(
             buildingRequirement: BuildingType.RANCH,
             tileRequirement: TileType.SHEEP,
-            levelRequirement: SkillLevel.Create(Skill.FARMING, 20),
-            secondary: hide));
-
-        // farming: RANCH + goat -> raw mutton + hide
-        g.SubType = (int)Goods.RawMeat.RAW_GOAT;
-        Requirements.Add(g.GetId(), new ProductionRequirements(
-            buildingRequirement: BuildingType.RANCH,
-            tileRequirement: TileType.GOAT,
             levelRequirement: SkillLevel.Create(Skill.FARMING, 20),
             secondary: hide));
 
