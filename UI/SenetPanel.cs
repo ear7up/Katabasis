@@ -307,13 +307,25 @@ public class SenetGame
         }
     }
 
-    public int Roll()
+    public int Roll(SenetPanel panel)
     {
         int sum = 0;
         for (int i = 0; i < 4; i++)
             sum += Globals.Rand.Next(0, 2);
+
+        for (int i = 0; i < panel.Sticks.Elements.Count; i++)
+        {
+            if (i < sum)
+                panel.Sticks.Elements[i].Image.SpriteColor = Color.DarkRed;
+            else if (panel.Sticks.Elements[i].Image != null)
+                panel.Sticks.Elements[i].Image.SpriteColor = Color.White;
+        }
+
         if (sum == 0)
             sum = 5;
+
+        panel.RollNumber.Text = $"{sum}";
+
         return sum;
     }
 
@@ -420,7 +432,7 @@ public class SenetGame
 
     public void MovePlayer1(SenetPanel panel)
     {
-        Movement(panel, Selected, Selected.MoveForward(Board, Roll()));
+        Movement(panel, Selected, Selected.MoveForward(Board, Roll(panel)));
 
         for (int i = 0; i < Player2Pieces.Length; i++)
         {
@@ -432,7 +444,7 @@ public class SenetGame
 
     public void MovePlayer2(SenetPanel panel)
     {
-        Movement(panel, Selected, Selected.MoveForward(Board, Roll()));
+        Movement(panel, Selected, Selected.MoveForward(Board, Roll(panel)));
         
         for (int i = 0; i < Player1Pieces.Length; i++)
         {
@@ -451,22 +463,47 @@ public class SenetPanel : CloseablePanel
 
     public VBox MyLayout;
     public HBox godButtons;
+    public HBox Sticks;
+    public TextSprite RollNumber;
 
     public SenetPanel() : base(Sprites.SenetBoard)
     {
         MyLayout = new();
-        MyLayout.SetMargin(top: 373, left: 93);
+        //MyLayout.SetMargin(top: 373, left: 93);
+        MyLayout.SetMargin(top: 29, left: 25);
         MyLayout.OnClick = null;
         Add(MyLayout);
 
         Draggable = false;
 
+        // Roll button in the top-left
+        UIElement rollButton = new(Sprites.SenetRoll, hoverImage: Sprites.SenetRollHover, onClick: Move);
+        MyLayout.Add(rollButton);
+        rollButton.SetPadding(bottom: 10);
+
+        // Sticks to show the roll below the button
+        Sticks = new();
+        for (int s = 0; s < 4; s++)
+        {
+            UIElement stick = new(Sprites.SenetStick);
+            stick.SetPadding(right: 5);
+            Sticks.Add(stick);
+        }
+        
+        Sticks.Elements[3].SetPadding(right: 13);
+        RollNumber = new(Sprites.Font, hasDropShadow: false);
+        Sticks.Add(RollNumber);
+
+        Sticks.SetPadding(bottom: 192);
+        MyLayout.Add(Sticks);
+
+        // god buttons below the roll panel, aligned with the background image
         int i = 0;
         godButtons = new();
 
         UIElement osirisButton = new(Sprites.Osiris, hoverImage: Sprites.OsirisHover, onClick: Globals.Model.Senet.Guess);
         osirisButton.UserData = i++;
-        osirisButton.SetPadding(right: 5);
+        osirisButton.SetPadding(left: 65, right: 5);
         godButtons.Add(osirisButton);
 
         UIElement setButton = new(Sprites.Set, hoverImage: Sprites.SetHover, onClick: Globals.Model.Senet.Guess);
@@ -501,6 +538,11 @@ public class SenetPanel : CloseablePanel
         MyLayout.Add(godButtons);
 
         SetDefaultPosition(new Vector2(Globals.WindowSize.X / 2 - Width() / 2, 50f));
+    }
+
+    public void Move(Object clicked)
+    {
+        Globals.Model.Senet.Move(this);
     }
 
     public void Update(Building building)

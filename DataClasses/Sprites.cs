@@ -137,6 +137,9 @@ static class Sprites
 	public static SpriteTexture SetHover;
 	public static SpriteTexture Thoth;
 	public static SpriteTexture ThothHover;
+	public static SpriteTexture SenetStick;
+	public static SpriteTexture SenetRoll;
+	public static SpriteTexture SenetRollHover;
 
 	// Map
 	public static List<SpriteTexture> desertTextures;
@@ -302,6 +305,9 @@ static class Sprites
 		SetHover = LoadTexture("UI_maybe/senet/setHover");
 		Thoth = LoadTexture("UI_maybe/senet/thoth");
 		ThothHover = LoadTexture("UI_maybe/senet/thothHover");
+		SenetStick = LoadTexture("UI_maybe/senet/stick");
+		SenetRoll = LoadTexture("UI_maybe/senet/rollButton");
+		SenetRollHover = LoadTexture("UI_maybe/senet/rollButtonHover");
 
 		// Misc
 		Coin = LoadTexture("misc/coin");

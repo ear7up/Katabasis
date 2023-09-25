@@ -36,7 +36,7 @@ public class TextSprite : UIElement, Drawable
         if (HasDropShadow)
             FontColor = Color.White;
         else
-            FontColor = Color.Blue;
+            FontColor = Color.Black;
 
         Transparency = 1f;
     }
