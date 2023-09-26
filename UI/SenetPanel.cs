@@ -60,7 +60,7 @@ public class GamePiece
 
     public void SetClearTimer()
     {
-        ClearTimer = 3f;
+        ClearTimer = 1.5f;
     }
 
     public void Update(bool active)
@@ -99,11 +99,10 @@ public class GamePiece
         Element.Draw(Element.Position);
     }
 
-    public int MoveForward(GamePiece[][] board, int n)
+    public Point CalcNewTilePosition(int n)
     {
         int x = X;
         int y = Y;
-        int tile = (Y * 10) + X + n + 1;
 
         if (Y % 2 == 0)
         {
@@ -124,24 +123,37 @@ public class GamePiece
             }
         }
 
+        return new Point(x, y);
+    }
+
+    public int CalcNewTileNumber(int n)
+    {
+        return (Y * 10) + X + n + 1;
+    }
+
+    public int MoveForward(GamePiece[][] board, int n)
+    {
+        int tile = CalcNewTileNumber(n);
+        Point newPos = CalcNewTilePosition(n);
+
         // Off the board
-        if (y > 2)
+        if (newPos.Y > 2)
             return tile;
 
         // Swap with piece at move location
-        GamePiece whereLanding = board[y][x];
+        GamePiece whereLanding = board[newPos.Y][newPos.X];
         board[Y][X]= whereLanding;
         whereLanding.X = X;
         whereLanding.Y = Y;
         whereLanding.Element.SetAnimation(Element.Position, 20f, 10f);
 
-        board[y][x] = this;
-        X = x;
-        Y = y;
+        board[newPos.Y][newPos.X] = this;
+        X = newPos.X;
+        Y = newPos.Y;
 
         Element.SetAnimation(whereLanding.Element.Position, 20f, 10f);
-        if (tile >= (int)SenetGame.SenetSpecialTiles.ELIM1 && tile <= (int)SenetGame.SenetSpecialTiles.ELIM2)
-            Element.AnimationOnComplete = SetClearTimer;
+        if (tile > 30 || (tile >= (int)SenetGame.SenetSpecialTiles.ELIM1 && tile <= (int)SenetGame.SenetSpecialTiles.ELIM2))
+            SetClearTimer();
 
         return tile;
     }
@@ -150,6 +162,7 @@ public class GamePiece
 public class SenetGame
 {
     public int Turn { get; set; }
+    public int AiChoices { get; set; }
     public GameState State { get; set; }
     public GamePiece[][] Board { get; set; }
     public GamePiece Selected { get; set; }
@@ -198,8 +211,8 @@ public class SenetGame
         if (InputManager.UnconsumedKeypress(Keys.R))
             ResetBoard(panel);
 
-        if (State != GameState.PLAYING)
-            return;
+        if (Turn % 2 == 1 && Selected == null || Selected.Team == 0)
+            AiSelectBestPiece();
 
         foreach (GamePiece[] row in Board)
         {
@@ -209,6 +222,9 @@ public class SenetGame
                 piece.Update(active);
             }
         }
+
+        if (State != GameState.PLAYING)
+            return;
 
         if (InputManager.UnconsumedKeypress(Keys.N))
             Move(panel);
@@ -231,6 +247,7 @@ public class SenetGame
     public void ResetBoard(SenetPanel panel)
     {
         Turn = 0;
+        AiChoices = 7;
         State = GameState.PLAYING;
         HiddenPosition = Globals.Rand.Next(0, 7);
 
@@ -267,6 +284,7 @@ public class SenetGame
     {
         // Draw some fancy graphics and reveal the hidden god
         State = GameState.WON;
+        
     }
 
     public void Lose()
@@ -331,7 +349,8 @@ public class SenetGame
 
     public void Move(SenetPanel panel)
     {
-        if (Selected.Team == 0)
+        // Can't move pieces once they're off the board or waiting to be cleared
+        if (Selected.Team == 0 || Selected.ClearTimer != 0f)
             return;
 
         SoundEffects.Play(SoundEffects.DiceSound);
@@ -354,7 +373,10 @@ public class SenetGame
     {
         // Only eliminate on the player side, not the CPU
         if (Turn % 2 != 0)
+        {
+            AiEliminate(n);
             return;
+        }
 
         List<UIElement> candidates = new();
 
@@ -378,11 +400,22 @@ public class SenetGame
         }
     }
 
+    public void AiEliminate(int n)
+    {
+        AiChoices -= n;
+
+        // AI knows which panels is correct
+        if (AiChoices <= 1)
+            Lose();
+    }
+
     public void Randomize(SenetPanel panel)
     {
-        // TODO: seperate randomize/eliminate for CPU and player
         if (Turn % 2 != 0)
+        {
+            AiChoices = 7;
             return;
+        }
 
         HiddenPosition = Globals.Rand.Next(0, 7);
         foreach (UIElement button in panel.godButtons.Elements)
@@ -405,11 +438,7 @@ public class SenetGame
             default: return;
         }
 
-        if (tile > 30)
-        {
-            piece.Clear();
-            CheckVictoryCondition();
-        }
+        CheckVictoryCondition();
     }
 
     // One victory condition is to clear all pieces
@@ -440,6 +469,51 @@ public class SenetGame
             if (Selected.Team != 0 && Selected.ClearTimer == 0f)
                 break;
         }
+
+        AiSelectBestPiece();
+    }
+
+    public void AiSelectBestPiece()
+    {
+        int count = 0;
+        foreach (GamePiece piece in Player2Pieces)
+            if (piece.Team != 0 && piece.ClearTimer == 0f)
+                count++;
+
+        GamePiece choice = null;
+        foreach (GamePiece piece in Player2Pieces)
+        {
+            if (piece.Team == 0 || piece.ClearTimer != 0f)
+                continue;
+
+            // Moving 2 steps is a 6/16 chance, try to 
+            Point newPos = piece.CalcNewTilePosition(2);
+            int tile = piece.CalcNewTileNumber(2);
+
+            // Avoid moving pieces likely to hit the randomize tile
+            if (tile == (int)SenetSpecialTiles.RANDOMIZE)
+                continue;
+
+            // Max y coordinate, max x coordinate for even rows, min for the odd row (middle goes backwards)
+            if (choice == null || piece.Y > choice.Y ||
+                (piece.Y == choice.Y && piece.Y != 1 && piece.X > choice.X) ||
+                (piece.Y == choice.Y && piece.Y == 1 && piece.X < choice.X))
+            {
+                choice = piece;
+            }
+
+            // Aggressively try to swap with the opponent's pieces
+            if (Board[newPos.Y][newPos.X].Team == 1)
+            {
+                choice = piece; 
+                break;
+            }
+        }
+
+        if (choice != null)
+            Selected = choice;
+        else
+            CheckVictoryCondition();
     }
 
     public void MovePlayer2(SenetPanel panel)
@@ -464,6 +538,7 @@ public class SenetPanel : CloseablePanel
     public VBox MyLayout;
     public HBox godButtons;
     public HBox Sticks;
+    public TextSprite WinLoss;
     public TextSprite RollNumber;
 
     public SenetPanel() : base(Sprites.SenetBoard)
@@ -476,9 +551,12 @@ public class SenetPanel : CloseablePanel
 
         Draggable = false;
 
+        HBox topPart = new();
+        VBox rollLayout = new();
+
         // Roll button in the top-left
         UIElement rollButton = new(Sprites.SenetRoll, hoverImage: Sprites.SenetRollHover, onClick: Move);
-        MyLayout.Add(rollButton);
+        rollLayout.Add(rollButton);
         rollButton.SetPadding(bottom: 10);
 
         // Sticks to show the roll below the button
@@ -495,49 +573,61 @@ public class SenetPanel : CloseablePanel
         Sticks.Add(RollNumber);
 
         Sticks.SetPadding(bottom: 192);
-        MyLayout.Add(Sticks);
+        rollLayout.Add(Sticks);
+        rollLayout.SetPadding(right: 50);
+
+        WinLoss = new(Sprites.Font);
+
+        topPart.Add(rollLayout);
+        topPart.Add(WinLoss);
+        MyLayout.Add(topPart);
 
         // god buttons below the roll panel, aligned with the background image
         int i = 0;
         godButtons = new();
 
-        UIElement osirisButton = new(Sprites.Osiris, hoverImage: Sprites.OsirisHover, onClick: Globals.Model.Senet.Guess);
+        UIElement osirisButton = new(Sprites.Osiris, hoverImage: Sprites.OsirisHover, onClick: Guess);
         osirisButton.UserData = i++;
         osirisButton.SetPadding(left: 65, right: 5);
         godButtons.Add(osirisButton);
 
-        UIElement setButton = new(Sprites.Set, hoverImage: Sprites.SetHover, onClick: Globals.Model.Senet.Guess);
+        UIElement setButton = new(Sprites.Set, hoverImage: Sprites.SetHover, onClick: Guess);
         setButton.UserData = i++;
         setButton.SetPadding(right: 15);
         godButtons.Add(setButton);
 
-        UIElement raButton = new(Sprites.Ra, hoverImage: Sprites.RaHover, onClick: Globals.Model.Senet.Guess);
+        UIElement raButton = new(Sprites.Ra, hoverImage: Sprites.RaHover, onClick: Guess);
         raButton.UserData = i++;
         raButton.SetPadding(right: 13);
         godButtons.Add(raButton);
 
-        UIElement thothButton = new(Sprites.Thoth, hoverImage: Sprites.ThothHover, onClick: Globals.Model.Senet.Guess);
+        UIElement thothButton = new(Sprites.Thoth, hoverImage: Sprites.ThothHover, onClick: Guess);
         thothButton.UserData = i++;
         thothButton.SetPadding(right: 8);
         godButtons.Add(thothButton);
 
-        UIElement isisButton = new(Sprites.Isis, hoverImage: Sprites.IsisHover, onClick: Globals.Model.Senet.Guess);
+        UIElement isisButton = new(Sprites.Isis, hoverImage: Sprites.IsisHover, onClick: Guess);
         isisButton.UserData = i++;
         isisButton.SetPadding(right: 10);
         godButtons.Add(isisButton);
 
-        UIElement anubisButton = new(Sprites.Anubis, hoverImage: Sprites.AnubisHover, onClick: Globals.Model.Senet.Guess);
+        UIElement anubisButton = new(Sprites.Anubis, hoverImage: Sprites.AnubisHover, onClick: Guess);
         anubisButton.UserData = i++;
         anubisButton.SetPadding(right: 8);
         godButtons.Add(anubisButton);
 
-        UIElement horusButton = new(Sprites.Horus, hoverImage: Sprites.HorusHover, onClick: Globals.Model.Senet.Guess);
+        UIElement horusButton = new(Sprites.Horus, hoverImage: Sprites.HorusHover, onClick: Guess);
         horusButton.UserData = i++;
         godButtons.Add(horusButton);
 
         MyLayout.Add(godButtons);
 
         SetDefaultPosition(new Vector2(Globals.WindowSize.X / 2 - Width() / 2, 50f));
+    }
+
+    public void Guess(Object clicked)
+    {
+        Globals.Model.Senet.Guess(clicked);
     }
 
     public void Move(Object clicked)
@@ -558,6 +648,14 @@ public class SenetPanel : CloseablePanel
         SetDraggable();
 
         Globals.Model.Senet.Update(this);
+
+        switch (Globals.Model.Senet.State)
+        {
+            case GameState.PLAYING: WinLoss.Text = ""; break;
+            case GameState.WON: WinLoss.Text = "Victory!"; break;
+            case GameState.LOST: WinLoss.Text = "Defeat."; break;
+        }
+
         base.Update();
     }
 
