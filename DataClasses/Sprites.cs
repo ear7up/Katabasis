@@ -22,6 +22,7 @@ static class Sprites
 	public static SpriteFont Font { get; private set; }
 	public static SpriteFont Font2 { get; private set; }
 	public static SpriteFont SmallFont { get; private set; }
+	public static SpriteFont FontAgencyL { get; private set; }
 	
 	// Buildings
 	public static List<SpriteTexture> buildings;
@@ -175,7 +176,8 @@ static class Sprites
 		
 		Font = content.Load<SpriteFont>("Font");
 		Font2 = content.Load<SpriteFont>("Gladius-z8AV3");
-		SmallFont = content.Load<SpriteFont>("SmallFont");
+		SmallFont = content.Load<SpriteFont>("agencyr_small");
+		FontAgencyL = content.Load<SpriteFont>("agencyr_large");
 
 		// Map textures
         desertTextures = Sprites.LoadTextures("desert/flat", 18);

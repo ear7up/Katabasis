@@ -11,6 +11,7 @@ public class TextSprite : UIElement, Drawable
     public string Text { get; set; }
 
     public Color FontColor;
+    public Color DropShadowColor;
     public bool HasDropShadow { get; set; }
 
     public float Transparency { get; set; }
@@ -26,24 +27,27 @@ public class TextSprite : UIElement, Drawable
         Transparency = 1f;
     }
 
-    public TextSprite(SpriteFont font, bool hasDropShadow = true, string text = "") : base()
+    public TextSprite(SpriteFont font, bool hasDropShadow = false, string text = "") : base()
     {
         Font = font;
         Text = text;
         HasDropShadow = hasDropShadow;
         Position = Vector2.Zero;
-
-        if (HasDropShadow)
-            FontColor = Color.White;
-        else
-            FontColor = Color.Black;
-
+        FontColor = Color.Black;
+        DropShadowColor = Color.White;
         Transparency = 1f;
     }
 
-    public TextSprite(SpriteFont font, Color color, string text = "") : this(font, true, text)
+    public TextSprite(SpriteFont font, Color color, string text = "") : this(font, false, text)
     {
         FontColor = color;
+        HasDropShadow = false;
+    }
+
+    public TextSprite(SpriteFont font, Color color, Color dropShadowColor, string text = "") : this(font, true, text)
+    {
+        FontColor = color;
+        DropShadowColor = dropShadowColor;
     }
 
     public override int Width()
@@ -80,9 +84,8 @@ public class TextSprite : UIElement, Drawable
         // Draw using layerDepth = 1f, draw text above everything else on layer 0 (default)
         if (HasDropShadow  && Transparency == 1f)
         {
-            Color shadowColor = Color.Black * Transparency;
             Globals.SpriteBatch.DrawString(Font, Text, offset + GetPadding() + new Vector2(1f, 1f), 
-                shadowColor, 0f, Vector2.Zero, Scale, SpriteEffects.None, 1f);
+                DropShadowColor * Transparency, 0f, Vector2.Zero, Scale, SpriteEffects.None, 1f);
         }
 
         Globals.SpriteBatch.DrawString(Font, Text, offset + GetPadding(), 

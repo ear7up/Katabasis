@@ -47,7 +47,7 @@ public class GameManager
         _sky = Sprite.Create(Sprites.Sky, Vector2.Zero);
         _sky.SetScale(2f);
 
-        _coordinateDisplay = new(Sprites.Font, hasDropShadow: true);
+        _coordinateDisplay = new(Sprites.Font, Color.White, Color.Black);
         _coordinateDisplay.ScaleDown(0.4f);
 
         _decorationManager = new();

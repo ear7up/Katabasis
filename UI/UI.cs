@@ -26,7 +26,7 @@ static class UI
         TopRight = new();
         BottomRight = new();
         Tooltip = new(/*Sprites.Tooltip*/);
-        TooltipText = new TextSprite(Sprites.Font);
+        TooltipText = new TextSprite(Sprites.Font, Color.White, Color.Black);
         TooltipText.ScaleUp(0.1f);
     }
 

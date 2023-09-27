@@ -24,14 +24,14 @@ public class StatsPanel : CloseablePanel
         OverviewLayout.SetMargin(top: 1, left: 1);
         OverviewLayout.Add(new TextSprite(Sprites.Font, text: "Overview"));
 
-        OverviewText = new TextSprite(Sprites.SmallFont);
+        OverviewText = new TextSprite(Sprites.FontAgencyL);
         OverviewLayout.Add(OverviewText);
 
         // Demographics will contain a SpriteText label followed by a GridLayout containing
         // 10 rows for ages 0-10, 11-20, etc. with the number of females in col 0, males in col 1
         DemographicsLayout = new();
         DemographicsLayout.SetMargin(top: 1, left: 1);
-        DemographicsLayout.Add(new TextSprite(Sprites.Font, text: "Demographics"));
+        DemographicsLayout.Add(new TextSprite(Sprites.FontAgencyL, text: "Demographics"));
 
         DemographicsTable = new();
         for (int y = 0; y < 10; y++)

@@ -23,12 +23,12 @@ public class AccordionLayout : VBox
         VBox container = new();
         container.SetMargin(left: 5, top: 1);
         container.Image = SectionSprite;
-        TextSprite label = new(Sprites.Font, text: name);
+        TextSprite label = new(Sprites.Font, Color.White, Color.Black, text: name);
         label.ScaleDown(0.2f);
         container.OnClick = ToggleSection;
         container.Add(label);
         container.Add(layout);
-        container.SetPadding(bottom: 16);
+        container.SetPadding(bottom: 5);
 
         container.Name = name;
         layout.Name = name;

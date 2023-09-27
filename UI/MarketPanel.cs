@@ -86,7 +86,7 @@ public class MarketPanel : CloseablePanel
                     priceBar.Image.SpriteColor = Color.Green;
                     priceBar.SetPadding(right: 10);
 
-                    TextSprite priceText = new TextSprite(Sprites.SmallFont, text: "0.0");
+                    TextSprite priceText = new TextSprite(Sprites.SmallFont, Color.White, Color.Black, text: "0.0");
 
                     OverlapLayout priceDisplay = new();
                     priceDisplay.Add(priceBar);

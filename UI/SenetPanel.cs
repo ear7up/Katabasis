@@ -138,7 +138,10 @@ public class GamePiece
 
         // Off the board
         if (newPos.Y > 2)
+        {
+            SetClearTimer();
             return tile;
+        }
 
         // Swap with piece at move location
         GamePiece whereLanding = board[newPos.Y][newPos.X];
@@ -568,19 +571,21 @@ public class SenetPanel : CloseablePanel
             Sticks.Add(stick);
         }
         
-        Sticks.Elements[3].SetPadding(right: 13);
-        RollNumber = new(Sprites.Font, hasDropShadow: false);
+        Sticks.Elements[3].SetPadding(right: 18);
+        RollNumber = new(Sprites.FontAgencyL, hasDropShadow: false);
         Sticks.Add(RollNumber);
 
         Sticks.SetPadding(bottom: 192);
         rollLayout.Add(Sticks);
         rollLayout.SetPadding(right: 50);
 
-        WinLoss = new(Sprites.Font);
+        WinLoss = new(Sprites.FontAgencyL, Color.White, Color.Black);
 
-        topPart.Add(rollLayout);
-        topPart.Add(WinLoss);
-        MyLayout.Add(topPart);
+        //topPart.Add(rollLayout);
+        //topPart.Add(WinLoss);
+        MyLayout.Add(rollLayout);
+        WinLoss.SetPadding(left: 400);
+        MyLayout.Add(WinLoss);
 
         // god buttons below the roll panel, aligned with the background image
         int i = 0;
@@ -637,6 +642,8 @@ public class SenetPanel : CloseablePanel
 
     public void Update(Building building)
     {
+        Sticks.SetPadding(bottom: 192 - WinLoss.Height());
+
         if (building == null)
             Hide();
         else

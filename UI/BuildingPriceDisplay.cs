@@ -23,13 +23,13 @@ public class BuildingPriceDisplay : UIElement
         if (subType != BuildingSubType.NONE)
             name = Globals.Title(SubType.ToString()) + " " + name;
 
-        TextSprite typeText = new(Sprites.Font, text: name);
+        TextSprite typeText = new(Sprites.Font, Color.White, Color.Black, text: name);
         typeText.ScaleDown(0.2f);
 
         UIElement coinIcon = new(Sprites.Coin, 0.3f);
-        LaborPrice = new(Sprites.SmallFont);
+        LaborPrice = new(Sprites.SmallFont, Color.White, Color.Black);
 
-        MaterialsPrice = new(Sprites.SmallFont);
+        MaterialsPrice = new(Sprites.SmallFont, Color.White, Color.Black);
 
         HBox priceLayout1 = new();
         priceLayout1.Add(coinIcon);

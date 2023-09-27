@@ -26,8 +26,8 @@ public class Button : OverlapLayout
 
         if (buttonText != null)
         {
-            ButtonText = new(Sprites.SmallFont, text: buttonText);
-            ButtonText.SetPadding(top: 10, left: 10);
+            ButtonText = new(Sprites.SmallFont, Color.White, Color.Black, text: buttonText);
+            ButtonText.SetPadding(top: 10, left: 15);
             ButtonText.OnClick = null;
             Add(ButtonText);
         }

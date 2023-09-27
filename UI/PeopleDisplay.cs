@@ -5,7 +5,7 @@ using ProfessionExtension;
 
 public class PeopleDisplay : GridLayout
 {
-    public static Color TextColor = Color.SaddleBrown;
+    public static Color TextColor = Color.Black;
 
     public class PeopleColumn
     {
@@ -14,7 +14,7 @@ public class PeopleDisplay : GridLayout
 
         public PeopleColumn(string name, Func<Person, UIElement> getValue, Action<Object> onClick = null)
         {
-            HeaderSprite = new(Sprites.Font, TextColor, name);
+            HeaderSprite = new(Sprites.Font, TextColor, Color.Black, name);
             HeaderSprite.OnClick = onClick;
             GetValueFunction = getValue;
         }

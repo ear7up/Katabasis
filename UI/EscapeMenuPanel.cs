@@ -24,7 +24,7 @@ public class EscapeMenuPanel : CloseablePanel
             UIElement button = new(Sprites.MenuButton, 1f, buttons[i]);
             button.HoverImage = Sprite.Create(Sprites.MenuButtonHover, Vector2.Zero);
 
-            TextSprite buttonText = new(Sprites.Font, text: text[i]);
+            TextSprite buttonText = new(Sprites.Font, Color.White, Color.Black, text: text[i]);
             buttonText.SetPadding(left: 35, top: 20);
             buttonText.ScaleDown(0.40f);
 

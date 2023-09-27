@@ -16,7 +16,7 @@ public class CloseablePanel : VBox
 
         // Invisible element representing the draggable window bar at the top
         TopBar = new();
-        TopBar.SetPadding(bottom: 50, right: Width() - XButton.Width());
+        TopBar.SetPadding(bottom: 55, right: Width() - XButton.Width());
     }
 
     public virtual void ClosePanel(Object clicked)

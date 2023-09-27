@@ -46,7 +46,7 @@ public class PersonPanel : CloseablePanel
             UIElement startLevelBar = new(Sprites.VerticalGreenBar);
             UIElement levelBar = new(Sprites.VerticalGreenBar);
             levelBar.Image.SpriteColor = Color.Goldenrod;
-            TextSprite levelText = new(Sprites.SmallFont);
+            TextSprite levelText = new(Sprites.SmallFont, Color.White, Color.Black);
             levelDisplay.Add(levelBar);
             levelDisplay.Add(startLevelBar);
             levelDisplay.Add(levelText);
