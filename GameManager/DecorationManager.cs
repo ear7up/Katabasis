@@ -13,6 +13,12 @@ public class DecorationManager
         Editing.SpriteColor = new Color(Color.LightBlue, 0.3f);
     }
 
+    public void NewDecoration(int i)
+    {
+        Editing = Sprite.Create(Sprites.decorations[i], InputManager.MousePos);
+        Editing.SpriteColor = new Color(Color.LightBlue, 0.3f);
+    }
+
     public void Update(Map tileMap)
     {
         if (Editing == null)

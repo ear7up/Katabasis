@@ -14,7 +14,7 @@ public class GameManager
 
     // Managers
     private static BuildingPlacer _buildingPlacer;
-    private DecorationManager _decorationManager;
+    private static DecorationManager _decorationManager;
 
     // Misc UI elements
     private readonly Sprite _sky;
@@ -26,7 +26,7 @@ public class GameManager
 
     // Pop-up panels
     private static GridLayout _buttonPanel;
-    private static CloseablePanel _bottomPanel;
+    private static BuildingPlacerPanel _bottomPanel;
     private static InventoryPanel inventoryPanel;
     private static StatsPanel _statsPanel;
     private static PersonPanel _personPanel;
@@ -125,40 +125,7 @@ public class GameManager
         UI.AddElement(_buttonPanel, UI.Position.BOTTOM_LEFT);
 
         _bottomPanel = new(Sprites.BottomPanel);
-        _bottomPanel.Draggable = false;
-        _bottomPanel.SetMargin(left: 30, top: 60);
-
-        GridLayout bottomPanelGrid = new();
-        bottomPanelGrid.SetContent(0, 0, new UIElement(Sprites.farms[0], scale: 0.3f, 
-            onClick: BuildFarm, hoverElement: new BuildingPriceDisplay(null, BuildingType.FARM)));
-        bottomPanelGrid.SetContent(1, 0, new UIElement(Sprites.mines[0], scale: 0.3f, 
-            onClick: BuildMine, hoverElement: new BuildingPriceDisplay(null, BuildingType.MINE)));
-        bottomPanelGrid.SetContent(2, 0, new UIElement(Sprites.ranches[0], scale: 0.3f, 
-            onClick: BuildRanch, hoverElement: new BuildingPriceDisplay(null, BuildingType.RANCH)));
-        bottomPanelGrid.SetContent(3, 0, new UIElement(Sprites.markets[0], scale: 0.3f, 
-            onClick: BuildMarket, hoverElement: new BuildingPriceDisplay(null, BuildingType.MARKET)));
-        bottomPanelGrid.SetContent(4, 0, new UIElement(Sprites.decorations[0], scale: 0.4f, 
-            onClick: BuildDecoration, onHover: UI.SetTooltipText, tooltip: "Decoration"));
-
-        bottomPanelGrid.SetContent(0, 1, new UIElement(Sprites.houses[0], scale: 0.3f, 
-            onClick: BuildBrickHouse, hoverElement: new BuildingPriceDisplay(null, BuildingType.HOUSE, BuildingSubType.BRICK)));
-        bottomPanelGrid.SetContent(1, 1, new UIElement(Sprites.houses[0], scale: 0.3f, 
-            onClick: BuildWoodHouse, hoverElement: new BuildingPriceDisplay(null, BuildingType.HOUSE, BuildingSubType.WOOD)));
-        bottomPanelGrid.SetContent(2, 1, new UIElement(Sprites.barracks[0], scale: 0.3f, 
-            onClick: BuildBarracks, hoverElement: new BuildingPriceDisplay(null, BuildingType.BARRACKS)));
-        bottomPanelGrid.SetContent(3, 1, new UIElement(Sprites.granaries[0], scale: 0.3f, 
-            onClick: BuildGranary, hoverElement: new BuildingPriceDisplay(null, BuildingType.GRANARY)));
-        bottomPanelGrid.SetContent(4, 1, new UIElement(Sprites.smithies[0], scale: 0.3f, 
-            onClick: BuildSmithy, hoverElement: new BuildingPriceDisplay(null, BuildingType.SMITHY)));
-        bottomPanelGrid.SetContent(5, 1, new UIElement(Sprites.temples[0], scale: 0.3f, 
-            onClick: BuildTemple, hoverElement: new BuildingPriceDisplay(null, BuildingType.TEMPLE)));
-
-        _bottomPanel.Add(bottomPanelGrid);
-
-        _bottomPanel.SetDefaultPosition(new Vector2(
-            _buttonPanel.Width(), Globals.WindowSize.Y - _bottomPanel.Height() + 250));
-
-        _bottomPanel.Hide();
+        UI.AddElement(_bottomPanel, UI.Position.BOTTOM_LEFT);
 
         _personPanel = new(null);
         _personPanel.Hide();
@@ -218,24 +185,25 @@ public class GameManager
         Globals.Model.Player1.Kingdom.Army.CancelDeployment();
     }
 
-    public void BuildFarm(Object clicked) { Build(BuildingType.FARM); }
-    public void BuildMine(Object clicked) { Build(BuildingType.MINE); }
-    public void BuildRanch(Object clicked) { Build(BuildingType.RANCH); }
-    public void BuildMarket(Object clicked) { Build(BuildingType.MARKET); }
+    public static void BuildFarm(Object clicked) { Build(BuildingType.FARM); }
+    public static void BuildMine(Object clicked) { Build(BuildingType.MINE); }
+    public static void BuildRanch(Object clicked) { Build(BuildingType.RANCH); }
+    public static void BuildMarket(Object clicked) { Build(BuildingType.MARKET); }
 
-    public void BuildBarracks(Object clicked) { Build(BuildingType.BARRACKS); }
-    public void BuildBrickHouse(Object clicked) { Build(BuildingType.HOUSE, BuildingSubType.BRICK); }
-    public void BuildWoodHouse(Object clicked) { Build(BuildingType.HOUSE, BuildingSubType.WOOD); }
-    public void BuildGranary(Object clicked) { Build(BuildingType.GRANARY); }
-    public void BuildSmithy(Object clicked) { Build(BuildingType.SMITHY); }
-    public void BuildTemple(Object clicked) { Build(BuildingType.TEMPLE); }
+    public static void BuildBarracks(Object clicked) { Build(BuildingType.BARRACKS); }
+    public static void BuildBrickHouse(Object clicked) { Build(BuildingType.HOUSE, BuildingSubType.BRICK); }
+    public static void BuildWoodHouse(Object clicked) { Build(BuildingType.HOUSE, BuildingSubType.WOOD); }
+    public static void BuildGranary(Object clicked) { Build(BuildingType.GRANARY); }
+    public static void BuildSmithy(Object clicked) { Build(BuildingType.SMITHY); }
+    public static void BuildTemple(Object clicked) { Build(BuildingType.TEMPLE); }
 
-    public void BuildDecoration(Object clicked)
+    public static void BuildDecoration(Object clicked)
     {
-        _decorationManager.NewDecoration();
+        int i = (int)((UIElement)clicked).UserData;
+        _decorationManager.NewDecoration(i);
     }
 
-    public void Build(BuildingType buildingType, BuildingSubType subType = BuildingSubType.NONE)
+    public static void Build(BuildingType buildingType, BuildingSubType subType = BuildingSubType.NONE)
     {
         if (InputManager.Mode == InputManager.BUILD_MODE)
         {
@@ -470,7 +438,6 @@ public class GameManager
         _statsPanel.Update();
         MarketPanel.Update();
         inventoryPanel.Update();
-        _bottomPanel.Update();
         _tileInfoPanel.UpdateTileData(Model.TileMap.HighlightedTile);
 
         _rightClickMenu.Update();
@@ -645,7 +612,6 @@ public class GameManager
         UI.Draw();
 
         // Draw the popup interfaces
-        _bottomPanel.Draw(_bottomPanel.Position);
         inventoryPanel.Draw(inventoryPanel.Position);
         MarketPanel.Draw(MarketPanel.Position);
         _statsPanel.Draw(_statsPanel.Position);
