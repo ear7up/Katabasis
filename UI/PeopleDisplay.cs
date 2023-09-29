@@ -31,6 +31,8 @@ public class PeopleDisplay : GridLayout
 
         MyPage = 1;
         ElementsPerPage = 18;
+        MinHeight = 500;
+        MinWidth = 700;
         
         PersonColumns.Add(new PeopleColumn("Icon", GetIcon));
         PersonColumns.Add(new PeopleColumn("Name", GetName, SortByName));
@@ -98,6 +100,7 @@ public class PeopleDisplay : GridLayout
     }
 
     // Override to let this class manage its own paging
+    /*
     public override void ChangePageOnScroll()
     {
         if (!Hovering)
@@ -110,9 +113,11 @@ public class PeopleDisplay : GridLayout
 
         InputManager.ScrollValue = 0;
     }
+    */
 
     public void Update(List<Person> people)
     {
+        NumberOfDataRows = people.Count;
         base.Update();
 
         Clear();
@@ -124,7 +129,7 @@ public class PeopleDisplay : GridLayout
 
         // We don't want to store all people in GridContent, we only want to store the displayed content
         row = 1;
-        for (int i = (MyPage - 1) * ElementsPerPage; i < MyPage * ElementsPerPage && i < people.Count; i++)
+        for (int i = (Page - 1) * ElementsPerPage; i < Page * ElementsPerPage && i < people.Count; i++)
         {
             Person person = people[i];
             col = 0;

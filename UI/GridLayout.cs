@@ -14,10 +14,27 @@ public class GridLayout : Layout
     public bool HasHeader;
     public int ElementsPerPage;
     public int Page;
+    public TextSprite PageText;
+    public HBox PageNumberLayout;
+
+    public int MinHeight;
+    public int MinWidth;
+
+    // Set this for tables that have more data rows than actual display rows
+    public int NumberOfDataRows;
 
     public GridLayout(SpriteTexture texture = null) : base(texture)
     {
         GridContent = new();
+        PageText = new(Sprites.Font, Color.Black);
+        PageText.SetPadding(left: 5, right: 5);
+        PageText.Scale = new Vector2(0.9f, 0.9f);
+
+        PageNumberLayout = new();
+        PageNumberLayout.Add(new UIElement(Sprites.ArrowLeft, onClick: PageBack));
+        PageNumberLayout.Add(PageText);
+        PageNumberLayout.Add(new UIElement(Sprites.ArrowRight, onClick: PageForward));
+
         Page = 1;
     }
 
@@ -76,7 +93,32 @@ public class GridLayout : Layout
                 element.Update();
 
         if (ElementsPerPage > 0)
+        {
             ChangePageOnScroll();
+
+            int numPages = (int)Math.Max(1, Math.Ceiling((float)NumberOfDataRows / ElementsPerPage));
+            PageText.Text = $"{Page} / {numPages}";
+            PageNumberLayout.Update();
+        }
+
+        if (MinHeight > 0)
+        {
+            int contentHeight = Height() - GetBottomPadding();
+            if (contentHeight < MinHeight)
+                SetPadding(bottom: MinHeight - contentHeight);
+            else
+                SetPadding(bottom: 1);
+        }
+
+        if (MinWidth > 0)
+        {
+            int contentWidth = Width() - GetRightPadding();
+            if (contentWidth < MinWidth)
+                SetPadding(right: MinWidth - contentWidth);
+            else
+                SetPadding(right: 1);
+        }
+
         base.Update();
     }
 
@@ -85,15 +127,24 @@ public class GridLayout : Layout
         if (!Hovering)
             return;
 
-        float dataRows = (float)GridContent.Count;
-        if (HasHeader)
-            dataRows--;
-        if (InputManager.ScrollValue < 0 && Page < dataRows / ElementsPerPage)
-            Page++;
-        else if (InputManager.ScrollValue > 0 && Page > 1)
-            Page--;
+        if (InputManager.ScrollValue < 0)
+            PageForward();
+        else if (InputManager.ScrollValue > 0)
+            PageBack();
 
         InputManager.ScrollValue = 0;
+    }
+
+    public void PageBack(Object clicked = null)
+    {
+        if (Page > 1)
+            Page--;
+    }
+
+    public void PageForward(Object clicked = null)
+    {
+        if (Page < (float)NumberOfDataRows / ElementsPerPage)
+            Page++;
     }
 
     public override void Draw(Vector2 offset)
@@ -117,8 +168,13 @@ public class GridLayout : Layout
         Vector2 relative = Vector2.Zero;
         int rowNumber = 0;
 
-        if (HasHeader)
+        // Fake starting on the proper page
+        if (NumberOfDataRows > 0)
+            rowNumber = ElementsPerPage * (Page - 1);
+        else if (HasHeader)
             rowNumber--;
+
+        
 
         foreach (List<UIElement> row in GridContent)
         {
@@ -148,6 +204,13 @@ public class GridLayout : Layout
                 relative.Y += row[0].Height();
 
             rowNumber++;
+        }
+
+        if (ElementsPerPage > 0)
+        {
+            // Draw in the bottom right corner
+            PageNumberLayout.Draw(offset + new Vector2(
+                Width() - PageNumberLayout.Width(), Height() - PageNumberLayout.Height()));
         }
     }
     
