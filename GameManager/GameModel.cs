@@ -36,7 +36,7 @@ public class GameModel
         for (int i = 0 ; i < NUM_PEOPLE; i++)
         {
             Person person = Person.CreatePerson(TileMap.Origin, TileMap.GetOriginTile());
-            person.Money = Globals.Rand.Next(20, 50);
+            person.Money = Globals.Rand.Next(40, 100);
             Player1.Kingdom.AddPerson(person);
         }
 

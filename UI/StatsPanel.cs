@@ -24,7 +24,7 @@ public class StatsPanel : CloseablePanel
         OverviewLayout.SetMargin(top: 1, left: 1);
         OverviewLayout.Add(new TextSprite(Sprites.Font, text: "Overview"));
 
-        OverviewText = new TextSprite(Sprites.FontAgencyL);
+        OverviewText = new TextSprite(Sprites.Font);
         OverviewLayout.Add(OverviewText);
 
         // Demographics will contain a SpriteText label followed by a GridLayout containing

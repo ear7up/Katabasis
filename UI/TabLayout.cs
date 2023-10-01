@@ -58,6 +58,13 @@ public class TabLayout : Layout
             SwitchTab(button);
     }
 
+    public void AddTab(string tabName, UIElement content)
+    {
+        UIElement button = new(Sprites.TabUnselected);
+        button.AddSelectedImage(Sprites.TabSelected);
+        AddTab(tabName, button, content);
+    }
+
     public void SwitchTab(Object clicked)
     {
         UIElement current = (UIElement)Tabs[CurrentTab];
