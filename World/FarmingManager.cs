@@ -16,6 +16,7 @@ public class Farm
     public const float SOW_TIME = 60f;
     public const float GROW_TIME = 300f;
     public const float HARVEST_TIME = 60f;
+    public const float TOTAL_WORK_TIME = SOW_TIME + HARVEST_TIME;
     
     public int PlantId { get; set; }
     public FarmState State { get; set; }
@@ -24,10 +25,13 @@ public class Farm
     public float TimeRemaining { get; set; }
     public float TimeTotal { get; set; }
 
+    public Dictionary<Person, Goods> TimeWorked { get; set; }
+
     public Farm()
     {
         State = FarmState.UNPLANTED;
         PlantId = 0;
+        TimeWorked = new();
     }
 
     public static Farm Create(Building building)
@@ -76,6 +80,10 @@ public class Farm
         // Extremely low chance to level up
         worker.GainExperience((int)Skill.FARMING, -99 * SkillLevel.INCREASE_CHANCE);
 
+        if (!TimeWorked.ContainsKey(worker))
+            TimeWorked[worker] = Goods.FromId(PlantId, quantity: 0);
+        TimeWorked[worker].Quantity -= adjustedTime;
+
         TimeRemaining -= adjustedTime;
         if (TimeRemaining > 0f)
             return false;
@@ -119,8 +127,9 @@ public class Farm
         // Get a portion of the total produced quantity
         float quantity = adjustedTime * (PRODUCED_QUANTITY / HARVEST_TIME);
 
-        // TODO: assumes 1-to-1 relationship between time and plant quantity
-        worker.PersonalStockpile.Add(PlantId, quantity);
+        if (!TimeWorked.ContainsKey(worker))
+            TimeWorked[worker] = Goods.FromId(PlantId, quantity: 0);
+        TimeWorked[worker].Quantity -= adjustedTime;
 
         // Extremely low chance to level up
         worker.GainExperience((int)Skill.FARMING, -99 * SkillLevel.INCREASE_CHANCE);
@@ -132,7 +141,18 @@ public class Farm
         State = FarmState.SOWING;
         TimeRemaining = SOW_TIME;
         TimeTotal = SOW_TIME;
+
+        // Hack: quantity will be negative until harvest is finished, then flipped to positive
+        // to indicate it is ready to be collected
+        foreach (Goods owed in TimeWorked.Values)
+            owed.Quantity = System.Math.Abs(owed.Quantity);
+
         return true;
+    }
+
+    public void Collect(Person worker, Goods toCollect)
+    {
+        worker.PersonalStockpile.Add(toCollect.GetId(), toCollect.Quantity);
     }
 
     public void Update()
@@ -228,6 +248,17 @@ public class Farm
 
     public Task GetTask(Person p)
     {
+        // If the person has done work and the crops have been harvested (positive quantity)
+        // assign a task to come to the farm and collect their share
+        if (TimeWorked.ContainsKey(p) && TimeWorked[p].Quantity > 0)
+        {
+            Goods toCollect = TimeWorked[p];
+            toCollect.Quantity = (TimeWorked[p].Quantity / TOTAL_WORK_TIME) * PRODUCED_QUANTITY;
+            Task task = CollectTask.Create("Collecting harvest", this, toCollect);
+            TimeWorked.Remove(p);
+            return task;
+        }
+
         if (!SkillRequirementMetBy(p))
             return null;
 

@@ -60,6 +60,7 @@ public class TaskStatus
 [JsonDerivedType(derivedType: typeof(CookTask), typeDiscriminator: "CookTask")]
 [JsonDerivedType(derivedType: typeof(SellTask), typeDiscriminator: "SellTask")]
 [JsonDerivedType(derivedType: typeof(BuildTask), typeDiscriminator: "BuildTask")]
+[JsonDerivedType(derivedType: typeof(CollectTask), typeDiscriminator: "CollectTask")]
 [JsonDerivedType(derivedType: typeof(HaulGoodsTask), typeDiscriminator: "HaulGoodsTask")]
 [JsonDerivedType(derivedType: typeof(DeploymentTask), typeDiscriminator: "DeploymentTask")]
 [JsonDerivedType(derivedType: typeof(IdleAtHomeTask), typeDiscriminator: "IdleAtHomeTask")]
