@@ -26,16 +26,23 @@ public class PersonPanel : CloseablePanel
         TopPart.SetPadding(bottom: 10);
 
         PersonIcon = new();
-        TaskDescription = new(Sprites.SmallFont);
-        InventoryDescription = new(Sprites.SmallFont);
+        TaskDescription = new(Sprites.SmallFont, Color.White, Color.Black);
+        InventoryDescription = new(Sprites.SmallFont, Color.White, Color.Black);
         PersonDescription = new(Sprites.SmallFont);
 
         TopPart.Add(PersonIcon);
         TopPart.Add(PersonDescription);
 
+        DarkPanel taskLayout = new("Tasks");
+        taskLayout.AddContent(TaskDescription);
+        taskLayout.SetPadding(bottom: 15);
+
+        DarkPanel inventoryLayout = new("Inventory");
+        inventoryLayout.AddContent(InventoryDescription);
+
         overviewLayout.Add(TopPart);
-        overviewLayout.Add(TaskDescription);
-        overviewLayout.Add(InventoryDescription);
+        overviewLayout.Add(taskLayout);
+        overviewLayout.Add(inventoryLayout);
 
         BuildSkillsLayout();
         BuildHealthLayout();
@@ -135,8 +142,8 @@ public class PersonPanel : CloseablePanel
 
         PersonDescription.Text = PersonTracking.Describe();
 
-        TaskDescription.Text = "[ Tasks ]\n" + PersonTracking.DescribeTasks();
-        InventoryDescription.Text = "[ Inventory ]\n" + PersonTracking.PersonalStockpile.ToString();
+        TaskDescription.Text = PersonTracking.DescribeTasks();
+        InventoryDescription.Text = PersonTracking.PersonalStockpile.ToString();
 
         UpdateHealthDisplay();
         UpdateSkillsDisplay();

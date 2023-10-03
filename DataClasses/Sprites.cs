@@ -116,6 +116,10 @@ static class Sprites
 	public static SpriteTexture CropIcon;
 	public static SpriteTexture ArrowLeft;
 	public static SpriteTexture ArrowRight;
+	public static SpriteTexture DarkPanel;
+	public static SpriteTexture DarkPanelTop;
+	public static SpriteTexture DarkPanelTopDarker;
+	public static SpriteTexture DarkPanelBottom;
 
 	// Market UI
 	public static SpriteTexture Buy1;
@@ -287,6 +291,10 @@ static class Sprites
 		CropIcon = LoadTexture("UI_maybe/cropIcon");
 		ArrowLeft = LoadTexture("UI_maybe/arrowLeft");
 		ArrowRight = LoadTexture("UI_maybe/arrowRight");
+		DarkPanel = LoadTexture("UI_maybe/darkPanel");
+		DarkPanelTop = LoadTexture("UI_maybe/darkPanelTop");
+		DarkPanelTopDarker = LoadTexture("UI_maybe/darkPanelTopDarker");
+		DarkPanelBottom = LoadTexture("UI_maybe/darkPanelBottom");
 
 		// UI - Market
 		Buy1 = LoadTexture("UI_maybe/buttons/buy1");
