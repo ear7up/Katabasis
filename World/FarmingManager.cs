@@ -25,7 +25,8 @@ public class Farm
     public float TimeRemaining { get; set; }
     public float TimeTotal { get; set; }
 
-    public Dictionary<Person, Goods> TimeWorked { get; set; }
+    // Person ID -> Goods (quantity = time worked)
+    public Dictionary<int, Goods> TimeWorked { get; set; }
 
     public Farm()
     {
@@ -80,9 +81,9 @@ public class Farm
         // Extremely low chance to level up
         worker.GainExperience((int)Skill.FARMING, -99 * SkillLevel.INCREASE_CHANCE);
 
-        if (!TimeWorked.ContainsKey(worker))
-            TimeWorked[worker] = Goods.FromId(PlantId, quantity: 0);
-        TimeWorked[worker].Quantity -= adjustedTime;
+        if (!TimeWorked.ContainsKey(worker.Id))
+            TimeWorked[worker.Id] = Goods.FromId(PlantId, quantity: 0);
+        TimeWorked[worker.Id].Quantity -= adjustedTime;
 
         TimeRemaining -= adjustedTime;
         if (TimeRemaining > 0f)
@@ -127,9 +128,9 @@ public class Farm
         // Get a portion of the total produced quantity
         float quantity = adjustedTime * (PRODUCED_QUANTITY / HARVEST_TIME);
 
-        if (!TimeWorked.ContainsKey(worker))
-            TimeWorked[worker] = Goods.FromId(PlantId, quantity: 0);
-        TimeWorked[worker].Quantity -= adjustedTime;
+        if (!TimeWorked.ContainsKey(worker.Id))
+            TimeWorked[worker.Id] = Goods.FromId(PlantId, quantity: 0);
+        TimeWorked[worker.Id].Quantity -= adjustedTime;
 
         // Extremely low chance to level up
         worker.GainExperience((int)Skill.FARMING, -99 * SkillLevel.INCREASE_CHANCE);
@@ -250,12 +251,12 @@ public class Farm
     {
         // If the person has done work and the crops have been harvested (positive quantity)
         // assign a task to come to the farm and collect their share
-        if (TimeWorked.ContainsKey(p) && TimeWorked[p].Quantity > 0)
+        if (TimeWorked.ContainsKey(p.Id) && TimeWorked[p.Id].Quantity > 0)
         {
-            Goods toCollect = TimeWorked[p];
-            toCollect.Quantity = (TimeWorked[p].Quantity / TOTAL_WORK_TIME) * PRODUCED_QUANTITY;
+            Goods toCollect = TimeWorked[p.Id];
+            toCollect.Quantity = (TimeWorked[p.Id].Quantity / TOTAL_WORK_TIME) * PRODUCED_QUANTITY;
             Task task = CollectTask.Create("Collecting harvest", this, toCollect);
-            TimeWorked.Remove(p);
+            TimeWorked.Remove(p.Id);
             return task;
         }
 

@@ -4,6 +4,8 @@ using System.Text.Json.Serialization;
 
 public abstract class Entity
 {
+    public static int IdCounter = 0;
+    
     [JsonIgnore]
     public Texture2D image { get; protected set; }
 

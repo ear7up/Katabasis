@@ -4,7 +4,6 @@ using System.Linq;
 
 public class Animal : Entity, Drawable
 {
-    public static int IdCounter = 0;
     public const float MOVE_SPEED = 10f;
 
     private int Id { get; set; }

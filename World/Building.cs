@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 
 public enum BuildingType
 {
@@ -20,6 +21,7 @@ public enum BuildingType
     GRANARY,
     TEMPLE,
     TANNERY,
+    PYRAMID,
     NONE
 }
 
@@ -39,6 +41,7 @@ public enum BuildingSubType
     WOOD
 }
 
+[JsonDerivedType(derivedType: typeof(PyramidBuilding), typeDiscriminator: "PyramidBuilding")]
 public class Building : Drawable
 {
     public const int MAX_BUILDING_SUBTYPES = 100;
@@ -191,12 +194,20 @@ public class Building : Drawable
         SpriteTexture spriteTexture = null;
         if (buildingType == BuildingType.MARKET)
             spriteTexture = Sprites.markets[5];
+        else if (buildingType == BuildingType.PYRAMID)
+            spriteTexture = Sprites.Pyramid100;
         else
             spriteTexture = Sprites.RandomBuilding(buildingType, subType);
 
         Sprite sprite = Sprite.Create(spriteTexture, position);
         Sprite conSprite = Sprite.Create(Sprites.RandomConstruction(buildingType, subType), position);
-        Building b = new Building();
+
+        Building b = null;
+        if (buildingType == BuildingType.PYRAMID)
+            b = new PyramidBuilding();
+        else
+            b = new Building();
+
         b.SetAttributes(location, sprite, conSprite, buildingType, subType);
 
         if (buildingType == BuildingType.CITY)
@@ -308,7 +319,7 @@ public class Building : Drawable
         return false;
     }
 
-    public void Update()
+    public virtual void Update()
     {
         if (InputManager.Mode == InputManager.CAMERA_MODE)
         {

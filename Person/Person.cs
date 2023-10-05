@@ -34,10 +34,8 @@ public class Person : Entity, Drawable
     public const int STARVING = 70;
     public const int STARVED_TO_DEATH = 120;
 
-    public static int IdCounter = 0;
-    public readonly int Id;    
-
     // Serialized content
+    public int Id { get; set; }
     public Tile Home { get; set; }
     public Building House { get; set; }
     public Building BuildingUsing { get; set; }

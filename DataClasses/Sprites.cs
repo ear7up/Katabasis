@@ -51,6 +51,12 @@ static class Sprites
 	public static List<SpriteTexture> temples;
 	public static List<SpriteTexture> templesCon;
 
+	// Pyramid 25% - 100% built
+	public static SpriteTexture Pyramid25;
+	public static SpriteTexture Pyramid50;
+	public static SpriteTexture Pyramid75;
+	public static SpriteTexture Pyramid100;
+
 	public static List<SpriteTexture> decorations;
 
 	// Animals
@@ -209,6 +215,11 @@ static class Sprites
 		market1Composite = LoadTextures("buildings/market/composite", 4);
 		smithies = LoadTextures("buildings/smithy", 4);
 		temples = LoadTextures("buildings/temple", 1);
+
+		Pyramid25 = LoadTexture("buildings/pyramid/pyramid_25");
+		Pyramid50 = LoadTexture("buildings/pyramid/pyramid_50");
+		Pyramid75 = LoadTexture("buildings/pyramid/pyramid_75");
+		Pyramid100 = LoadTexture("buildings/pyramid/pyramid_100");
 
 		pavedTexture = LoadTexture("buildings/paved");
 		Paved = Sprite.Create(pavedTexture, Vector2.Zero);
