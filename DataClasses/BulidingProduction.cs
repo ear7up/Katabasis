@@ -99,6 +99,12 @@ public class BuildingProduction
             toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 20)));
 
+        // building: bricks -> oven
+        Requirements.Add(Building.GetId(BuildingType.OVEN), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.BRICKS, 20)),
+            levelRequirement: SkillLevel.Create(Skill.BUILDING, 10)));
+
         // building: sandstone + chisel -> pyramid
         Requirements.Add(Building.GetId(BuildingType.PYRAMID), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(

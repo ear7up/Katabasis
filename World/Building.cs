@@ -21,6 +21,7 @@ public enum BuildingType
     GRANARY,
     TEMPLE,
     TANNERY,
+    OVEN,
     PYRAMID,
     NONE
 }
@@ -215,10 +216,14 @@ public class Building : Drawable
         if (buildingType == BuildingType.MARKET)
             BuildMarketComposite(b);
 
+        float scale = 0.4f;
+        if (buildingType == BuildingType.OVEN)
+            scale = 1.0f;
+
         if (!b.IsWholeTile())
         {
-            sprite.SetScale(0.4f);
-            conSprite?.SetScale(0.4f);
+            sprite.SetScale(scale);
+            conSprite?.SetScale(scale);
         }
 
         if (location != null)
@@ -398,12 +403,14 @@ public class Building : Drawable
 
     public void Draw()
     {
+        /*
         if (Type != BuildingType.FARM && Type != BuildingType.MINE)
         {
             Sprites.BuildingShadow.Position = Sprite.Position;
             Sprites.BuildingShadow.Scale = Sprite.Scale;
             Sprites.BuildingShadow.Draw();
         }
+        */
 
         if (Selected)
             DrawSelected();

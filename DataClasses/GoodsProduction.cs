@@ -409,19 +409,20 @@ public class GoodsProduction
                 and: true),
             levelRequirement: SkillLevel.Create(Skill.COOKING, 30)));
 
-        // cooking: wheat -> flour
+        // cooking: wheat + quern -> flour
         g.SubType = (int)Goods.ProcessedFood.FLOUR;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.FOOD_PLANT, (int)Goods.FoodPlant.WHEAT)),
-            buildingRequirement: BuildingType.GRANARY,
+            toolRequirement: new ToolRequirement(Goods.Tool.QUERN),
             levelRequirement: SkillLevel.Create(Skill.COOKING, 10)));
 
-        // cooking: flour -> bread (2x)
+        // cooking: flour + oven -> bread (2x)
         g.SubType = (int)Goods.ProcessedFood.BREAD;
         Requirements.Add(g.GetId(), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
                 new Goods(GoodsType.FOOD_PROCESSED, (int)Goods.ProcessedFood.FLOUR, 0.5f)),
+            buildingRequirement: BuildingType.OVEN,
             levelRequirement: SkillLevel.Create(Skill.COOKING, 20)));
 
         // cooking: grapes -> wine
@@ -753,7 +754,7 @@ public class GoodsProduction
                 // Stone tools require no building or tool to make
                 // Metal tools require a smithy and hammer
                 GoodsType madeFromType = GoodsType.MATERIAL_NATURAL;
-                if ((ToolMaterial)materialType != ToolMaterial.STONE)
+                if ((ToolMaterial)materialType != ToolMaterial.STONE && (ToolMaterial)materialType != ToolMaterial.NONE)
                 {
                     madeFromType = GoodsType.SMITHED;
                     buildingReq = BuildingType.SMITHY;

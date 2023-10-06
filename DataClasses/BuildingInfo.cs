@@ -11,6 +11,7 @@ public class BuildingInfo
     {
         BuildingType type = Building.TypeFromId(buildingId);
 
+        MaxUsers = 4;
         TimeToProduce = 30f;
         switch (type)
         {
@@ -19,6 +20,7 @@ public class BuildingInfo
             case BuildingType.BARRACKS: MaxUsers = 50; break;
             case BuildingType.SMITHY: MaxUsers = 2; break;
             case BuildingType.FORGE: MaxUsers = 2; break;
+            case BuildingType.OVEN: MaxUsers = 1; TimeToProduce = 15f; break;
             case BuildingType.PYRAMID: TimeToProduce = 120f; break;
             default: MaxUsers = 4; break;
         }

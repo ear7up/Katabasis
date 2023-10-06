@@ -107,7 +107,7 @@ public class Goods
     public enum Tool
     {
         PICKAXE, SHOVEL, HAMMER, KILN, FURNACE, SAW, KNIFE, 
-        SPEAR, FISHING_NET, AXE, SEWING_KIT, LOOM, CHISEL, HOE, NONE
+        SPEAR, FISHING_NET, AXE, SEWING_KIT, LOOM, CHISEL, HOE, QUERN, NONE
     }
 
     public enum MaterialAnimal
