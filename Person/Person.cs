@@ -387,6 +387,18 @@ public class Person : Entity, Drawable
         Tasks.Enqueue(new EatTask());
         Tasks.Enqueue(new SellAtMarketTask());
         Tasks.Enqueue(new BuyFoodFromMarketTask());
+        BuyConsumerGoods();
+    }
+
+    public void BuyConsumerGoods()
+    {
+        if (Money < 40f)
+            return;
+
+        Building market = (Building)Tile.Find(Home, 
+            new TileFilter(buildingType: BuildingType.MARKET));
+
+        
     }
 
     public void Eat1(Goods g)

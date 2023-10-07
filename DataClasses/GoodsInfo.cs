@@ -124,11 +124,15 @@ public class GoodsInfo
                     case Goods.Crafted.BRICKS: DefaultPrice = 1.8f; MarketSoftLimit = 3000; break;
                     case Goods.Crafted.PAPYRUS: DefaultPrice = 1.5f; break;
                     case Goods.Crafted.POTTERY: DefaultPrice = 2f; break;
-                    case Goods.Crafted.JEWELRY: DefaultPrice = 8f; break;
-                    case Goods.Crafted.INSTRUMENTS: DefaultPrice = 7f; break;
                     default: DefaultPrice = 5f; break;
                 }
                 UseRate = 0.001f; 
+                break;
+            }
+            case GoodsType.CONSUMER:
+            {
+                DefaultPrice = 8f;
+                MarketSoftLimit = 50;
                 break;
             }
             case GoodsType.WAR_GOODS:

@@ -15,7 +15,8 @@ public enum GoodsType
     WAR_GOODS = 8,
     SMITHED = 9,
     RAW_MEAT = 10,
-    NONE = 11
+    CONSUMER = 11,
+    NONE = 12
 }
 
 // In order based on quality; 
@@ -59,7 +60,8 @@ public class Goods
         typeof(Crafted),
         typeof(War),
         typeof(Smithed),
-        typeof(RawMeat)
+        typeof(RawMeat),
+        typeof(Consumer)
     };
 
     public static string[] Categories = 
@@ -74,7 +76,8 @@ public class Goods
         "Craft Goods",
         "Tools of War",
         "Refined Metals",
-        "Raw Meat"
+        "Raw Meat",
+        "Consumer Goods"
     };
 
     public enum ProcessedFood
@@ -97,7 +100,7 @@ public class Goods
         GARLIC, SCALLIONS, ONION, LEEK, LETTUCE, CELERY, 
         CUCUMBER, RADISH, TURNIP, GRAPES, SQUASH, MELON, 
         PEAS, LENTILS, CHICKPEAS, NUTS, OLIVE_OIL, BARLEY,
-        WHEAT, WILD_EDIBLE, NONE
+        WHEAT, CAROB, WILD_EDIBLE, NONE
     }
 
     // Consider making a separate enum for stone tools
@@ -117,7 +120,7 @@ public class Goods
 
     public enum MaterialPlant
     {
-        FLAX, WOOD, REEDS, TANNINS
+        FLAX, COTTON, WOOD, REEDS, TANNINS, MYRRH, MYRRH_OIL
     }
 
     public enum MaterialNatural
@@ -129,8 +132,13 @@ public class Goods
 
     public enum Crafted
     {
-        CLOTHING, BRICKS, LINEN, COMBS, JEWELRY, POTTERY, STATUES, 
-        INSTRUMENTS, YARN, LEATHER, PAPYRUS
+        BRICKS, LINEN, POTTERY, STATUES, YARN, LEATHER, PAPYRUS, 
+    }
+
+    public enum Consumer
+    {
+        JEWELRY, COMBS, CLOTHING, SANDALS, PERFUME, KOHL, GREEN_KOHL, 
+        INSTRUMENTS, SENET, TABLE, CHAIR
     }
 
     public enum War
@@ -317,10 +325,13 @@ public class Goods
             case GoodsType.MATERIAL_PLANT: subTypeName = Enum.GetName(typeof(MaterialPlant), subType); break;
             case GoodsType.MATERIAL_NATURAL: subTypeName = Enum.GetName(typeof(MaterialNatural), subType); break;
             case GoodsType.CRAFT_GOODS: subTypeName = Enum.GetName(typeof(Crafted), subType); break;
+            case GoodsType.CONSUMER: subTypeName = Enum.GetName(typeof(Consumer), subType); break;
             case GoodsType.WAR_GOODS: subTypeName = Enum.GetName(typeof(War), subType); break;
             case GoodsType.SMITHED: subTypeName = Enum.GetName(typeof(Smithed), subType); break;
             case GoodsType.RAW_MEAT: subTypeName = Enum.GetName(typeof(RawMeat), subType); break;
         }
+        if (subTypeName == "UNDEFINED")
+            Console.WriteLine($"Couldn't parse goods name for {type} {subType}");
         subTypeName = Globals.Title(subTypeName);
         return subTypeName;
     }
