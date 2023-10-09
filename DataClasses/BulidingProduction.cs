@@ -63,14 +63,14 @@ public class BuildingProduction
             tileRequirement: TileType.FOREST,
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 30)));
 
-        // Tannery building made of wood, with clay vats for holding the hides and liquid
-        // building: wood + clay + saw -> tannery
+        // Tannery building made of bricks, with clay vats for holding the hides and liquid
+        // building: bricks + clay + hammer -> tannery
         Requirements.Add(Building.GetId(BuildingType.TANNERY), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(
-                new Goods(GoodsType.MATERIAL_PLANT, (int)Goods.MaterialPlant.WOOD, 30),
+                new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.BRICKS, 30),
                 new Goods(GoodsType.MATERIAL_NATURAL, (int)Goods.MaterialNatural.CLAY, 40),
                 and: true),
-            toolRequirement: new ToolRequirement(Goods.Tool.SAW),
+            toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 30)));
 
         // building: saw + [wood AND linen] -> market

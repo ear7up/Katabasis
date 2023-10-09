@@ -198,6 +198,7 @@ public class GameManager
     public static void BuildTemple(Object clicked) { Build(BuildingType.TEMPLE); }
     public static void BuildOven(Object clicked) { Build(BuildingType.OVEN); }
     public static void BuildPyramid(Object clicked) { Build(BuildingType.PYRAMID); }
+    public static void BuildTannery(Object clicked) { Build(BuildingType.TANNERY); }
 
     public static void BuildDecoration(Object clicked)
     {
