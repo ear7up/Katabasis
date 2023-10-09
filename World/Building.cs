@@ -21,6 +21,7 @@ public enum BuildingType
     GRANARY,
     TEMPLE,
     TANNERY,
+    TAVERN,
     OVEN,
     PYRAMID,
     NONE
@@ -148,6 +149,7 @@ public class Building : Drawable
     {
         List<SpriteTexture> sprites = Sprites.city1Composite;
 
+        // TODO: fixed offsets differ based on building scale
         Rectangle bounds = building.Sprite.GetBounds();
         Vector2 pos = new Vector2(bounds.X, bounds.Y + 25) + building.Sprite.Origin * 0.25f;
         building.Composite.Add(Sprite.Create(sprites[0], pos + new Vector2(98, 100)));

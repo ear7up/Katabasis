@@ -61,10 +61,13 @@ public class BuildingPlacerPanel : CloseablePanel
             onClick: Katabasis.GameManager.BuildSmithy, hoverElement: new BuildingPriceDisplay(null, BuildingType.SMITHY)));
         buildingLayout.SetContent(1, 1, new UIElement(Sprites.temples[0], scale: 0.3f, 
             onClick: Katabasis.GameManager.BuildTemple, hoverElement: new BuildingPriceDisplay(null, BuildingType.TEMPLE)));
-            buildingLayout.SetContent(2, 1, new UIElement(Sprites.ovens[0], scale: 1.0f, 
-            onClick: Katabasis.GameManager.BuildOven, hoverElement: new BuildingPriceDisplay(null, BuildingType.OVEN)));
+        buildingLayout.SetContent(2, 1, new UIElement(Sprites.taverns[0], scale: 0.3f, 
+            onClick: Katabasis.GameManager.BuildTavern, hoverElement: new BuildingPriceDisplay(null, BuildingType.TAVERN)));
         buildingLayout.SetContent(3, 1, new UIElement(Sprites.Pyramid100, scale: 0.2f, 
             onClick: Katabasis.GameManager.BuildPyramid, hoverElement: new BuildingPriceDisplay(null, BuildingType.PYRAMID)));
+        buildingLayout.SetContent(4, 1, new UIElement(Sprites.ovens[0], scale: 1.0f, 
+            onClick: Katabasis.GameManager.BuildOven, hoverElement: new BuildingPriceDisplay(null, BuildingType.OVEN)));
+        
 
         return buildingLayout;
     }
