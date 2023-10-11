@@ -81,6 +81,14 @@ public class BuildingProduction
             toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
             levelRequirement: SkillLevel.Create(Skill.BUILDING, 30)));
 
+        // Garden
+        // building: bricks + hammer -> garden
+        Requirements.Add(Building.GetId(BuildingType.GARDEN), new ProductionRequirements(
+            goodsRequirement: new GoodsRequirement(
+                new Goods(GoodsType.CRAFT_GOODS, (int)Goods.Crafted.BRICKS, 20)),
+            toolRequirement: new ToolRequirement(Goods.Tool.HAMMER),
+            levelRequirement: SkillLevel.Create(Skill.BUILDING, 20)));
+
         // building: saw + [wood AND linen] -> market
         Requirements.Add(Building.GetId(BuildingType.MARKET), new ProductionRequirements(
             goodsRequirement: new GoodsRequirement(

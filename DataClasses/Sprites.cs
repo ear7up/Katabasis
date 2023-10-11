@@ -56,6 +56,8 @@ static class Sprites
 	public static List<SpriteTexture> tanneriesCon;
 	public static List<SpriteTexture> taverns;
 	//public static List<SpriteTexture> tavernsCon;
+	public static List<SpriteTexture> gardens;
+	//public static List<SpriteTexture> gardensCon;
 
 	// Pyramid 25% - 100% built
 	public static SpriteTexture Pyramid25;
@@ -224,6 +226,7 @@ static class Sprites
 		ovens = LoadTextures("buildings/oven", 3);
 		tanneries = LoadTextures("buildings/tannery", 1);
 		taverns = LoadTextures("buildings/tavern", 2);
+		gardens = LoadTextures("buildings/garden", 2);
 
 		Pyramid25 = LoadTexture("buildings/pyramid/pyramid_25");
 		Pyramid50 = LoadTexture("buildings/pyramid/pyramid_50");
@@ -247,6 +250,7 @@ static class Sprites
 		templesCon = LoadTextures("buildings/temple/construction", 1);
 		//ovensCon = LoadTextures("buildings/oven/construction", 1);
 		tanneriesCon = LoadTextures("buildings/tannery/construction", 1);
+		//gardensCon = LoadTextures("buildings/garden", 2);
 
 		decorations = LoadTextures("decorations", 10);
 
@@ -381,6 +385,7 @@ static class Sprites
 			case BuildingType.OVEN: textures = ovens; break;
 			case BuildingType.TANNERY: textures = tanneries; break;
 			case BuildingType.TAVERN: textures = taverns; break;
+			case BuildingType.GARDEN: textures = gardens; break;
 			default: textures = buildings; break;
 		}
 
@@ -406,6 +411,7 @@ static class Sprites
 			case BuildingType.TEMPLE: textures = templesCon; break;
 			case BuildingType.TANNERY: textures = tanneriesCon; break;
 			case BuildingType.TAVERN: textures = taverns; break; // No con texture yet
+			case BuildingType.GARDEN: textures = gardens; break; // No con texture yet
 			default: textures = buildings; break;
 		}
 

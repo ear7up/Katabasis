@@ -40,6 +40,8 @@ public class BuildingPlacerPanel : CloseablePanel
             onClick: Katabasis.GameManager.BuildMine, hoverElement: new BuildingPriceDisplay(null, BuildingType.MINE)));
         tileImprovementLayout.SetContent(2, 0, new UIElement(Sprites.ranches[0], scale: 0.3f, 
             onClick: Katabasis.GameManager.BuildRanch, hoverElement: new BuildingPriceDisplay(null, BuildingType.RANCH)));
+        tileImprovementLayout.SetContent(3, 0, new UIElement(Sprites.gardens[0], scale: 0.3f, 
+            onClick: Katabasis.GameManager.BuildGarden, hoverElement: new BuildingPriceDisplay(null, BuildingType.GARDEN)));
 
         return tileImprovementLayout;
     }
@@ -67,7 +69,6 @@ public class BuildingPlacerPanel : CloseablePanel
             onClick: Katabasis.GameManager.BuildPyramid, hoverElement: new BuildingPriceDisplay(null, BuildingType.PYRAMID)));
         buildingLayout.SetContent(4, 1, new UIElement(Sprites.ovens[0], scale: 1.0f, 
             onClick: Katabasis.GameManager.BuildOven, hoverElement: new BuildingPriceDisplay(null, BuildingType.OVEN)));
-        
 
         return buildingLayout;
     }

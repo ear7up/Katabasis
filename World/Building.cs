@@ -24,6 +24,7 @@ public enum BuildingType
     TAVERN,
     OVEN,
     PYRAMID,
+    GARDEN,
     NONE
 }
 
@@ -241,7 +242,8 @@ public class Building : Drawable
                Type == BuildingType.MINE || 
                Type == BuildingType.RANCH || 
                Type == BuildingType.CITY ||
-               Type == BuildingType.MARKET;
+               Type == BuildingType.MARKET || 
+               Type == BuildingType.GARDEN;
     }
     
     public void StartUsing(Person p)
