@@ -47,6 +47,7 @@ public class Person : Entity, Drawable
     public int Hunger { get; set; }
     public float MoveSpeed { get; set; }
     public Health HealthStatus { get; set; }
+    public EventLog Events { get; set; }
     public float Money { get; set; }
     public bool IsDead { get; set; }
     public ProfessionType Profession { get; set; }
@@ -96,6 +97,7 @@ public class Person : Entity, Drawable
         Demand = new float[Goods.NUM_GOODS_TYPES, Goods.GOODS_PER_TYPE];
 
         HealthStatus = new();
+        Events = new();
 
         // New person starts with each skill assigned randomly between 1-20 (they go up to 100 with experience)
         Skills = new();
@@ -196,6 +198,8 @@ public class Person : Entity, Drawable
         Home.Population -= 1;
         Home = House.Location;
         Home.Population += 1;
+
+        Events.Add("Found a new house");
     }
 
     public void NoHouseFound(Object x)
@@ -477,13 +481,15 @@ public class Person : Entity, Drawable
             if (skillLevel.level > max.level)
                 max = skillLevel;
         
-        SetProfession((ProfessionType)max.skill);
+        if (Profession != (ProfessionType)max.skill)
+            SetProfession((ProfessionType)max.skill);
     }
 
     public void SetProfession(ProfessionType profession)
     {
         // TODO: If soldier, change sprite
         Profession = profession;
+        Events.Add($"Changed profession to {profession.Describe()}");
     }
 
     public void ResetProfession()

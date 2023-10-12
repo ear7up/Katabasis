@@ -84,7 +84,7 @@ public class FoodInfo
         Data[Id(t, (int)Goods.FoodPlant.NUTS)] = new FoodInfo(fat: 19, iron: 2, calcium: 1);
         Data[Id(t, (int)Goods.FoodPlant.OLIVE_OIL)] = new FoodInfo(fat: 17, mood: 3);
         Data[Id(t, (int)Goods.FoodPlant.ONION)] = new FoodInfo(vitaminC: 11, iron: 2, calcium: 3, mood: 1);
-        Data[Id(t, (int)Goods.FoodPlant.PEAS)] = new FoodInfo(fat: 1, vitaminA: 6, vitaminC: 64, iron: 12, calcium: 3);
+        Data[Id(t, (int)Goods.FoodPlant.PEAS)] = new FoodInfo(fat: 1, vitaminA: 6, vitaminC: 25, iron: 14, calcium: 3);
         Data[Id(t, (int)Goods.FoodPlant.RADISH)] = new FoodInfo(vitaminC: 19, iron: 2, calcium: 2);
         Data[Id(t, (int)Goods.FoodPlant.SCALLIONS)] = new FoodInfo(vitaminA: 6, vitaminC: 21, iron: 8, calcium: 6);
         Data[Id(t, (int)Goods.FoodPlant.SQUASH)] = new FoodInfo(vitaminA: 1, vitaminC: 21, iron: 2, calcium: 1);

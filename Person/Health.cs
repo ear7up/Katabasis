@@ -10,8 +10,9 @@ public enum DietReq
 public class Health
 {
     public const int MIN = 0;
-    public const int MAX = 0;
+    public const int MAX = 100;
 
+    // Mood should probably be an object with an array of modifiers
     public int Mood { get; set; }
     public int Fat { get; set; }
     public int VitaminA { get; set; }
@@ -47,11 +48,11 @@ public class Health
         FoodInfo info = FoodInfo.Get(goodsId);
         if (info == null)
             return;
-        Fat += info.Fat;
-        VitaminA += info.VitaminA;
-        VitaminC += info.VitaminC;
-        Iron += info.Iron;
-        Calcium += info.Calcium;
+        Fat = MathHelper.Clamp(Fat + info.Fat, MIN, MAX);
+        VitaminA = MathHelper.Clamp(VitaminA + info.VitaminA * 3, MIN, MAX);
+        VitaminC = MathHelper.Clamp(VitaminC + info.VitaminC * 2, MIN, MAX);
+        Iron = MathHelper.Clamp(Iron + info.Iron, MIN, MAX);
+        Calcium = MathHelper.Clamp(Calcium+ info.Calcium * 4, MIN, MAX);
         Mood = MathHelper.Clamp(Mood + info.Mood, MIN, MAX);
     }
 

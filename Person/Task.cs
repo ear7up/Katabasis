@@ -666,6 +666,8 @@ public class TryToProduceTask : Task
         if (Requirements.Secondary != null)
             p.PersonalStockpile.Add(Requirements.Secondary.Id, Requirements.Secondary.Ratio * Goods.Quantity);
 
+        p.Events.Add($"Produced {Goods.ToString()}");
+
         return true;
     }
 
@@ -868,8 +870,12 @@ public class BuyTask : Task
     public override TaskStatus Execute(Person p)
     {
         Status.Complete = true;
+        string order = Order.Goods.ToString();
         if (Globals.Model.Market.AttemptTransact(Order))
+        {
             Status.ReturnValue = Order.Goods;
+            p.Events.Add($"Bought {order}");
+        }
         return Status;
     }
 }
@@ -935,6 +941,7 @@ public class HaulGoodsTask : Task
         foreach (Goods goods in Hauling)
             ToStockpile.Add(goods);
         p.Money += Salary;
+        p.Events.Add("Hauled goods");
         return true;
     }
 }
@@ -1235,8 +1242,9 @@ public class BuildTask : Task
         if (reqs != null && reqs.ToolRequirement != null)
             p.PersonalStockpile.UseTool(reqs.ToolRequirement.Tool, reqs.ToolTypeRequirement);
 
-        Status.Complete = true;
+        p.Events.Add($"Built {Request.ToBuild.Name()}");
 
+        Status.Complete = true;
         return true;
     }
 }

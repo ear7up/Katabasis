@@ -7,10 +7,11 @@ public class PersonPanel : CloseablePanel
     public TabLayout MyLayout;
     public HBox TopPart;
     public GridLayout SkillsLayout;
-    public VBox HealthLayout;
+    public VBox StatusLayout;
 
     public UIElement PersonIcon;
     public TextSprite TaskDescription;
+    public TextSprite EventsDescription;
     public TextSprite InventoryDescription;
     public TextSprite PersonDescription;
 
@@ -45,39 +46,44 @@ public class PersonPanel : CloseablePanel
         overviewLayout.Add(inventoryLayout);
 
         BuildSkillsLayout();
-        BuildHealthLayout();
+        BuildStatusLayout();
 
         MyLayout.AddTab("Overview", overviewLayout);
         MyLayout.AddTab("Skills", SkillsLayout);
-        MyLayout.AddTab("Health", HealthLayout);
+        MyLayout.AddTab("Status", StatusLayout);
 
         SetDefaultPosition(new Vector2(Globals.WindowSize.X - Width(), 50f));
     }
 
-    // TODO
-    public void BuildHealthLayout()
+    public void BuildStatusLayout()
     {
-        HealthLayout = new();
-        HealthLayout.Add(new TextSprite(Sprites.SmallFont));
-        HealthLayout.Add(new TextSprite(Sprites.SmallFont));
-        HealthLayout.Add(new TextSprite(Sprites.SmallFont));
-        HealthLayout.Add(new TextSprite(Sprites.SmallFont));
-        HealthLayout.Add(new TextSprite(Sprites.SmallFont));
-        HealthLayout.Add(new TextSprite(Sprites.SmallFont));
-        HealthLayout.Add(new TextSprite(Sprites.SmallFont));
+        StatusLayout = new();
+        StatusLayout.Add(new TextSprite(Sprites.SmallFont));
+        StatusLayout.Add(new TextSprite(Sprites.SmallFont));
+        StatusLayout.Add(new TextSprite(Sprites.SmallFont));
+        StatusLayout.Add(new TextSprite(Sprites.SmallFont));
+        StatusLayout.Add(new TextSprite(Sprites.SmallFont));
+        StatusLayout.Add(new TextSprite(Sprites.SmallFont));
+        StatusLayout.Add(new TextSprite(Sprites.SmallFont));
+        StatusLayout.Elements[StatusLayout.Elements.Count - 1].SetPadding(bottom: 15);
+
+        DarkPanel eventsLayout = new("Events");
+        EventsDescription = new(Sprites.SmallFont, Color.White, Color.Black);
+        eventsLayout.AddContent(EventsDescription);
+        StatusLayout.Add(eventsLayout);
     }
 
     public void UpdateHealthDisplay()
     {
         int row = 0;
         Health h = PersonTracking.HealthStatus;
-        ((TextSprite)HealthLayout.Elements[row++]).Text = $"Mood: {h.Mood}";
-        ((TextSprite)HealthLayout.Elements[row++]).Text = $"Hunger: {PersonTracking.Hunger}";
-        ((TextSprite)HealthLayout.Elements[row++]).Text = $"Fat: {h.Fat}";
-        ((TextSprite)HealthLayout.Elements[row++]).Text = $"Vitamin A: {h.VitaminA}";
-        ((TextSprite)HealthLayout.Elements[row++]).Text = $"Vitamin C: {h.VitaminC}";
-        ((TextSprite)HealthLayout.Elements[row++]).Text = $"Calcium: {h.Calcium}";
-        ((TextSprite)HealthLayout.Elements[row++]).Text = $"Iron: {h.Iron}";
+        ((TextSprite)StatusLayout.Elements[row++]).Text = $"Mood: {h.Mood}";
+        ((TextSprite)StatusLayout.Elements[row++]).Text = $"Hunger: {PersonTracking.Hunger}";
+        ((TextSprite)StatusLayout.Elements[row++]).Text = $"Fat: {h.Fat}";
+        ((TextSprite)StatusLayout.Elements[row++]).Text = $"Vitamin A: {h.VitaminA}";
+        ((TextSprite)StatusLayout.Elements[row++]).Text = $"Vitamin C: {h.VitaminC}";
+        ((TextSprite)StatusLayout.Elements[row++]).Text = $"Calcium: {h.Calcium}";
+        ((TextSprite)StatusLayout.Elements[row++]).Text = $"Iron: {h.Iron}";
     }
 
     public void BuildSkillsLayout()
@@ -142,6 +148,7 @@ public class PersonPanel : CloseablePanel
 
         PersonDescription.Text = PersonTracking.Describe();
 
+        EventsDescription.Text = PersonTracking.Events.Describe();
         TaskDescription.Text = PersonTracking.DescribeTasks();
         InventoryDescription.Text = PersonTracking.PersonalStockpile.ToString();
 

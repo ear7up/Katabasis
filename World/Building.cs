@@ -366,6 +366,14 @@ public class Building : Drawable
             $"users=({CurrentUsers.Count}/{MaxUsers})";
     }
 
+    public string Name()
+    {
+        string name = Globals.Title(Type.ToString());
+        if (SubType != BuildingSubType.NONE)
+            name += $"({Globals.Title(SubType.ToString())})";
+        return name;
+    }
+
     public string Describe()
     {
         string description = "";
