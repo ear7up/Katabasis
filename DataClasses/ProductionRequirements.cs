@@ -2,7 +2,6 @@ public class ProductionRequirements
 {
     public SkillLevel SkillRequirement;
     public ToolRequirement ToolRequirement;
-    public ToolMaterial ToolTypeRequirement;
     public TileType TileRequirement;
     public BuildingType BuildingRequirement;
     public BuildingSubType BuildingSubTypeRequirement;

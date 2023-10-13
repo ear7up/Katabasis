@@ -123,6 +123,41 @@ public class GoodsProduction
         return -1;
     }
 
+    public static bool Produceable(int goodsId)
+    {
+        // TODO: return true if the good can be produced, otherwise false
+
+        ProductionRequirements reqs = (ProductionRequirements)Requirements[goodsId];
+        // Player must have the building: reqs.BuildingRequirement
+        // Player must have the tile: reqs.TileRequirement
+        // If reqs.ToolRequirement.Material is not stone, Player must have a Smithy and Mine of that type
+        // If reqs.GoodsRequirement.And, each good must be Produceable()
+        // otherwise, at least one must be
+        return true;
+    }
+
+    public static int ProfitableUsing(SkillLevel s)
+    {
+        if ((int)s.skill > MostProfitable.Count)
+            return -1;
+
+        List<int> profitable = new();
+
+        // Ordered by most profitable, so pick the first one allowed by skill level
+        foreach (int goodsId in MostProfitable[(int)s.skill])
+        {
+            SkillLevel req = ((ProductionRequirements)Requirements[goodsId]).SkillRequirement;
+            if (CalculateProfitability(goodsId, 100) > 0 && (req == null || req.level <= s.level))
+                profitable.Add(goodsId);
+        }
+
+        // Pick a random profitable good to produce
+        if (profitable.Count > 0)
+            return profitable[Globals.Rand.Next(profitable.Count)];
+
+        return -1;
+    }
+
     public static float CalculateTimeToProduce(int goodsId, float quantity, int level)
     {
         float timeToProduce = GoodsInfo.GetTime(goodsId) * quantity;
@@ -136,6 +171,8 @@ public class GoodsProduction
         GoodsRequirement req = ((ProductionRequirements)Requirements[goodsId]).GoodsRequirement;
 
         float timeToProduce = CalculateTimeToProduce(goodsId, 1f, level);
+
+        //Console.Out.WriteLine($"{Goods.FromId(goodsId).GetName()}, price = {profit}, ttp = {timeToProduce}");
 
         // No goods required, pure profit
         if (req == null)

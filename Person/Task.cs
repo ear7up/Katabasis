@@ -238,6 +238,25 @@ public class Task
         return task;
     }
 
+    public static Task ProfitableUsingSkill(SkillLevel s)
+    {
+        // These skills are handled by specialized managers
+        if (s.skill == Skill.FARMING || s.skill == Skill.BUILDING)
+            return null;
+
+        int id = GoodsProduction.ProfitableUsing(s);
+
+        if (id < 0)
+            return null;
+
+        Goods goods = Goods.FromId(id);
+        goods.Quantity = GoodsInfo.GetDefaultProductionQuantity(goods);
+
+        TryToProduceTask task = new();
+        task.SetAttributes(goods);
+        return task;
+    }
+
     public virtual string Describe(string extra = "", bool debug = true, string depth = "")
     {
         string s = $"{depth}<{base.ToString()}> {Description} [{extra}]\n";
@@ -1240,7 +1259,7 @@ public class BuildTask : Task
         // Subtract durability from the tool used in construction
         ProductionRequirements reqs = BuildingProduction.GetRequirements(Request.ToBuild.Type);
         if (reqs != null && reqs.ToolRequirement != null)
-            p.PersonalStockpile.UseTool(reqs.ToolRequirement.Tool, reqs.ToolTypeRequirement);
+            p.PersonalStockpile.UseTool(reqs.ToolRequirement.Tool, reqs.ToolRequirement.Material);
 
         p.Events.Add($"Built {Request.ToBuild.Name()}");
 

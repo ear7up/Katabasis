@@ -247,6 +247,8 @@ public class Person : Entity, Drawable
 
         else if (task == null && r < PROFIT_SEEKING_CHANCE)
             task = Task.MostProfitableUsingSkill(weightedRandomChoice);
+        else
+            task = Task.ProfitableUsingSkill(weightedRandomChoice);
 
         // Some skills may have no completable tasks, so have a chance to not get stuck in a loop
         if (task == null)

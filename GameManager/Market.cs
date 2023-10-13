@@ -89,11 +89,9 @@ public class Market
         // Increase or decrease prices proportiontely to supply and demand
         for (int i = 0; i < Prices.Length; i++)
         {
-            // No change if demand is 0
-            // Price changes by (0.01 * d) percent per second where d is net quantity surplus/excess
-            // E.g. an outstanding request for 50 units will increase price by 0.05% per second (3%/min)
+            // Price changes by +/- 0.01 %/s, positive if there is more being bought than sold, otherwise negative
             float demand = Demand[i];
-            Prices[i] *= 1 + (0.00001f * demand * Globals.Time);
+            Prices[i] *= 1 + (0.01f * Math.Sign(demand) * Globals.Time);
 
             // Limit price fluctuations so they don't get too crazy
             // Also, this prevents the UI price bars from stretching out too far
@@ -129,11 +127,6 @@ public class Market
     // automatically deducts money from requestor for purchases
     public bool AttemptTransact(MarketOrder o)
     {
-        if (o.Buying)
-            Demand[o.Goods.GetId()]++;
-        else
-            Demand[o.Goods.GetId()]--;
-
         // Trying to buy, can't afford it
         float cost = GetPrice(o.Goods.GetId()) * o.Goods.Quantity;
         if (o.Buying && o.Requestor.Money < cost)
@@ -205,6 +198,12 @@ public class Market
 
         // Remove all fulfilled orders
         trades.RemoveAll(s => s.Goods.Quantity <= 0.001f);
+
+        // Update supply and demand
+        if (o.Buying)
+            Demand[o.Goods.GetId()] += amountBoughtOrSold;
+        else
+            Demand[o.Goods.GetId()] -= amountBoughtOrSold;
         
         if (amountBoughtOrSold < o.Goods.Quantity)
             return false;
