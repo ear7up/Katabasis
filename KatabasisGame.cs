@@ -1,12 +1,23 @@
 ﻿using System;
 using System.IO;
 using System.Text.Json;
+using Microsoft.Win32.SafeHandles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 
 namespace Katabasis;
+
+public enum SaveSlot
+{
+    DEFAULT,
+    AUTO,
+    QUICK,
+    SLOT1,
+    SLOT2,
+    SLOT3
+}
 
 public class KatabasisGame : Game
 {
@@ -38,7 +49,7 @@ public class KatabasisGame : Game
         _fullscreen = false;
 
         IsMouseVisible = true;
-        CurrentSaveName = "save";
+        CurrentSaveName = SaveSlot.AUTO.ToString();
     }
 
     public void ToggleFullscreen()
@@ -113,14 +124,14 @@ public class KatabasisGame : Game
         if (_secondsSinceLastSave >= Config.AutoSaveFrequencySeconds && Config.AutoSaveFrequencySeconds > 0)
         {
             _secondsSinceLastSave = 0;
-            Save("autosave");
+            Save(SaveSlot.AUTO);
         }
 
         if (InputManager.SavePressed)
-            Save(CurrentSaveName);
+            Save();
 
         if (InputManager.LoadPressed)
-            Load(CurrentSaveName);
+            Load();
 
         Globals.Update(gameTime);
         _gameManager.Update(gameTime);
@@ -128,18 +139,40 @@ public class KatabasisGame : Game
         base.Update(gameTime);
     }
 
-    public void Save(string filename = "")
+    public static string GetFilename(SaveSlot slot)
     {
-        if (filename.Length == 0)
-            filename = CurrentSaveName;
+        return $"{slot.ToString()}.json";
+    }
+
+    public string GetLastModified(SaveSlot slot)
+    {
+        if (!File.Exists(GetFilename(slot)))
+            return "";
+
+        DateTime lastModified = File.GetLastWriteTime(GetFilename(slot));
+        return lastModified.ToString();
+    }
+
+    public void Save(SaveSlot slot = SaveSlot.DEFAULT)
+    {
+        string filename = CurrentSaveName;
+        if (slot != SaveSlot.DEFAULT)
+            filename = slot.ToString();
 
         FileStream fileStream = File.Create($"{filename}.json");
         JsonSerializer.Serialize(fileStream, _gameModel, Globals.JsonOptionsS);
         fileStream.Close();
+
+        if (slot != SaveSlot.AUTO)
+            CurrentSaveName = filename;
     }
 
-    public void Load(string filename)
+    public void Load(SaveSlot slot = SaveSlot.DEFAULT)
     {
+        string filename = CurrentSaveName;
+        if (slot != SaveSlot.DEFAULT)
+            filename = slot.ToString();
+
         // Clear out the old objects being drawn from the global buffers
         Globals.Ybuffer.Clear();
         Globals.TextBuffer.Clear();
@@ -150,6 +183,9 @@ public class KatabasisGame : Game
         _gameModel.InitLoaded();
 
         _gameManager.SetGameModel(_gameModel);
+
+        if (slot != SaveSlot.AUTO)
+            CurrentSaveName = filename;
     }
 
     protected override void Draw(GameTime gameTime)

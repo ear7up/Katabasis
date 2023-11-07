@@ -59,6 +59,7 @@ public class Person : Entity, Drawable
     public WeightedList<SkillLevel> Skills { get; set; }
 
     public FadingTextSprite TaskCompleteNotification;
+    public FadingSprite TaskIcon;
 
     // Don't serialize, we need to requeue this task if we saved and loaded in the middle
     public bool SearchingForHouse;
@@ -92,6 +93,7 @@ public class Person : Entity, Drawable
         Tasks = new();
         TaskCompleteNotification = new(Sprites.SmallFont, "", Vector2.Zero, 1f, 2f);
         TaskCompleteNotification.FontColor = Color.Green;
+        TaskIcon = new(fadeTime: 4f);
 
         PersonalStockpile = new();
         Demand = new float[Goods.NUM_GOODS_TYPES, Goods.GOODS_PER_TYPE];
@@ -267,6 +269,9 @@ public class Person : Entity, Drawable
         // No task could be found, try again next Update cycle
         if (task == null)
             return;
+
+        TaskIcon.Reset();
+        TaskIcon.SetNewSpriteTexture(Sprites.GetSkillIcon(weightedRandomChoice.skill));
 
         // Catch initialization failures, try up to 10 times to pick another task
         TaskStatus initStatus = task.Init(this);
@@ -558,6 +563,8 @@ public class Person : Entity, Drawable
         }
 
         TaskCompleteNotification.Update();
+        TaskIcon.Position = Position + new Vector2(10f, -40f);
+        TaskIcon.Update();
     }
 
     public override void Draw()
@@ -567,6 +574,8 @@ public class Person : Entity, Drawable
 
         if (Config.ShowTaskNotifications)
             TaskCompleteNotification.Draw();
+
+        TaskIcon.Draw();
     }
 
     public void HandleTaskComplete(Task current, TaskStatus currentStatus)

@@ -34,6 +34,7 @@ public class Sprite : Drawable
     public Vector2 Origin { get; set; }
     public Vector2 Scale { get; set; }
     public Color SpriteColor { get; set; }
+    public float Transparency { get; set; }
     public float Rotation { get; set; }
     
     public Rectangle Bounds;
@@ -42,6 +43,7 @@ public class Sprite : Drawable
     {
         Scale = new Vector2(1f, 1f);
         SpriteColor = Color.White;
+        Transparency = 1f;
         Rotation = 0f;
         DrawRelativeToOrigin = true;
     }
@@ -63,8 +65,8 @@ public class Sprite : Drawable
 
     public void SetNewSpriteTexture(SpriteTexture spriteTexture)
     {
-        Texture = spriteTexture.Texture;
-        TexturePath = spriteTexture.Path;
+        Texture = spriteTexture?.Texture;
+        TexturePath = spriteTexture?.Path;
     }
 
     public void ScaleUp(float s)
@@ -87,11 +89,11 @@ public class Sprite : Drawable
         Scale /= new Vector2(1 - s, 1 - s);
     }
 
-    public void Draw()
+    public virtual void Draw()
     {
         Globals.SpriteBatch.Draw(
             Texture, Position, null, 
-            SpriteColor, Rotation,
+            SpriteColor * Transparency, Rotation,
             (DrawRelativeToOrigin) ? Origin : Vector2.Zero, 
             Scale, SpriteEffects.None, 0f);
     }

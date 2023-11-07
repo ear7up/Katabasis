@@ -52,14 +52,14 @@ public class EscapeMenuPanel : CloseablePanel
     {
         // TODO: save menu (name the save, choose to overwrite, etc.)
         SoundEffects.Play(SoundEffects.StoneButtonPress);
-        Katabasis.KatabasisGame.Instance.Save(KatabasisGame.CurrentSaveName);
+        Katabasis.KatabasisGame.Instance.Save();
     }
 
     public void LoadButton(Object clicked)
     {
         // TODO: load menu (choose which save to load, display last modified time, etc.)
         SoundEffects.Play(SoundEffects.StoneButtonPress);
-        Katabasis.KatabasisGame.Instance.Load(KatabasisGame.CurrentSaveName);
+        Katabasis.KatabasisGame.Instance.Load();
     }
 
     public void ExitButton(Object clicked)

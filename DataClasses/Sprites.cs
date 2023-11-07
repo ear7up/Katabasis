@@ -101,6 +101,18 @@ static class Sprites
 	public static SpriteTexture Turnips;
 	public static SpriteTexture Wheat;
 
+	// Skills
+	public static SpriteTexture Building;
+	public static SpriteTexture Cooking;
+	public static SpriteTexture Crafting;
+	public static SpriteTexture Farming;
+	public static SpriteTexture Fighting;
+	public static SpriteTexture Fishing;
+	public static SpriteTexture Forestry;
+	public static SpriteTexture Hunting;
+	public static SpriteTexture Mining;
+	public static SpriteTexture Smithing;
+
 	// UI
 	public static SpriteTexture Clock;
 	public static SpriteTexture ClockHand;
@@ -287,6 +299,17 @@ static class Sprites
 		Scallions = LoadTexture("plant_icons/scallions");
 		Turnips = LoadTexture("plant_icons/turnips");
 		Wheat = LoadTexture("plant_icons/wheat");
+
+		Building = LoadTexture("skills/building");
+		Cooking = LoadTexture("skills/cooking");
+		Crafting = LoadTexture("skills/crafting");
+		Farming = LoadTexture("skills/farming");
+		Fighting = LoadTexture("skills/fighting");
+		Fishing = LoadTexture("skills/fishing");
+		Forestry = LoadTexture("skills/forestry");
+		Hunting = LoadTexture("skills/hunting");
+		Mining = LoadTexture("skills/mining");
+		Smithing = LoadTexture("skills/smithing");
 
 		// UI
 		Clock = LoadTexture("UI_maybe/clock");
@@ -489,4 +512,22 @@ static class Sprites
 		Loaded[path] = texture;
 		return new SpriteTexture(path, texture);
 	}
+
+	public static SpriteTexture GetSkillIcon(Skill skill)
+	{
+        return skill switch
+        {
+			Skill.HUNTING => Hunting,
+			Skill.COOKING => Cooking,
+			Skill.FARMING => Farming,
+            Skill.BUILDING => Building,
+			Skill.FORESTRY => Forestry,
+            Skill.CRAFTING => Crafting,
+			Skill.MINING => Mining,
+			Skill.FISHING => Fishing,
+			Skill.SMITHING => Smithing,
+			Skill.FIGHTING => Fighting,
+            _ => null,
+        };
+    }
 }

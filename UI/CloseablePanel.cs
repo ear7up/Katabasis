@@ -19,7 +19,7 @@ public class CloseablePanel : VBox
         TopBar.SetPadding(bottom: 55, right: Width() - XButton.Width());
     }
 
-    public virtual void ClosePanel(Object clicked)
+    public virtual void ClosePanel(Object clicked = null)
     {
         SoundEffects.Play(SoundEffects.StoneButtonPress);
         Hide();
